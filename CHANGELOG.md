@@ -1,5 +1,7 @@
 # XIV_Databar Continued
 
-## [1.0](https://github.com/Kozoaku/XIV_Databar/tree/v1.0) (2023-01-02)
+## [1.0.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v1.0.1) (2023-01-02)
 
-- Initial release
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v1.0...v1.0.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+
+- Added Curse and Wago project IDs.
