@@ -1,0 +1,4 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="Libs\LibClassicSpecs\LibClassicSpecs.lua"/>
+  <Include file="Libs\LibAddonCompat-1.0\LibAddonCompat-1.0.xml"/>
+</Ui>
