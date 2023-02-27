@@ -1,8 +1,8 @@
-## Interface: 30400
-## X-Interface: 30400
+## Interface: 30401
+## X-Interface: 30401
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
-## Version: 1.0.1
+## Version: 2.0
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
@@ -14,7 +14,9 @@
 ## X-Wago-ID: WqKQVaGx
 
 embeds.xml
+Classic\embeds.xml
 
 locales\locales.xml
 core.lua
-modules\load_modules.xml
+Core\modules\load_modules.xml
+Classic\modules\load_modules.xml
