@@ -1,8 +1,8 @@
-## Interface: 100005
-## X-Interface: 100005
+## Interface: 100007
+## X-Interface: 100007
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
-## Version: 2.0
+## Version: 2.0.1
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
