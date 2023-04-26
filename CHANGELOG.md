@@ -1,7 +1,7 @@
 # XIV_Databar Continued
 
-## [2.0.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v2.0.1) (2023-03-24)
+## [2.0.2](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v2.0.2) (2023-04-26)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v2.0...v2.0.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v2.0.1...v2.0.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-- Retail TOC update for patch 10.0.7.
+- Removed TBC TOC file.
