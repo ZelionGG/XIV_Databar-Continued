@@ -1,7 +1,8 @@
 # XIV_Databar Continued
 
-## [2.0.2](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v2.0.2) (2023-04-26)
+## [2.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v2.1) (2023-05-08)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v2.0.1...v2.0.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v2.0.2...v2.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-- Removed TBC TOC file.
+- Moved Ethereal Portal hearthstone in first position
+- TOC update for retail patch 10.1
