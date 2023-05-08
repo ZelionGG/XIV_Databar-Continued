@@ -13,6 +13,7 @@ function TravelModule:OnInitialize()
   self.iconPath = xb.constants.mediaPath..'datatexts\\repair'
   self.garrisonHearth = 110560
   self.hearthstones = {
+    54452,  -- Ethereal Portal
     193588, -- Timewalker's Hearthstone
     190237, -- Broker Translocation Matrix
     188952, -- Dominated Hearthstone
@@ -24,7 +25,6 @@ function TravelModule:OnInitialize()
     6948,   -- Hearthstone
     64488,  -- Innkeeper's Daughter
     28585,  -- Ruby Slippers
-    54452,  -- Ethereal Portal
     93672,  -- Dark Portal
     142542, -- Tome of Town Portal
     163045, -- Headless Horseman's Hearthstone
