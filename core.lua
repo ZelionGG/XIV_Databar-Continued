@@ -13,6 +13,10 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
 
 XIVBar.L = L
 
+_G.XIV_Databar_Continued_OnAddonCompartmentClick = function()
+    XIVBar:ToggleConfig()
+end
+
 XIVBar.constants = {
     mediaPath = "Interface\\AddOns\\"..AddOnName.."\\media\\",
     playerName = UnitName("player"),
@@ -151,9 +155,7 @@ function XIVBar:OnEnable()
 end
 
 function XIVBar:ToggleConfig()
-    InterfaceOptionsFrame.selectedTab = 2;
-	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way
-	InterfaceOptionsFrame_OpenToCategory("XIV Bar Continued")
+    InterfaceOptionsFrame_OpenToCategory("XIV Bar Continued")
 end
 
 function XIVBar:SetColor(name, r, g, b, a)
