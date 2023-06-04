@@ -91,8 +91,10 @@ function TalentModule:OnEnable()
     end
     self.talentFrame:Show()
 
-    self.loadoutName = self:GetCurrentLoadoutName()
-    self:CreateLoadoutFrames()
+    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+        self.loadoutName = self:GetCurrentLoadoutName()
+        self:CreateLoadoutFrames()
+    end
     self:CreateTalentFrames()
     self:RegisterFrameEvents()
     self:Refresh()
@@ -108,6 +110,18 @@ function TalentModule:OnDisable()
     self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED')
     self:UnregisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
     self:UnregisterEvent('PLAYER_LOOT_SPEC_UPDATED')
+end
+
+function TalentModule:EnableTalentLoadout()
+    self:CreateLoadoutFrames()
+    self:Refresh()
+    self.loadoutFrame:Show()
+end
+
+function TalentModule:DisableTalentLoadout()
+    if self.loadoutFrame and self.loadoutFrame:IsVisible() then
+        self.loadoutFrame:Hide()
+    end
 end
 
 function TalentModule:GetCurrentLoadoutName()
@@ -151,27 +165,29 @@ function TalentModule:Refresh()
 
     local iconSize = db.text.fontSize + db.general.barPadding
     local curSpecID, name, _ = GetSpecializationInfo(self.currentSpecID)
-    self:GetCurrentLoadoutName()
-
     local textHeight = db.text.fontSize
 
-    -- LOADOUT
-    self.loadoutText:SetFont(xb:GetFont(textHeight))
-    self.loadoutText:SetTextColor(xb:GetColor('normal'))
-    self.loadoutText:SetText(self.loadoutName or "")
+    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+        self:GetCurrentLoadoutName()
 
-    self.loadoutText:SetPoint('LEFT')
+        -- LOADOUT
+        self.loadoutText:SetFont(xb:GetFont(textHeight))
+        self.loadoutText:SetTextColor(xb:GetColor('normal'))
+        self.loadoutText:SetText(self.loadoutName or "")
 
-    self.loadoutText:Show()
+        self.loadoutText:SetPoint('LEFT')
 
-    self.loadoutFrame:SetSize(iconSize + self.loadoutText:GetWidth() + 5, xb:GetHeight())
-    self.loadoutFrame:SetPoint('LEFT')
+        self.loadoutText:Show()
 
-    if self.loadoutFrame:GetWidth() < db.modules.talent.minWidth then
-        self.loadoutFrame:SetWidth(db.modules.talent.minWidth)
+        self.loadoutFrame:SetSize(iconSize + self.loadoutText:GetWidth() + 5, xb:GetHeight())
+        self.loadoutFrame:SetPoint('LEFT')
+
+        if self.loadoutFrame:GetWidth() < db.modules.talent.minWidth then
+            self.loadoutFrame:SetWidth(db.modules.talent.minWidth)
+        end
+
+        self.loadoutFrame:SetSize(self.loadoutFrame:GetWidth(), xb:GetHeight())
     end
-
-    self.loadoutFrame:SetSize(self.loadoutFrame:GetWidth(), xb:GetHeight())
 
     -- TALENTS
     self.specIcon:SetTexture(self.classIcon)
@@ -193,13 +209,21 @@ function TalentModule:Refresh()
     self.specText:Show()
 
     self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
-    self.specFrame:SetPoint('LEFT', self.loadoutFrame, 'RIGHT', 0, 0)
+    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+        self.specFrame:SetPoint('LEFT', self.loadoutFrame, 'RIGHT', 0, 0)
+    else
+        self.specFrame:SetPoint('LEFT')
+    end
 
     if self.specFrame:GetWidth() < db.modules.talent.minWidth then
         self.specFrame:SetWidth(db.modules.talent.minWidth)
     end
 
-    self.talentFrame:SetSize(self.loadoutFrame:GetWidth() + self.specFrame:GetWidth(), xb:GetHeight())
+    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+        self.talentFrame:SetSize(self.loadoutFrame:GetWidth() + self.specFrame:GetWidth(), xb:GetHeight())
+    else
+        self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
+    end
 
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
@@ -305,58 +329,60 @@ function TalentModule:RegisterFrameEvents()
     self.specFrame:EnableMouse(true)
     self.specFrame:RegisterForClicks('AnyUp')
 
-    self.loadoutFrame:EnableMouse(true)
-    self.loadoutFrame:RegisterForClicks('AnyUp')
+    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+        self.loadoutFrame:EnableMouse(true)
+        self.loadoutFrame:RegisterForClicks('AnyUp')
 
-    -- LOADOUTS
-    self.loadoutFrame:SetScript('OnEnter', function()
-        if InCombatLockdown() then
-            return
-        end
-        self.loadoutText:SetTextColor(unpack(xb:HoverColors()))
-        if xb.db.profile.modules.talent.showTooltip then
-            if (not self.loadoutPopup:IsVisible()) then
-                self:ShowTooltip()
+        -- LOADOUTS
+        self.loadoutFrame:SetScript('OnEnter', function()
+            if InCombatLockdown() then
+                return
             end
-        end
-    end)
-
-    self.loadoutFrame:SetScript('OnLeave', function()
-        if InCombatLockdown() then
-            return
-        end
-        local db = xb.db.profile
-        self.loadoutText:SetTextColor(xb:GetColor('normal'))
-        if xb.db.profile.modules.talent.showTooltip then
-            if self.LTip:IsAcquired("TalentTooltip") then
-                self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
-            end
-        end
-    end)
-
-    self.loadoutFrame:SetScript('OnClick', function(_, button)
-        if self.LTip:IsAcquired("TalentTooltip") then
-            self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
-        end
-
-        if InCombatLockdown() then
-            return
-        end
-
-        if button == 'LeftButton' then
-            if not self.loadoutPopup:IsVisible() then
-                self:CreateLoadoutPopup()
-                self.loadoutPopup:Show()
-                self.specPopup:Hide()
-                self.lootSpecPopup:Hide()
-            else
-                self.loadoutPopup:Hide()
-                if xb.db.profile.modules.talent.showTooltip then
+            self.loadoutText:SetTextColor(unpack(xb:HoverColors()))
+            if xb.db.profile.modules.talent.showTooltip then
+                if (not self.loadoutPopup:IsVisible()) then
                     self:ShowTooltip()
                 end
             end
-        end
-    end)
+        end)
+
+        self.loadoutFrame:SetScript('OnLeave', function()
+            if InCombatLockdown() then
+                return
+            end
+            local db = xb.db.profile
+            self.loadoutText:SetTextColor(xb:GetColor('normal'))
+            if xb.db.profile.modules.talent.showTooltip then
+                if self.LTip:IsAcquired("TalentTooltip") then
+                    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+                end
+            end
+        end)
+
+        self.loadoutFrame:SetScript('OnClick', function(_, button)
+            if self.LTip:IsAcquired("TalentTooltip") then
+                self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+            end
+
+            if InCombatLockdown() then
+                return
+            end
+
+            if button == 'LeftButton' then
+                if not self.loadoutPopup:IsVisible() then
+                    self:CreateLoadoutPopup()
+                    self.loadoutPopup:Show()
+                    self.specPopup:Hide()
+                    self.lootSpecPopup:Hide()
+                else
+                    self.loadoutPopup:Hide()
+                    if xb.db.profile.modules.talent.showTooltip then
+                        self:ShowTooltip()
+                    end
+                end
+            end
+        end)
+    end
 
     -- TALENTS
     self.specFrame:SetScript('OnEnter', function()
@@ -398,7 +424,9 @@ function TalentModule:RegisterFrameEvents()
                 self.lootSpecPopup:Hide()
                 self:CreateSpecPopup()
                 self.specPopup:Show()
-                self.loadoutPopup:Hide()
+                if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+                    self.loadoutPopup:Hide()
+                end
             else
                 self.specPopup:Hide()
                 if xb.db.profile.modules.talent.showTooltip then
@@ -408,7 +436,9 @@ function TalentModule:RegisterFrameEvents()
         elseif button == 'RightButton' then
             if not self.lootSpecPopup:IsVisible() then
                 self.specPopup:Hide()
-                self.loadoutPopup:Hide()
+                if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+                    self.loadoutPopup:Hide()
+                end
                 self:CreateLootSpecPopup()
                 self.lootSpecPopup:Show()
             else
@@ -800,6 +830,7 @@ end
 function TalentModule:GetDefaultOptions()
     return 'talent', {
         enabled = true,
+        enableLoadoutSwitcher = true,
         showTooltip = true,
         minWidth = 50
     }
@@ -824,12 +855,27 @@ function TalentModule:GetConfig()
                     else
                         self:Disable()
                     end
+                end
+            },
+            enableLoadoutSwitcher = {
+                name = L['Enable Loadout Switcher'],
+                order = 1,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.talent.loadoutSwitcherEnabled;
                 end,
-                width = "full"
+                set = function(_, val)
+                    xb.db.profile.modules.talent.loadoutSwitcherEnabled = val
+                    if val then
+                        self:EnableTalentLoadout()
+                    else
+                        self:DisableTalentLoadout()
+                    end
+                end
             },
             showTooltip = {
                 name = L['Show Tooltips'],
-                order = 1,
+                order = 2,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.talent.showTooltip;
@@ -842,7 +888,7 @@ function TalentModule:GetConfig()
             minWidth = {
                 name = L['Talent Minimum Width'],
                 type = 'range',
-                order = 2,
+                order = 3,
                 min = 10,
                 max = 200,
                 step = 10,

@@ -13,7 +13,6 @@ L['B'] = true; -- short for 1000000000
 L['L'] = true; -- For the local ping
 L['W'] = true; -- For the world ping
 
-
 -- General
 L["Positioning"] = true;
 L['Bar Position'] = true;
@@ -143,6 +142,7 @@ L['Set Specialization'] = true;
 L['Set Loot Specialization'] = true;
 L['Current Specialization'] = true;
 L['Current Loot Specialization'] = true;
+L['Enable Loadout Switcher'] = true;
 L['Talent Minimum Width'] = true;
 L['Open Artifact'] = true;
 L['Remaining'] = true;
