@@ -52,6 +52,9 @@ function MenuModule:OnInitialize()
         D3 = {
             text = 'Diablo 3'
         },
+        Fen = {
+            text = 'Diablo 4'
+        },
         ANBS = {
             text = 'Diablo Immortal'
         },
@@ -641,8 +644,8 @@ function MenuModule:SocialHover(hoverFunc)
                     end
 
                     -- clientsList contains all game related clients a bnet friend can have - being on mobile or just in the app is excluded from this list
-                    local clientsList = {BNET_CLIENT_WOW, BNET_CLIENT_SC2, BNET_CLIENT_D3, BNET_CLIENT_WTCG,
-                                         BNET_CLIENT_HEROES, BNET_CLIENT_OVERWATCH, BNET_CLIENT_SC,
+                    local clientsList = {BNET_CLIENT_WOW, BNET_CLIENT_SC2, BNET_CLIENT_D3, BNET_CLIENT_FEN,
+                                         BNET_CLIENT_WTCG, BNET_CLIENT_HEROES, BNET_CLIENT_OVERWATCH, BNET_CLIENT_SC,
                                          BNET_CLIENT_DESTINY2, BNET_CLIENT_COD, BNET_CLIENT_COD_MW, BNET_CLIENT_COD_MW2,
                                          BNET_CLIENT_COD_BOCW, BNET_CLIENT_WC3}
 
