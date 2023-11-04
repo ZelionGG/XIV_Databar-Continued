@@ -291,7 +291,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.ach then
+    if mm.ach and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         self.frames.ach = CreateFrame("BUTTON", "ach", parentFrame)
         parentFrame = self.frames.ach
     else
@@ -309,7 +309,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.lfg then
+    if mm.lfg and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         self.frames.lfg = CreateFrame("BUTTON", "lfg", parentFrame)
         parentFrame = self.frames.lfg
     else
@@ -327,7 +327,7 @@ function MenuModule:CreateFrames()
     --     end
     --   end
 
-    if mm.pvp then
+    if mm.pvp and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         self.frames.pvp = CreateFrame("BUTTON", "pvp", parentFrame)
         parentFrame = self.frames.pvp
     else
@@ -336,7 +336,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.pet then
+    if mm.pet and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         self.frames.pet = CreateFrame("BUTTON", "pet", parentFrame)
         parentFrame = self.frames.pet
     else
