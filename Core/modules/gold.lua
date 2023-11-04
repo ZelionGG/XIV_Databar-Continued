@@ -3,17 +3,6 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
-    ---Proxy for C_Containter.GetContainerNumFreeSlots
-    ---@paramsig bagIndex
-    ---@param bagIndex number
-    ---@return number numFreeSlots
-    ---@return number bagFamily
-    function GetContainerNumFreeSlots(bagIndex)
-        return C_Container.GetContainerNumFreeSlots(bagIndex)
-    end
-end
-
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
 local isSessionNegative, isDailyNegative = false, false
@@ -152,7 +141,7 @@ function GoldModule:Refresh()
         if db.modules.gold.showFreeBagSpace then
             local freeSpace = 0
             for i = 0, 4 do
-                freeSpace = freeSpace + GetContainerNumFreeSlots(i)
+                freeSpace = freeSpace + C_Container.GetContainerNumFreeSlots(i)
             end
             self.bagText:SetFont(xb:GetFont(db.text.fontSize))
             self.bagText:SetText('(' .. tostring(freeSpace) .. ')')
@@ -175,7 +164,7 @@ function GoldModule:Refresh()
     if db.modules.gold.showFreeBagSpace then
         local freeSpace = 0
         for i = 0, 4 do
-            freeSpace = freeSpace + GetContainerNumFreeSlots(i)
+            freeSpace = freeSpace + C_Container.GetContainerNumFreeSlots(i)
         end
         self.bagText:SetFont(xb:GetFont(db.text.fontSize))
         self.bagText:SetTextColor(xb:GetColor('normal'))
