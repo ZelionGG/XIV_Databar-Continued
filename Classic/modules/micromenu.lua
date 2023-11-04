@@ -990,7 +990,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleLFGParentFrame()
+            PVEFrame_ToggleFrame()
         end
     end; -- lfg
 
@@ -999,8 +999,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            PetPaperDollFrame_SetTab(3)
-            ToggleCharacter("PetPaperDollFrame")
+            ToggleCollectionsJournal()
         end
     end; -- pet
 
