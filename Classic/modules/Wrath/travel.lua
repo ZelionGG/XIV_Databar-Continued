@@ -5,15 +5,13 @@ local L = XIVBar.L;
 
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
-function TravelModule:GetName()
-    return L['Travel'];
-end
+function TravelModule:GetName() return L['Travel']; end
 
 function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
-    -- self.garrisonHearth = 110560
-    self.hearthstones = {184871, -- Dark Portal
-    6948 -- Hearthstone
+    self.hearthstones = {
+        184871, -- Dark Portal
+        6948 -- Hearthstone
     }
 
     self.portButtons = {}
@@ -26,12 +24,8 @@ end
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TravelModule:SkinFrame(frame, name)
     if self.useElvUI then
-        if frame.StripTextures then
-            frame:StripTextures()
-        end
-        if frame.SetTemplate then
-            frame:SetTemplate("Transparent")
-        end
+        if frame.StripTextures then frame:StripTextures() end
+        if frame.SetTemplate then frame:SetTemplate("Transparent") end
 
         local close = _G[name .. "CloseButton"] or frame.CloseButton
         if close and close.SetAlpha then
@@ -52,7 +46,8 @@ function TravelModule:OnEnable()
         self.hearthFrame = CreateFrame('FRAME', nil, xb:GetFrame('bar'))
         xb:RegisterFrame('travelFrame', self.hearthFrame)
     end
-    self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
+    self.useElvUI = xb.db.profile.general.useElvUI and
+                        (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
     self.hearthFrame:Show()
     self:CreateFrames()
     self:RegisterFrameEvents()
@@ -68,21 +63,28 @@ end
 
 function TravelModule:CreateFrames()
     self.hearthButton = self.hearthButton or
-                            CreateFrame('BUTTON', 'hearthButton', self.hearthFrame, 'SecureActionButtonTemplate')
-    self.hearthIcon = self.hearthIcon or self.hearthButton:CreateTexture(nil, 'OVERLAY')
-    self.hearthText = self.hearthText or self.hearthButton:CreateFontString(nil, 'OVERLAY')
+                            CreateFrame('BUTTON', 'hearthButton',
+                                        self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+    self.hearthIcon = self.hearthIcon or
+                          self.hearthButton:CreateTexture(nil, 'OVERLAY')
+    self.hearthText = self.hearthText or
+                          self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
     self.portButton = self.portButton or
-                          CreateFrame('BUTTON', 'portButton', self.hearthFrame, 'SecureActionButtonTemplate')
-    self.portIcon = self.portIcon or self.portButton:CreateTexture(nil, 'OVERLAY')
-    self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
+                          CreateFrame('BUTTON', 'portButton', self.hearthFrame,
+                                      'SecureActionButtonTemplate')
+    self.portIcon = self.portIcon or
+                        self.portButton:CreateTexture(nil, 'OVERLAY')
+    self.portText = self.portText or
+                        self.portButton:CreateFontString(nil, 'OVERLAY')
 
     self.portPopup = self.portPopup or
                          CreateFrame('BUTTON', 'portPopup', self.portButton,
-            BackdropTemplateMixin and 'BackdropTemplate')
+                                     BackdropTemplateMixin and
+                                         'BackdropTemplate')
 
-    if not self.useElvUI then
-    end
+    if not self.useElvUI then end
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -113,24 +115,18 @@ function TravelModule:RegisterFrameEvents()
     end
 
     self.portPopup:SetScript('OnClick', function(self, button)
-        if button == 'RightButton' then
-            self:Hide()
-        end
+        if button == 'RightButton' then self:Hide() end
     end)
 
-    self.hearthButton:SetScript('OnEnter', function()
-        TravelModule:SetHearthColor()
-    end)
+    self.hearthButton:SetScript('OnEnter',
+                                function() TravelModule:SetHearthColor() end)
 
-    self.hearthButton:SetScript('OnLeave', function()
-        TravelModule:SetHearthColor()
-    end)
+    self.hearthButton:SetScript('OnLeave',
+                                function() TravelModule:SetHearthColor() end)
 
     self.portButton:SetScript('OnEnter', function()
         TravelModule:SetPortColor()
-        if InCombatLockdown() then
-            return
-        end
+        if InCombatLockdown() then return end
         self:ShowTooltip()
     end)
 
@@ -141,15 +137,10 @@ function TravelModule:RegisterFrameEvents()
 end
 
 function TravelModule:UpdatePortOptions()
-    if not self.portOptions then
-        self.portOptions = {}
-    end
+    if not self.portOptions then self.portOptions = {} end
 
     if xb.constants.playerClass == 'DRUID' and not self.portOptions[18960] then
-        self.portOptions[18960] = {
-            portId = 18960,
-            text = C_Map.GetMapInfo(241)
-        }
+        self.portOptions[18960] = {portId = 18960, text = C_Map.GetMapInfo(241)}
     end
 
     if xb.constants.playerClass == 'DEATHKNIGHT' and not self.portOptions[50977] then
@@ -161,16 +152,14 @@ function TravelModule:UpdatePortOptions()
 end
 
 function TravelModule:FormatCooldown(cdTime)
-    if cdTime <= 0 then
-        return L['Ready']
-    end
+    if cdTime <= 0 then return L['Ready'] end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
-    local minutes = string.format("%02.f", math.floor(cdTime / 60 - (hours * 60)))
-    local seconds = string.format("%02.f", math.floor(cdTime - (hours * 3600) - (minutes * 60)))
+    local minutes = string.format("%02.f",
+                                  math.floor(cdTime / 60 - (hours * 60)))
+    local seconds = string.format("%02.f", math.floor(
+                                      cdTime - (hours * 3600) - (minutes * 60)))
     local retString = ''
-    if tonumber(hours) ~= 0 then
-        retString = hours .. ':'
-    end
+    if tonumber(hours) ~= 0 then retString = hours .. ':' end
     if tonumber(minutes) ~= 0 or tonumber(hours) ~= 0 then
         retString = retString .. minutes .. ':'
     end
@@ -178,9 +167,7 @@ function TravelModule:FormatCooldown(cdTime)
 end
 
 function TravelModule:SetHearthColor()
-    if InCombatLockdown() then
-        return;
-    end
+    if InCombatLockdown() then return; end
 
     local db = xb.db.profile
     if self.hearthButton:IsMouseOver() then
@@ -195,24 +182,41 @@ function TravelModule:SetHearthColor()
                     hearthName, _ = GetItemInfo(v)
                     if hearthName ~= nil then
                         hearthActive = true
-                        self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
+                        self.hearthButton:SetAttribute("macrotext",
+                                                       "/cast " .. hearthName)
                         break
                     end
                 end
-            end -- if toy/item
+            end -- if item
+            if PlayerHasToy(v) then
+                if C_Container.GetItemCooldown(v) == 0 then
+                    _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                    if hearthName ~= nil then
+                        hearthActive = true
+                        self.hearthButton:SetAttribute("macrotext",
+                                                       "/cast " .. hearthName)
+                        break
+                    end
+                end
+            end -- if toy
             if IsPlayerSpell(v) then
                 if GetSpellCooldown(v) == 0 then
                     hearthName, _ = GetSpellInfo(v)
                     hearthActive = true
-                    self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
+                    self.hearthButton:SetAttribute("macrotext",
+                                                   "/cast " .. hearthName)
                 end
             end -- if is spell
         end -- for hearthstones
         if not hearthActive then
-            self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b,
-                db.color.inactive.a)
-            self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b,
-                db.color.inactive.a)
+            self.hearthIcon:SetVertexColor(db.color.inactive.r,
+                                           db.color.inactive.g,
+                                           db.color.inactive.b,
+                                           db.color.inactive.a)
+            self.hearthText:SetTextColor(db.color.inactive.r,
+                                         db.color.inactive.g,
+                                         db.color.inactive.b,
+                                         db.color.inactive.a)
         else
             self.hearthText:SetTextColor(xb:GetColor('normal'))
         end
@@ -220,9 +224,7 @@ function TravelModule:SetHearthColor()
 end
 
 function TravelModule:SetPortColor()
-    if InCombatLockdown() then
-        return;
-    end
+    if InCombatLockdown() then return; end
 
     local db = xb.db.profile
     local v = xb.db.char.portItem.portId
@@ -246,7 +248,18 @@ function TravelModule:SetPortColor()
                 hearthName, _ = GetItemInfo(v)
                 if hearthName ~= nil then
                     hearthActive = true
-                    self.portButton:SetAttribute("macrotext", "/cast " .. hearthName)
+                    self.portButton:SetAttribute("macrotext",
+                                                 "/cast " .. hearthName)
+                end
+            end
+        end -- if toy/item
+        if (PlayerHasToy(v)) then
+            if C_Container.GetItemCooldown(v) == 0 then
+                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                if hearthName ~= nil then
+                    hearthActive = true
+                    self.portButton:SetAttribute("macrotext",
+                                                 "/cast " .. hearthName)
                 end
             end
         end -- if toy/item
@@ -255,16 +268,19 @@ function TravelModule:SetPortColor()
                 hearthName, _ = GetSpellInfo(v)
                 if hearthName ~= nil then
                     hearthActive = true
-                    self.portButton:SetAttribute("macrotext", "/cast " .. hearthName)
+                    self.portButton:SetAttribute("macrotext",
+                                                 "/cast " .. hearthName)
                 end
             end
         end -- if is spell
 
         if not hearthActive then
-            self.portIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b,
-                db.color.inactive.a)
-            self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b,
-                db.color.inactive.a)
+            self.portIcon:SetVertexColor(db.color.inactive.r,
+                                         db.color.inactive.g,
+                                         db.color.inactive.b,
+                                         db.color.inactive.a)
+            self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
+                                       db.color.inactive.b, db.color.inactive.a)
         else
             self.portIcon:SetVertexColor(xb:GetColor('normal'))
             self.portText:SetTextColor(xb:GetColor('normal'))
@@ -273,13 +289,13 @@ function TravelModule:SetPortColor()
 end
 
 function TravelModule:CreatePortPopup()
-    if not self.portPopup then
-        return;
-    end
+    if not self.portPopup then return; end
 
     local db = xb.db.profile
-    self.portOptionString = self.portOptionString or self.portPopup:CreateFontString(nil, 'OVERLAY')
-    self.portOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
+    self.portOptionString = self.portOptionString or
+                                self.portPopup:CreateFontString(nil, 'OVERLAY')
+    self.portOptionString:SetFont(xb:GetFont(db.text.fontSize +
+                                                 self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.portOptionString:SetTextColor(r, g, b, 1)
     self.portOptionString:SetText(L['Port Options'])
@@ -287,7 +303,8 @@ function TravelModule:CreatePortPopup()
     self.portOptionString:SetPoint('CENTER')
 
     local popupWidth = self.portPopup:GetWidth()
-    local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
+    local popupHeight = xb.constants.popupPadding + db.text.fontSize +
+                            self.optionTextExtra
     local changedWidth = false
     for i, v in pairs(self.portOptions) do
         if self.portButtons[v.portId] == nil then
@@ -340,29 +357,27 @@ function TravelModule:CreatePortPopup()
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
             button:SetPoint('RIGHT')
-            popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
+            popupHeight = popupHeight + xb.constants.popupPadding +
+                              db.text.fontSize
         else
             button:Hide()
         end
     end -- for id/button in portButtons
-    if changedWidth then
-        popupWidth = popupWidth + self.extraPadding
-    end
+    if changedWidth then popupWidth = popupWidth + self.extraPadding end
 
     if popupWidth < self.portButton:GetWidth() then
         popupWidth = self.portButton:GetWidth()
     end
 
     if popupWidth < (self.portOptionString:GetStringWidth() + self.extraPadding) then
-        popupWidth = (self.portOptionString:GetStringWidth() + self.extraPadding)
+        popupWidth =
+            (self.portOptionString:GetStringWidth() + self.extraPadding)
     end
     self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
 
 function TravelModule:Refresh()
-    if self.hearthFrame == nil then
-        return;
-    end
+    if self.hearthFrame == nil then return; end
 
     if not xb.db.profile.modules.travel.enabled then
         self:Disable();
@@ -385,7 +400,8 @@ function TravelModule:Refresh()
     self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
     self.hearthText:SetText(GetBindLocation())
 
-    self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
+    self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize +
+                                  db.general.barPadding, xb:GetHeight())
     self.hearthButton:SetPoint("RIGHT")
 
     self.hearthText:SetPoint("RIGHT")
@@ -393,7 +409,8 @@ function TravelModule:Refresh()
     self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
     self.hearthIcon:SetSize(iconSize, iconSize)
 
-    self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT", -(db.general.barPadding), 0)
+    self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT",
+                             -(db.general.barPadding), 0)
 
     self:SetHearthColor()
 
@@ -401,7 +418,8 @@ function TravelModule:Refresh()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
         self.portText:SetText(xb.db.char.portItem.text)
 
-        self.portButton:SetSize(self.portText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
+        self.portButton:SetSize(self.portText:GetWidth() + iconSize +
+                                    db.general.barPadding, xb:GetHeight())
         self.portButton:SetPoint("LEFT", -(db.general.barPadding), 0)
 
         self.portText:SetPoint("RIGHT")
@@ -409,7 +427,8 @@ function TravelModule:Refresh()
         self.portIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
         self.portIcon:SetSize(iconSize, iconSize)
 
-        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT", -(db.general.barPadding), 0)
+        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT",
+                               -(db.general.barPadding), 0)
 
         self:SetPortColor()
     end
@@ -445,7 +464,8 @@ function TravelModule:ShowTooltip()
         GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
         GameTooltip:ClearLines()
         local r, g, b, _ = unpack(xb:HoverColors())
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
+        GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] ..
+                                "|cFFFFFFFF]|r", r, g, b)
         for i, v in pairs(self.portOptions) do
             if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
                 if IsUsableItem(v.portId) then
@@ -461,16 +481,14 @@ function TravelModule:ShowTooltip()
             end
         end
         GameTooltip:AddLine(" ")
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Port Option'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>',
+                                  L['Change Port Option'], r, g, b, 1, 1, 1)
         GameTooltip:Show()
     end
 end
 
 function TravelModule:FindFirstOption()
-    local firstItem = {
-        portId = 140192,
-        text = GetItemInfo(140192)
-    }
+    local firstItem = {portId = 140192, text = GetItemInfo(140192)}
     if self.portOptions then
         for k, v in pairs(self.portOptions) do
             if self:IsUsable(v.portId) then
@@ -482,16 +500,12 @@ function TravelModule:FindFirstOption()
     return firstItem
 end
 
-function TravelModule:IsUsable(id)
-    return IsUsableItem(id) or IsPlayerSpell(id)
-end
+function TravelModule:IsUsable(id) return IsUsableItem(id) or IsPlayerSpell(id) end
 
 function TravelModule:GetDefaultOptions()
     local firstItem = self:FindFirstOption()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
-    return 'travel', {
-        enabled = true
-    }
+    return 'travel', {enabled = true}
 end
 
 function TravelModule:GetConfig()

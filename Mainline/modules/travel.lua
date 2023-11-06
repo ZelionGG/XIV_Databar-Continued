@@ -189,13 +189,13 @@ function TravelModule:UpdatePortOptions()
   if not self.portOptions then
     self.portOptions = {}
   end
-  if IsUsableItem(128353) and not self.portOptions[128353] then
+  if PlayerHasToy(128353) and not self.portOptions[128353] then
     self.portOptions[128353] = {portId = 128353, text = GetItemInfo(128353)} -- admiral's compass
   end
-  if IsUsableItem(140192) and not self.portOptions[140192] then
+  if PlayerHasToy(140192) and not self.portOptions[140192] then
     self.portOptions[140192] = {portId = 140192, text = GetItemInfo(140192)} -- dalaran hearthstone
   end
-  if IsUsableItem(self.garrisonHearth) and not self.portOptions[self.garrisonHearth] then
+  if PlayerHasToy(self.garrisonHearth) and not self.portOptions[self.garrisonHearth] then
     self.portOptions[self.garrisonHearth] = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP} -- needs to be var for default options
   end
 
@@ -256,9 +256,19 @@ function TravelModule:SetHearthColor()
     local hearthName = ''
     local hearthActive = true
     for i,v in ipairs(self.hearthstones) do
-      if (PlayerHasToy(v) or IsUsableItem(v)) then
+      if IsUsableItem(v) then
         if GetItemCooldown(v) == 0 then
           hearthName, _ = GetItemInfo(v)
+          if hearthName ~= nil then
+            hearthActive = true
+            self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
+            break
+          end
+        end
+      end -- if toy/item
+      if PlayerHasToy(v) then
+        if GetItemCooldown(v) == 0 then
+          _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
           if hearthName ~= nil then
             hearthActive = true
             self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
@@ -303,9 +313,9 @@ function TravelModule:SetPortColor()
   else
     local hearthname = ''
     local hearthActive = false
-    if (PlayerHasToy(v) or IsUsableItem(v)) then
+    if PlayerHasToy(v) then
       if GetItemCooldown(v) == 0 then
-        hearthName, _ = GetItemInfo(v)
+        _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
         if hearthName ~= nil then
           hearthActive = true
           self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
@@ -349,7 +359,7 @@ function TravelModule:CreatePortPopup()
   local changedWidth = false
   for i, v in pairs(self.portOptions) do
     if self.portButtons[v.portId] == nil then
-      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
+      if PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) then
         local button = CreateFrame('BUTTON', nil, self.portPopup)
         local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
@@ -388,7 +398,7 @@ function TravelModule:CreatePortPopup()
         end
       end -- if usable item or spell
     else
-      if not (IsUsableItem(v.portId) or IsPlayerSpell(v.portId)) then
+      if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId)) then
         self.portButtons[v.portId].isSettable = false
       end
     end -- if nil
@@ -531,7 +541,7 @@ function TravelModule:FindFirstOption()
 end
 
 function TravelModule:IsUsable(id)
-  return IsUsableItem(id) or IsPlayerSpell(id)
+  return PlayerHasToy(id) or IsUsableItem(id) or IsPlayerSpell(id)
 end
 
 function TravelModule:GetDefaultOptions()

@@ -4,5 +4,5 @@
   <Script file="micromenu.lua" />
   <Script file="talents.lua" />
   <Script file="tradeskill.lua" />
-  <Script file="travel.lua" />
+  <Script file="Wrath/travel.lua" />
 </Ui>
