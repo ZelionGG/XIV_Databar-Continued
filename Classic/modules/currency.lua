@@ -137,8 +137,8 @@ function CurrencyModule:Refresh()
     -- self.currencyFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
-    local anchorFrame = xb:GetFrame('tradeskillFrame')
-    if not anchorFrame:IsVisible() then
+    -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
+    if anchorFrame ~= nil and not anchorFrame:IsVisible() then
         if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
             anchorFrame = xb:GetFrame('clockFrame')
         elseif xb:GetFrame('talentFrame') and xb:GetFrame('talentFrame'):IsVisible() then
