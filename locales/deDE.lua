@@ -138,6 +138,7 @@ L['Toggle Profession Frame'] = 'Berufsrahmen anzeigen';
 L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
 
 L['Set Specialization'] = "Spezialisierung auswählen";
+L['Set Loadout'] = "Konfiguration auswählen";
 L['Set Loot Specialization'] = "Beute-Spezialisierung auswählen";
 L['Current Specialization'] = "Aktuelle Spezialisierung";
 L['Current Loot Specialization'] = "Aktuelle Beute-Spezialisierung";

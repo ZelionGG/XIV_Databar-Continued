@@ -138,6 +138,7 @@ L['Toggle Profession Frame'] = 'Afficher le cadre de la profession';
 L['Toggle Profession Spellbook'] = 'afficher le livre de sorts de la profession';
 
 L['Set Specialization'] = "Choix de la spécialisation";
+L['Set Loadout'] = "Choix de la configuration";
 L['Set Loot Specialization'] = "Spécialisation du butin";
 L['Current Specialization'] = "Spécialisation actuelle";
 L['Current Loot Specialization'] = "Spécialisation du butin actuelle";

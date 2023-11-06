@@ -138,6 +138,7 @@ L['Toggle Profession Frame'] = '顯示職業框架';
 L['Toggle Profession Spellbook'] = '表演專業拼寫本';
 
 L['Set Specialization'] = "设置专精";
+L['Set Loadout'] = true; -- Translation needed
 L['Set Loot Specialization'] = "设置拾取专精";
 L['Current Specialization'] = "当前专精";
 L['Current Loot Specialization'] = "当前拾取专精";

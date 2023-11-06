@@ -138,6 +138,7 @@ L['Toggle Profession Frame'] = 'Показать кадр профессии';
 L['Toggle Profession Spellbook'] = 'показать книгу заклинаний профессии';
 
 L['Set Specialization'] = "Выбрать специализацию";
+L['Set Loadout'] = true; -- Translation needed
 L['Set Loot Specialization'] = "Выбрать специализацию для добычи";
 L['Current Specialization'] = "Текущая специализация";
 L['Current Loot Specialization'] = "Текущая специализация для добычи";
