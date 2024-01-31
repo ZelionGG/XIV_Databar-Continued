@@ -147,3 +147,6 @@ L['Open Artifact'] = "Ouvrir l'Arme Prodigieuse";
 L['Remaining'] = "Restant";
 L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
+
+-- Travel
+L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";

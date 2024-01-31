@@ -52,6 +52,7 @@ function TravelModule:OnInitialize()
     self.portButtons = {}
     self.extraPadding = (xb.constants.popupPadding * 3)
     self.optionTextExtra = 4
+    self.availableHearthstones = {}
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -179,6 +180,13 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:SetScript('OnEnter',
                                 function() TravelModule:SetHearthColor() end)
 
+    -- Heartstone Randomizer
+    if xb.db.profile.modules.travel.randomize then
+        self.hearthButton:SetScript('PreClick', function(self, button, down)
+            TravelModule:SetHearthColor()
+        end)
+    end
+
     self.hearthButton:SetScript('OnLeave',
                                 function() TravelModule:SetHearthColor() end)
 
@@ -265,57 +273,85 @@ function TravelModule:SetHearthColor()
     if InCombatLockdown() then return; end
 
     local db = xb.db.profile
-    if self.hearthButton:IsMouseOver() then
-        self.hearthText:SetTextColor(unpack(xb:HoverColors()))
-    else
-        self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
-        local hearthName = ''
-        local hearthActive = true
-        for i, v in ipairs(self.hearthstones) do
-            if IsUsableItem(v) then
-                if GetItemCooldown(v) == 0 then
-                    hearthName, _ = GetItemInfo(v)
-                    if hearthName ~= nil then
+
+    self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
+
+    local hearthName = ''
+    local hearthActive = true
+    local keyset = {}
+    local random_elem
+    for i, v in ipairs(self.hearthstones) do
+        if IsUsableItem(v) then
+            if GetItemCooldown(v) == 0 then
+                hearthName, _ = GetItemInfo(v)
+                if hearthName ~= nil then
+                    if xb.db.profile.modules.travel.randomize then
+                        table.insert(keyset, i)
+                        self.availableHearthstones[v] = {name = hearthName}
+                    else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
                                                        "/cast " .. hearthName)
                         break
                     end
                 end
-            end -- if toy/item
-            if PlayerHasToy(v) then
-                if GetItemCooldown(v) == 0 then
-                    _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
-                    if hearthName ~= nil then
+            end
+        end -- if toy/item
+        if PlayerHasToy(v) then
+            if GetItemCooldown(v) == 0 then
+                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                if hearthName ~= nil then
+                    if xb.db.profile.modules.travel.randomize then
+                        table.insert(keyset, i)
+                        self.availableHearthstones[v] = {name = hearthName}
+                    else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
                                                        "/cast " .. hearthName)
                         break
                     end
                 end
-            end -- if toy/item
-            if IsPlayerSpell(v) then
-                if GetSpellCooldown(v) == 0 then
-                    hearthName, _ = GetSpellInfo(v)
+            end
+        end -- if toy/item
+        if IsPlayerSpell(v) then
+            if GetSpellCooldown(v) == 0 then
+                hearthName, _ = GetSpellInfo(v)
+                if xb.db.profile.modules.travel.randomize then
+                    table.insert(keyset, i)
+                    self.availableHearthstones[v] = {name = hearthName}
+                else
                     hearthActive = true
                     self.hearthButton:SetAttribute("macrotext",
                                                    "/cast " .. hearthName)
                 end
-            end -- if is spell
-        end -- for hearthstones
-        if not hearthActive then
-            self.hearthIcon:SetVertexColor(db.color.inactive.r,
-                                           db.color.inactive.g,
-                                           db.color.inactive.b,
-                                           db.color.inactive.a)
-            self.hearthText:SetTextColor(db.color.inactive.r,
-                                         db.color.inactive.g,
-                                         db.color.inactive.b,
-                                         db.color.inactive.a)
+            end
+        end -- if is spell
+    end -- for hearthstones
+
+    if xb.db.profile.modules.travel.randomize then
+        random_elem = self.hearthstones[keyset[math.random(#keyset)]]
+        for k, v in pairs(self.availableHearthstones) do
+            if k == random_elem then
+                hearthName = v.name
+                break
+            end
+        end
+    end
+
+    self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
+
+    if not hearthActive then
+        self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
+                                       db.color.inactive.b, db.color.inactive.a)
+        self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
+                                     db.color.inactive.b, db.color.inactive.a)
+    else
+        if self.hearthButton:IsMouseOver() then
+            self.hearthText:SetTextColor(unpack(xb:HoverColors()))
         else
             self.hearthText:SetTextColor(xb:GetColor('normal'))
         end
-    end -- else
+    end
 end
 
 function TravelModule:SetPortColor()
@@ -468,6 +504,18 @@ function TravelModule:Refresh()
         self:Disable();
         return;
     end
+
+    if not xb.db.profile.modules.travel.randomize then
+        -- Heartstone Randomizer
+        self.hearthButton:SetScript('PreClick', function(self, button, down)
+            -- end
+        end)
+    else
+        self.hearthButton:SetScript('PreClick', function(self, button, down)
+            TravelModule:SetHearthColor()
+        end)
+    end
+
     if InCombatLockdown() then
         self.hearthText:SetText(GetBindLocation())
         self.portText:SetText(xb.db.char.portItem.text)
@@ -614,7 +662,20 @@ function TravelModule:GetConfig()
                     end
                 end,
                 width = "full"
-            }
+            },
+            randomize = {
+                name = L['Use Random Hearthstone'],
+                order = 1,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.travel.randomize;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.travel.randomize = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
         }
     }
 end

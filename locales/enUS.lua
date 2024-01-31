@@ -149,3 +149,6 @@ L['Open Artifact'] = true;
 L['Remaining'] = true;
 L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
+
+-- Travel
+L['Use Random Hearthstone'] = true;

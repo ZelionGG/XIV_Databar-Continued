@@ -147,3 +147,6 @@ L['Open Artifact'] = "打开神器";
 L['Remaining'] = "剩余";
 L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
+
+-- Travel
+L['Use Random Hearthstone'] = true; -- Translation needed

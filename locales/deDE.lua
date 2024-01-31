@@ -147,3 +147,6 @@ L['Open Artifact'] = "Artefakt öffen";
 L['Remaining'] = "Verbleibend";
 L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
+
+-- Travel
+L['Use Random Hearthstone'] = true; -- Translation needed
