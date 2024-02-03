@@ -50,6 +50,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+[![XIVScreenshot][xiv-screenshot]](https://www.curseforge.com/wow/addons/xiv_databar-continued)
+
 Pursuing the work of MilleXIV, [Vicious-wow](https://github.com/Vicious-wow/XIV_Databar) and [Kozoaku](https://github.com/Kozoaku/XIV_Databar).
 
 A reworking of [SX_Databar by saxitoxin](https://www.wowinterface.com/downloads/info23745-SX_DataBar.html).
@@ -154,5 +156,6 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 [issues-url]: https://github.com/ZelionGG/XIV_Databar-Continued/issues
 [license-shield]: https://img.shields.io/github/license/ZelionGG/XIV_Databar-Continued.svg?style=for-the-badge
 [license-url]: https://github.com/ZelionGG/XIV_Databar-Continued/blob/master/LICENSE.txt
+[xiv-screenshot]: https://media.forgecdn.net/attachments/591/575/xiv_databar-continued.png
 [Lua]: https://img.shields.io/badge/lua-000000?style=for-the-badge&logo=lua&logoColor=white
 [Lua-url]: https://www.lua.org/
