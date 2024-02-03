@@ -156,6 +156,6 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 [issues-url]: https://github.com/ZelionGG/XIV_Databar-Continued/issues
 [license-shield]: https://img.shields.io/github/license/ZelionGG/XIV_Databar-Continued.svg?style=for-the-badge
 [license-url]: https://github.com/ZelionGG/XIV_Databar-Continued/blob/master/LICENSE.txt
-[xiv-screenshot]: https://media.forgecdn.net/attachments/591/575/xiv_databar-continued.png
+[xiv-screenshot]: https://i.ibb.co/k5r5mCg/xiv-databar-continued.png
 [Lua]: https://img.shields.io/badge/lua-000000?style=for-the-badge&logo=lua&logoColor=white
 [Lua-url]: https://www.lua.org/
