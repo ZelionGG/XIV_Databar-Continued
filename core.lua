@@ -135,8 +135,9 @@ function XIVBar:OnInitialize()
 
     self.timerRefresh = false
 
+    self:RegisterChatCommand('xivc', 'ToggleConfig')
     self:RegisterChatCommand('xivbar', 'ToggleConfig')
-    self:RegisterChatCommand('xb', 'ToggleConfig')
+    self:RegisterChatCommand('xbc', 'ToggleConfig')
 end
 
 function XIVBar:OnEnable()
