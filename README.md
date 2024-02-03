@@ -120,7 +120,7 @@ See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) 
 - Amanthuul - Russian Localization
 - Yaoenqi - Chinese Localization
 
-__I am actually looking for people that want to help with localization of XIV_Databar Continued, don't hesitate to check #10 and to contact me on [X (Twitter)](https://twitter.com/ZelionGG)__ 
+__I am actually looking for people that want to help with localization of XIV_Databar Continued, don't hesitate to check [#10](https://github.com/ZelionGG/XIV_Databar-Continued/issues/10) and to contact me on [X (Twitter)](https://twitter.com/ZelionGG)__ 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
