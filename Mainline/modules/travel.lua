@@ -53,6 +53,7 @@ function TravelModule:OnInitialize()
     self.extraPadding = (xb.constants.popupPadding * 3)
     self.optionTextExtra = 4
     self.availableHearthstones = {}
+    self.selectedHearthstones = {}
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -89,6 +90,9 @@ function TravelModule:OnEnable()
     self:CreateFrames()
     self:RegisterFrameEvents()
     self:Refresh()
+
+    xb.db.profile.modules.travel.selectedHearthstones =
+        xb.db.profile.modules.travel.selectedHearthstones or {}
 end
 
 function TravelModule:OnDisable()
@@ -96,6 +100,7 @@ function TravelModule:OnDisable()
     self:UnregisterEvent('SPELLS_CHANGED')
     self:UnregisterEvent('BAG_UPDATE_DELAYED')
     self:UnregisterEvent('HEARTHSTONE_BOUND')
+    self:UnregisterEvent('GET_ITEM_INFO_RECEIVED')
 end
 
 function TravelModule:CreateFrames()
@@ -149,6 +154,7 @@ function TravelModule:RegisterFrameEvents()
     self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
     self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
     self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
+    self:RegisterEvent('GET_ITEM_INFO_RECEIVED', 'RefreshHearthstonesList')
 
     self.hearthButton:EnableMouse(true)
     self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
@@ -177,15 +183,15 @@ function TravelModule:RegisterFrameEvents()
         if button == 'RightButton' then self:Hide() end
     end)
 
-    self.hearthButton:SetScript('OnEnter',
-                                function() TravelModule:SetHearthColor() end)
-
     -- Heartstone Randomizer
     if xb.db.profile.modules.travel.randomize then
-        self.hearthButton:SetScript('PreClick', function(self, button, down)
+        self.hearthButton:SetScript('PreClick', function()
             TravelModule:SetHearthColor()
         end)
     end
+
+    self.hearthButton:SetScript('OnEnter',
+                                function() TravelModule:SetHearthColor() end)
 
     self.hearthButton:SetScript('OnLeave',
                                 function() TravelModule:SetHearthColor() end)
@@ -280,7 +286,22 @@ function TravelModule:SetHearthColor()
     local hearthActive = true
     local keyset = {}
     local random_elem
-    for i, v in ipairs(self.hearthstones) do
+    local selectedHearthstones = {}
+    local usedHearthstones = {}
+
+    if xb.db.profile.modules.travel.selectedHearthstones then
+        for i, v in pairs(xb.db.profile.modules.travel.selectedHearthstones) do
+            if v == true then table.insert(selectedHearthstones, i) end
+        end
+    end
+
+    if #selectedHearthstones >= 1 then
+        usedHearthstones = selectedHearthstones
+    else
+        usedHearthstones = self.hearthstones
+    end
+
+    for i, v in ipairs(usedHearthstones) do
         if IsUsableItem(v) then
             if GetItemCooldown(v) == 0 then
                 hearthName, _ = GetItemInfo(v)
@@ -329,16 +350,14 @@ function TravelModule:SetHearthColor()
     end -- for hearthstones
 
     if xb.db.profile.modules.travel.randomize then
-        random_elem = self.hearthstones[keyset[math.random(#keyset)]]
+        random_elem = usedHearthstones[math.random(#usedHearthstones)]
         for k, v in pairs(self.availableHearthstones) do
             if k == random_elem then
-                hearthName = v.name
+                self.hearthButton:SetAttribute("macrotext", "/cast " .. v.name)
                 break
             end
         end
     end
-
-    self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
 
     if not hearthActive then
         self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
@@ -507,11 +526,11 @@ function TravelModule:Refresh()
 
     if not xb.db.profile.modules.travel.randomize then
         -- Heartstone Randomizer
-        self.hearthButton:SetScript('PreClick', function(self, button, down)
+        self.hearthButton:SetScript('PreClick', function()
             -- end
         end)
     else
-        self.hearthButton:SetScript('PreClick', function(self, button, down)
+        self.hearthButton:SetScript('PreClick', function()
             TravelModule:SetHearthColor()
         end)
     end
@@ -635,6 +654,49 @@ function TravelModule:IsUsable(id)
     return PlayerHasToy(id) or IsUsableItem(id) or IsPlayerSpell(id)
 end
 
+function TravelModule:RefreshHearthstonesList()
+    local function has_index(tab, ind)
+        for index, value in pairs(tab) do
+            if index == ind then return true end
+        end
+
+        return false
+    end
+
+    if xb.db.profile.modules.travel.hearthstonesList == nil then
+        xb.db.profile.modules.travel.hearthstonesList = {}
+        for i, v in ipairs(self.hearthstones) do
+            if self:IsUsable(v) then
+                table.insert(xb.db.profile.modules.travel.hearthstonesList, v,
+                             "")
+            end
+        end
+    else
+        for i, v in ipairs(self.hearthstones) do
+            if not has_index(xb.db.profile.modules.travel.hearthstonesList, v) then
+                if self:IsUsable(v) then
+                    table.insert(xb.db.profile.modules.travel.hearthstonesList,
+                                 v, "")
+                end
+            end
+        end
+    end
+
+    for i, v in pairs(xb.db.profile.modules.travel.hearthstonesList) do
+        if v == '' or v == nil then
+            local hearthName = ''
+            -- if IsUsableItem(i) then
+            --     hearthName, _ = GetItemInfo(i)
+            -- elseif PlayerHasToy(i) then
+            _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(i)
+            -- elseif IsPlayerSpell(i) then
+            --     hearthName, _ = GetSpellInfo(i)
+            -- end
+            xb.db.profile.modules.travel.hearthstonesList[i] = hearthName
+        end
+    end
+end
+
 function TravelModule:GetDefaultOptions()
     local firstItem = self:FindFirstOption()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
@@ -642,6 +704,12 @@ function TravelModule:GetDefaultOptions()
 end
 
 function TravelModule:GetConfig()
+    local hearthstonesTable = {}
+
+    for i, v in pairs(xb.db.profile.modules.travel.hearthstonesList) do
+        table.insert(hearthstonesTable, i, v)
+    end
+
     return {
         name = self:GetName(),
         type = "group",
@@ -676,6 +744,22 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            usableHearthstones = {
+                order = 2,
+                name = L['Hearthstones Select'],
+                desc = L['Hearthstones Select Desc'],
+                type = "multiselect",
+                values = hearthstonesTable,
+                get = function(_, key)
+                    return
+                        xb.db.profile.modules.travel.selectedHearthstones[key]
+                end,
+                set = function(_, key, state)
+                    xb.db.profile.modules.travel.selectedHearthstones[key] =
+                        state
+                    self:Refresh()
+                end
+            }
         }
     }
 end

@@ -154,3 +154,5 @@ L['Artifact Knowledge'] = true;
 
 -- Travel
 L['Use Random Hearthstone'] = true;
+L['Hearthstones Select'] = true;
+L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
