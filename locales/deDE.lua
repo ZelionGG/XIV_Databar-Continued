@@ -23,6 +23,8 @@ L["Miscellaneous"] = "Verschiedenes";
 L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Abstand zwischen Modulen";
+L['Bar Margin'] = true; -- Need Translation
+L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
 L['Use ElvUI for tooltips'] = "Verwenden Sie ElvUI für QuickInfos";
 

@@ -23,6 +23,8 @@ L["Miscellaneous"] = "Divers";
 L['Hide Bar in combat'] = "Cacher la barre en combat";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
+L['Bar Margin'] = "Marge des modules en bord d'écran";
+L["Leftmost and rightmost margin of the bar modules"] = "Décalage des modules en bord d'écran";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
 L['Use ElvUI for tooltips'] = "Utiliser ElvUI pour les info-bulles";
 

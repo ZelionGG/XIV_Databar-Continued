@@ -23,6 +23,8 @@ L["Miscellaneous"] = "Разное";
 L['Hide Bar in combat'] = "Прятать полосу во время боя";
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
+L['Bar Margin'] = "Маржа бара"; -- Need Translation ?
+L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
 L['Hide order hall bar'] = "Прятать полосу оплота класса";
 L['Use ElvUI for tooltips'] = "Используйте ElvUI для подсказок";
 

@@ -24,6 +24,8 @@ L["Miscellaneous"] = true;
 L['Hide Bar in combat'] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
+L['Bar Margin'] = true;
+L["Leftmost and rightmost margin of the bar modules"] = true;
 L['Hide order hall bar'] = true;
 L['Use ElvUI for tooltips'] = true;
 
