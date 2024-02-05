@@ -155,6 +155,7 @@ L['Artifact Knowledge'] = "神兵知識等級";
 
 -- Travel
 L['Use Random Hearthstone'] = "使用隨機爐石";
+L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
 L['Hearthstones Select'] = "選擇爐石";
 L['Hearthstones Select Desc'] = "選擇要使用哪些爐石 (如果選擇了多個爐石，請勾選 '選擇爐石' 選項)";
 

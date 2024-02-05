@@ -152,5 +152,6 @@ L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
+L['Empty Hearthstones List'] = "Si vous voyez une liste vide, /reload votre interface afin de recharger les données quelques secondes après le chargement initial (Blizzard charge les informations des objets de manière asynchrone)."
 L['Hearthstones Select'] = "Sélection des pierres de foyers";
 L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')";

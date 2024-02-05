@@ -154,5 +154,6 @@ L['Artifact Knowledge'] = true;
 
 -- Travel
 L['Use Random Hearthstone'] = true;
+L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
