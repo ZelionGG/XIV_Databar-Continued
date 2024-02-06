@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help me improve XIV_Databar Continued
-title: ''
+title: "[Bug] "
 labels: ''
 assignees: ZelionGG
 
@@ -29,6 +29,9 @@ If applicable, add screenshots to help explain your problem.
 **WoW Version (please complete the following information):**
  - WoW Flavour: [e.g Retail, Classic Wrath, Classic] 
  - Version
+
+** XIV_Databar Continued Version:**
+Which version of XIV_Databar Continued are you using ?
 
 **Additional context**
 Add any other context about the problem here.

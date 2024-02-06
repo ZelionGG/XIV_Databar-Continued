@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for XIV_Databar Continued
-title: ''
+title: "[Enhancement] "
 labels: ''
 assignees: ZelionGG
 
