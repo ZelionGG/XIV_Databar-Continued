@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help me improve XIV_Databar Continued
 title: ''
 labels: ''
 assignees: ZelionGG
@@ -19,6 +19,9 @@ Steps to reproduce the behavior:
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
+
+**Lua error logs**
+A copy-paste of your Lua errors.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
