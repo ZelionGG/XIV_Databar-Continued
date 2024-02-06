@@ -26,11 +26,11 @@ A copy-paste of your Lua errors.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**WoW Version (please complete the following information):**
+**WoW Version (please complete the following information)**
  - WoW Flavour: [e.g Retail, Classic Wrath, Classic] 
  - Version
 
-** XIV_Databar Continued Version:**
+**XIV_Databar Continued Version**
 Which version of XIV_Databar Continued are you using ?
 
 **Additional context**
