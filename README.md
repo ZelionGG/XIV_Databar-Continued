@@ -97,9 +97,10 @@ This section should list any major frameworks/libraries used to bootstrap your p
 ## Roadmap
 
 - [x] Add a Loadout manager (next to the talent manager) that will allow you to change your talents easily
-- [ ] Hearthstones
+- [x] Hearthstones
     - [x] Add a hearthstone randomizer (uses a random hearthstone each time you click the button)
-    - [ ] Add an option to favor Hearthstones 
+    - [x] Add an option to favor Hearthstones
+- [ ] Changelog in the GUI 
 
 See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) for a full list of proposed features (and known issues).
 
@@ -119,6 +120,7 @@ See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) 
 - PhatsoTGT - German Localization
 - Amanthuul - Russian Localization
 - Yaoenqi - Chinese Localization
+- [class2u](https://github.com/class2u) - Chinese (Taiwan) Localization
 
 __I am actually looking for people that want to help with localization of XIV_Databar Continued, don't hesitate to check [#10](https://github.com/ZelionGG/XIV_Databar-Continued/issues/10) and to contact me on [X (Twitter)](https://twitter.com/ZelionGG)__ 
 
