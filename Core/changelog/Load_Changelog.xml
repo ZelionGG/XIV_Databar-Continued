@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file='Old/v2/2.5.lua'/>
+	<Script file='Old/v2/2.6.lua'/>
+	<Script file='2.6.1.lua'/>
+</Ui>
