@@ -1,8 +1,8 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[9999] = {
-    version_string = "TBD",
-    release_date = "TBD",
+XIVBar.Changelog[1010] = {
+    version_string = "1.0.1",
+    release_date = "2023/01/02",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
@@ -14,8 +14,12 @@ XIVBar.Changelog[9999] = {
     new = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "Added Curse and Wago project IDs."
+        },
+        ["frFR"] = {
+            "Ajout des ID projets Curse et Wago."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },

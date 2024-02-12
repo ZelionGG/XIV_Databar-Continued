@@ -1,13 +1,17 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[9999] = {
-    version_string = "TBD",
-    release_date = "TBD",
+XIVBar.Changelog[2020] = {
+    version_string = "2.0.2",
+    release_date = "2023/04/26",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "[Global] Removed TBC TOC file."
+        },
+        ["frFR"] = {
+            "[Global] Suppression du fichier TOC de BC Classic."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },

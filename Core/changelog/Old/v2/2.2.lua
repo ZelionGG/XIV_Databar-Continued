@@ -1,8 +1,8 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[9999] = {
-    version_string = "TBD",
-    release_date = "TBD",
+XIVBar.Changelog[2200] = {
+    version_string = "2.2",
+    release_date = "2023/06/05",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
@@ -14,8 +14,12 @@ XIVBar.Changelog[9999] = {
     new = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "[Retail] Added the option to enable the loadout switcher in the talents module."
+        },
+        ["frFR"] = {
+            "[Retail] Ajout d'une option pour activer le sélecteur d'ensemble de talents."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },

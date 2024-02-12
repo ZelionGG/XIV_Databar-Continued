@@ -1,5 +1,28 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<!-- OLD V1 -->
+	<Script file='Old/v1/1.0.lua'/>
+	<Script file='Old/v1/1.0.1.lua'/>
+	<!-- OLD V2 -->
+	<Script file='Old/v2/2.0.lua'/>
+	<Script file='Old/v2/2.0.1.lua'/>
+	<Script file='Old/v2/2.0.2.lua'/>
+	<Script file='Old/v2/2.1.lua'/>
+	<Script file='Old/v2/2.1.1.lua'/>
+	<Script file='Old/v2/2.1.2.lua'/>
+	<Script file='Old/v2/2.1.11.lua'/>
+	<Script file='Old/v2/2.2.lua'/>
+	<Script file='Old/v2/2.2.1.lua'/>
+	<Script file='Old/v2/2.2.2.lua'/>
+	<Script file='Old/v2/2.3.lua'/>
+	<Script file='Old/v2/2.3.1.lua'/>
+	<Script file='Old/v2/2.3.2.lua'/>
+	<Script file='Old/v2/2.3.21.lua'/>
+	<Script file='Old/v2/2.3.22.lua'/> 
+	<Script file='Old/v2/2.3.23.lua'/>
+	<Script file='Old/v2/2.3.3.lua'/>
+	<Script file='Old/v2/2.4.lua'/>
 	<Script file='Old/v2/2.5.lua'/>
 	<Script file='Old/v2/2.6.lua'/>
+	<!-- LIVE -->
 	<Script file='2.6.1.lua'/>
 </Ui>

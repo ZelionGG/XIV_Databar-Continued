@@ -136,7 +136,7 @@ function XIVBar:OnInitialize()
         end
 
         options.args.changelog.args[tostring(version)] = {
-            order = 1000 - version,
+            order = 10000 - version,
             name = versionString,
             type = "group",
             args = {
@@ -159,7 +159,7 @@ function XIVBar:OnInitialize()
             page.importantHeader = {
                 order = 3,
                 type = "header",
-                name = orange("Important")
+                name = orange(L["Important"])
             }
             page.important = {
                 order = 4,
@@ -167,7 +167,7 @@ function XIVBar:OnInitialize()
                 name = function()
                     local text = ""
                     for index, line in ipairs(important) do
-                        text = text .. format("%02d", index) .. ". " ..
+                        text = text .. index .. ". " ..
                                    renderChangelogLine(line) .. "\n"
                     end
                     return text .. "\n"
@@ -189,7 +189,7 @@ function XIVBar:OnInitialize()
                 name = function()
                     local text = ""
                     for index, line in ipairs(new) do
-                        text = text .. format("%02d", index) .. ". " ..
+                        text = text .. index .. ". " ..
                                    renderChangelogLine(line) .. "\n"
                     end
                     return text .. "\n"
@@ -213,7 +213,7 @@ function XIVBar:OnInitialize()
                 name = function()
                     local text = ""
                     for index, line in ipairs(improvement) do
-                        text = text .. format("%02d", index) .. ". " ..
+                        text = text .. index .. ". " ..
                                    renderChangelogLine(line) .. "\n"
                     end
                     return text .. "\n"
@@ -243,6 +243,9 @@ function XIVBar:OnInitialize()
     self.modulesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(
                                   AddOnName, L['Modules'], "XIV Bar Continued",
                                   "modules")
+    self.changelogOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(
+                                    AddOnName, L['Changelog'],
+                                    "XIV Bar Continued", "changelog")
 
     options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
     self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(
