@@ -1,6 +1,6 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[261] = {
+XIVBar.Changelog[2610] = {
     version_string = "2.6.1",
     release_date = "2024/02/05",
     important = {

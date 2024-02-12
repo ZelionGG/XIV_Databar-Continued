@@ -1,13 +1,17 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[9999] = {
-    version_string = "TBD",
-    release_date = "TBD",
+XIVBar.Changelog[1000] = {
+    version_string = "1.0",
+    release_date = "2023/01/02",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "Initial release of XIV_Databar Continued."
+        },
+        ["frFR"] = {
+            "Release initiale de XIV_Databar Continued."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },

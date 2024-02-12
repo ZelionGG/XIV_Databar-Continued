@@ -1,8 +1,8 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[9999] = {
-    version_string = "TBD",
-    release_date = "TBD",
+XIVBar.Changelog[2110] = {
+    version_string = "2.1.1",
+    release_date = "2023/05/09",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
@@ -14,8 +14,14 @@ XIVBar.Changelog[9999] = {
     new = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "Added the new addon icon.",
+            "[Retail] Created Addon Compartment integration."
+        },
+        ["frFR"] = {
+            "Ajout du logo de l'addon.",
+            "[Retail] Ajout de l'intégration au nouveau système de compartiments d'addons."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },
