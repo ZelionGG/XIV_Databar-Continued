@@ -152,9 +152,15 @@ function XIVBar:OnInitialize()
 
         local page = options.args.changelog.args[tostring(version)].args
 
-        local important = data.important and
-                              (data.important[GetLocale()] or
-                                  data.important["enUS"])
+        -- Checking localized "Important" category
+        local important_localized = {}
+        if next(data.important[GetLocale()]) ~= nil then
+            important_localized = data.important[GetLocale()]
+        else 
+            important_localized = data.important["enUS"]
+        end
+
+        local important = data.important and important_localized
         if important and #important > 0 then
             page.importantHeader = {
                 order = 3,
@@ -176,7 +182,15 @@ function XIVBar:OnInitialize()
             }
         end
 
-        local new = data.new and (data.new[GetLocale()] or data.new["enUS"])
+        -- Checking localized "New" category
+        local new_localized = {}
+        if next(data.new[GetLocale()]) ~= nil then
+            new_localized = data.new[GetLocale()]
+        else 
+            new_localized = data.new["enUS"]
+        end
+
+        local new = data.new and new_localized
         if new and #new > 0 then
             page.newHeader = {
                 order = 5,
@@ -198,9 +212,15 @@ function XIVBar:OnInitialize()
             }
         end
 
-        local improvement = data.improvement and
-                                (data.improvement[GetLocale()] or
-                                    data.improvement["enUS"])
+        -- Checking localized "New" category
+        local improvment_localized = {}
+        if next(data.improvement[GetLocale()]) ~= nil then
+            improvment_localized = data.improvement[GetLocale()]
+        else 
+            improvment_localized = data.improvement["enUS"]
+        end
+
+        local improvement = data.improvement and improvment_localized
         if improvement and #improvement > 0 then
             page.improvementHeader = {
                 order = 7,
