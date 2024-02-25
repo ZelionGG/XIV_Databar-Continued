@@ -19,5 +19,6 @@ embeds.xml
 
 locales\locales.xml
 core.lua
+Core\changelog\Load_Changelog.xml
 Core\modules\load_modules.xml
 Mainline\modules\load_modules.xml
