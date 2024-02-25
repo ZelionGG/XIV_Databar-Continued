@@ -155,3 +155,11 @@ L['Use Random Hearthstone'] = true;
 L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
+
+-- Changelog
+L["%month%-%day%-%year%"] = "%year%年%month%月%day%日";
+L["Version"] = "版本";
+L["Important"] = "重要";
+L["New"] = "新增";
+L["Improvement"] = "改善";
+L["Changelog"] = "更新记录";
