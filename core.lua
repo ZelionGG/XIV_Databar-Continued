@@ -212,7 +212,7 @@ function XIVBar:OnInitialize()
             }
         end
 
-        -- Checking localized "New" category
+        -- Checking localized "Improvment" category
         local improvment_localized = {}
         if next(data.improvement[GetLocale()]) ~= nil then
             improvment_localized = data.improvement[GetLocale()]
