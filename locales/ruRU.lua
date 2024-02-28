@@ -161,5 +161,5 @@ L["%month%-%day%-%year%"] = "%day%-%month%-%year%";
 L["Version"] = "Версия";
 L["Important"] = "Важные";
 L["New"] = "Новые";
-L["Improvement"] = "Улучшения";
+L["Improvment"] = "Улучшения";
 L["Changelog"] = "Журнал изменений";

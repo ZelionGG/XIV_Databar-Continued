@@ -225,7 +225,7 @@ function XIVBar:OnInitialize()
             page.improvmentHeader = {
                 order = 7,
                 type = "header",
-                name = orange(L["improvment"])
+                name = orange(L["Improvment"])
             }
             page.improvment = {
                 order = 8,
