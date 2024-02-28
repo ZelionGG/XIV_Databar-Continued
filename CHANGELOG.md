@@ -7,3 +7,7 @@
 ### _Global :_
 
 - Fixed an addon breaking error caused by unmaintained locales in the Changelog module.
+
+### _Vanilla Classic :_
+
+- TOC update for 1.15.1.
