@@ -217,22 +217,22 @@ function XIVBar:OnInitialize()
         if data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
             improvment_localized = data.improvment[GetLocale()]
         else 
-            improvment_localized = data.improvement["enUS"]
+            improvment_localized = data.improvment["enUS"]
         end
 
-        local improvement = data.improvement and improvment_localized
-        if improvement and #improvement > 0 then
-            page.improvementHeader = {
+        local improvment = data.improvment and improvment_localized
+        if improvment and #improvment > 0 then
+            page.improvmentHeader = {
                 order = 7,
                 type = "header",
-                name = orange(L["Improvement"])
+                name = orange(L["improvment"])
             }
-            page.improvement = {
+            page.improvment = {
                 order = 8,
                 type = "description",
                 name = function()
                     local text = ""
-                    for index, line in ipairs(improvement) do
+                    for index, line in ipairs(improvment) do
                         text = text .. index .. ". " ..
                                    renderChangelogLine(line) .. "\n"
                     end
