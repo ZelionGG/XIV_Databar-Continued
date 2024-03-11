@@ -214,7 +214,7 @@ function TravelModule:UpdatePortOptions()
         self.portOptions[128353] = {portId = 128353, text = GetItemInfo(128353)} -- admiral's compass
     end
     if PlayerHasToy(140192) and not self.portOptions[140192] then
-        self.portOptions[140192] = {portId = 140192, text = GetItemInfo(140192)} -- dalaran hearthstone
+        self.portOptions[140192] = {portId = 140192, text = xb.db.profile.dalaran_hs_string or GetItemInfo(140192)} -- dalaran hearthstone
     end
     if PlayerHasToy(self.garrisonHearth) and
         not self.portOptions[self.garrisonHearth] then
@@ -694,6 +694,12 @@ function TravelModule:RefreshHearthstonesList()
             -- end
             xb.db.profile.hearthstonesList[i] = hearthName
         end
+    end
+
+    -- Dalaran Hearthstone
+    if xb.db.profile.dalaran_hs_string == nil then
+        local _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(140192)
+        xb.db.profile.dalaran_hs_string = hearthName
     end
 end
 
