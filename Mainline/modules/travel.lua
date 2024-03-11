@@ -11,6 +11,7 @@ function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.garrisonHearth = 110560
     self.hearthstones = {
+        212337, -- Stone of the Hearth
         209035, -- Hearthstone of the Flame
         208704, -- Deepdweller's Earthen Hearthstone
         54452, -- Ethereal Portal
