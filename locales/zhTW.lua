@@ -192,3 +192,11 @@ L["Diablo 4"] = "暗黑破壞神IV"
 L["Blizzard Arcade Collection"] = "暴雪遊樂場典藏系列"
 L["Crash Bandicoot 4"] = "袋狼大進擊4"
 L["Hide Friends Playing Other Games"] = "隱藏其他遊戲好友"; -- used for the friend list function I added myself
+
+-- Changelog
+L["%month%-%day%-%year%"] = "%year%年%month%月%day%日"
+L["Version"] = "版本"
+L["Important"] = "重要"
+L["New"] = "新增"
+L["Improvment"] = "改善"
+L["Changelog"] = "更新記錄"

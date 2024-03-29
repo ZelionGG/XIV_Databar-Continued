@@ -101,7 +101,7 @@ function CurrencyModule:Refresh()
 
         self.xpBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
         if db.modules.currency.xpBarCC then
-            rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
+            local rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
             self.xpBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
         else
             self.xpBar:SetStatusBarColor(xb:GetColor('normal'))
@@ -137,6 +137,7 @@ function CurrencyModule:Refresh()
     -- self.currencyFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
+    local anchorFrame = xb:GetFrame('tradeskillFrame')
     -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
     if anchorFrame ~= nil and not anchorFrame:IsVisible() then
         if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then

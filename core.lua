@@ -152,9 +152,15 @@ function XIVBar:OnInitialize()
 
         local page = options.args.changelog.args[tostring(version)].args
 
-        local important = data.important and
-                              (data.important[GetLocale()] or
-                                  data.important["enUS"])
+        -- Checking localized "Important" category
+        local important_localized = {}
+        if data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
+            important_localized = data.important[GetLocale()]
+        else 
+            important_localized = data.important["enUS"]
+        end
+
+        local important = data.important and important_localized
         if important and #important > 0 then
             page.importantHeader = {
                 order = 3,
@@ -176,7 +182,15 @@ function XIVBar:OnInitialize()
             }
         end
 
-        local new = data.new and (data.new[GetLocale()] or data.new["enUS"])
+        -- Checking localized "New" category
+        local new_localized = {}
+        if data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
+            new_localized = data.new[GetLocale()]
+        else 
+            new_localized = data.new["enUS"]
+        end
+
+        local new = data.new and new_localized
         if new and #new > 0 then
             page.newHeader = {
                 order = 5,
@@ -198,21 +212,27 @@ function XIVBar:OnInitialize()
             }
         end
 
-        local improvement = data.improvement and
-                                (data.improvement[GetLocale()] or
-                                    data.improvement["enUS"])
-        if improvement and #improvement > 0 then
-            page.improvementHeader = {
+        -- Checking localized "Improvment" category
+        local improvment_localized = {}
+        if data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
+            improvment_localized = data.improvment[GetLocale()]
+        else 
+            improvment_localized = data.improvment["enUS"]
+        end
+
+        local improvment = data.improvment and improvment_localized
+        if improvment and #improvment > 0 then
+            page.improvmentHeader = {
                 order = 7,
                 type = "header",
-                name = orange(L["Improvement"])
+                name = orange(L["Improvment"])
             }
-            page.improvement = {
+            page.improvment = {
                 order = 8,
                 type = "description",
                 name = function()
                     local text = ""
-                    for index, line in ipairs(improvement) do
+                    for index, line in ipairs(improvment) do
                         text = text .. index .. ". " ..
                                    renderChangelogLine(line) .. "\n"
                     end

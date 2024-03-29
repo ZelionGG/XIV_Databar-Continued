@@ -25,7 +25,7 @@ XIVBar.Changelog[2120] = {
         ["koKR"] = {},
         ["ruRU"] = {}
     },
-    improvement = {
+    improvment = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {

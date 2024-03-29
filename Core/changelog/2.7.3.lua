@@ -1,16 +1,16 @@
 local AddOnName, XIVBar = ...;
 
-XIVBar.Changelog[2111] = {
-    version_string = "2.1.11",
-    release_date = "2023/06/04",
+XIVBar.Changelog[2703] = {
+    version_string = "2.7.3",
+    release_date = "2024/03/22",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {
-            "[Global] #4 - Fixed the LUA error with the clock module."
+            "[Retail] TOC update for Retail 10.2.6.",
         },
         ["frFR"] = {
-            "[Global] #4 - Correction de l'erreur LUA causée par le module horloge."
+            "[Retail] Mise à jour du TOC pour la version 10.2.6 de Retail.",
         },
         ["koKR"] = {},
         ["ruRU"] = {}

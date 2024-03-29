@@ -91,9 +91,10 @@ function CurrencyModule:Refresh()
         self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
         self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
 
-        self.xpBar:SetStatusBarTexture(1, 1, 1)
+        self.xpBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
         if db.modules.currency.xpBarCC then
-            self.xpBar:SetStatusBarColor(xb:GetClassColors())
+            local rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
+            self.xpBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
         else
             self.xpBar:SetStatusBarColor(xb:GetColor('normal'))
         end
