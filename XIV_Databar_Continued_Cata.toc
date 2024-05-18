@@ -1,10 +1,8 @@
-## Interface: 100207
-## X-Interface: 100207
+## Interface: 40400
+## X-Interface: 40400
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: 2.8
-## IconTexture: Interface\Addons\XIV_Databar_Continued\icon.png
-## AddonCompartmentFunc: XIV_Databar_Continued_OnAddonCompartmentClick
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
@@ -16,9 +14,10 @@
 ## X-Wago-ID: WqKQVaGx
 
 embeds.xml
+Classic\embeds.xml
 
 locales\locales.xml
 core.lua
 Core\changelog\Load_Changelog.xml
 Core\modules\load_modules.xml
-Mainline\modules\load_modules.xml
+Classic\modules\load_modules_wrath.xml
