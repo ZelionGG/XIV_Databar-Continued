@@ -947,7 +947,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleFriendsFrame(1)
+            ToggleFriendsFrame()
         end
     end; -- social
 
