@@ -318,14 +318,14 @@ function MenuModule:CreateFrames()
         end
     end
 
-    --   if mm.journal then
-    --     self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
-    --     parentFrame = self.frames.journal
-    --   else
-    --     if self.frames.journal then
-    --       self.frames.journal = nil
-    --     end
-    --   end
+    if mm.journal then
+        self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
+        parentFrame = self.frames.journal
+    else
+        if self.frames.journal then
+          self.frames.journal = nil
+        end
+    end
 
     if mm.pvp and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         self.frames.pvp = CreateFrame("BUTTON", "pvp", parentFrame)
@@ -978,12 +978,14 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- talent
 
-    --   self.functions.journal = function(self, button, down)
-    --     if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
-    --     if button == "LeftButton" then
-    --   		ToggleEncounterJournal()
-    --   	end
-    --   end; --journal
+    self.functions.journal = function(self, button, down)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then 
+            return; 
+        end
+        if button == "LeftButton" then
+      		ToggleEncounterJournal()
+      	end
+    end; --journal
 
     self.functions.lfg = function(self, button, down)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
