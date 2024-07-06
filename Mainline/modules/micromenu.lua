@@ -8,6 +8,7 @@ local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 function MenuModule:GetName()
     return L['Micromenu'];
 end
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function MenuModule:OnInitialize()
     self.LTip = LibStub('LibQTip-1.0')
