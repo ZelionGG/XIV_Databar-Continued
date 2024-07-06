@@ -29,7 +29,8 @@
 	<Script file='Old/v2/2.7.2.lua'/>
 	<Script file='Old/v2/2.7.3.lua'/>
 	<Script file='Old/v2/2.8.lua'/>
+	<Script file='Old/v2/2.9.lua'/>
 	<!-- LIVE -->
-	<Script file='2.9.lua'/>
+	<Script file='3.0.lua'/>
 	
 </Ui>
