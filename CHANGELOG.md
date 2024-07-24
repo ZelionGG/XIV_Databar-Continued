@@ -1,13 +1,13 @@
 # XIV_Databar Continued
 
-## [3.0](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.0) (2024-07-06)
+## [3.0.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.0.1) (2024-07-24)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v2.9...v3.0) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.0...v3.0.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-### _The War Within Beta :_
+### _Retail :_
 
-- Initial 11.0 compatibility.
+- Micromenu module fix for Retail 11.0.0.
 
-### _Global :_
+### _Classic SoD :_
 
-- Removed a useless var in TOC files.
+- Micromenu module fix (Guild button) for Classic SOD 1.15.3.

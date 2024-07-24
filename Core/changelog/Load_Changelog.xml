@@ -30,7 +30,8 @@
 	<Script file='Old/v2/2.7.3.lua'/>
 	<Script file='Old/v2/2.8.lua'/>
 	<Script file='Old/v2/2.9.lua'/>
+	<Script file='Old/v3/3.0.lua'/>
 	<!-- LIVE -->
-	<Script file='3.0.lua'/>
+	<Script file='3.0.1.lua'/>
 	
 </Ui>
