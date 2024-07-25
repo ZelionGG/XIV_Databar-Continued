@@ -1,11 +1,11 @@
-## Interface: 11502
-## X-Interface: 11502
+## Interface: 11503
+## X-Interface: 11503
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
-## Version: 2.9
+## Version: 3.0.2
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
-## SavedVariables: TEST_CONFIG, XIVBarDB
+## SavedVariables: XIVBarDB
 
 ## X-Website: https://github.com/ZelionGG/XIV_Databar-Continued
 ## X-Issues: https://github.com/ZelionGG/XIV_Databar-Continued/issues

@@ -8,6 +8,7 @@ local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 function MenuModule:GetName()
     return L['Micromenu'];
 end
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function MenuModule:OnInitialize()
     self.LTip = LibStub('LibQTip-1.0')
@@ -956,7 +957,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleFrame(SpellBookFrame)
+            PlayerSpellsUtil.TogglePlayerSpellsFrame(3)
         end
     end; -- spell
 
@@ -965,7 +966,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleTalentFrame()
+            PlayerSpellsUtil.TogglePlayerSpellsFrame(2)
         end
     end; -- talent
 

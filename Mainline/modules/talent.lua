@@ -5,9 +5,12 @@ local L = XIVBar.L;
 
 local C_ClassTalents = C_ClassTalents;
 local C_Traits = C_Traits;
+
 local TalentModule = xb:NewModule("TalentModule", 'AceEvent-3.0')
 local GetSpecializationInfo = GetSpecializationInfo;
 local GetSpecialization = GetSpecialization;
+
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function TalentModule:GetName()
     return TALENTS;

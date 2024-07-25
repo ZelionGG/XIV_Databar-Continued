@@ -5,6 +5,12 @@ local L = XIVBar.L;
 
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
+local GetItemInfo = C_Item.GetItemInfo
+local IsUsableItem = C_Item.IsUsableItem
+local GetItemCooldown = C_Item.GetItemCooldown
+
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+
 function TravelModule:GetName() return L['Travel']; end
 
 function TravelModule:OnInitialize()

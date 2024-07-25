@@ -938,7 +938,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleFriendsFrame(3)
+            ToggleGuildFrame()
         end
     end; -- guild
 
