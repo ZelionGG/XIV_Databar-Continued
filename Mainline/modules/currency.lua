@@ -52,7 +52,7 @@ function CurrencyModule:Refresh()
     local db = xb.db.profile
     xb.constants.playerLevel = UnitLevel("player")
     if InCombatLockdown() then
-        if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+        if xb.constants.playerLevel < GetMaxPlayerLevel() and db.modules.currency.showXPbar then
             self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
             self.xpBar:SetValue(UnitXP('player'))
             self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
@@ -73,7 +73,7 @@ function CurrencyModule:Refresh()
     end
     self.xpFrame:Hide()
 
-    if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+    if xb.constants.playerLevel < GetMaxPlayerLevel() and db.modules.currency.showXPbar then
         -- self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
 
         local textHeight = floor((xb:GetHeight() - 4) / 2)
@@ -284,7 +284,7 @@ function CurrencyModule:ShowTooltip()
 
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
 
-    if xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar then
+    if xb.constants.playerLevel < GetMaxPlayerLevel() and xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
 
