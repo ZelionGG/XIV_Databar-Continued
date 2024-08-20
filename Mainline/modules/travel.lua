@@ -9,6 +9,9 @@ local GetItemInfo = C_Item.GetItemInfo
 local IsUsableItem = C_Item.IsUsableItem
 local GetItemCooldown = C_Item.GetItemCooldown
 
+local GetSpellCooldown = C_Spell.GetSpellCooldown
+local GetSpellInfo = C_Spell.GetSpellInfo
+
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function TravelModule:GetName() return L['Travel']; end
