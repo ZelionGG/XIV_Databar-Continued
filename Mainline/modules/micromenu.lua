@@ -917,11 +917,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            if ChatMenu:IsVisible() then
-                ChatMenu:Hide()
-            else
-                ChatFrame_ToggleMenu()
-            end
+            _G.ChatFrameMenuButton:OpenMenu()
         end
     end; -- chat
 
