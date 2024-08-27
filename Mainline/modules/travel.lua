@@ -7,7 +7,7 @@ local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
 local GetItemInfo = C_Item.GetItemInfo
 local IsUsableItem = C_Item.IsUsableItem
-local GetItemCooldown = C_Item.GetItemCooldown
+local GetItemCooldown = C_Container.GetItemCooldown
 
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellInfo = C_Spell.GetSpellInfo
@@ -399,7 +399,8 @@ function TravelModule:SetHearthColor()
         end -- if toy/item
         if IsPlayerSpell(v) then
             if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+                spellInfo = GetSpellInfo(v)
+                hearthName = spellInfo.name
                 if xb.db.profile.randomizeHs then
                     table.insert(keyset, i)
                     self.availableHearthstones[v] = {name = hearthName}
@@ -478,8 +479,9 @@ function TravelModule:SetPortColor()
             end
         end -- if toy
         if IsPlayerSpell(v) then
-            if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+            if GetSpellCooldown(v).duration == 0 then
+                spellInfo = GetSpellInfo(v)
+                hearthName = spellInfo.name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -881,13 +883,15 @@ function TravelModule:ShowTooltip()
         for i, v in pairs(self.portOptions) do
             if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
                 if IsUsableItem(v.portId) then
-                    local _, cd, _ = GetItemCooldown(v.portId)
-                    local cdString = self:FormatCooldown(cd)
+                    local startTime, cd, _ = GetItemCooldown(v.portId)
+                    local remainingCooldown = (startTime + cd - GetTime())
+                    local cdString = self:FormatCooldown(remainingCooldown)
                     GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                 end
                 if IsPlayerSpell(v.portId) then
-                    local _, cd, _ = GetSpellCooldown(v.portId)
-                    local cdString = self:FormatCooldown(cd)
+                    local cd = GetSpellCooldown(v.portId)
+                    local remainingCooldown = (cd.startTime + cd.duration - GetTime())
+                    local cdString = self:FormatCooldown(remainingCooldown)
                     GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                 end
             end
