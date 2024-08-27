@@ -173,12 +173,14 @@ function TravelModule:CreateFrames()
     end
 
     -- Mythic+ popup
-    self.mythicPopup = self.mythicPopup or
-                           CreateFrame('FRAME', 'mythicPopup',
-                                       self.mythicButton,
-                                       'UIDropDownMenuTemplate')
+    if(xb.db.profile.enableMythicPortals) then
+        self.mythicPopup = self.mythicPopup or
+                            CreateFrame('FRAME', 'mythicPopup',
+                                        self.mythicButton,
+                                        'UIDropDownMenuTemplate')
 
-    self.mythicPopup:SetPoint("CENTER")
+        self.mythicPopup:SetPoint("CENTER")
+    end
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -820,24 +822,26 @@ function TravelModule:Refresh()
     self:CreatePortPopup()
 
     -- M+ Part
-    self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
-    self.mythicText:SetText('M+ Portals')
+    if(xb.db.profile.enableMythicPortals) then
+        self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
+        self.mythicText:SetText('M+ Portals')
 
-    self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
-                                  db.general.barPadding, xb:GetHeight())
-    self.mythicButton:SetPoint("LEFT", -(db.general.barPadding), 0)
+        self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
+                                    db.general.barPadding, xb:GetHeight())
+        self.mythicButton:SetPoint("LEFT", -(db.general.barPadding), 0)
 
-    self.mythicText:SetPoint("RIGHT")
+        self.mythicText:SetPoint("RIGHT")
 
-    self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
-    self.mythicIcon:SetSize(iconSize, iconSize)
+        self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
+        self.mythicIcon:SetSize(iconSize, iconSize)
 
-    self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
-                             -(db.general.barPadding), 0)
+        self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
+                                -(db.general.barPadding), 0)
 
-    self:SetMythicColor()
+        self:SetMythicColor()
 
-    self:CreateMythicPopup()
+        self:CreateMythicPopup()
+    end
 
     local popupPadding = xb.constants.popupPadding
     local popupPoint = 'BOTTOM'
@@ -853,10 +857,12 @@ function TravelModule:Refresh()
     self:SkinFrame(self.portPopup, "SpecToolTip")
     self.portPopup:Hide()
 
-    self.mythicPopup:ClearAllPoints()
-    self.mythicPopup:SetPoint(popupPoint, self.mythicButton, relPoint, 0, 0)
-    self:SkinFrame(self.mythicPopup, "SpecToolTip")
-    self.mythicPopup:Hide()
+    if(xb.db.profile.enableMythicPortals) then
+        self.mythicPopup:ClearAllPoints()
+        self.mythicPopup:SetPoint(popupPoint, self.mythicButton, relPoint, 0, 0)
+        self:SkinFrame(self.mythicPopup, "SpecToolTip")
+        self.mythicPopup:Hide()
+    end
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
     self.portButton:Show()
@@ -864,9 +870,11 @@ function TravelModule:Refresh()
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    self.mythicButton:Show()
-    if self.mythicButton:IsVisible() then
-        totalWidth = totalWidth + self.mythicButton:GetWidth()
+    if(xb.db.profile.enableMythicPortals) then
+        self.mythicButton:Show()
+        if self.mythicButton:IsVisible() then
+            totalWidth = totalWidth + self.mythicButton:GetWidth()
+        end
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -1003,9 +1011,22 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            enableMythicPortals = {
+                name = L['Show Mythic+ Portals'],
+                order = 1,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.enableMythicPortals;
+                end,
+                set = function(_, val)
+                    xb.db.profile.enableMythicPortals = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
             randomizeHs = {
                 name = L['Use Random Hearthstone'],
-                order = 1,
+                order = 2,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.randomizeHs;
@@ -1018,11 +1039,11 @@ function TravelModule:GetConfig()
             },
             information = {
                 name = L['Empty Hearthstones List'],
-                order = 2,
+                order = 3,
                 type = "description"
             },
             selectedHearthstones = {
-                order = 3,
+                order = 4,
                 name = L['Hearthstones Select'],
                 desc = L['Hearthstones Select Desc'],
                 type = "multiselect",
