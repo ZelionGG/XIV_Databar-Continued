@@ -5,6 +5,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
+[![Discord][discord-shield]][discord-url]
 [![MIT License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
@@ -159,6 +160,8 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 [stars-url]: https://github.com/ZelionGG/XIV_Databar-Continued/stargazers
 [issues-shield]: https://img.shields.io/github/issues/ZelionGG/XIV_Databar-Continued.svg?style=for-the-badge
 [issues-url]: https://github.com/ZelionGG/XIV_Databar-Continued/issues
+[discord-shield]: https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white
+[discord-url]: https://discord.gg/g7JZNGSU32
 [license-shield]: https://img.shields.io/github/license/ZelionGG/XIV_Databar-Continued.svg?style=for-the-badge
 [license-url]: https://github.com/ZelionGG/XIV_Databar-Continued/blob/master/LICENSE.txt
 [xiv-screenshot]: https://i.ibb.co/k5r5mCg/xiv-databar-continued.png
