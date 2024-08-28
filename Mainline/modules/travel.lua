@@ -173,14 +173,10 @@ function TravelModule:CreateFrames()
     end
 
     -- Mythic+ popup
-    if(xb.db.profile.enableMythicPortals) then
-        self.mythicPopup = self.mythicPopup or
-                            CreateFrame('FRAME', 'mythicPopup',
-                                        self.mythicButton,
-                                        'UIDropDownMenuTemplate')
-
-        self.mythicPopup:SetPoint("CENTER")
-    end
+    self.mythicPopup = self.mythicPopup or
+                           CreateFrame('FRAME', 'mythicPopup',
+                                       self.mythicButton,
+                                       'UIDropDownMenuTemplate')
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -620,9 +616,9 @@ function TravelModule:CreateMythicPopup()
             }
         },
         ["mop"] = {
-            name = "Mists of Pandaria", 
+            name = "Mists of Pandaria",
             teleports = {
-                [131204] = 464, -- Temple of the Jade Serpent
+                [131204] = 464 -- Temple of the Jade Serpent
             }
         },
         ["wod"] = {
@@ -645,7 +641,7 @@ function TravelModule:CreateMythicPopup()
                 [393766] = 1318, -- Court of Stars
                 [424163] = 1201, -- Darkheart Thicket
                 [393764] = 1473, -- Halls of Valor
-                [410078] = 1206, -- Neltharion's Lair
+                [410078] = 1206 -- Neltharion's Lair
             }
         },
         ["bfa"] = {
@@ -654,7 +650,7 @@ function TravelModule:CreateMythicPopup()
                 [424187] = 1668, -- Atal'Dazar
                 [410071] = 1672, -- Freehold
                 [424167] = 1705, -- Waycrest Manor
-                [410074] = 1711, -- The Underrot
+                [410074] = 1711 -- The Underrot
             }
         },
         ["shadowlands"] = {
@@ -705,14 +701,25 @@ function TravelModule:CreateMythicPopup()
     end
 
     local function CreateTeleportButton(value, spellName)
-        local button = CreateFrame("Button", nil, UIParent,
+        local button = CreateFrame("Button",
+                                   "TravelMenuTeleportButton" .. spellName,
+                                   UIParent,
                                    "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+
         name = GetLFGDungeonInfo(value)
         button:SetText(name)
         button:SetSize(200, 16)
         button:SetAttribute("type", "spell")
         button:SetAttribute("spell", spellName)
         button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+
+        -- Hide the checkboxes
+        for i, region in pairs {button:GetRegions()} do
+            if region:GetObjectType() == "Texture" then region:Hide() end
+        end
+
+        local text = button:GetFontString()
+        text:SetPoint('LEFT', 5, 0)
 
         button:HookScript("PostClick",
                           function(self, button, down)
@@ -822,25 +829,29 @@ function TravelModule:Refresh()
     self:CreatePortPopup()
 
     -- M+ Part
-    if(xb.db.profile.enableMythicPortals) then
+    if self.mythicButton then self.mythicButton:Hide() end
+
+    if (xb.db.profile.enableMythicPortals) then
         self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
         self.mythicText:SetText('M+ Portals')
 
         self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
-                                    db.general.barPadding, xb:GetHeight())
+                                      db.general.barPadding, xb:GetHeight())
         self.mythicButton:SetPoint("LEFT", -(db.general.barPadding), 0)
 
         self.mythicText:SetPoint("RIGHT")
 
         self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
-        self.mythicIcon:SetSize(iconSize, iconSize)
+        self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
 
         self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
-                                -(db.general.barPadding), 0)
+                                 -(db.general.barPadding) + 5, 0)
 
         self:SetMythicColor()
 
         self:CreateMythicPopup()
+
+        self.mythicButton:Show()
     end
 
     local popupPadding = xb.constants.popupPadding
@@ -857,12 +868,10 @@ function TravelModule:Refresh()
     self:SkinFrame(self.portPopup, "SpecToolTip")
     self.portPopup:Hide()
 
-    if(xb.db.profile.enableMythicPortals) then
-        self.mythicPopup:ClearAllPoints()
-        self.mythicPopup:SetPoint(popupPoint, self.mythicButton, relPoint, 0, 0)
-        self:SkinFrame(self.mythicPopup, "SpecToolTip")
-        self.mythicPopup:Hide()
-    end
+    self.mythicPopup:ClearAllPoints()
+    self.mythicPopup:SetPoint(popupPoint, self.mythicButton, relPoint, -10, 0)
+    self:SkinFrame(self.mythicPopup, "SpecToolTip")
+    self.mythicPopup:Hide()
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
     self.portButton:Show()
@@ -870,7 +879,7 @@ function TravelModule:Refresh()
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    if(xb.db.profile.enableMythicPortals) then
+    if (xb.db.profile.enableMythicPortals) then
         self.mythicButton:Show()
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
@@ -898,7 +907,8 @@ function TravelModule:ShowTooltip()
                 end
                 if IsPlayerSpell(v.portId) then
                     local cd = GetSpellCooldown(v.portId)
-                    local remainingCooldown = (cd.startTime + cd.duration - GetTime())
+                    local remainingCooldown =
+                        (cd.startTime + cd.duration - GetTime())
                     local cdString = self:FormatCooldown(remainingCooldown)
                     GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                 end
