@@ -157,6 +157,19 @@ L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few 
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
 
+L["Classic"] = true;
+L["Burning Crusade"] = true;
+L["Wrath of the Lich King"] = true;
+L["Cataclysm"] = true;
+L["Mists of Pandaria"] = true;
+L["Warlords of Draenor"] = true;
+L["Legion"] = true;
+L["Battle for Azeroth"] = true;
+L["Shadowlands"] = true;
+L["Dragonflight"] = true;
+L["The War Within"] = true;
+L["Current season"] = true;
+
 -- Changelog
 L["%month%-%day%-%year%"] = "%year%年%month%月%day%日";
 L["Version"] = "版本";
