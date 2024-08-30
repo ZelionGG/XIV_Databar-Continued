@@ -215,6 +215,7 @@ function TravelModule:RegisterFrameEvents()
     self.mythicButton:EnableMouse(true)
     self.mythicButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
     self.mythicButton:SetAttribute('type', 'mythicFunction')
+    self.mythicButton.HandlesGlobalMouseEvent = function() return true end
 
     self.mythicButton.mythicFunction = self.mythicButton.mythicFunction or
                                            function()
@@ -605,10 +606,14 @@ function TravelModule:CreateMythicPopup()
             name = L["Cataclysm"],
             teleports = {
                 [1] = {
+                    teleportId = 445424, -- Grim Batol Teleport
+                    dungeonId = 304 -- Grim Batol
+                },
+                [2] = {
                     teleportId = 410080, -- The Vortex Pinnacle Teleport
                     dungeonId = 311 -- The Vortex Pinnacle
                 },
-                [2] = {
+                [3] = {
                     teleportId = 424142, -- Throne of the Tides Teleport
                     dungeonId = 302 -- Throne of the Tides
                 }
@@ -697,12 +702,16 @@ function TravelModule:CreateMythicPopup()
                     dungeonId = 1672 -- Freehold
                 },
                 [3] = {
-                    teleportId = 424167, -- Waycrest Manor Teleport
-                    dungeonId = 1705 -- Waycrest Manor
+                    teleportId = 445418, -- Siege of Boralus Teleport
+                    dungeonId = 1700 -- Siege of Boralus
                 },
                 [4] = {
                     teleportId = 410074, -- The Underrot Teleport
                     dungeonId = 1711 -- The Underrot
+                },
+                [5] = {
+                    teleportId = 424167, -- Waycrest Manor Teleport
+                    dungeonId = 1705 -- Waycrest Manor
                 }
             }
         },
