@@ -7,7 +7,7 @@ local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
 local GetItemInfo = C_Item.GetItemInfo
 local IsUsableItem = C_Item.IsUsableItem
-local GetItemCooldown = C_Item.GetItemCooldown
+local GetItemCooldown = C_Container.GetItemCooldown
 
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellInfo = C_Spell.GetSpellInfo
@@ -114,6 +114,7 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
+    -- Hearthstones Part
     self.hearthButton = self.hearthButton or
                             CreateFrame('BUTTON', 'hearthButton',
                                         self.hearthFrame,
@@ -123,6 +124,7 @@ function TravelModule:CreateFrames()
     self.hearthText = self.hearthText or
                           self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
+    -- Portals Part
     self.portButton = self.portButton or
                           CreateFrame('BUTTON', 'portButton', self.hearthFrame,
                                       'SecureActionButtonTemplate')
@@ -131,9 +133,20 @@ function TravelModule:CreateFrames()
     self.portText = self.portText or
                         self.portButton:CreateFontString(nil, 'OVERLAY')
 
+    -- Mythic+ Part
+    self.mythicButton = self.mythicButton or
+                            CreateFrame('BUTTON', 'mythicButton',
+                                        self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+    self.mythicIcon = self.mythicIcon or
+                          self.mythicButton:CreateTexture(nil, 'OVERLAY')
+    self.mythicText = self.mythicText or
+                          self.mythicButton:CreateFontString(nil, 'OVERLAY')
+
     local template =
         (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or
             (BackdropTemplateMixin and "BackdropTemplate")
+    -- Portals popup
     self.portPopup = self.portPopup or
                          CreateFrame('BUTTON', 'portPopup', self.portButton,
                                      template)
@@ -158,6 +171,12 @@ function TravelModule:CreateFrames()
                 GameTooltip:GetBackdropBorderColor())
         end
     end
+
+    -- Mythic+ popup
+    self.mythicPopup = self.mythicPopup or
+                           CreateFrame('FRAME', 'mythicPopup',
+                                       self.mythicButton,
+                                       'UIDropDownMenuTemplate')
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -193,6 +212,19 @@ function TravelModule:RegisterFrameEvents()
         if button == 'RightButton' then self:Hide() end
     end)
 
+    self.mythicButton:EnableMouse(true)
+    self.mythicButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
+    self.mythicButton:SetAttribute('type', 'mythicFunction')
+    self.mythicButton.HandlesGlobalMouseEvent = function() return true end
+
+    self.mythicButton.mythicFunction = self.mythicButton.mythicFunction or
+                                           function()
+            if not InCombatLockdown() then
+                ToggleDropDownMenu(1, nil, self.mythicPopup, self.mythicButton,
+                                   0, 0)
+            end
+        end
+
     -- Heartstone Randomizer
     if xb.db.profile.randomizeHs then
         self.hearthButton:SetScript('PreClick', function()
@@ -216,6 +248,16 @@ function TravelModule:RegisterFrameEvents()
         TravelModule:SetPortColor()
         GameTooltip:Hide()
     end)
+
+    self.mythicButton:SetScript('OnEnter', function()
+        TravelModule:SetMythicColor()
+        if InCombatLockdown() then return end
+    end)
+
+    self.mythicButton:SetScript('OnLeave', function()
+        TravelModule:SetMythicColor()
+        GameTooltip:Hide()
+    end)
 end
 
 function TravelModule:UpdatePortOptions()
@@ -224,7 +266,10 @@ function TravelModule:UpdatePortOptions()
         self.portOptions[128353] = {portId = 128353, text = GetItemInfo(128353)} -- admiral's compass
     end
     if PlayerHasToy(140192) and not self.portOptions[140192] then
-        self.portOptions[140192] = {portId = 140192, text = xb.db.profile.dalaran_hs_string or GetItemInfo(140192)} -- dalaran hearthstone
+        self.portOptions[140192] = {
+            portId = 140192,
+            text = xb.db.profile.dalaran_hs_string or GetItemInfo(140192)
+        } -- dalaran hearthstone
     end
     if PlayerHasToy(self.garrisonHearth) and
         not self.portOptions[self.garrisonHearth] then
@@ -346,7 +391,8 @@ function TravelModule:SetHearthColor()
         end -- if toy/item
         if IsPlayerSpell(v) then
             if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+                spellInfo = GetSpellInfo(v)
+                hearthName = spellInfo.name
                 if xb.db.profile.randomizeHs then
                     table.insert(keyset, i)
                     self.availableHearthstones[v] = {name = hearthName}
@@ -425,8 +471,9 @@ function TravelModule:SetPortColor()
             end
         end -- if toy
         if IsPlayerSpell(v) then
-            if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+            if GetSpellCooldown(v).duration == 0 then
+                spellInfo = GetSpellInfo(v)
+                hearthName = spellInfo.name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -446,6 +493,17 @@ function TravelModule:SetPortColor()
             self.portIcon:SetVertexColor(xb:GetColor('normal'))
             self.portText:SetTextColor(xb:GetColor('normal'))
         end
+    end -- else
+end
+
+function TravelModule:SetMythicColor()
+    if InCombatLockdown() then return; end
+
+    if self.mythicButton:IsMouseOver() then
+        self.mythicText:SetTextColor(unpack(xb:HoverColors()))
+    else
+        self.mythicIcon:SetVertexColor(xb:GetColor('normal'))
+        self.mythicText:SetTextColor(xb:GetColor('normal'))
     end -- else
 end
 
@@ -469,7 +527,8 @@ function TravelModule:CreatePortPopup()
     local changedWidth = false
     for i, v in pairs(self.portOptions) do
         if self.portButtons[v.portId] == nil then
-            if PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or IsUsableItem(v.portId) then
+            if PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
+                IsUsableItem(v.portId) then
                 local button = CreateFrame('BUTTON', nil, self.portPopup)
                 local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
@@ -508,7 +567,8 @@ function TravelModule:CreatePortPopup()
                 end
             end -- if usable item or spell
         else
-            if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or IsUsableItem(v.portId)) then
+            if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
+                IsUsableItem(v.portId)) then
                 self.portButtons[v.portId].isSettable = false
             end
         end -- if nil
@@ -537,6 +597,362 @@ function TravelModule:CreatePortPopup()
     self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
 
+function TravelModule:CreateMythicPopup()
+    local mythicTeleports = {
+        [1] = {name = L["Classic"]},
+        [2] = {name = L["Burning Crusade"]},
+        [3] = {name = L["Wrath of the Lich King"]},
+        [4] = {
+            name = L["Cataclysm"],
+            teleports = {
+                [1] = {
+                    teleportId = 445424, -- Grim Batol Teleport
+                    dungeonId = 304 -- Grim Batol
+                },
+                [2] = {
+                    teleportId = 410080, -- The Vortex Pinnacle Teleport
+                    dungeonId = 311 -- The Vortex Pinnacle
+                },
+                [3] = {
+                    teleportId = 424142, -- Throne of the Tides Teleport
+                    dungeonId = 302 -- Throne of the Tides
+                }
+            }
+        },
+        [5] = {
+            name = L["Mists of Pandaria"],
+            teleports = {
+                [1] = {
+                    teleportId = 131204, -- Temple of the Jade Serpent Teleport
+                    dungeonId = 464 -- Temple of the Jade Serpent
+                }
+            }
+        },
+        [6] = {
+            name = L["Warlords of Draenor"],
+            teleports = {
+                [1] = {
+                    teleportId = 159897, -- Auchindoun Teleport
+                    dungeonId = 820 -- Auchindoun
+                },
+                [2] = {
+                    teleportId = 159895, -- Bloodmaul Slag Mines Teleport
+                    dungeonId = 787 -- Bloodmaul Slag Mines
+                },
+                [3] = {
+                    teleportId = 159900, -- Grimrail Depot Teleport
+                    dungeonId = 822 -- Grimrail Depot
+                },
+                [4] = {
+                    teleportId = 159896, -- Iron Docks Teleport
+                    dungeonId = 821 -- Iron Docks
+                },
+                [5] = {
+                    teleportId = 159898, -- Skyreach Teleport
+                    dungeonId = 779 -- Skyreach
+                },
+                [6] = {
+                    teleportId = 159899, -- Shadowmoon Burial Grounds Teleport
+                    dungeonId = 783 -- Shadowmoon Burial Grounds
+                },
+                [7] = {
+                    teleportId = 159901, -- The Everbloom Teleport
+                    dungeonId = 824 -- The Everbloom
+                },
+                [8] = {
+                    teleportId = 159902, -- Upper Blackrock Spire Teleport
+                    dungeonId = 828 -- Upper Blackrock Spire
+                }
+            }
+        },
+        [7] = {
+            name = L["Legion"],
+            teleports = {
+                [1] = {
+                    teleportId = 424153, -- -- Black Rook Hold Teleport
+                    dungeonId = 1204 -- -- Black Rook Hold
+                },
+                [2] = {
+                    teleportId = 393766, -- Court of Stars Teleport
+                    dungeonId = 1318 -- Court of Stars
+                },
+                [3] = {
+                    teleportId = 424163, -- Darkheart Thicket Teleport
+                    dungeonId = 1201 -- Darkheart Thicket
+                },
+                [4] = {
+                    teleportId = 393764, -- Halls of Valor Teleport
+                    dungeonId = 1473 -- Halls of Valor
+                },
+                [5] = {
+                    teleportId = 410078, -- Neltharion's Lair Teleport
+                    dungeonId = 1206 -- Neltharion's Lair
+                }
+            }
+        },
+        [8] = {
+            name = L["Battle for Azeroth"],
+            teleports = {
+                [1] = {
+                    teleportId = 424187, -- Atal'Dazar Teleport
+                    dungeonId = 1668 -- Atal'Dazar
+                },
+                [2] = {
+                    teleportId = 410071, -- Freehold Teleport
+                    dungeonId = 1672 -- Freehold
+                },
+                [3] = {
+                    teleportId = 445418, -- Siege of Boralus Teleport
+                    dungeonId = 1700 -- Siege of Boralus
+                },
+                [4] = {
+                    teleportId = 410074, -- The Underrot Teleport
+                    dungeonId = 1711 -- The Underrot
+                },
+                [5] = {
+                    teleportId = 424167, -- Waycrest Manor Teleport
+                    dungeonId = 1705 -- Waycrest Manor
+                }
+            }
+        },
+        [9] = {
+            name = L["Shadowlands"],
+            teleports = {
+                [1] = {
+                    teleportId = 354468, -- De Other Side Teleport
+                    dungeonId = 2080 -- De Other Side
+                },
+                [2] = {
+                    teleportId = 354464, -- Mists of Tirna Scithe Teleport
+                    dungeonId = 2072 -- Mists of Tirna Scithe
+                },
+                [3] = {
+                    teleportId = 354463, -- Plaguefall Teleport
+                    dungeonId = 2069 -- Plaguefall
+                },
+                [4] = {
+                    teleportId = 354469, -- Sanguine Depths Teleport
+                    dungeonId = 2082 -- Sanguine Depths
+                },
+                [5] = {
+                    teleportId = 354466, -- Spires of Ascension Teleport
+                    dungeonId = 2076 -- Spires of Ascension
+                },
+                [6] = {
+                    teleportId = 367416, -- Tazavesh, the Veiled Market Teleport
+                    dungeonId = 2225 -- Tazavesh, the Veiled Market
+                },
+                [7] = {
+                    teleportId = 354467, -- Theater of Pain Teleport
+                    dungeonId = 2078 -- Theater of Pain
+                },
+                [8] = {
+                    teleportId = 354462, -- The Necrotic Wake Teleport
+                    dungeonId = 2070 -- The Necrotic Wake
+                }
+            }
+        },
+        [10] = {
+            name = L["Dragonflight"],
+            teleports = {
+                [1] = {
+                    teleportId = 393273, -- Algeth'ar Academy Teleport
+                    dungeonId = 2366 -- Algeth'ar Academy
+                },
+                [2] = {
+                    teleportId = 393267, -- Brackenhide Hollow Teleport
+                    dungeonId = 2362 -- Brackenhide Hollow
+                },
+                [3] = {
+                    teleportId = 424197, -- Dawn of the Infinite Teleport
+                    dungeonId = 2430 -- Dawn of the Infinite
+                },
+                [4] = {
+                    teleportId = 393283, -- Halls of Infusion Teleport
+                    dungeonId = 2364 -- Halls of Infusion
+                },
+                [5] = {
+                    teleportId = 393276, -- Neltharus Teleport
+                    dungeonId = 2356 -- Neltharus
+                },
+                [6] = {
+                    teleportId = 393256, -- Ruby Life Pools Teleport
+                    dungeonId = 2361 -- Ruby Life Pools
+                },
+                [7] = {
+                    teleportId = 393279, -- The Azure Vault Teleport
+                    dungeonId = 2332 -- The Azure Vault
+                },
+                [8] = {
+                    teleportId = 393262, -- The Nokhud Offensive Teleport
+                    dungeonId = 2368 -- The Nokhud Offensive
+                },
+                [9] = {
+                    teleportId = 393222, -- Uldaman: Legacy of Tyr Teleport
+                    dungeonId = 2352 -- Uldaman: Legacy of Tyr
+                }
+            }
+        },
+        [11] = {name = L["The War Within"]},
+        [12] = {
+            name = L["Current season"],
+            teleports = {
+                [1] = {
+                    teleportId = 445417, -- Ara-Kara, City of Echoes Teleport
+                    dungeonId = 2604 -- Ara-Kara, City of Echoes
+                },
+                [2] = {
+                    teleportId = 445416, -- City of Threads Teleport
+                    dungeonId = 2642 -- City of Threads
+                },
+                [3] = {
+                    teleportId = 445424, -- Grim Batol Teleport
+                    dungeonId = 304 -- Grim Batol
+                },
+                [4] = {
+                    teleportId = 354464, -- Mists of Tirna Scithe Teleport
+                    dungeonId = 2072 -- Mists of Tirna Scithe
+                },
+                [5] = {
+                    teleportId = 445418, -- Siege of Boralus Teleport
+                    dungeonId = 1700 -- Siege of Boralus
+                },
+                [6] = {
+                    teleportId = 445414, -- The Dawnbreaker Teleport
+                    dungeonId = 2523 -- The Dawnbreaker
+                },
+                [7] = {
+                    teleportId = 354462, -- The Necrotic Wake Teleport
+                    dungeonId = 2070 -- The Necrotic Wake
+                },
+                [8] = {
+                    teleportId = 445269, -- The Stonevault Teleport
+                    dungeonId = 2693 -- The Stonevault
+                }
+            }
+        }
+    }
+
+    -- Loop on each mythicTeleports item and check foreach if spell known, if known, add to new table
+    local filteredTeleports = {}
+    for mythicKey, mythicData in ipairs(mythicTeleports) do
+        if mythicData.teleports then
+            local newTeleports = {}
+            local i = 1
+            for index, spell in ipairs(mythicData.teleports) do
+                if IsSpellKnown(spell.teleportId) then
+                    newTeleports[i] = {
+                        teleportId = spell.teleportId,
+                        dungeonId = spell.dungeonId
+                    }
+                    i = i + 1
+                end
+            end
+            if next(newTeleports) then
+                mythicData.teleports = newTeleports
+                table.insert(filteredTeleports, mythicData)
+            end
+        else
+            table.insert(filteredTeleports, mythicData)
+        end
+    end
+
+    local function CreateTeleportButton(value, spellName)
+        local button = CreateFrame("Button",
+                                   "TravelMenuTeleportButton" .. spellName,
+                                   UIParent,
+                                   "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+
+        name = GetLFGDungeonInfo(value.dungeonId)
+        button:SetText(name)
+        button:SetAttribute("type", "spell")
+        button:SetAttribute("spell", spellName)
+        button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+
+        -- Hide the checkboxes
+        for i, region in pairs {button:GetRegions()} do
+            if region:GetObjectType() == "Texture" then region:Hide() end
+        end
+
+        -- Move the text to the right by 5 units
+        local text = button:GetFontString()
+        text:SetPoint('LEFT', 5, 0)
+        local font, _, flags = text:GetFont()
+        text:SetFont(font, 12, flags)
+
+        local textWidth = text:GetStringWidth()
+        button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
+
+        button:HookScript("PostClick",
+                          function(self, button, down)
+            CloseDropDownMenus()
+        end)
+
+        return button
+    end
+
+    UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
+        if (level or 1) == 1 then
+            -- Title
+            local info = UIDropDownMenu_CreateInfo()
+            local r, g, b, _ = unpack(xb:HoverColors())
+            info.text = '[|cFF' .. string.format('%02x', r * 255) ..
+                            string.format('%02x', g * 255) ..
+                            string.format('%02x', b * 255) ..
+                            L["Mythic+ Portals"] .. '|r]'
+            info.notClickable, info.notCheckable = true, true
+            UIDropDownMenu_AddButton(info)
+
+            -- Separator
+            local separator = UIDropDownMenu_CreateInfo()
+            separator.text = ""
+            separator.disabled = true
+            separator.notClickable = true
+            separator.isTitle = true
+            separator.leftPadding = 10
+            separator.textHeight = 1 -- Makes the separator line thinner
+            separator.notCheckable = true
+            UIDropDownMenu_AddButton(separator, level)
+
+            -- Loop on each mythicTeleports item and check foreach if spell known, if not, don't show anything
+            for mythicKey, mythicData in ipairs(filteredTeleports) do
+                if mythicData.teleports then
+                    if mythicData.name == L["Current season"] then
+                        UIDropDownMenu_AddButton(separator, level)
+                    end
+
+                    local info = UIDropDownMenu_CreateInfo()
+                    info.text, info.checked = mythicData.name, false
+                    info.menuList, info.hasArrow = mythicData.teleports, true
+                    info.notCheckable = true
+                    info.value = mythicData.teleports
+                    UIDropDownMenu_AddButton(info)
+                end
+            end
+        else
+            for key, value in ipairs(menuList) do
+                local spellName = C_Spell.GetSpellName(value.teleportId)
+
+                local info = UIDropDownMenu_CreateInfo()
+
+                info.customFrame = CreateTeleportButton(value, spellName)
+                UIDropDownMenu_AddButton(info, level)
+            end
+        end
+    end, 'MENU')
+
+    for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
+        local button = _G["DropDownList1Button" .. i]
+        if button then
+            local text = button:GetFontString()
+            if text then
+                local font, _, flags = text:GetFont()
+                text:SetFont(font, 12, flags) -- Change `14` to your desired font size
+            end
+        end
+    end
+end
+
 function TravelModule:Refresh()
     if self.hearthFrame == nil then return; end
 
@@ -561,6 +977,7 @@ function TravelModule:Refresh()
         self.portText:SetText(xb.db.char.portItem.text)
         self:SetHearthColor()
         self:SetPortColor()
+        self:SetMythicColor()
         return
     end
 
@@ -570,6 +987,7 @@ function TravelModule:Refresh()
     -- local iconSize = (xb:GetHeight() / 2)
     local iconSize = db.text.fontSize + db.general.barPadding
 
+    -- Hearthstone Part
     self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
     self.hearthText:SetText(GetBindLocation())
 
@@ -587,12 +1005,14 @@ function TravelModule:Refresh()
 
     self:SetHearthColor()
 
+    -- Portals Part
     self.portText:SetFont(xb:GetFont(db.text.fontSize))
     self.portText:SetText(xb.db.char.portItem.text)
 
     self.portButton:SetSize(self.portText:GetWidth() + iconSize +
                                 db.general.barPadding, xb:GetHeight())
-    self.portButton:SetPoint("LEFT", -(db.general.barPadding), 0)
+    self.portButton:SetPoint("RIGHT", self.hearthButton, "LEFT",
+                             -(db.general.barPadding), 0)
 
     self.portText:SetPoint("RIGHT")
 
@@ -605,6 +1025,32 @@ function TravelModule:Refresh()
     self:SetPortColor()
 
     self:CreatePortPopup()
+
+    -- M+ Part
+    if self.mythicButton then self.mythicButton:Hide() end
+
+    if (xb.db.profile.enableMythicPortals) then
+        self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
+        self.mythicText:SetText('M+ Portals')
+
+        self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
+                                      db.general.barPadding, xb:GetHeight())
+        self.mythicButton:SetPoint("LEFT", -(db.general.barPadding), 0)
+
+        self.mythicText:SetPoint("RIGHT")
+
+        self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
+        self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
+
+        self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
+                                 -(db.general.barPadding) + 5, 0)
+
+        self:SetMythicColor()
+
+        self:CreateMythicPopup()
+
+        self.mythicButton:Show()
+    end
 
     local popupPadding = xb.constants.popupPadding
     local popupPoint = 'BOTTOM'
@@ -620,10 +1066,25 @@ function TravelModule:Refresh()
     self:SkinFrame(self.portPopup, "SpecToolTip")
     self.portPopup:Hide()
 
+    self.mythicPopup:ClearAllPoints()
+
+    self.mythicPopup.point = "BOTTOM"
+    self.mythicPopup.relativePoint = "TOP"
+
+    self:SkinFrame(self.mythicPopup, "SpecToolTip")
+    self.mythicPopup:Hide()
+
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
     self.portButton:Show()
     if self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
+    end
+
+    if (xb.db.profile.enableMythicPortals) then
+        self.mythicButton:Show()
+        if self.mythicButton:IsVisible() then
+            totalWidth = totalWidth + self.mythicButton:GetWidth()
+        end
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -640,13 +1101,16 @@ function TravelModule:ShowTooltip()
         for i, v in pairs(self.portOptions) do
             if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
                 if IsUsableItem(v.portId) then
-                    local _, cd, _ = GetItemCooldown(v.portId)
-                    local cdString = self:FormatCooldown(cd)
+                    local startTime, cd, _ = GetItemCooldown(v.portId)
+                    local remainingCooldown = (startTime + cd - GetTime())
+                    local cdString = self:FormatCooldown(remainingCooldown)
                     GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                 end
                 if IsPlayerSpell(v.portId) then
-                    local _, cd, _ = GetSpellCooldown(v.portId)
-                    local cdString = self:FormatCooldown(cd)
+                    local cd = GetSpellCooldown(v.portId)
+                    local remainingCooldown =
+                        (cd.startTime + cd.duration - GetTime())
+                    local cdString = self:FormatCooldown(remainingCooldown)
                     GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                 end
             end
@@ -688,16 +1152,14 @@ function TravelModule:RefreshHearthstonesList()
         xb.db.profile.hearthstonesList = {}
         for i, v in ipairs(self.hearthstones) do
             if self:IsUsable(v) then
-                table.insert(xb.db.profile.hearthstonesList, v,
-                             "")
+                table.insert(xb.db.profile.hearthstonesList, v, "")
             end
         end
     else
         for i, v in ipairs(self.hearthstones) do
             if not has_index(xb.db.profile.hearthstonesList, v) then
                 if self:IsUsable(v) then
-                    table.insert(xb.db.profile.hearthstonesList,
-                                 v, "")
+                    table.insert(xb.db.profile.hearthstonesList, v, "")
                 end
             end
         end
@@ -760,9 +1222,22 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            enableMythicPortals = {
+                name = L['Show Mythic+ Portals'],
+                order = 1,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.enableMythicPortals;
+                end,
+                set = function(_, val)
+                    xb.db.profile.enableMythicPortals = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
             randomizeHs = {
                 name = L['Use Random Hearthstone'],
-                order = 1,
+                order = 2,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.randomizeHs;
@@ -775,22 +1250,20 @@ function TravelModule:GetConfig()
             },
             information = {
                 name = L['Empty Hearthstones List'],
-                order = 2,
-                type = "description",
+                order = 3,
+                type = "description"
             },
             selectedHearthstones = {
-                order = 3,
+                order = 4,
                 name = L['Hearthstones Select'],
                 desc = L['Hearthstones Select Desc'],
                 type = "multiselect",
                 values = hearthstonesTable,
                 get = function(_, key)
-                    return
-                        xb.db.profile.selectedHearthstones[key]
+                    return xb.db.profile.selectedHearthstones[key]
                 end,
                 set = function(_, key, state)
-                    xb.db.profile.selectedHearthstones[key] =
-                        state
+                    xb.db.profile.selectedHearthstones[key] = state
                     self:Refresh()
                 end
             }

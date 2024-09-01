@@ -200,7 +200,7 @@ function TradeskillModule:SetProfScripts(prefix)
       local currentProfessionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
       if currentProfessionInfo.professionID == self[prefix].id then C_TradeSkillUI.CloseTradeSkill() return end
       C_TradeSkillUI.OpenTradeSkill(self[prefix].id)
-    elseif button == 'RightButton' then ToggleSpellBook(BOOKTYPE_PROFESSION) end
+    elseif button == 'RightButton' then ToggleProfessionsBook() end
   end)
 
   self[prefix..'Frame']:SetScript('OnEnter', function()

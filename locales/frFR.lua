@@ -151,10 +151,24 @@ L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
+L['Show Mythic+ Portals'] = "Montrer les portails Mythique+";
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
 L['Empty Hearthstones List'] = "Si vous voyez une liste vide, /reload votre interface afin de recharger les données quelques secondes après le chargement initial (Blizzard charge les informations des objets de manière asynchrone)."
 L['Hearthstones Select'] = "Sélection des pierres de foyers";
 L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')";
+
+L["Classic"] = true;
+L["Burning Crusade"] = true;
+L["Wrath of the Lich King"] = true;
+L["Cataclysm"] = true;
+L["Mists of Pandaria"] = true;
+L["Warlords of Draenor"] = true;
+L["Legion"] = true;
+L["Battle for Azeroth"] = true;
+L["Shadowlands"] = true;
+L["Dragonflight"] = true;
+L["The War Within"] = true;
+L["Current season"] = "Saison courante";
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%month%-%day%-%year%";

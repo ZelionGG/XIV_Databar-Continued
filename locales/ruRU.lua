@@ -151,10 +151,24 @@ L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
 
 -- Travel (Translation needed)
+L['Show Mythic+ Portals'] = true;
 L['Use Random Hearthstone'] = true;
 L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
+
+L["Classic"] = true;
+L["Burning Crusade"] = true;
+L["Wrath of the Lich King"] = true;
+L["Cataclysm"] = true;
+L["Mists of Pandaria"] = true;
+L["Warlords of Draenor"] = true;
+L["Legion"] = true;
+L["Battle for Azeroth"] = true;
+L["Shadowlands"] = true;
+L["Dragonflight"] = true;
+L["The War Within"] = true;
+L["Current season"] = true;
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%day%-%month%-%year%";
