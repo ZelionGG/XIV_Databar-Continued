@@ -64,6 +64,7 @@ function TravelModule:OnInitialize()
     self.optionTextExtra = 4
     self.availableHearthstones = {}
     self.selectedHearthstones = {}
+    self.noMythicTeleport = true
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -845,6 +846,7 @@ function TravelModule:CreateMythicPopup()
             local i = 1
             for index, spell in ipairs(mythicData.teleports) do
                 if IsSpellKnown(spell.teleportId) then
+                    self.noMythicTeleport = false
                     newTeleports[i] = {
                         teleportId = spell.teleportId,
                         dungeonId = spell.dungeonId
@@ -1053,7 +1055,9 @@ function TravelModule:Refresh()
 
         self:CreateMythicPopup()
 
-        self.mythicButton:Show()
+        if not self.noMythicTeleport then
+            self.mythicButton:Show()
+        end
     end
 
     local popupPadding = xb.constants.popupPadding
@@ -1085,7 +1089,9 @@ function TravelModule:Refresh()
     end
 
     if (xb.db.profile.enableMythicPortals) then
-        self.mythicButton:Show()
+        if not self.noMythicTeleport then
+            self.mythicButton:Show()
+        end
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
