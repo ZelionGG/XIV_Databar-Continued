@@ -56,7 +56,8 @@ function ReputationModule:Refresh()
         local current, threshold, _, rewardPending = C_Reputation_GetFactionParagonInfo(factionID)
 
         if current and threshold then
-            _, minValue, maxValue, curValue, reaction = L["Paragon"], 0, threshold, current % threshold, 9
+            local _, minVal, maxVal, curVal, reactVal = L["Paragon"], 0, threshold, current % threshold, 9
+            reaction, minValue, maxValue, curValue = reactVal, minVal, maxVal, curVal
         end
     end
 

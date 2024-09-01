@@ -112,8 +112,8 @@ function TradeskillModule:UpdateProfValues()
     else
         -- player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
         self.tradeskillFrame:Show()
-        self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, self.firstProf.offset, self.firstProf
-            .id, _ = LibAddonCompat:GetProfessionInfo(self.firstProf.idx)
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.firstProf.idx)
+        self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset, self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
         self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
         self.firstProfBar:SetValue(self.firstProf.lvl)
     end
@@ -124,8 +124,8 @@ function TradeskillModule:UpdateProfValues()
     else
         -- player has two profession, setting second one. show secondProfFrame because it might've been hidden before
         self.secondProfFrame:Show()
-        self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, self.secondProf
-            .offset, self.secondProf.id, _ = LibAddonCompat:GetProfessionInfo(self.secondProf.idx)
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.secondProf.idx)
+        self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
         self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
         self.secondProfBar:SetValue(self.secondProf.lvl)
     end
@@ -133,8 +133,8 @@ function TradeskillModule:UpdateProfValues()
     -- update values for secondary professions if they exist (first aid / archaeology / fishing / cooking)
     -- update archaeology
     if self.first_aid.idx then
-        self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, _, self.first_aid.offset, self.first_aid
-            .id, _ = LibAddonCompat:GetProfessionInfo(self.first_aid.idx)
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.first_aid.idx)
+        self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset, self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
     end
     -- update archaeology
     --[[ if self.arch.idx then
@@ -142,13 +142,13 @@ function TradeskillModule:UpdateProfValues()
   end ]]
     -- update fishing
     if self.fish.idx then
-        self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, _, self.fish.offset, self.fish.id, _ =
-            LibAddonCompat:GetProfessionInfo(self.fish.idx)
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.fish.idx)
+        self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name, defIcon, lvl, maxLvl, offset, id
     end
     -- update cooking
     if self.cook.idx then
-        self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, _, self.cook.offset, self.cook.id, _ =
-            LibAddonCompat:GetProfessionInfo(self.cook.idx)
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.cook.idx)
+        self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name, defIcon, lvl, maxLvl, offset, id
     end
 end
 

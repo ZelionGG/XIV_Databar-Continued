@@ -193,7 +193,8 @@ function TravelModule:SetHearthColor()
         for i, v in ipairs(self.hearthstones) do
             if IsUsableItem(v) then
                 if C_Container.GetItemCooldown(v) == 0 then
-                    hearthName, _ = GetItemInfo(v)
+                    local name, _ = GetItemInfo(v)
+                    hearthName = name
                     if hearthName ~= nil then
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
@@ -203,7 +204,8 @@ function TravelModule:SetHearthColor()
             end -- if toy/item
             if IsPlayerSpell(v) then
                 if GetSpellCooldown(v) == 0 then
-                    hearthName, _ = GetSpellInfo(v)
+                    local name, _ = GetSpellInfo(v)
+                    hearthName = name
                     hearthActive = true
                     self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
                 end
@@ -244,7 +246,8 @@ function TravelModule:SetPortColor()
         local hearthActive = false
         if (IsUsableItem(v)) then
             if C_Container.GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext", "/cast " .. hearthName)
@@ -253,7 +256,7 @@ function TravelModule:SetPortColor()
         end -- if toy/item
         if IsPlayerSpell(v) then
             if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+                local name, _ = GetSpellInfo(v)
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext", "/cast " .. hearthName)

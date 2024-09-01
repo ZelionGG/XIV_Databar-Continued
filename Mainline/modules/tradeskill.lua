@@ -61,7 +61,8 @@ function TradeskillModule:UpdateProfValues()
   else
     --player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
     self.tradeskillFrame:Show()
-    self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, _, self.firstProf.id, _ = GetProfessionInfo(self.firstProf.idx)
+    local name, defIcon, lvl, maxLvl, _, _, id, _ = GetProfessionInfo(self.firstProf.idx)
+    self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.id = name, defIcon, lvl, maxLvl, id
     self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
     self.firstProfBar:SetValue(self.firstProf.lvl)
   end
@@ -72,7 +73,8 @@ function TradeskillModule:UpdateProfValues()
   else
     --player has two profession, setting second one. show secondProfFrame because it might've been hidden before
     self.secondProfFrame:Show()
-    self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, _, self.secondProf.id, _ = GetProfessionInfo(self.secondProf.idx)
+    local name, defIcon, lvl, maxLvl, _, _, id, _ = GetProfessionInfo(self.secondProf.idx)
+    self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.id = name, defIcon, lvl, maxLvl, id
     self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
     self.secondProfBar:SetValue(self.secondProf.lvl)
   end
@@ -80,15 +82,18 @@ function TradeskillModule:UpdateProfValues()
   --update values for secondary professions if they exist (archaeology / fishing / cooking)
   --update archaeology
   if self.arch.idx then
-    self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, _, _, self.arch.id, _ = GetProfessionInfo(self.arch.idx)
+    local name, defIcon, lvl, maxLvl, _, _, id, _ = GetProfessionInfo(self.arch.idx)
+    self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.id = name, defIcon, lvl, maxLvl, id
   end
   --update fishing
   if self.fish.idx then
-    self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, _, _, self.fish.id, _ = GetProfessionInfo(self.fish.idx)
+    local name, defIcon, lvl, maxLvl, _, _, id, _ = GetProfessionInfo(self.fish.idx)
+    self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.id = name, defIcon, lvl, maxLvl, id
   end
   --update cooking
   if self.cook.idx then
-    self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, _, _, self.cook.id, _ = GetProfessionInfo(self.cook.idx)
+    local name, defIcon, lvl, maxLvl, _, _, id, _ = GetProfessionInfo(self.cook.idx)
+    self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.id = name, defIcon, lvl, maxLvl, id
   end
 end
 

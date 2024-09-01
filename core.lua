@@ -854,7 +854,8 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(info, r, g, b, a)
                     if self.db.profile.color.useTextCC then
-                        r, g, b, _ = self:GetClassColors()
+                        local cr, cg, cb, _ = self:GetClassColors()
+                        r, g, b = cr, cg, cb
                     end
                     XIVBar:SetColor('normal', r, g, b, a)
                 end,
@@ -883,7 +884,8 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(info, r, g, b, a)
                     if self.db.profile.color.useHoverCC then
-                        r, g, b, _ = self:GetClassColors()
+                        local cr, cg, cb, _ = self:GetClassColors()
+                        r, g, b = cr, cg, cb
                     end
                     XIVBar:SetColor('hover', r, g, b, a)
                 end,

@@ -359,7 +359,8 @@ function TravelModule:SetHearthColor()
     for i, v in ipairs(usedHearthstones) do
         if IsUsableItem(v) then
             if GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
@@ -375,7 +376,8 @@ function TravelModule:SetHearthColor()
         end -- if toy/item
         if PlayerHasToy(v) then
             if GetItemCooldown(v) == 0 then
-                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
@@ -452,7 +454,8 @@ function TravelModule:SetPortColor()
 
         if IsUsableItem(v) then
             if GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -462,7 +465,8 @@ function TravelModule:SetPortColor()
         end -- if item
         if PlayerHasToy(v) then
             if GetItemCooldown(v) == 0 then
-                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -1171,7 +1175,8 @@ function TravelModule:RefreshHearthstonesList()
             -- if IsUsableItem(i) then
             --     hearthName, _ = GetItemInfo(i)
             -- elseif PlayerHasToy(i) then
-            _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(i)
+            local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(i)
+            hearthName = name
             -- elseif IsPlayerSpell(i) then
             --     hearthName, _ = GetSpellInfo(i)
             -- end

@@ -707,7 +707,9 @@ function TalentModule:CreateLootSpecPopup()
                 name = L['Current Specialization'];
                 specId = self.currentSpecID
             else
-                _, name, _ = GetSpecializationInfo(i)
+                local _, specName, _ = GetSpecializationInfo(i)
+                name = specName
+                
             end
             local button = CreateFrame('BUTTON', nil, self.lootSpecPopup)
             local buttonText = button:CreateFontString(nil, 'OVERLAY')
@@ -814,9 +816,11 @@ function TalentModule:ShowTooltip()
 
     local name = ''
     if self.currentLootSpecID == 0 then
-        _, name, _ = GetSpecializationInfo(self.currentSpecID)
+        local _, specName, _ = GetSpecializationInfo(self.currentSpecID)
+        name = specName
     else
-        _, name, _ = GetSpecializationInfoByID(self.currentLootSpecID)
+        local _, specName, _ = GetSpecializationInfoByID(self.currentLootSpecID)
+        name = specName
     end
     tooltip:AddLine(L['Current Loot Specialization'], "|cFFFFFFFF" .. name .. "|r")
     tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
