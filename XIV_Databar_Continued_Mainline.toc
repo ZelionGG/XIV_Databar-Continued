@@ -2,7 +2,7 @@
 ## X-Interface: 110002
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
-## Version: 3.0.3
+## Version: 3.1
 ## IconTexture: Interface\Addons\XIV_Databar_Continued\icon.png
 ## AddonCompartmentFunc: XIV_Databar_Continued_OnAddonCompartmentClick
 
