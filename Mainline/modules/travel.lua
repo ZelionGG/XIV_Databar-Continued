@@ -1200,7 +1200,10 @@ end
 function TravelModule:GetDefaultOptions()
     local firstItem = self:FindFirstOption()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
-    return 'travel', {enabled = true}
+    return 'travel', {
+        enabled = true,
+        enableMythicPortals = true,
+    }
 end
 
 function TravelModule:GetConfig()
