@@ -1,0 +1,24 @@
+name: Notify Discord on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  send-discord-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send release info to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          RELEASE_NAME=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_NAME}"
+          RELEASE_BODY=$(jq -r .body < "$GITHUB_EVENT_PATH")
+          [ -z "$RELEASE_BODY" ] && RELEASE_BODY="No description provided."
+
+          PAYLOAD=$(jq -n \
+            --arg content "**New Release: [${RELEASE_NAME}](${RELEASE_URL})**\n\n${RELEASE_BODY}" \
+            '{content: $content}')
+
+          curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" $DISCORD_WEBHOOK_URL
