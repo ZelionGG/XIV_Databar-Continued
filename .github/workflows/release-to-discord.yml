@@ -14,7 +14,7 @@ jobs:
         uses: SethCohen/github-releases-to-discord@v1.13.1
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          color: "16711680"
+          color: "197379"
           username: "XIV_Databar Continued"
           avatar_url: "https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png"
           content: "||@everyone||"
