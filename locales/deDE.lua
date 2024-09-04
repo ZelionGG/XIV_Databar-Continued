@@ -4,8 +4,8 @@ local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
 if not L then return end
 
 L['Modules'] = "Module";
-L['Left-Click'] = "Linksklick";
-L['Right-Click'] = "Rechtsklick";
+L['Left-Click'] = "Links-Klick";
+L['Right-Click'] = "Rechts-Klick";
 L['k'] = true; -- short for 1000
 L['M'] = true; -- short for 1000000
 L['B'] = true; -- short for 1000000000
@@ -23,13 +23,13 @@ L["Miscellaneous"] = "Verschiedenes";
 L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Abstand zwischen Modulen";
-L['Bar Margin'] = true; -- Need Translation
-L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
+L['Bar Margin'] = "Balkenrand";
+L["Leftmost and rightmost margin of the bar modules"] = "Linker und rechter Rand der Balkenmodule";
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
-L['Use ElvUI for tooltips'] = "Verwenden Sie ElvUI für QuickInfos";
+L['Use ElvUI for tooltips'] = "Verwende ElvUI für QuickInfos";
 
 -- Positioning Options
-L['Positioning Options'] = "Positions-Optionen";
+L['Positioning Options'] = "Positions Einstellungen";
 L['Horizontal Position'] = "Horizontale Position";
 L['Bar Width'] = "Leistenbreite";
 L['Left'] = "Links";
@@ -43,7 +43,7 @@ L['Text Style'] = "Schriftstil";
 
 -- Text Colors
 L["Colors"] = "Farben";
-L['Text Colors'] = "Textfarbe";
+L['Text Colors'] = "Textfarben";
 L['Normal'] = "Normal";
 L['Inactive'] = "Inaktiv";
 L["Use Class Color for Text"] = "Benutze Klassenfarben für Texte";
@@ -55,17 +55,17 @@ L['Hover'] = "Mouseover";
 
 L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
-L['Main Menu Icon Right Spacing'] = "Hauptmenü Icon Abstand Rechts";
-L['Icon Spacing'] = "Icon-Abstand";
-L["Hide BNet App Friends"] = true;
+L['Main Menu Icon Right Spacing'] = "Hauptmenü Symbolabstand Rechts";
+L['Icon Spacing'] = "Symbolabstand";
+L["Hide BNet App Friends"] = "BNet App-Freunde verbergen";
 L['Open Guild Page'] = "Öffne Gildenfenster";
 L['No Tag'] = "Keine Markierung";
 L['Whisper BNet'] = "über BNet anflüstern";
 L['Whisper Character'] = "Charakter anflüstern";
 L['Hide Social Text'] = "Social Text verstecken";
-L['Social Text Offset'] = "Social Text versetzen";
+L['Social Text Offset'] = "Social Text Versatz";
 L["GMOTD in Tooltip"] = "Nachricht des Tages im Tooltip";
-L["Modifier for friend invite"] = "Modifier um Freunde einzuladen";
+L["Modifier for friend invite"] = "Modifikator für Freundschaftseinladungen";
 L['Show/Hide Buttons'] = "Zeige/Verstecke Tasten";
 L['Show Menu Button'] = "Zeige Menü Taste";
 L['Show Chat Button'] = "Zeige Chat Taste";
@@ -88,26 +88,26 @@ L['Alliance'] = "Allianz";
 L['Horde'] = true;
 
 L['Durability Warning Threshold'] = "Haltbarkeitswarnschwelle";
-L['Show Item Level'] = "Gegenstandslevel anzeigen";
+L['Show Item Level'] = "Gegenstandsstufe anzeigen";
 L['Show Coordinates'] = "Koordinaten anzeigen";
 
 L['Master Volume'] = "Haupt-Lautstärke";
-L["Volume step"] = "Lautstärken-Schritte";
+L["Volume step"] = "Lautstärken Schritte";
 
-L['Time Format'] = "Uhrzeit-Format";
-L['Use Server Time'] = "Server-Zeit benutzen";
+L['Time Format'] = "Uhrzeit Format";
+L['Use Server Time'] = "Server Zeit benutzen";
 L['New Event!'] = "Neue Veranstaltung!";
 L['Local Time'] = "Lokale Zeit";
-L['Realm Time'] = "Realm-Zeit";
+L['Realm Time'] = "Realm Zeit";
 L['Open Calendar'] = "Kalendar öffnen";
 L['Open Clock'] = "Stoppuhr öffnen";
-L['Hide Event Text'] = "Event-Text verstecken";
+L['Hide Event Text'] = "Event Text verstecken";
 
 L['Travel'] = "Reise";
-L['Port Options'] = "Teleport-Optionen";
+L['Port Options'] = "Teleport Einstellungen";
 L['Ready'] = "Bereit";
-L['Travel Cooldowns'] = "Reise-Abklingzeiten";
-L['Change Port Option'] = "Teleport-Optionen ändern";
+L['Travel Cooldowns'] = "Reise Abklingzeiten";
+L['Change Port Option'] = "Teleport Einstellungen ändern";
 
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
 L['Shorten Gold'] = "Gold abkürzen";
@@ -126,24 +126,24 @@ L['Second Currency'] = "Währung #2";
 L['Third Currency'] = "Währung #3";
 L['Rested'] = "Ausgeruht";
 
-L['Show World Ping'] = "World-Ping anzeigen";
-L['Number of Addons To Show'] = "Maximale Anzahl für Addon-Anzeige";
+L['Show World Ping'] = "Welt-Ping anzeigen";
+L['Number of Addons To Show'] = "Maximale Anzahl für Addon Anzeige";
 L['Addons to Show in Tooltip'] = "Addons die im Tooltip angezeigt werden";
 L['Show All Addons in Tooltip with Shift'] = "Alle Addons im Tooltip anzeigen via Shift";
 L['Memory Usage'] = "Speichernutzung";
-L['Garbage Collect'] = "Speicher säubern"; -- The expression "garbage collecor" only works in english
+L['Garbage Collect'] = "Speicher säubern";
 L['Cleaned'] = "Gesäubert";
 
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
-L['Toggle Profession Frame'] = 'Berufsrahmen anzeigen';
+L['Toggle Profession Frame'] = 'Berufsfenster anzeigen';
 L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
 
 L['Set Specialization'] = "Spezialisierung auswählen";
 L['Set Loadout'] = "Konfiguration auswählen";
-L['Set Loot Specialization'] = "Beute-Spezialisierung auswählen";
+L['Set Loot Specialization'] = "Beute Spezialisierung auswählen";
 L['Current Specialization'] = "Aktuelle Spezialisierung";
-L['Current Loot Specialization'] = "Aktuelle Beute-Spezialisierung";
+L['Current Loot Specialization'] = "Aktuelle Beute Spezialisierung";
 L['Talent Minimum Width'] = "Minimale Breite für Talente";
 L['Open Artifact'] = "Artefakt öffen";
 L['Remaining'] = "Verbleibend";
@@ -151,12 +151,12 @@ L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
 -- Travel (Translation needed)
-L["Mythic+ Portals"] = true;
-L['Show Mythic+ Portals'] = true;
-L['Use Random Hearthstone'] = true;
-L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
-L['Hearthstones Select'] = true;
-L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
+L["Mythic+ Portals"] = "Mythisch+ Portale";
+L['Show Mythic+ Portals'] = "Zeige Mytisch+ Portale";
+L['Use Random Hearthstone'] = "Zufälligen Ruhestein verwenden";
+L['Empty Hearthstones List'] = "Wenn Du eine leere Liste siehst, lade Deine Benutzeroberfläche einige Sekunden nach dem ersten Laden neu (Blizzard lädt Artikelinformationen asynchron, daher ist dies derzeit die einzige Lösung).."
+L['Hearthstones Select'] = "Ruhesteine auswählen";
+L['Hearthstones Select Desc'] = "Wähle aus, welche Ruhesteine verwendet werden sollen (sei vorsichtig, wenn Du mehrere Ruhesteine auswählst, aktiviere ggf. die Option „Ruhesteine auswählen“)";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
@@ -169,7 +169,7 @@ L["Battle for Azeroth"] = true;
 L["Shadowlands"] = true;
 L["Dragonflight"] = true;
 L["The War Within"] = true;
-L["Current season"] = true;
+L["Current season"] = "Aktuelle Season";
 
 -- Changelog
 L["%month%-%day%-%year%"] = true;
