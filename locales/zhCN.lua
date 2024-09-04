@@ -151,6 +151,7 @@ L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
 
 -- Travel (Translation needed)
+L["Mythic+ Portals"] = true;
 L['Show Mythic+ Portals'] = true;
 L['Use Random Hearthstone'] = true;
 L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."

@@ -103,17 +103,24 @@ end
 
 function TradeskillModule:UpdateProfValues()
     -- update profession indexes before anything else or receive a million bugs when (un)learning professions
-    self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx =
-        LibAddonCompat:GetProfessions() -- this is the most important line in the entire fucking module
-
+    if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+        self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx = GetProfessions() -- this is the most important line in the entire fucking module
+    else
+        self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx = LibAddonCompat:GetProfessions()
+    end
     -- if firstProf.idx doesn't exist, the player hasn't learned any profession and thus the tradeskillFrame is hidden
     if not self.firstProf.idx then
         self.tradeskillFrame:Hide()
     else
         -- player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
         self.tradeskillFrame:Show()
-        self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, self.firstProf.offset, self.firstProf
-            .id, _ = LibAddonCompat:GetProfessionInfo(self.firstProf.idx)
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.firstProf.idx)
+            self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset, self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.firstProf.idx)
+            self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset, self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
+        end
         self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
         self.firstProfBar:SetValue(self.firstProf.lvl)
     end
@@ -124,31 +131,57 @@ function TradeskillModule:UpdateProfValues()
     else
         -- player has two profession, setting second one. show secondProfFrame because it might've been hidden before
         self.secondProfFrame:Show()
-        self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, self.secondProf
-            .offset, self.secondProf.id, _ = LibAddonCompat:GetProfessionInfo(self.secondProf.idx)
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.secondProf.idx)
+            self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.secondProf.idx)
+            self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
+        end
         self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
         self.secondProfBar:SetValue(self.secondProf.lvl)
     end
 
     -- update values for secondary professions if they exist (first aid / archaeology / fishing / cooking)
-    -- update archaeology
+    -- update first aid
     if self.first_aid.idx then
-        self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, _, self.first_aid.offset, self.first_aid
-            .id, _ = LibAddonCompat:GetProfessionInfo(self.first_aid.idx)
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.first_aid.idx)
+            self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset, self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.first_aid.idx)
+            self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset, self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
+        end
     end
     -- update archaeology
-    --[[ if self.arch.idx then
-    self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, _, _, self.arch.id, _ = GetProfessionInfo(self.arch.idx)
-  end ]]
+    if self.arch.idx then
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.arch.idx)
+            self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.arch.idx)
+            self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name, defIcon, lvl, maxLvl, offset, id
+        end
+    end
     -- update fishing
     if self.fish.idx then
-        self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, _, self.fish.offset, self.fish.id, _ =
-            LibAddonCompat:GetProfessionInfo(self.fish.idx)
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.fish.idx)
+            self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.fish.idx)
+            self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name, defIcon, lvl, maxLvl, offset, id
+        end
     end
     -- update cooking
     if self.cook.idx then
-        self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, _, self.cook.offset, self.cook.id, _ =
-            LibAddonCompat:GetProfessionInfo(self.cook.idx)
+        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.cook.idx)
+            self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name, defIcon, lvl, maxLvl, offset, id
+        else
+            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.cook.idx)
+            self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name, defIcon, lvl, maxLvl, offset, id
+        end
     end
 end
 
@@ -270,7 +303,10 @@ function TradeskillModule:SetProfScripts(prefix)
             if self[prefix].offset ~= nil then
                 CastSpell(self[prefix].offset + 1, "Spell")
             end
-            -- elseif button == 'RightButton' then ToggleSpellBook(BOOKTYPE_PROFESSION) 
+        elseif button == 'RightButton' then 
+            if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+                ToggleSpellBook(BOOKTYPE_PROFESSION) 
+            end
         end
     end)
 
@@ -362,7 +398,9 @@ function TradeskillModule:ShowTooltip()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Profession Frame'], r, g, b, 1, 1, 1)
-    -- GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Toggle Profession Spellbook'], r, g, b, 1, 1, 1)
+    if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
+        GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Toggle Profession Spellbook'], r, g, b, 1, 1, 1)
+    end
     GameTooltip:Show()
 end
 

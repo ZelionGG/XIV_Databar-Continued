@@ -153,6 +153,7 @@ L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
 
 -- Travel
+L["Mythic+ Portals"] = true;
 L['Show Mythic+ Portals'] = true;
 L['Use Random Hearthstone'] = true;
 L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."

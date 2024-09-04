@@ -64,6 +64,7 @@ function TravelModule:OnInitialize()
     self.optionTextExtra = 4
     self.availableHearthstones = {}
     self.selectedHearthstones = {}
+    self.noMythicTeleport = true
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -359,7 +360,8 @@ function TravelModule:SetHearthColor()
     for i, v in ipairs(usedHearthstones) do
         if IsUsableItem(v) then
             if GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
@@ -375,7 +377,8 @@ function TravelModule:SetHearthColor()
         end -- if toy/item
         if PlayerHasToy(v) then
             if GetItemCooldown(v) == 0 then
-                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
@@ -452,7 +455,8 @@ function TravelModule:SetPortColor()
 
         if IsUsableItem(v) then
             if GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -462,7 +466,8 @@ function TravelModule:SetPortColor()
         end -- if item
         if PlayerHasToy(v) then
             if GetItemCooldown(v) == 0 then
-                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -841,6 +846,7 @@ function TravelModule:CreateMythicPopup()
             local i = 1
             for index, spell in ipairs(mythicData.teleports) do
                 if IsSpellKnown(spell.teleportId) then
+                    self.noMythicTeleport = false
                     newTeleports[i] = {
                         teleportId = spell.teleportId,
                         dungeonId = spell.dungeonId
@@ -1049,7 +1055,9 @@ function TravelModule:Refresh()
 
         self:CreateMythicPopup()
 
-        self.mythicButton:Show()
+        if not self.noMythicTeleport then
+            self.mythicButton:Show()
+        end
     end
 
     local popupPadding = xb.constants.popupPadding
@@ -1081,7 +1089,9 @@ function TravelModule:Refresh()
     end
 
     if (xb.db.profile.enableMythicPortals) then
-        self.mythicButton:Show()
+        if not self.noMythicTeleport then
+            self.mythicButton:Show()
+        end
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
@@ -1171,7 +1181,8 @@ function TravelModule:RefreshHearthstonesList()
             -- if IsUsableItem(i) then
             --     hearthName, _ = GetItemInfo(i)
             -- elseif PlayerHasToy(i) then
-            _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(i)
+            local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(i)
+            hearthName = name
             -- elseif IsPlayerSpell(i) then
             --     hearthName, _ = GetSpellInfo(i)
             -- end
@@ -1189,7 +1200,10 @@ end
 function TravelModule:GetDefaultOptions()
     local firstItem = self:FindFirstOption()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
-    return 'travel', {enabled = true}
+    return 'travel', {
+        enabled = true,
+        enableMythicPortals = true,
+    }
 end
 
 function TravelModule:GetConfig()

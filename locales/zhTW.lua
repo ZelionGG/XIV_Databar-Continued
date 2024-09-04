@@ -154,6 +154,7 @@ L['Available Ranks'] = "神兵武器等級";
 L['Artifact Knowledge'] = "神兵知識等級";
 
 -- Travel
+L["Mythic+ Portals"] = true;
 L['Show Mythic+ Portals'] = true; -- Translation needed
 L['Use Random Hearthstone'] = "使用隨機爐石";
 L['Empty Hearthstones List'] = "如果下方的清單是空的，或是沒有完整顯示出你擁有的爐石，請等幾秒後再重新載入介面 (暴雪使用非同步的方式載入物品資訊，這是目前唯一的解決方法)。"

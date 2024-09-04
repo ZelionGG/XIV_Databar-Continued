@@ -179,7 +179,8 @@ function TravelModule:SetHearthColor()
         for i, v in ipairs(self.hearthstones) do
             if IsUsableItem(v) then
                 if C_Container.GetItemCooldown(v) == 0 then
-                    hearthName, _ = GetItemInfo(v)
+                    local name, _ = GetItemInfo(v)
+                    hearthName = name
                     if hearthName ~= nil then
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
@@ -190,7 +191,8 @@ function TravelModule:SetHearthColor()
             end -- if item
             if PlayerHasToy(v) then
                 if C_Container.GetItemCooldown(v) == 0 then
-                    _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                    local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                    hearthName = name
                     if hearthName ~= nil then
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
@@ -201,7 +203,8 @@ function TravelModule:SetHearthColor()
             end -- if toy
             if IsPlayerSpell(v) then
                 if GetSpellCooldown(v) == 0 then
-                    hearthName, _ = GetSpellInfo(v)
+                    local name, _ = GetSpellInfo(v)
+                    hearthName = name
                     hearthActive = true
                     self.hearthButton:SetAttribute("macrotext",
                                                    "/cast " .. hearthName)
@@ -245,7 +248,8 @@ function TravelModule:SetPortColor()
         local hearthActive = false
         if (IsUsableItem(v)) then
             if C_Container.GetItemCooldown(v) == 0 then
-                hearthName, _ = GetItemInfo(v)
+                local name, _ = GetItemInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -255,7 +259,8 @@ function TravelModule:SetPortColor()
         end -- if toy/item
         if (PlayerHasToy(v)) then
             if C_Container.GetItemCooldown(v) == 0 then
-                _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",
@@ -265,7 +270,8 @@ function TravelModule:SetPortColor()
         end -- if toy/item
         if IsPlayerSpell(v) then
             if GetSpellCooldown(v) == 0 then
-                hearthName, _ = GetSpellInfo(v)
+                local name, _ = GetSpellInfo(v)
+                hearthName = name
                 if hearthName ~= nil then
                     hearthActive = true
                     self.portButton:SetAttribute("macrotext",

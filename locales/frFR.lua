@@ -151,6 +151,7 @@ L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
+L["Mythic+ Portals"] = "Portails Mythique+";
 L['Show Mythic+ Portals'] = "Montrer les portails Mythique+";
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
 L['Empty Hearthstones List'] = "Si vous voyez une liste vide, /reload votre interface afin de recharger les données quelques secondes après le chargement initial (Blizzard charge les informations des objets de manière asynchrone)."
