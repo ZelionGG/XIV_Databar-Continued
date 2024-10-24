@@ -151,8 +151,10 @@ L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
 
 -- Travel (Translation needed)
-L["Mythic+ Portals"] = true;
-L['Show Mythic+ Portals'] = true;
+L['M+ Teleports'] = true;
+L['Only show current season'] = true;
+L["Mythic+ Teleports"] = true;
+L['Show Mythic+ Teleports'] = true;
 L['Use Random Hearthstone'] = true;
 L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
 L['Hearthstones Select'] = true;
