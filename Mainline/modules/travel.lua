@@ -841,25 +841,27 @@ function TravelModule:CreateMythicPopup()
     -- Loop on each mythicTeleports item and check foreach if spell known, if known, add to new table
     local filteredTeleports = {}
     for mythicKey, mythicData in ipairs(mythicTeleports) do
-        if mythicData.teleports then
-            local newTeleports = {}
-            local i = 1
-            for index, spell in ipairs(mythicData.teleports) do
-                if IsSpellKnown(spell.teleportId) then
-                    self.noMythicTeleport = false
-                    newTeleports[i] = {
-                        teleportId = spell.teleportId,
-                        dungeonId = spell.dungeonId
-                    }
-                    i = i + 1
+        if (xb.db.profile.curSeasonOnly and mythicKey == 12) or not xb.db.profile.curSeasonOnly then
+            if mythicData.teleports then
+                local newTeleports = {}
+                local i = 1
+                for index, spell in ipairs(mythicData.teleports) do
+                    if IsSpellKnown(spell.teleportId) then
+                        self.noMythicTeleport = false
+                        newTeleports[i] = {
+                            teleportId = spell.teleportId,
+                            dungeonId = spell.dungeonId
+                        }
+                        i = i + 1
+                    end
                 end
-            end
-            if next(newTeleports) then
-                mythicData.teleports = newTeleports
+                if next(newTeleports) then
+                    mythicData.teleports = newTeleports
+                    table.insert(filteredTeleports, mythicData)
+                end
+            else
                 table.insert(filteredTeleports, mythicData)
             end
-        else
-            table.insert(filteredTeleports, mythicData)
         end
     end
 
@@ -897,15 +899,64 @@ function TravelModule:CreateMythicPopup()
         return button
     end
 
-    UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
-        if (level or 1) == 1 then
-            -- Title
+    if not xb.db.profile.curSeasonOnly then -- If not curSeasonOnly, show a 2 levels dropdown menu
+        UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
+            if (level or 1) == 1 then
+                -- Title
+                local info = UIDropDownMenu_CreateInfo()
+                local r, g, b, _ = unpack(xb:HoverColors())
+                info.text = '[|cFF' .. string.format('%02x', r * 255) ..
+                                string.format('%02x', g * 255) ..
+                                string.format('%02x', b * 255) ..
+                                L['Mythic+ Teleports'] .. '|r]'
+                info.notClickable, info.notCheckable = true, true
+                UIDropDownMenu_AddButton(info)
+
+                -- Separator
+                local separator = UIDropDownMenu_CreateInfo()
+                separator.text = ""
+                separator.disabled = true
+                separator.notClickable = true
+                separator.isTitle = true
+                separator.leftPadding = 10
+                separator.textHeight = 1 -- Makes the separator line thinner
+                separator.notCheckable = true
+                UIDropDownMenu_AddButton(separator, level)
+
+                -- Loop on each mythicTeleports item and check foreach if spell known, if not, don't show anything
+                for mythicKey, mythicData in ipairs(filteredTeleports) do
+                    if mythicData.teleports then
+                        if mythicData.name == L["Current season"] then
+                            UIDropDownMenu_AddButton(separator, level)
+                        end
+
+                        local info = UIDropDownMenu_CreateInfo()
+                        info.text, info.checked = mythicData.name, false
+                        info.menuList, info.hasArrow = mythicData.teleports, true
+                        info.notCheckable = true
+                        info.value = mythicData.teleports
+                        UIDropDownMenu_AddButton(info)
+                    end
+                end
+            else
+                for key, value in ipairs(menuList) do
+                    local spellName = C_Spell.GetSpellName(value.teleportId)
+
+                    local info = UIDropDownMenu_CreateInfo()
+
+                    info.customFrame = CreateTeleportButton(value, spellName)
+                    UIDropDownMenu_AddButton(info, level)
+                end
+            end
+        end, 'MENU')
+    else -- If curSeasonOnly, only show a single-level dropdown menu
+        UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
             local info = UIDropDownMenu_CreateInfo()
             local r, g, b, _ = unpack(xb:HoverColors())
             info.text = '[|cFF' .. string.format('%02x', r * 255) ..
                             string.format('%02x', g * 255) ..
                             string.format('%02x', b * 255) ..
-                            L["Mythic+ Portals"] .. '|r]'
+                            L['Mythic+ Teleports'] .. '|r]'
             info.notClickable, info.notCheckable = true, true
             UIDropDownMenu_AddButton(info)
 
@@ -919,33 +970,19 @@ function TravelModule:CreateMythicPopup()
             separator.textHeight = 1 -- Makes the separator line thinner
             separator.notCheckable = true
             UIDropDownMenu_AddButton(separator, level)
-
-            -- Loop on each mythicTeleports item and check foreach if spell known, if not, don't show anything
+                
             for mythicKey, mythicData in ipairs(filteredTeleports) do
-                if mythicData.teleports then
-                    if mythicData.name == L["Current season"] then
-                        UIDropDownMenu_AddButton(separator, level)
-                    end
+                for key, value in ipairs(mythicData.teleports) do
+                    local spellName = C_Spell.GetSpellName(value.teleportId)
 
                     local info = UIDropDownMenu_CreateInfo()
-                    info.text, info.checked = mythicData.name, false
-                    info.menuList, info.hasArrow = mythicData.teleports, true
-                    info.notCheckable = true
-                    info.value = mythicData.teleports
-                    UIDropDownMenu_AddButton(info)
+
+                    info.customFrame = CreateTeleportButton(value, spellName)
+                    UIDropDownMenu_AddButton(info, level)
                 end
             end
-        else
-            for key, value in ipairs(menuList) do
-                local spellName = C_Spell.GetSpellName(value.teleportId)
-
-                local info = UIDropDownMenu_CreateInfo()
-
-                info.customFrame = CreateTeleportButton(value, spellName)
-                UIDropDownMenu_AddButton(info, level)
-            end
-        end
-    end, 'MENU')
+        end, 'MENU')
+    end
 
     for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
         local button = _G["DropDownList1Button" .. i]
@@ -1037,7 +1074,7 @@ function TravelModule:Refresh()
 
     if (xb.db.profile.enableMythicPortals) then
         self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
-        self.mythicText:SetText('M+ Portals')
+        self.mythicText:SetText(L['M+ Teleports'])
 
         self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
                                       db.general.barPadding, xb:GetHeight())
@@ -1203,6 +1240,8 @@ function TravelModule:GetDefaultOptions()
     return 'travel', {
         enabled = true,
         enableMythicPortals = true,
+        curSeasonOnly = false,
+        randomizeHs = false
     }
 end
 
@@ -1221,7 +1260,7 @@ function TravelModule:GetConfig()
         args = {
             enable = {
                 name = ENABLE,
-                order = 0,
+                order = 10,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.travel.enabled;
@@ -1236,9 +1275,14 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            mythicHeader = {
+                order = 18,
+                name = L['Mythic+ Teleports'],
+                type = 'header',
+            },
             enableMythicPortals = {
-                name = L['Show Mythic+ Portals'],
-                order = 1,
+                name = L['Show Mythic+ Teleports'],
+                order = 20,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.enableMythicPortals;
@@ -1249,9 +1293,27 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            curSeasonOnly = {
+                name = L['Only show current season'],
+                order = 25,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.curSeasonOnly;
+                end,
+                set = function(_, val)
+                    xb.db.profile.curSeasonOnly = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
+            hearthstoneHeader = {
+                order = 28,
+                name = "Hearthstones",
+                type = 'header',
+            },
             randomizeHs = {
                 name = L['Use Random Hearthstone'],
-                order = 2,
+                order = 30,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.randomizeHs;
@@ -1264,11 +1326,11 @@ function TravelModule:GetConfig()
             },
             information = {
                 name = L['Empty Hearthstones List'],
-                order = 3,
+                order = 40,
                 type = "description"
             },
             selectedHearthstones = {
-                order = 4,
+                order = 50,
                 name = L['Hearthstones Select'],
                 desc = L['Hearthstones Select Desc'],
                 type = "multiselect",
