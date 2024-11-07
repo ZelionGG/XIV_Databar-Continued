@@ -707,7 +707,7 @@ function TravelModule:CreateMythicPopup()
                     dungeonId = 1672 -- Freehold
                 },
                 [3] = {
-                    teleportId = 445418, -- Siege of Boralus Teleport
+                    teleportId = 464256, -- Siege of Boralus Teleport
                     dungeonId = 1700 -- Siege of Boralus
                 },
                 [4] = {
