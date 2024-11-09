@@ -151,8 +151,10 @@ L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
-L["Mythic+ Portals"] = "Portails Mythique+";
-L['Show Mythic+ Portals'] = "Montrer les portails Mythique+";
+L['M+ Teleports'] = "Téléportations M+";
+L['Only show current season'] = "N'afficher que les téléportations de la saison courante.";
+L["Mythic+ Teleports"] = "Téléportations Mythique+";
+L['Show Mythic+ Teleports'] = "Montrer les téléportations Mythique+";
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
 L['Empty Hearthstones List'] = "Si vous voyez une liste vide, /reload votre interface afin de recharger les données quelques secondes après le chargement initial (Blizzard charge les informations des objets de manière asynchrone)."
 L['Hearthstones Select'] = "Sélection des pierres de foyers";

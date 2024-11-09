@@ -151,12 +151,9 @@ L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
 -- Travel (Translation needed)
-L["Mythic+ Portals"] = "Mythisch+ Portale";
-L['Show Mythic+ Portals'] = "Zeige Mytisch+ Portale";
-L['Use Random Hearthstone'] = "Zufälligen Ruhestein verwenden";
-L['Empty Hearthstones List'] = "Wenn Du eine leere Liste siehst, lade Deine Benutzeroberfläche einige Sekunden nach dem ersten Laden neu (Blizzard lädt Artikelinformationen asynchron, daher ist dies derzeit die einzige Lösung).."
-L['Hearthstones Select'] = "Ruhesteine auswählen";
-L['Hearthstones Select Desc'] = "Wähle aus, welche Ruhesteine verwendet werden sollen (sei vorsichtig, wenn Du mehrere Ruhesteine auswählst, aktiviere ggf. die Option „Ruhesteine auswählen“)";
+L['M+ Teleports'] = true;
+L['Only show current season'] = true;
+L["Mythic+ Teleports"] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
