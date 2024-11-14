@@ -1,23 +1,25 @@
 # XIV_Databar Continued
 
-## [3.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.1) (2024-09-03)
+## [3.2](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.2) (2024-11-14)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.0.3...v3.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.1...v3.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Retail :_
 
-- New Mythic+ Portals functionality in the Travel module, allowing you to have fast access to your known Mythic+ Portals and to cast that teleport.
-- Travel module fix (Acherus, Dreamgrove, ...) for Retail's API changes in 11.0.2.
+- Update for Retail 11.0.5.
+- [Mythic+ Teleports] fix to Siege of Boralus Teleport ID.
+- Disabled the coordinates functionality in instances in the [Armor] module.
+- [Mythic+ Portals] global renaming to [Mythic+ Teleports] in the [Travel] module.
+- Added options in the [Mythic+ Teleports] functionality to allow showing only the current season dungeons.
 
 ### _Cataclysm Classic :_
 
-- Added Archaeology in the Tradeskill module tooltip.
-- Added back the Right Click functionality in the Tradeskill module to make it possible to access the professions frame.
+- Update for Cataclysm Classic 4.4.1.
 
 ### _Classic SoD :_
 
-- Tradeskill module fix.
+- Update for Classic SOD 1.15.4.
 
 ### _Global :_
 
-- Code refactoring to fix underscores reassignments causing erros with some native Blizzard commands in XIV Databr Continued.
+- German locales updates and additions.
