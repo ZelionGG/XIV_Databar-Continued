@@ -1078,7 +1078,7 @@ function TravelModule:Refresh()
 
         self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
                                       db.general.barPadding, xb:GetHeight())
-        self.mythicButton:SetPoint("LEFT", -(db.general.barPadding), 0)
+        self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
 
         self.mythicText:SetPoint("RIGHT")
 
