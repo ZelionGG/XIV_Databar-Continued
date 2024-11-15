@@ -170,7 +170,14 @@ L["Current season"] = "Aktuelle Season";
 
 -- Profile Import/Export
 L["Profile Sharing"] = true;
+
+L["Invalid import string"] = true;
+L["Failed to decode import string"] = true;
+L["Failed to decompress import string"] = true;
+L["Failed to deserialize import string"] = true;
+L["Invalid profile format"] = true;
 L["Profile imported successfully as"] = true;
+
 L["Copy the export string below:"] = true;
 L["Paste the import string below:"] = true;
 L["Import or export your profiles to share them with other players."] = true;

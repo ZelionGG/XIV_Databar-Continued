@@ -342,31 +342,31 @@ function XIVBar:OnInitialize()
 
     function XIVBar:ImportProfile(encoded)
         if not encoded or encoded == "" then
-            print("|cffff0000XIV Databar Continued:|r Invalid import string")
+            print("|cffff0000XIV Databar Continued:|r " .. L["Invalid import string"])
             return false
         end
 
         local decoded = LibStub:GetLibrary("LibDeflate"):DecodeForPrint(encoded)
         if not decoded then
-            print("|cffff0000XIV Databar Continued:|r Failed to decode import string")
+            print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decode import string"])
             return false
         end
 
         local decompressed = LibStub:GetLibrary("LibDeflate"):DecompressDeflate(decoded)
         if not decompressed then
-            print("|cffff0000XIV Databar Continued:|r Failed to decompress import string")
+            print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decompress import string"])
             return false
         end
 
         local success, imported = LibStub:GetLibrary("AceSerializer-3.0"):Deserialize(decompressed)
         if not success then
-            print("|cffff0000XIV Databar Continued:|r Failed to deserialize import string")
+            print("|cffff0000XIV Databar Continued:|r " .. L["Failed to deserialize import string"])
             return false
         end
 
         -- Validate the imported data
         if type(imported) ~= "table" or type(imported.profile) ~= "table" or type(imported.meta) ~= "table" then
-            print("|cffff0000XIV Databar Continued:|r Invalid profile format")
+            print("|cffff0000XIV Databar Continued:|r " .. L["Invalid profile format"])
             return false
         end
 
