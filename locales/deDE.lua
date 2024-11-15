@@ -109,6 +109,9 @@ L['Ready'] = "Bereit";
 L['Travel Cooldowns'] = "Reise Abklingzeiten";
 L['Change Port Option'] = "Teleport Einstellungen ändern";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
 L['Shorten Gold'] = "Gold abkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";

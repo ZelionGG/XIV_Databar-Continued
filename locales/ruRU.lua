@@ -109,6 +109,9 @@ L['Ready'] = "Готово";
 L['Travel Cooldowns'] = "Способности для перемещения";
 L['Change Port Option'] = "Изменить назначение телепорта";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "Всегда показывать серебро и медь";
 L['Shorten Gold'] = "Сокращать число золота";
 L['Toggle Bags'] = "Переключить видимость сумок";

@@ -109,6 +109,9 @@ L['Ready'] = "Prêt";
 L['Travel Cooldowns'] = "Temps de recharge des voyages";
 L['Change Port Option'] = "Option de changement de la téléportation";
 
+L["Registered characters"] = "Personnages enregistrés";
+L['Show Free Bag Space'] = "Montrer l'espace libre dans les sacs";
+L['Show Other Realms'] = "Montrer les autres royaumes";
 L['Always Show Silver and Copper'] = "Toujours montrer l'argent et le cuivre";
 L['Shorten Gold'] = "Raccourcir le montant d'or";
 L['Toggle Bags'] = "Ouvrir/Fermer les sacs";

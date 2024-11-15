@@ -110,6 +110,9 @@ L['Ready'] = true;
 L['Travel Cooldowns'] = true;
 L['Change Port Option'] = true;
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = true;
 L['Shorten Gold'] = true;
 L['Toggle Bags'] = true;

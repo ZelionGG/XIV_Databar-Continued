@@ -113,6 +113,9 @@ L['Ready'] = "完成";
 L['Travel Cooldowns'] = "旅行傳送冷卻";
 L['Change Port Option'] = "變更傳送選項";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "總是顯示銀和銅";
 L['Shorten Gold'] = "金額縮寫";
 L['Toggle Bags'] = "打開/關閉背包";
