@@ -175,7 +175,7 @@ L["Current season"] = "Saison courante";
 
 -- Profile Import/Export
 L["Profile Sharing"] = "Partage de profil";
-L["Profile imported successfully as"] = "Profil importé avec succès";
+L["Profile imported successfully as"] = "Profil importé avec succès sous le nom";
 L["Copy the export string below:"] = "Copier la chaîne d'export ci-dessous:";
 L["Paste the import string below:"] = "Coller la chaîne d'import ci-dessous:";
 L["Import or export your profiles to share them with other players."] = "Importez ou exportez vos profils pour les partager avec d'autres joueurs.";
