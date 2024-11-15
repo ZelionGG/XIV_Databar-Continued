@@ -72,19 +72,32 @@ function GoldModule:GetName()
 end
 
 function GoldModule:OnInitialize()
-    if not xb.db.factionrealm[xb.constants.playerName] then
-        xb.db.factionrealm[xb.constants.playerName] = {
+    local fullCharName = xb.constants.playerName .. "-" .. xb.constants.playerRealm
+    if not xb.db.global.characters[fullCharName] then
+        xb.db.global.characters[fullCharName] = {
             currentMoney = 0,
             sessionMoney = 0,
-            dailyMoney = 0
+            dailyMoney = 0,
+            faction = select(1, UnitFactionGroup("player")),
+            class = select(2, UnitClass("player")),
+            realm = xb.constants.playerRealm
         }
     else
-        if not xb.db.factionrealm[xb.constants.playerName].dailyMoney then
-            xb.db.factionrealm[xb.constants.playerName].dailyMoney = 0
+        if not xb.db.global.characters[fullCharName].dailyMoney then
+            xb.db.global.characters[fullCharName].dailyMoney = 0
+        end
+        if not xb.db.global.characters[fullCharName].faction then
+            xb.db.global.characters[fullCharName].faction = select(1, UnitFactionGroup("player"))
+        end
+        if not xb.db.global.characters[fullCharName].class then
+            xb.db.global.characters[fullCharName].class = select(2, UnitClass("player"))
+        end
+        if not xb.db.global.characters[fullCharName].realm then
+            xb.db.global.characters[fullCharName].realm = xb.constants.playerRealm
         end
     end
 
-    local playerData = xb.db.factionrealm[xb.constants.playerName]
+    local playerData = xb.db.global.characters[fullCharName]
 
     local curDate = C_DateAndTime.GetCurrentCalendarTime()
     local today = ConvertDateToNumber(curDate.month, curDate.monthDay, curDate.year)
@@ -97,10 +110,6 @@ function GoldModule:OnInitialize()
     else
         playerData.lastLoginDate = today
     end
-
-    if not playerData.class then
-        playerData.class = select(2, UnitClass("player"))
-    end
 end
 
 function GoldModule:OnEnable()
@@ -110,8 +119,9 @@ function GoldModule:OnEnable()
     end
     self.goldFrame:Show()
 
-    xb.db.factionrealm[xb.constants.playerName].sessionMoney = 0
-    xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
+    local fullCharName = xb.constants.playerName .. "-" .. xb.constants.playerRealm
+    xb.db.global.characters[fullCharName].sessionMoney = 0
+    xb.db.global.characters[fullCharName].currentMoney = GetMoney()
 
     self:CreateFrames()
     self:RegisterFrameEvents()
@@ -216,34 +226,87 @@ function GoldModule:RegisterFrameEvents()
 
         GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 6)
         local r, g, b, _ = unpack(xb:HoverColors())
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. BONUS_ROLL_REWARD_MONEY .. "|cFFFFFFFF - |r" ..
-                                xb.constants.playerFactionLocal .. " " .. xb.constants.playerRealm .. "|cFFFFFFFF]|r",
+        GameTooltip:AddLine("|cFFFFFFFF[|r" .. BONUS_ROLL_REWARD_MONEY .. "|cFFFFFFFF]|r",
             r, g, b)
         if not xb.db.profile.modules.gold.showSmallCoins then
             GameTooltip:AddLine(L["Gold rounded values"], 1, 1, 1)
         end
         GameTooltip:AddLine(" ")
 
+        local fullCharName = xb.constants.playerName .. "-" .. xb.constants.playerRealm
         GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(
-            math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney), true), r, g, b, 1, 1, 1)
+            math.abs(xb.db.global.characters[fullCharName].sessionMoney), true), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(
-            math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney), true), r, g, b, 1, 1, 1)
+            math.abs(xb.db.global.characters[fullCharName].dailyMoney), true), r, g, b, 1, 1, 1)
         GameTooltip:AddLine(" ")
 
-        local totalGold = 0
-        for charName, goldData in pairs(xb.db.factionrealm) do
-            local charClass = xb.db.factionrealm[charName].class
-            local cc_r, cc_g, cc_b = 1, 1, 1
-            if charClass then
-                cc_r = RAID_CLASS_COLORS[charClass].r
-                cc_g = RAID_CLASS_COLORS[charClass].g
-                cc_b = RAID_CLASS_COLORS[charClass].b
+        -- Sort characters by realm
+        local realmCharacters = {}
+        local sortedRealms = {}
+        for charName, goldData in pairs(xb.db.global.characters) do
+            local realm = goldData.realm or "Unknown Realm"
+            realmCharacters[realm] = realmCharacters[realm] or {}
+            realmCharacters[realm][charName] = goldData
+            -- Add realm to sorted list if not already present
+            local found = false
+            for _, existingRealm in ipairs(sortedRealms) do
+                if existingRealm == realm then
+                    found = true
+                    break
+                end
             end
-            GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), cc_r, cc_g, cc_b, 1, 1, 1)
-            totalGold = totalGold + goldData.currentMoney
+            if not found then
+                table.insert(sortedRealms, realm)
+            end
         end
 
-        GameTooltip:AddLine(" ")
+        -- Sort realms alphabetically
+        table.sort(sortedRealms)
+
+        -- Move current realm to the top if it exists
+        local currentRealm = xb.constants.playerRealm
+        for i, realm in ipairs(sortedRealms) do
+            if realm == currentRealm then
+                table.remove(sortedRealms, i)
+                table.insert(sortedRealms, 1, realm)
+                break
+            end
+        end
+
+        local totalGold = 0
+        -- Display characters grouped by realm
+        for _, realm in ipairs(sortedRealms) do
+            -- Skip other realms if showOtherRealms is disabled
+            if xb.db.profile.modules.gold.showOtherRealms or realm == currentRealm then
+                -- Calculate realm total
+                local realmTotal = 0
+                for _, goldData in pairs(realmCharacters[realm]) do
+                    realmTotal = realmTotal + goldData.currentMoney
+                end
+                
+                GameTooltip:AddDoubleLine("|cff82c5ff" .. realm .. "|r", moneyWithTexture(realmTotal), nil, nil, nil, 1, 1, 1)
+                
+                for charName, goldData in pairs(realmCharacters[realm]) do
+                    local charClass = goldData.class
+                    local cc_r, cc_g, cc_b = 1, 1, 1
+                    if charClass then
+                        cc_r = RAID_CLASS_COLORS[charClass].r
+                        cc_g = RAID_CLASS_COLORS[charClass].g
+                        cc_b = RAID_CLASS_COLORS[charClass].b
+                    end
+                    local factionIcon = ""
+                    if goldData.faction then
+                        factionIcon = goldData.faction == "Alliance" and "|TInterface\\FriendsFrame\\PlusManz-Alliance:16|t " or "|TInterface\\FriendsFrame\\PlusManz-Horde:16|t "
+                    end
+                    -- Extract just the character name part before any hyphens
+                    local displayName = charName:match("^([^-]+)")
+                    GameTooltip:AddDoubleLine(factionIcon .. displayName, moneyWithTexture(goldData.currentMoney), cc_r, cc_g, cc_b, 1, 1, 1)
+                    totalGold = totalGold + goldData.currentMoney
+                end
+                GameTooltip:AddLine(" ")  -- Add space between realms
+            end
+        end
+
         GameTooltip:AddDoubleLine(TOTAL, GoldModule:FormatCoinText(totalGold), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Bags'], r, g, b, 1, 1, 1)
         GameTooltip:Show()
@@ -280,7 +343,8 @@ function GoldModule:RegisterFrameEvents()
 end
 
 function GoldModule:PLAYER_MONEY()
-    local gdb = xb.db.factionrealm[xb.constants.playerName]
+    local fullCharName = xb.constants.playerName .. "-" .. xb.constants.playerRealm
+    local gdb = xb.db.global.characters[fullCharName]
     local curMoney = gdb.currentMoney
     local tmpMoney = GetMoney()
     local moneyDiff = tmpMoney - curMoney
@@ -324,7 +388,7 @@ end
 function listAllCharactersByFactionRealm()
     local optTable = {
         header = {
-            name = "|cff82c5ff" .. xb.constants.playerFactionLocal .. " " .. xb.constants.playerRealm .. "|r",
+            name = "|cff82c5ff" .. L["Characters"] .. "|r",
             type = "header",
             order = 0
         },
@@ -335,20 +399,72 @@ function listAllCharactersByFactionRealm()
         }
     }
 
-    for k, v in pairs(xb.db.factionrealm) do
-        optTable[k] = {
-            name = k,
-            width = "full",
-            type = "toggle",
-            get = function()
-                return xb.db.factionrealm[k] ~= nil;
-            end,
-            set = function(_, val)
-                if not val and xb.db.factionrealm[k] ~= nil then
-                    xb.db.factionrealm[k] = nil;
-                end
+    -- Sort characters by realm
+    local realmCharacters = {}
+    local sortedRealms = {}
+    for charName, charData in pairs(xb.db.global.characters) do
+        local realm = charData.realm or "Unknown Realm"
+        realmCharacters[realm] = realmCharacters[realm] or {}
+        realmCharacters[realm][charName] = charData
+        -- Add realm to sorted list if not already present
+        local found = false
+        for _, existingRealm in ipairs(sortedRealms) do
+            if existingRealm == realm then
+                found = true
+                break
             end
+        end
+        if not found then
+            table.insert(sortedRealms, realm)
+        end
+    end
+
+    -- Sort realms alphabetically
+    table.sort(sortedRealms)
+
+    -- Move current realm to the top if it exists
+    local currentRealm = xb.constants.playerRealm
+    for i, realm in ipairs(sortedRealms) do
+        if realm == currentRealm then
+            table.remove(sortedRealms, i)
+            table.insert(sortedRealms, 1, realm)
+            break
+        end
+    end
+
+    local order = 1
+    -- Create realm headers and character entries
+    for _, realm in ipairs(sortedRealms) do
+        -- Add realm header
+        optTable["header_"..realm] = {
+            name = "|cff82c5ff" .. realm .. "|r",
+            type = "header",
+            order = order
         }
+        order = order + 1
+
+        -- Add characters for this realm
+        for charName, charData in pairs(realmCharacters[realm]) do
+            local factionText = charData.faction or "Unknown"
+            local classColor = charData.class and RAID_CLASS_COLORS[charData.class].colorStr or "ffffffff"
+            -- Extract just the character name part before any hyphens
+            local displayName = charName:match("^([^-]+)")
+            optTable[charName] = {
+                name = displayName .. " (|c" .. classColor .. factionText .. "|r)",
+                width = "full",
+                type = "toggle",
+                order = order,
+                get = function()
+                    return xb.db.global.characters[charName] ~= nil;
+                end,
+                set = function(_, val)
+                    if not val and xb.db.global.characters[charName] ~= nil then
+                        xb.db.global.characters[charName] = nil;
+                    end
+                end
+            }
+            order = order + 1
+        end
     end
     return optTable;
 end
@@ -358,7 +474,8 @@ function GoldModule:GetDefaultOptions()
         enabled = true,
         showSmallCoins = false,
         showFreeBagSpace = true,
-        shortThousands = false
+        shortThousands = false,
+        showOtherRealms = true
     }
 end
 
@@ -417,6 +534,18 @@ function GoldModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.gold.shortThousands = val;
+                    self:Refresh();
+                end
+            },
+            showOtherRealms = {
+                name = L['Show Other Realms'],
+                order = 2,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.gold.showOtherRealms;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.gold.showOtherRealms = val;
                     self:Refresh();
                 end
             },

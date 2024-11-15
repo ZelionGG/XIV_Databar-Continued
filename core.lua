@@ -62,6 +62,9 @@ XIVBar.defaults = {
         },
         text = {fontSize = 12, smallFontSize = 11, font = 'Homizio Bold'},
         modules = {}
+    },
+    global = {
+        characters = {}
     }
 };
 
