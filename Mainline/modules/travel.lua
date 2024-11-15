@@ -236,7 +236,7 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:SetScript('OnEnter', function()
         self:SetHearthColor()
         if InCombatLockdown() then return end
-        self:ShowHearthTooltip()
+        self:ShowTooltip()
     end)
 
     self.hearthButton:SetScript('OnLeave', function()
@@ -291,7 +291,7 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:SetScript('OnEnter', function()
         self:SetHearthColor()
         if InCombatLockdown() then return end
-        self:ShowHearthTooltip()
+        self:ShowTooltip()
     end)
 
     self.hearthButton:SetScript('OnLeave', function()
@@ -1261,35 +1261,6 @@ function TravelModule:ShowTooltip()
             end)
         end
     end
-end
-
-function TravelModule:ShowHearthTooltip()
-    GameTooltip:SetOwner(self.hearthButton, 'ANCHOR_' .. xb.miniTextPosition)
-    GameTooltip:ClearLines()
-    local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Hearthstone'] .. "|cFFFFFFFF]|r", r, g, b)
-    
-    -- Show cooldowns for all selected hearthstones
-    for itemId, enabled in pairs(xb.db.profile.selectedHearthstones) do
-        if enabled and IsUsableItem(itemId) then
-            local itemName = GetItemInfo(itemId)
-            if itemName then
-                local startTime, cd = GetItemCooldown(itemId)
-                if startTime and cd then
-                    local remainingCooldown = (startTime + cd - GetTime())
-                    local cdString = self:FormatCooldown(remainingCooldown)
-                    GameTooltip:AddDoubleLine(itemName, cdString, r, g, b, 1, 1, 1)
-                end
-            end
-        end
-    end
-    
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Use Hearthstone'], r, g, b, 1, 1, 1)
-    if xb.db.profile.randomizeHs then
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Randomize Hearthstone'], r, g, b, 1, 1, 1)
-    end
-    GameTooltip:Show()
 end
 
 function TravelModule:FindFirstOption()
