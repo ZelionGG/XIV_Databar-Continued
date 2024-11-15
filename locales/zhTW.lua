@@ -210,6 +210,18 @@ L["Blizzard Arcade Collection"] = "暴雪遊樂場典藏系列"
 L["Crash Bandicoot 4"] = "袋狼大進擊4"
 L["Hide Friends Playing Other Games"] = "隱藏其他遊戲好友"; -- used for the friend list function I added myself
 
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+L["Profile imported successfully as"] = true;
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
+
 -- Changelog
 L["%month%-%day%-%year%"] = "%year%年%month%月%day%日"
 L["Version"] = "版本"

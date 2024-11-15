@@ -173,6 +173,18 @@ L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = "Saison courante";
 
+-- Profile Import/Export
+L["Profile Sharing"] = "Partage de profil";
+L["Profile imported successfully as"] = "Profil importé avec succès";
+L["Copy the export string below:"] = "Copier la chaîne d'export ci-dessous:";
+L["Paste the import string below:"] = "Coller la chaîne d'import ci-dessous:";
+L["Import or export your profiles to share them with other players."] = "Importez ou exportez vos profils pour les partager avec d'autres joueurs.";
+L["Profile Import/Export"] = "Import/Export de profil";
+L["Export Profile"] = "Exporter le profil";
+L["Export your current profile settings"] = "Exporter les paramètres du profil actuel";
+L["Import Profile"] = "Importer un profil";
+L["Import a profile from another player"] = "Importer un profil d'un autre joueur";
+
 -- Changelog
 L["%month%-%day%-%year%"] = "%month%-%day%-%year%";
 L["Version"] = true;

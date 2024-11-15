@@ -168,6 +168,18 @@ L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = "Aktuelle Season";
 
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+L["Profile imported successfully as"] = true;
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
+
 -- Changelog
 L["%month%-%day%-%year%"] = true;
 L["Version"] = true;

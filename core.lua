@@ -87,7 +87,7 @@ function XIVBar:RGBToHex(r, g, b, header, ending)
 end
 
 function XIVBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, true)
+    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, "Default")
     self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold',
                       self.constants.mediaPath .. "homizio_bold.ttf")
     self.frames = {}
@@ -99,26 +99,79 @@ function XIVBar:OnInitialize()
         handler = XIVBar,
         type = 'group',
         args = {
-            general = {
-                name = GENERAL_LABEL,
-                type = "group",
-                args = {general = self:GetGeneralOptions()}
-            }, -- general
-            modules = {name = L['Modules'], type = "group", args = {}}, -- modules
-            changelog = {
-                type = "group",
-                childGroups = "select",
-                name = L["Changelog"],
-                args = {}
-            }
+            general = self:GetGeneralOptions()
         }
     }
 
+    local moduleOptions = {
+        name = L['Modules'],
+        type = "group",
+        args = {}
+    }
+
+    local changelogOptions = {
+        type = "group",
+        childGroups = "select",
+        name = L["Changelog"],
+        args = {}
+    }
+
+    local profileSharingOptions = {
+        name = L["Profile Sharing"],
+        type = "group",
+        args = {
+            header = {
+                order = 1,
+                type = "header",
+                name = L["Profile Import/Export"],
+            },
+            desc = {
+                order = 2,
+                type = "description",
+                name = L["Import or export your profiles to share them with other players."],
+                fontSize = "medium",
+            },
+            export = {
+                order = 3,
+                type = "execute",
+                name = L["Export Profile"],
+                desc = L["Export your current profile settings"],
+                func = function()
+                    local exportString = XIVBar:ExportProfile()
+                    if exportString then
+                        local dialog = StaticPopup_Show("XIVBAR_EXPORT_PROFILE")
+                        if dialog then
+                            dialog.editBox:SetText(exportString)
+                            dialog.editBox:HighlightText()
+                        end
+                    end
+                end,
+            },
+            import = {
+                order = 4,
+                type = "execute",
+                name = L["Import Profile"],
+                desc = L["Import a profile from another player"],
+                func = function()
+                    StaticPopup_Show("XIVBAR_IMPORT_PROFILE")
+                end,
+            },
+        }
+    }
+
+    for name, module in self:IterateModules() do
+        if module['GetConfig'] ~= nil then
+            moduleOptions.args[name] = module:GetConfig()
+        end
+        if module['GetDefaultOptions'] ~= nil then
+            local oName, oTable = module:GetDefaultOptions()
+            self.defaults.profile.modules[oName] = oTable
+        end
+    end
+
     local function orange(string)
         if type(string) ~= "string" then string = tostring(string) end
-
-        string = XIVBar:CreateColorString(string,
-                                          {r = 0.859, g = 0.388, b = 0.203})
+        string = XIVBar:CreateColorString(string, {r = 0.859, g = 0.388, b = 0.203})
         return string
     end
 
@@ -138,7 +191,7 @@ function XIVBar:OnInitialize()
             dateString = gsub(dateString, "%%day%%", dateTable[3])
         end
 
-        options.args.changelog.args[tostring(version)] = {
+        changelogOptions.args[tostring(version)] = {
             order = 10000 - version,
             name = versionString,
             type = "group",
@@ -153,7 +206,7 @@ function XIVBar:OnInitialize()
             }
         }
 
-        local page = options.args.changelog.args[tostring(version)].args
+        local page = changelogOptions.args[tostring(version)].args
 
         -- Checking localized "Important" category
         local important_localized = {}
@@ -246,31 +299,303 @@ function XIVBar:OnInitialize()
         end
     end
 
-    for name, module in self:IterateModules() do
-        if module['GetConfig'] ~= nil then
-            options.args.modules.args[name] = module:GetConfig()
-        end
-        if module['GetDefaultOptions'] ~= nil then
-            local oName, oTable = module:GetDefaultOptions()
-            self.defaults.profile.modules[oName] = oTable
-        end
-    end
-
     self.db:RegisterDefaults(self.defaults)
 
-    AceConfig:RegisterOptionsTable(AddOnName, options)
-    AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued", nil, "general")
-    AceConfigDialog:AddToBlizOptions(AddOnName, L['Modules'], "XIV Bar Continued", "modules")
-    AceConfigDialog:AddToBlizOptions(AddOnName, L['Changelog'], "XIV Bar Continued", "changelog")
+    -- Get profile options
+    local profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 
-    options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    AceConfigDialog:AddToBlizOptions(AddOnName, 'Profiles', "XIV Bar Continued", "profiles")
+    -- Register all options tables
+    AceConfig:RegisterOptionsTable(AddOnName, options)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_Modules", moduleOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_Changelog", changelogOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_ProfileSharing", profileSharingOptions)
+
+    -- Add to Blizzard options
+    AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L['Modules'], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L['Changelog'], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ProfileSharing", 'Profile Sharing', "XIV Bar Continued")
 
     self.timerRefresh = false
 
     self:RegisterChatCommand('xivc', 'ToggleConfig')
     self:RegisterChatCommand('xivbar', 'ToggleConfig')
     self:RegisterChatCommand('xbc', 'ToggleConfig')
+
+    -- Export and Import Profile Functions
+    function XIVBar:ExportProfile()
+        local currentProfile = self.db.profile
+        local exportData = {
+            profile = currentProfile,
+            meta = {
+                character = self.constants.playerName,
+                realm = self.constants.playerRealm,
+                exportTime = time()
+            }
+        }
+        local serialized = LibStub:GetLibrary("AceSerializer-3.0"):Serialize(exportData)
+        local encoded = LibStub:GetLibrary("LibDeflate"):EncodeForPrint(LibStub:GetLibrary("LibDeflate"):CompressDeflate(serialized))
+        return encoded
+    end
+
+    function XIVBar:ImportProfile(encoded)
+        if not encoded or encoded == "" then
+            print("|cffff0000XIV Databar Continued:|r Invalid import string")
+            return false
+        end
+
+        local decoded = LibStub:GetLibrary("LibDeflate"):DecodeForPrint(encoded)
+        if not decoded then
+            print("|cffff0000XIV Databar Continued:|r Failed to decode import string")
+            return false
+        end
+
+        local decompressed = LibStub:GetLibrary("LibDeflate"):DecompressDeflate(decoded)
+        if not decompressed then
+            print("|cffff0000XIV Databar Continued:|r Failed to decompress import string")
+            return false
+        end
+
+        local success, imported = LibStub:GetLibrary("AceSerializer-3.0"):Deserialize(decompressed)
+        if not success then
+            print("|cffff0000XIV Databar Continued:|r Failed to deserialize import string")
+            return false
+        end
+
+        -- Validate the imported data
+        if type(imported) ~= "table" or type(imported.profile) ~= "table" or type(imported.meta) ~= "table" then
+            print("|cffff0000XIV Databar Continued:|r Invalid profile format")
+            return false
+        end
+
+        -- Create a profile name based on the source character
+        local profileName = imported.meta.character
+        if imported.meta.realm and imported.meta.realm ~= self.constants.playerRealm then
+            profileName = profileName .. " - " .. imported.meta.realm
+        end
+
+        -- Add a number if profile already exists
+        local baseProfileName = profileName
+        local count = 1
+        while self.db.profiles[profileName] do
+            profileName = baseProfileName .. " " .. count
+            count = count + 1
+        end
+
+        -- Create new profile and import settings
+        self.db:SetProfile(profileName)
+        for k, v in pairs(imported.profile) do
+            if k ~= "profileKeys" then -- Skip profileKeys to avoid conflicts
+                self.db.profile[k] = v
+            end
+        end
+
+        self:Refresh()
+        print("|cff00ff00XIV Databar Continued:|r " .. L["Profile imported successfully as"] .. " '" .. profileName .. "'")
+        return true
+    end
+
+    -- Add export/import options to the general options
+    function XIVBar:GetGeneralOptions()
+        return {
+            name = GENERAL_LABEL,
+            type = "group",
+            inline = true,
+            args = {
+                positioning = self:GetPositioningOptions(),
+                text = self:GetTextOptions(),
+                textColors = self:GetTextColorOptions()
+            }
+        }
+    end
+end
+
+StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
+    text = L["Copy the export string below:"],
+    button1 = CLOSE,
+    hasEditBox = true,
+    editBoxWidth = 350,
+    maxLetters = 0,
+    OnShow = function(self)
+        self.editBox:SetAutoFocus(true)
+        self.editBox:SetJustifyH("LEFT")
+        self.editBox:SetWidth(350)
+    end,
+    EditBoxOnEscapePressed = function(self)
+        self:GetParent():Hide()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
+    text = L["Paste the import string below:"],
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    hasEditBox = true,
+    editBoxWidth = 350,
+    maxLetters = 0,
+    OnShow = function(self)
+        self.editBox:SetAutoFocus(true)
+        self.editBox:SetJustifyH("LEFT")
+        self.editBox:SetWidth(350)
+    end,
+    OnAccept = function(self)
+        local importString = self.editBox:GetText()
+        XIVBar:ImportProfile(importString)
+    end,
+    EditBoxOnEscapePressed = function(self)
+        self:GetParent():Hide()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+function XIVBar:GetPositioningOptions()
+    return {
+        name = L["Positioning"],
+        type = "group",
+        order = 1,
+        inline = true,
+        args = {
+            barLocation = {
+                name = L['Bar Position'],
+                type = "select",
+                order = 2,
+                width = "full",
+                values = {TOP = L['Top'], BOTTOM = L['Bottom']},
+                style = "dropdown",
+                get = function()
+                    return self.db.profile.general.barPosition;
+                end,
+                set = function(info, value)
+                    self.db.profile.general.barPosition = value;
+                    self:Refresh();
+                end
+            },
+            flightHide = {
+                name = "Hide when in flight",
+                type = "toggle",
+                order = 1,
+                get = function()
+                    return self.db.profile.general.barFlightHide
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barFlightHide = val;
+                    self:Refresh();
+                end
+            },
+            fullScreen = {
+                name = VIDEO_OPTIONS_FULLSCREEN,
+                type = "toggle",
+                order = 4,
+                get = function()
+                    return self.db.profile.general.barFullscreen;
+                end,
+                set = function(info, value)
+                    self.db.profile.general.barFullscreen = value;
+                    self:Refresh();
+                end
+            },
+            barPosition = {
+                name = L['Horizontal Position'],
+                type = "select",
+                hidden = function()
+                    return self.db.profile.general.barFullscreen;
+                end,
+                order = 5,
+                values = {
+                    LEFT = L['Left'],
+                    CENTER = L['Center'],
+                    RIGHT = L['Right']
+                },
+                style = "dropdown",
+                get = function()
+                    return self.db.profile.general.barHoriz;
+                end,
+                set = function(info, value)
+                    self.db.profile.general.barHoriz = value;
+                    self:Refresh();
+                end,
+                disabled = function()
+                    return self.db.profile.general.barFullscreen;
+                end
+            },
+            barWidth = {
+                name = L['Bar Width'],
+                type = 'range',
+                order = 6,
+                hidden = function()
+                    return self.db.profile.general.barFullscreen;
+                end,
+                min = 200,
+                max = GetScreenWidth(),
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barWidth;
+                end,
+                set = function(info, val)
+                    self.db.profile.general.barWidth = val;
+                    self:Refresh();
+                end,
+                disabled = function()
+                    return self.db.profile.general.barFullscreen;
+                end
+            },
+            barPadding = {
+                name = L['Bar Padding'],
+                type = 'range',
+                order = 10,
+                min = 0,
+                max = 10,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barPadding;
+                end,
+                set = function(info, val)
+                    self.db.profile.general.barPadding = val;
+                    self:Refresh();
+                end
+            },
+            moduleSpacing = {
+                name = L['Module Spacing'],
+                type = 'range',
+                order = 11,
+                min = 10,
+                max = 80,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.moduleSpacing;
+                end,
+                set = function(info, val)
+                    self.db.profile.general.moduleSpacing = val;
+                    self:Refresh();
+                end
+            },
+            barMargin = {
+                name = L['Bar Margin'],
+                desc = L["Leftmost and rightmost margin of the bar modules"],
+                type = 'range',
+                order = 12,
+                min = 0,
+                max = 80,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barMargin;
+                end,
+                set = function(info, val)
+                    self.db.profile.general.barMargin = val;
+                    self:Refresh();
+                end
+            }
+        }
+    }
 end
 
 function XIVBar:OnEnable()
@@ -310,8 +635,8 @@ function XIVBar:GetColor(name)
     if name == 'normal' then
         -- use class color for normal color
         if profile.useTextCC then
-            local r, g, b = self:GetClassColors()
-            return r, g, b, a
+            local cr, cg, cb, _ = self:GetClassColors()
+            r, g, b = cr, cg, cb
         end
     end
     -- use self-picked color for normal color
@@ -552,219 +877,9 @@ function XIVBar:GetGeneralOptions()
         type = "group",
         inline = true,
         args = {
-            positioning = {
-                name = L["Positioning"],
-                type = "group",
-                order = 1,
-                inline = true,
-                args = {
-                    barLocation = {
-                        name = L['Bar Position'],
-                        type = "select",
-                        order = 2,
-                        width = "full",
-                        values = {TOP = L['Top'], BOTTOM = L['Bottom']},
-                        style = "dropdown",
-                        get = function()
-                            return self.db.profile.general.barPosition;
-                        end,
-                        set = function(info, value)
-                            self.db.profile.general.barPosition = value;
-                            self:Refresh();
-                        end
-                    },
-                    flightHide = {
-                        name = "Hide when in flight",
-                        type = "toggle",
-                        order = 1,
-                        get = function()
-                            return self.db.profile.general.barFlightHide
-                        end,
-                        set = function(_, val)
-                            self.db.profile.general.barFlightHide = val;
-                            self:Refresh();
-                        end
-                    },
-                    fullScreen = {
-                        name = VIDEO_OPTIONS_FULLSCREEN,
-                        type = "toggle",
-                        order = 4,
-                        get = function()
-                            return self.db.profile.general.barFullscreen;
-                        end,
-                        set = function(info, value)
-                            self.db.profile.general.barFullscreen = value;
-                            self:Refresh();
-                        end
-                    },
-                    barPosition = {
-                        name = L['Horizontal Position'],
-                        type = "select",
-                        hidden = function()
-                            return self.db.profile.general.barFullscreen;
-                        end,
-                        order = 5,
-                        values = {
-                            LEFT = L['Left'],
-                            CENTER = L['Center'],
-                            RIGHT = L['Right']
-                        },
-                        style = "dropdown",
-                        get = function()
-                            return self.db.profile.general.barHoriz;
-                        end,
-                        set = function(info, value)
-                            self.db.profile.general.barHoriz = value;
-                            self:Refresh();
-                        end,
-                        disabled = function()
-                            return self.db.profile.general.barFullscreen;
-                        end
-                    },
-                    barWidth = {
-                        name = L['Bar Width'],
-                        type = 'range',
-                        order = 6,
-                        hidden = function()
-                            return self.db.profile.general.barFullscreen;
-                        end,
-                        min = 200,
-                        max = GetScreenWidth(),
-                        step = 1,
-                        get = function()
-                            return self.db.profile.general.barWidth;
-                        end,
-                        set = function(info, val)
-                            self.db.profile.general.barWidth = val;
-                            self:Refresh();
-                        end,
-                        disabled = function()
-                            return self.db.profile.general.barFullscreen;
-                        end
-                    }
-                }
-            },
+            positioning = self:GetPositioningOptions(),
             text = self:GetTextOptions(),
-            colors = {
-                name = L["Colors"],
-                type = "group",
-                inline = true,
-                order = 3,
-                args = {
-                    barColor = {
-                        name = L['Bar Color'],
-                        type = "color",
-                        order = 1,
-                        hasAlpha = true,
-                        set = function(info, r, g, b, a)
-                            if not self.db.profile.color.useCC then
-                                self:SetColor('barColor', r, g, b, a)
-                            else
-                                local cr, cg, cb, _ = self:GetClassColors()
-                                self:SetColor('barColor', cr, cg, cb, a)
-                            end
-                        end,
-                        get = function()
-                            return XIVBar:GetColor('barColor')
-                        end
-                    },
-                    barCC = {
-                        name = L['Use Class Color for Bar'],
-                        desc = L["Only the alpha can be set with the color picker"],
-                        type = "toggle",
-                        order = 2,
-                        set = function(info, val)
-                            XIVBar:SetColor('barColor', self:GetClassColors());
-                            self.db.profile.color.useCC = val;
-                            self:Refresh();
-                        end,
-                        get = function()
-                            return self.db.profile.color.useCC
-                        end
-                    },
-                    textColors = self:GetTextColorOptions()
-                }
-            },
-            miscellanelous = {
-                name = L["Miscellaneous"],
-                type = "group",
-                inline = true,
-                order = 3,
-                args = {
-                    barCombatHide = {
-                        name = L['Hide Bar in combat'],
-                        type = "toggle",
-                        order = 9,
-                        width = "full",
-                        get = function()
-                            return self.db.profile.general.barCombatHide;
-                        end,
-                        set = function(_, val)
-                            self.db.profile.general.barCombatHide = val;
-                            self:Refresh();
-                        end
-                    },
-                    barPadding = {
-                        name = L['Bar Padding'],
-                        type = 'range',
-                        order = 10,
-                        min = 0,
-                        max = 10,
-                        step = 1,
-                        get = function()
-                            return self.db.profile.general.barPadding;
-                        end,
-                        set = function(info, val)
-                            self.db.profile.general.barPadding = val;
-                            self:Refresh();
-                        end
-                    },
-                    moduleSpacing = {
-                        name = L['Module Spacing'],
-                        type = 'range',
-                        order = 11,
-                        min = 10,
-                        max = 80,
-                        step = 1,
-                        get = function()
-                            return self.db.profile.general.moduleSpacing;
-                        end,
-                        set = function(info, val)
-                            self.db.profile.general.moduleSpacing = val;
-                            self:Refresh();
-                        end
-                    },
-                    barMargin = {
-                        name = L['Bar Margin'],
-                        desc = L["Leftmost and rightmost margin of the bar modules"],
-                        type = 'range',
-                        order = 12,
-                        min = 0,
-                        max = 80,
-                        step = 1,
-                        get = function()
-                            return self.db.profile.general.barMargin;
-                        end,
-                        set = function(info, val)
-                            self.db.profile.general.barMargin = val;
-                            self:Refresh();
-                        end
-                    },
-                    useElvUI = {
-                        name = L['Use ElvUI for tooltips'],
-                        type = "toggle",
-                        order = 13,
-                        width = "full",
-                        get = function()
-                            return self.db.profile.general.useElvUI;
-                        end,
-                        set = function(_, val)
-                            self.db.profile.general.useElvUI = val;
-                            self:Refresh();
-                        end
-                    }
-                }
-            }
+            textColors = self:GetTextColorOptions()
         }
     }
 end
