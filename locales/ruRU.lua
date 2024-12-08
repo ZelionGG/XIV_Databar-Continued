@@ -21,6 +21,7 @@ L['Bar Color'] = "Цвет полосы";
 L['Use Class Color for Bar'] = "Использовать цвет класса для полосы";
 L["Miscellaneous"] = "Разное";
 L['Hide Bar in combat'] = "Прятать полосу во время боя";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
 L['Bar Margin'] = "Маржа бара"; -- Need Translation ?
@@ -37,6 +38,7 @@ L["Y Offset"] = true;
 L["Horizontal position of the bar"] = true;
 L["Vertical position of the bar"] = true;
 L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Настройки позиционированя";

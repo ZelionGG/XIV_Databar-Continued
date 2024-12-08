@@ -21,6 +21,7 @@ L['Bar Color'] = "条颜色";
 L['Use Class Color for Bar'] = "条使用职业颜色";
 L["Miscellaneous"] = "杂项";
 L['Hide Bar in combat'] = "战斗中隐藏";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "条填充";
 L['Module Spacing'] = "模块间距";
 L['Bar Margin'] = "条形边距";
@@ -37,6 +38,7 @@ L["Y Offset"] = true;
 L["Horizontal position of the bar"] = true;
 L["Vertical position of the bar"] = true;
 L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "位置选项";

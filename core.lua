@@ -1221,7 +1221,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barFlightHide = {
-                name = L["Hide in Flight"],
+                name = L["Hide when in flight"],
                 type = "toggle",
                 order = 10,
                 get = function()

@@ -21,6 +21,7 @@ L['Bar Color'] = "Couleur de la barre";
 L['Use Class Color for Bar'] = "Utiliser la couleur de classe pour la barre";
 L["Miscellaneous"] = "Divers";
 L['Hide Bar in combat'] = "Cacher la barre en combat";
+L["Hide when in flight"] = "Cacher la barre en vol";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
 L['Bar Margin'] = "Marge des modules en bord d'écran";
@@ -37,6 +38,7 @@ L["Y Offset"] = "Décalage Y";
 L["Horizontal position of the bar"] = "Position horizontale de la barre";
 L["Vertical position of the bar"] = "Position verticale de la barre";
 L["Behavior"] = "Comportement";
+L["Spacing"] = "Espacement";
 
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement";

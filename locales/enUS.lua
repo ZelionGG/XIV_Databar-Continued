@@ -22,6 +22,7 @@ L['Bar Color'] = true;
 L['Use Class Color for Bar'] = true;
 L["Miscellaneous"] = true;
 L['Hide Bar in combat'] = true;
+L["Hide when in flight"] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
 L['Bar Margin'] = true;
@@ -38,6 +39,7 @@ L["Y Offset"] = true;
 L["Horizontal position of the bar"] = true;
 L["Vertical position of the bar"] = true;
 L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = true;

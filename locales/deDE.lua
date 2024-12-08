@@ -21,6 +21,7 @@ L['Bar Color'] = "Leistenfarbe";
 L['Use Class Color for Bar'] = "Benutze Klassenfarbe für Leiste";
 L["Miscellaneous"] = "Verschiedenes";
 L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Abstand zwischen Modulen";
 L['Bar Margin'] = "Balkenrand";
@@ -37,6 +38,7 @@ L["Y Offset"] = true;
 L["Horizontal position of the bar"] = true;
 L["Vertical position of the bar"] = true;
 L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Positions Einstellungen";
