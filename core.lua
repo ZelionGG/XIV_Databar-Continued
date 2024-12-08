@@ -1,6 +1,7 @@
 local AddOnName, XIVBar = ...;
 local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
+local floor = math.floor
 local AceAddon, AceAddonMinor = _G.LibStub('AceAddon-3.0')
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
@@ -40,11 +41,15 @@ XIVBar.defaults = {
             moduleSpacing = 30,
             barMargin = 0,
             barFullscreen = true,
-            barWidth = GetScreenWidth(),
-            barHoriz = 'CENTER',
             barCombatHide = false,
             barFlightHide = false,
-            useElvUI = true
+            useElvUI = true,
+            barWidth = floor(GetScreenWidth()),
+            locked = true,
+            point = "CENTER",
+            relativePoint = "CENTER",
+            xOffset = 0,
+            yOffset = 0
         },
         color = {
             barColor = {r = 0.094, g = 0.094, b = 0.094, a = 0.75},
@@ -460,145 +465,174 @@ StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
     preferredIndex = 3,
 }
 
-function XIVBar:GetPositioningOptions()
-    return {
-        name = L["Positioning"],
-        type = "group",
-        order = 1,
-        inline = true,
-        args = {
-            barLocation = {
-                name = L['Bar Position'],
-                type = "select",
-                order = 2,
-                width = "full",
-                values = {TOP = L['Top'], BOTTOM = L['Bottom']},
-                style = "dropdown",
-                get = function()
-                    return self.db.profile.general.barPosition;
-                end,
-                set = function(info, value)
-                    self.db.profile.general.barPosition = value;
-                    self:Refresh();
-                end
-            },
-            flightHide = {
-                name = "Hide when in flight",
-                type = "toggle",
-                order = 1,
-                get = function()
-                    return self.db.profile.general.barFlightHide
-                end,
-                set = function(_, val)
-                    self.db.profile.general.barFlightHide = val;
-                    self:Refresh();
-                end
-            },
-            fullScreen = {
-                name = VIDEO_OPTIONS_FULLSCREEN,
-                type = "toggle",
-                order = 4,
-                get = function()
-                    return self.db.profile.general.barFullscreen;
-                end,
-                set = function(info, value)
-                    self.db.profile.general.barFullscreen = value;
-                    self:Refresh();
-                end
-            },
-            barPosition = {
-                name = L['Horizontal Position'],
-                type = "select",
-                hidden = function()
-                    return self.db.profile.general.barFullscreen;
-                end,
-                order = 5,
-                values = {
-                    LEFT = L['Left'],
-                    CENTER = L['Center'],
-                    RIGHT = L['Right']
-                },
-                style = "dropdown",
-                get = function()
-                    return self.db.profile.general.barHoriz;
-                end,
-                set = function(info, value)
-                    self.db.profile.general.barHoriz = value;
-                    self:Refresh();
-                end,
-                disabled = function()
-                    return self.db.profile.general.barFullscreen;
-                end
-            },
-            barWidth = {
-                name = L['Bar Width'],
-                type = 'range',
-                order = 6,
-                hidden = function()
-                    return self.db.profile.general.barFullscreen;
-                end,
-                min = 200,
-                max = GetScreenWidth(),
-                step = 1,
-                get = function()
-                    return self.db.profile.general.barWidth;
-                end,
-                set = function(info, val)
-                    self.db.profile.general.barWidth = val;
-                    self:Refresh();
-                end,
-                disabled = function()
-                    return self.db.profile.general.barFullscreen;
-                end
-            },
-            barPadding = {
-                name = L['Bar Padding'],
-                type = 'range',
-                order = 10,
-                min = 0,
-                max = 10,
-                step = 1,
-                get = function()
-                    return self.db.profile.general.barPadding;
-                end,
-                set = function(info, val)
-                    self.db.profile.general.barPadding = val;
-                    self:Refresh();
-                end
-            },
-            moduleSpacing = {
-                name = L['Module Spacing'],
-                type = 'range',
-                order = 11,
-                min = 10,
-                max = 80,
-                step = 1,
-                get = function()
-                    return self.db.profile.general.moduleSpacing;
-                end,
-                set = function(info, val)
-                    self.db.profile.general.moduleSpacing = val;
-                    self:Refresh();
-                end
-            },
-            barMargin = {
-                name = L['Bar Margin'],
-                desc = L["Leftmost and rightmost margin of the bar modules"],
-                type = 'range',
-                order = 12,
-                min = 0,
-                max = 80,
-                step = 1,
-                get = function()
-                    return self.db.profile.general.barMargin;
-                end,
-                set = function(info, val)
-                    self.db.profile.general.barMargin = val;
-                    self:Refresh();
-                end
-            }
-        }
-    }
+function XIVBar:CreateMainBar()
+    if self.frames.bar == nil then
+        local bar = CreateFrame("FRAME", "XIV_Databar", UIParent)
+        self:RegisterFrame('bar', bar)
+        self.frames.bgTexture = self.frames.bgTexture or bar:CreateTexture(nil, "BACKGROUND")
+        
+        -- Create guide lines
+        local guides = CreateFrame("FRAME", nil, UIParent)
+        guides:SetAllPoints()
+        guides:Hide()
+        
+        -- Vertical center line
+        local centerLine = guides:CreateTexture(nil, "OVERLAY")
+        centerLine:SetColorTexture(1, 1, 1, 0.3)
+        centerLine:SetWidth(2)
+        centerLine:SetPoint("TOP", UIParent, "TOP", 0, 0)
+        centerLine:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 0)
+        
+        -- Horizontal center line
+        local hCenterLine = guides:CreateTexture(nil, "OVERLAY")
+        hCenterLine:SetColorTexture(1, 1, 1, 0.3)
+        hCenterLine:SetHeight(2)
+        hCenterLine:SetPoint("LEFT", UIParent, "LEFT", 0, 0)
+        hCenterLine:SetPoint("RIGHT", UIParent, "RIGHT", 0, 0)
+        
+        -- Edge markers
+        local edgeMarkerSize = 40
+        local edgeMarkerThickness = 2
+        
+        -- Top edge markers
+        local topLeft = guides:CreateTexture(nil, "OVERLAY")
+        topLeft:SetColorTexture(1, 1, 1, 0.3)
+        topLeft:SetSize(edgeMarkerSize, edgeMarkerThickness)
+        topLeft:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+        
+        local topRight = guides:CreateTexture(nil, "OVERLAY")
+        topRight:SetColorTexture(1, 1, 1, 0.3)
+        topRight:SetSize(edgeMarkerSize, edgeMarkerThickness)
+        topRight:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0)
+        
+        -- Bottom edge markers
+        local bottomLeft = guides:CreateTexture(nil, "OVERLAY")
+        bottomLeft:SetColorTexture(1, 1, 1, 0.3)
+        bottomLeft:SetSize(edgeMarkerSize, edgeMarkerThickness)
+        bottomLeft:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
+        
+        local bottomRight = guides:CreateTexture(nil, "OVERLAY")
+        bottomRight:SetColorTexture(1, 1, 1, 0.3)
+        bottomRight:SetSize(edgeMarkerSize, edgeMarkerThickness)
+        bottomRight:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
+        
+        -- Vertical edge markers
+        local leftTop = guides:CreateTexture(nil, "OVERLAY")
+        leftTop:SetColorTexture(1, 1, 1, 0.3)
+        leftTop:SetSize(edgeMarkerThickness, edgeMarkerSize)
+        leftTop:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+        
+        local leftBottom = guides:CreateTexture(nil, "OVERLAY")
+        leftBottom:SetColorTexture(1, 1, 1, 0.3)
+        leftBottom:SetSize(edgeMarkerThickness, edgeMarkerSize)
+        leftBottom:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
+        
+        local rightTop = guides:CreateTexture(nil, "OVERLAY")
+        rightTop:SetColorTexture(1, 1, 1, 0.3)
+        rightTop:SetSize(edgeMarkerThickness, edgeMarkerSize)
+        rightTop:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0)
+        
+        local rightBottom = guides:CreateTexture(nil, "OVERLAY")
+        rightBottom:SetColorTexture(1, 1, 1, 0.3)
+        rightBottom:SetSize(edgeMarkerThickness, edgeMarkerSize)
+        rightBottom:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
+        
+        self.frames.guides = guides
+        
+        -- Set initial frame level instead of strata
+        bar:SetFrameLevel(1)
+        
+        -- Make the bar movable
+        bar:SetMovable(true)
+        bar:EnableMouse(true)
+        bar:RegisterForDrag("LeftButton")
+        
+        -- Snap threshold in pixels
+        local SNAP_THRESHOLD = 20
+
+        -- Helper function to check if a value is within the snap threshold
+        local function IsWithinThreshold(value, target, threshold)
+            return math.abs(value - target) <= threshold
+        end
+
+        -- Helper function to get the center coordinates of the bar
+        local function GetBarCenter(bar)
+            local width, height = bar:GetSize()
+            local x, y = bar:GetCenter()
+            return x, y, width, height
+        end
+
+        -- Helper function to snap to nearest point if within threshold
+        local function GetSnappedPosition(bar)
+            local screenWidth, screenHeight = UIParent:GetWidth(), UIParent:GetHeight()
+            local centerX, centerY, barWidth, barHeight = GetBarCenter(bar)
+            local point = "CENTER"
+            local xOffset, yOffset = 0, 0
+            local snapped = false
+            
+            -- Check horizontal position
+            if IsWithinThreshold(centerX, screenWidth/2, SNAP_THRESHOLD) then
+                point = "CENTER"
+                xOffset = 0
+                snapped = true
+            elseif IsWithinThreshold(centerX - barWidth/2, 0, SNAP_THRESHOLD) then
+                point = "LEFT"
+                xOffset = 0
+                snapped = true
+            elseif IsWithinThreshold(centerX + barWidth/2, screenWidth, SNAP_THRESHOLD) then
+                point = "RIGHT"
+                xOffset = 0
+                snapped = true
+            else
+                point = "CENTER"
+                xOffset = centerX - screenWidth/2
+            end
+            
+            -- Check vertical position
+            if IsWithinThreshold(centerY, 0, SNAP_THRESHOLD) then
+                yOffset = 0
+                point = "BOTTOM" .. (point ~= "CENTER" and point or "")
+                snapped = true
+            elseif IsWithinThreshold(centerY, screenHeight, SNAP_THRESHOLD) then
+                yOffset = 0
+                point = "TOP" .. (point ~= "CENTER" and point or "")
+                snapped = true
+            else
+                yOffset = centerY - screenHeight/2
+            end
+            
+            return point, point, xOffset, yOffset, snapped
+        end
+        
+        bar:SetScript("OnDragStart", function(self)
+            if not XIVBar.db.profile.general.locked and not XIVBar.db.profile.general.barFullscreen then
+                self:StartMoving()
+                XIVBar.frames.guides:Show()
+            end
+        end)
+
+        bar:SetScript("OnDragStop", function(self)
+            if not XIVBar.db.profile.general.barFullscreen then
+                self:StopMovingOrSizing()
+                XIVBar.frames.guides:Hide()
+                
+                -- Get final position with snapping
+                local point, relativePoint, xOffset, yOffset = GetSnappedPosition(self)
+                
+                -- Save position
+                XIVBar.db.profile.general.point = point
+                XIVBar.db.profile.general.relativePoint = relativePoint
+                XIVBar.db.profile.general.xOffset = xOffset
+                XIVBar.db.profile.general.yOffset = yOffset
+                
+                -- Apply position
+                self:ClearAllPoints()
+                self:SetPoint(point, UIParent, relativePoint, xOffset, yOffset)
+                
+                XIVBar:Refresh()
+            end
+        end)
+    end
 end
 
 function XIVBar:OnEnable()
@@ -674,15 +708,6 @@ end
 ---@param name string name of the frame as supplied to RegisterFrame
 ---@return Frame
 function XIVBar:GetFrame(name) return self.frames[name] end
-
-function XIVBar:CreateMainBar()
-    if self.frames.bar == nil then
-        self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
-        self.frames.bgTexture = self.frames.bgTexture or
-                                    self.frames.bar:CreateTexture(nil,
-                                                                  "BACKGROUND")
-    end
-end
 
 function XIVBar:HideBarEvent()
     local bar = self:GetFrame("bar")
@@ -767,19 +792,37 @@ function XIVBar:Refresh()
 
     local barColor = self.db.profile.color.barColor
     self.frames.bar:ClearAllPoints()
-    self.frames.bar:SetPoint(self.db.profile.general.barPosition)
-    if self.db.profile.general.barFullscreen then
+    
+    -- Use saved position if not in fullscreen mode
+    if not self.db.profile.general.barFullscreen then
+        -- If we have a saved custom position, use it
+        if self.db.profile.general.point then
+            self.frames.bar:SetPoint(
+                self.db.profile.general.point,
+                UIParent,
+                self.db.profile.general.relativePoint,
+                self.db.profile.general.xOffset,
+                self.db.profile.general.yOffset
+            )
+        else
+            -- Initial position based on barHoriz and barPosition
+            self.frames.bar:SetPoint(self.db.profile.general.barPosition, UIParent, self.db.profile.general.barPosition)
+            if self.db.profile.general.barHoriz == 'LEFT' then
+                self.frames.bar:SetPoint("LEFT", UIParent, "LEFT", self.db.profile.general.barMargin, 0)
+            elseif self.db.profile.general.barHoriz == 'RIGHT' then
+                self.frames.bar:SetPoint("RIGHT", UIParent, "RIGHT", -self.db.profile.general.barMargin, 0)
+            else -- CENTER
+                self.frames.bar:SetPoint(self.db.profile.general.barHoriz, UIParent, self.db.profile.general.barHoriz, 0, 0)
+            end
+        end
+        self.frames.bar:SetWidth(self.db.profile.general.barWidth)
+    else
+        self.frames.bar:SetPoint(self.db.profile.general.barPosition)
         self.frames.bar:SetPoint("LEFT", self.db.profile.general.barMargin, 0)
         self.frames.bar:SetPoint("RIGHT", -self.db.profile.general.barMargin, 0)
-    else
-        local relativePoint = self.db.profile.general.barHoriz
-        if relativePoint == 'CENTER' then relativePoint = 'BOTTOM' end
-        self.frames.bar:SetPoint(self.db.profile.general.barHoriz,
-                                 self.frames.bar:GetParent(), relativePoint)
-        self.frames.bar:SetWidth(self.db.profile.general.barWidth)
     end
+    
     self.frames.bar:SetHeight(self:GetHeight())
-
     self.frames.bgTexture:SetColorTexture(self:GetColor('barColor'))
     self.frames.bgTexture:SetAllPoints()
 
@@ -1035,6 +1078,208 @@ function XIVBar:GetTextColorOptions()
                 end,
                 get = function()
                     return XIVBar:GetColor('inactive')
+                end
+            }
+        }
+    }
+end
+
+function XIVBar:GetPositioningOptions()
+    return {
+        name = L["Positioning"],
+        type = "group",
+        order = 1,
+        inline = true,
+        args = {
+            positionHeader = {
+                name = L["Bar Position"],
+                type = "header",
+                order = 1
+            },
+            barFullscreen = {
+                name = VIDEO_OPTIONS_FULLSCREEN,
+                desc = L["Makes the bar span the entire screen width"],
+                type = "toggle",
+                order = 2,
+                width = "full",
+                get = function()
+                    return self.db.profile.general.barFullscreen
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barFullscreen = val
+                    self:Refresh()
+                end
+            },
+            barPosition = {
+                name = L['Bar Position'],
+                desc = L["Position the bar at the top or bottom of the screen"],
+                type = "select",
+                order = 3,
+                width = "full",
+                values = {TOP = L["Top"], BOTTOM = L["Bottom"]},
+                style = "dropdown",
+                hidden = function()
+                    return not self.db.profile.general.barFullscreen
+                end,
+                get = function()
+                    return self.db.profile.general.barPosition
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barPosition = val
+                    self:Refresh()
+                end
+            },
+            xOffset = {
+                name = L["X Offset"],
+                desc = L["Horizontal position of the bar"],
+                type = "range",
+                order = 4,
+                hidden = function()
+                    return self.db.profile.general.barFullscreen
+                end,
+                min = -floor(GetScreenWidth()),
+                max = floor(GetScreenWidth()),
+                step = 1,
+                get = function()
+                    return self.db.profile.general.xOffset
+                end,
+                set = function(_, val)
+                    self.db.profile.general.xOffset = val
+                    self:Refresh()
+                end
+            },
+            yOffset = {
+                name = L["Y Offset"],
+                desc = L["Vertical position of the bar"],
+                type = "range",
+                order = 5,
+                hidden = function()
+                    return self.db.profile.general.barFullscreen
+                end,
+                min = -floor(GetScreenHeight()),
+                max = floor(GetScreenHeight()),
+                step = 1,
+                get = function()
+                    return self.db.profile.general.yOffset
+                end,
+                set = function(_, val)
+                    self.db.profile.general.yOffset = val
+                    self:Refresh()
+                end
+            },
+            locked = {
+                name = L["Lock Bar"],
+                desc = L["Lock the bar to prevent dragging"],
+                type = "toggle",
+                order = 6,
+                hidden = function()
+                    return self.db.profile.general.barFullscreen
+                end,
+                get = function()
+                    return self.db.profile.general.locked
+                end,
+                set = function(_, val)
+                    self.db.profile.general.locked = val
+                end
+            },
+            barWidth = {
+                name = L["Bar Width"],
+                type = "range",
+                order = 7,
+                hidden = function()
+                    return self.db.profile.general.barFullscreen
+                end,
+                min = 200,
+                max = math.floor(GetScreenWidth()),
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barWidth
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barWidth = val
+                    self:Refresh()
+                end,
+                disabled = function()
+                    return self.db.profile.general.barFullscreen
+                end
+            },
+            behaviorHeader = {
+                name = L["Behavior"],
+                type = "header",
+                order = 8
+            },
+            barCombatHide = {
+                name = L['Hide Bar in combat'],
+                type = "toggle",
+                order = 9,
+                get = function()
+                    return self.db.profile.general.barCombatHide
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barCombatHide = val
+                    self:Refresh()
+                end
+            },
+            barFlightHide = {
+                name = L["Hide in Flight"],
+                type = "toggle",
+                order = 10,
+                get = function()
+                    return self.db.profile.general.barFlightHide
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barFlightHide = val
+                end
+            },
+            spacingHeader = {
+                name = L["Spacing"],
+                type = "header",
+                order = 11
+            },
+            barPadding = {
+                name = L["Bar Padding"],
+                type = "range",
+                order = 12,
+                min = 0,
+                max = 10,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barPadding
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barPadding = val
+                    self:Refresh()
+                end
+            },
+            moduleSpacing = {
+                name = L["Module Spacing"],
+                type = "range",
+                order = 13,
+                min = 10,
+                max = 80,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.moduleSpacing
+                end,
+                set = function(_, val)
+                    self.db.profile.general.moduleSpacing = val
+                    self:Refresh()
+                end
+            },
+            barMargin = {
+                name = L["Bar Margin"],
+                desc = L["Leftmost and rightmost margin of the bar modules"],
+                type = "range",
+                order = 14,
+                min = 0,
+                max = 80,
+                step = 1,
+                get = function()
+                    return self.db.profile.general.barMargin
+                end,
+                set = function(_, val)
+                    self.db.profile.general.barMargin = val
+                    self:Refresh()
                 end
             }
         }

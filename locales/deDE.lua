@@ -27,6 +27,16 @@ L['Bar Margin'] = "Balkenrand";
 L["Leftmost and rightmost margin of the bar modules"] = "Linker und rechter Rand der Balkenmodule";
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
 L['Use ElvUI for tooltips'] = "Verwende ElvUI für QuickInfos";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Positions Einstellungen";
@@ -154,9 +164,15 @@ L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
 -- Travel (Translation needed)
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
+L['Show Mythic+ Teleports'] = true;
+L['Use Random Hearthstone'] = true;
+L['Empty Hearthstones List'] = true;
+L['Hearthstones Select'] = true;
+L['Hearthstones Select Desc'] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

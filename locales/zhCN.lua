@@ -27,6 +27,16 @@ L['Bar Margin'] = "条形边距";
 L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
 L['Hide order hall bar'] = "隐藏职业大厅条";
 L['Use ElvUI for tooltips'] = "使用ElvUI作為工具提示";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "位置选项";
@@ -154,6 +164,7 @@ L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
 
 -- Travel (Translation needed)
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;

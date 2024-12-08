@@ -28,6 +28,16 @@ L['Bar Margin'] = true;
 L["Leftmost and rightmost margin of the bar modules"] = true;
 L['Hide order hall bar'] = true;
 L['Use ElvUI for tooltips'] = true;
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = true;
@@ -156,6 +166,7 @@ L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
 
 -- Travel
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;

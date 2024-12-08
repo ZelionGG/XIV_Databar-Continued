@@ -27,6 +27,16 @@ L['Bar Margin'] = "Marge des modules en bord d'écran";
 L["Leftmost and rightmost margin of the bar modules"] = "Décalage des modules en bord d'écran";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
 L['Use ElvUI for tooltips'] = "Utiliser ElvUI pour les info-bulles";
+L["Lock Bar"] = "Verrouiller la position de la barre";
+L["Lock the bar in place"] = "Verrouiller la position de la barre";
+L["Lock the bar to prevent dragging"] = "Verrouiller la barre pour empêcher le déplacement";
+L["Makes the bar span the entire screen width"] = "La barre prend toute la largeur de l'écran";
+L["Position the bar at the top or bottom of the screen"] = "Positionne la barre en haut ou en bas de l'écran";
+L["X Offset"] = "Décalage X";
+L["Y Offset"] = "Décalage Y";
+L["Horizontal position of the bar"] = "Position horizontale de la barre";
+L["Vertical position of the bar"] = "Position verticale de la barre";
+L["Behavior"] = "Comportement";
 
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement";
@@ -154,6 +164,7 @@ L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
+L['Hearthstone'] = "Pierre de foyer";
 L['M+ Teleports'] = "Téléportations M+";
 L['Only show current season'] = "N'afficher que les téléportations de la saison courante.";
 L["Mythic+ Teleports"] = "Téléportations Mythique+";
