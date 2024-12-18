@@ -2,6 +2,9 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local oldXp = UnitXP('player')
+local killsRemaining = 0
+
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
     ---Proxy for C_CurrencyInfo.GetCurrencyListLink
@@ -17,12 +20,7 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = {697, -- Elder Charm of Good Fortune
-    752, -- Mogu Rune of Fate
-    776, -- Warforged Seal
-    994, -- Seal of Tempered Fate
-    1129, -- Seal of Inevitable Fate
-    1273 -- Seal of Broken Fate
+    self.rerollItems = {
     }
 
     self.intToOpt = {
@@ -210,7 +208,6 @@ function CurrencyModule:CreateFrames()
 end
 
 function CurrencyModule:RegisterFrameEvents()
-
     for i = 1, 3 do
         self.curButtons[i]:EnableMouse(true)
         self.curButtons[i]:RegisterForClicks("AnyUp")
@@ -304,7 +301,6 @@ function CurrencyModule:ShowTooltip()
         xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
-
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
         local rested = GetXPExhaustion()
@@ -314,6 +310,27 @@ function CurrencyModule:ShowTooltip()
         -- Remaining
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
+        -- Kills remaining
+        if self.event == PLAYER_XP_UPDATE then
+            local newXp = UnitXP('player')
+            local xpGained = newXp - oldXp
+            local lastXp = 0
+            if self.event == PLAYER_LEVEL_UP then
+                return -- There is a behavior where leveling up will show previous max xp and give a negative number. Unsure how to resolve.
+            end
+            if xpGained > 1 then
+                self.killsRemaining = (maxXp - curXp) / xpGained
+                self.lastXp = newXp - oldXp
+            end
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                string.format('%d', self.killsRemaining), r, g, b, 1, 1, 1
+            )
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', self.lastXp), r, g, b, 1, 1,
+                1)
+            oldXp = UnitXP('player')
+        end
+
         -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
