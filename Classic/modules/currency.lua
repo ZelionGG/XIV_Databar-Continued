@@ -2,6 +2,9 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local oldXp = UnitXP('player')
+local killsRemaining = 0
+
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
     ---Proxy for C_CurrencyInfo.GetCurrencyListLink
@@ -17,12 +20,7 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = { 697, -- Elder Charm of Good Fortune
-        752,                  -- Mogu Rune of Fate
-        776,                  -- Warforged Seal
-        994,                  -- Seal of Tempered Fate
-        1129,                 -- Seal of Inevitable Fate
-        1273                  -- Seal of Broken Fate
+    self.rerollItems = {
     }
 
     self.intToOpt = {
@@ -303,10 +301,8 @@ function CurrencyModule:ShowTooltip()
         xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
-
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
-        local killsRemaining = ""
         local rested = GetXPExhaustion()
         -- XP
         GameTooltip:AddDoubleLine(XP .. ':',
@@ -315,14 +311,21 @@ function CurrencyModule:ShowTooltip()
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
         -- Kills remaining
-        if event == "PLAYER_XP_UPDATE" then
-            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-                string.format('%d', (killsRemaining)), r, g, b, 1, 1, 1)
+        if self.event == PLAYER_XP_UPDATE then
+            local newXp = UnitXP('player')
+            local xpGained = newXp - oldXp
+            if xpGained > 1 then
+                self.killsRemaining = maxXp / xpGained
+                GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                    string.format('%d', (self.killsRemaining)), r, g, b, 1, 1, 1)
+                self.oldXp = curXp
+            end
         end
+
         -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
-                string.format('%d', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
+                string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
     else
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
