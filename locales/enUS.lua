@@ -165,6 +165,7 @@ L['Talent Minimum Width'] = true;
 L['Open Artifact'] = true;
 L['Remaining'] = true;
 L['Kills to level'] = true;
+L['Last xp gain'] = true;
 L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
 
