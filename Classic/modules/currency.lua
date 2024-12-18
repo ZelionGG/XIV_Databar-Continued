@@ -314,19 +314,21 @@ function CurrencyModule:ShowTooltip()
         if self.event == PLAYER_XP_UPDATE then
             local newXp = UnitXP('player')
             local xpGained = newXp - oldXp
+            local lastXp = 0
             if self.event == PLAYER_LEVEL_UP then
-                return -- There is a behavior where leveling up will show previous max xp and give a negative number.
+                return -- There is a behavior where leveling up will show previous max xp and give a negative number. Unsure how to resolve.
             end
             if xpGained > 1 then
                 self.killsRemaining = (maxXp - curXp) / xpGained
-                GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-                    string.format('%d', self.killsRemaining), r, g, b, 1, 1, 1
-                )
-                GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
-                    string.format('%d', xpGained), r, g, b, 1, 1,
-                    1)
-                self.oldXp = curXp
+                self.lastXp = newXp - oldXp
             end
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                string.format('%d', self.killsRemaining), r, g, b, 1, 1, 1
+            )
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', self.lastXp), r, g, b, 1, 1,
+                1)
+            oldXp = UnitXP('player')
         end
 
         -- Rested
