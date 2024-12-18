@@ -17,12 +17,12 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = {697, -- Elder Charm of Good Fortune
-    752, -- Mogu Rune of Fate
-    776, -- Warforged Seal
-    994, -- Seal of Tempered Fate
-    1129, -- Seal of Inevitable Fate
-    1273 -- Seal of Broken Fate
+    self.rerollItems = { 697, -- Elder Charm of Good Fortune
+        752,                  -- Mogu Rune of Fate
+        776,                  -- Warforged Seal
+        994,                  -- Seal of Tempered Fate
+        1129,                 -- Seal of Inevitable Fate
+        1273                  -- Seal of Broken Fate
     }
 
     self.intToOpt = {
@@ -210,7 +210,6 @@ function CurrencyModule:CreateFrames()
 end
 
 function CurrencyModule:RegisterFrameEvents()
-
     for i = 1, 3 do
         self.curButtons[i]:EnableMouse(true)
         self.curButtons[i]:RegisterForClicks("AnyUp")
@@ -307,6 +306,7 @@ function CurrencyModule:ShowTooltip()
 
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
+        local killsRemaining = ""
         local rested = GetXPExhaustion()
         -- XP
         GameTooltip:AddDoubleLine(XP .. ':',
@@ -314,10 +314,15 @@ function CurrencyModule:ShowTooltip()
         -- Remaining
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
+        -- Kills remaining
+        if event == "PLAYER_XP_UPDATE" then
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                string.format('%d', (killsRemaining)), r, g, b, 1, 1, 1)
+        end
         -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
-                string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
+                string.format('%d', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
     else
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
