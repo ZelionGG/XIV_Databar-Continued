@@ -21,12 +21,24 @@ L['Bar Color'] = "Couleur de la barre";
 L['Use Class Color for Bar'] = "Utiliser la couleur de classe pour la barre";
 L["Miscellaneous"] = "Divers";
 L['Hide Bar in combat'] = "Cacher la barre en combat";
+L["Hide when in flight"] = "Cacher la barre en vol";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
 L['Bar Margin'] = "Marge des modules en bord d'écran";
 L["Leftmost and rightmost margin of the bar modules"] = "Décalage des modules en bord d'écran";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
 L['Use ElvUI for tooltips'] = "Utiliser ElvUI pour les info-bulles";
+L["Lock Bar"] = "Verrouiller la position de la barre";
+L["Lock the bar in place"] = "Verrouiller la position de la barre";
+L["Lock the bar to prevent dragging"] = "Verrouiller la barre pour empêcher le déplacement";
+L["Makes the bar span the entire screen width"] = "La barre prend toute la largeur de l'écran";
+L["Position the bar at the top or bottom of the screen"] = "Positionne la barre en haut ou en bas de l'écran";
+L["X Offset"] = "Décalage X";
+L["Y Offset"] = "Décalage Y";
+L["Horizontal position of the bar"] = "Position horizontale de la barre";
+L["Vertical position of the bar"] = "Position verticale de la barre";
+L["Behavior"] = "Comportement";
+L["Spacing"] = "Espacement";
 
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement";
@@ -109,6 +121,9 @@ L['Ready'] = "Prêt";
 L['Travel Cooldowns'] = "Temps de recharge des voyages";
 L['Change Port Option'] = "Option de changement de la téléportation";
 
+L["Registered characters"] = "Personnages enregistrés";
+L['Show Free Bag Space'] = "Montrer l'espace libre dans les sacs";
+L['Show Other Realms'] = "Montrer les autres royaumes";
 L['Always Show Silver and Copper'] = "Toujours montrer l'argent et le cuivre";
 L['Shorten Gold'] = "Raccourcir le montant d'or";
 L['Toggle Bags'] = "Ouvrir/Fermer les sacs";
@@ -151,6 +166,7 @@ L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
 -- Travel
+L['Hearthstone'] = "Pierre de foyer";
 L['M+ Teleports'] = "Téléportations M+";
 L['Only show current season'] = "N'afficher que les téléportations de la saison courante.";
 L["Mythic+ Teleports"] = "Téléportations Mythique+";
@@ -172,6 +188,25 @@ L["Shadowlands"] = true;
 L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = "Saison courante";
+
+-- Profile Import/Export
+L["Profile Sharing"] = "Partage de profil";
+
+L["Invalid import string"] = "Chaine d'import non valide";
+L["Failed to decode import string"] = "Erreur de décodage de la chaine d'import";
+L["Failed to decompress import string"] = "Erreur de décompression de la chaine d'import";
+L["Failed to deserialize import string"] = "Erreur de deserialization de la chaine d'import";
+L["Invalid profile format"] = "Format de profil non valide";
+L["Profile imported successfully as"] = "Profil importé avec succès sous le nom";
+
+L["Copy the export string below:"] = "Copier la chaîne d'export ci-dessous:";
+L["Paste the import string below:"] = "Coller la chaîne d'import ci-dessous:";
+L["Import or export your profiles to share them with other players."] = "Importez ou exportez vos profils pour les partager avec d'autres joueurs.";
+L["Profile Import/Export"] = "Import/Export de profil";
+L["Export Profile"] = "Exporter le profil";
+L["Export your current profile settings"] = "Exporter les paramètres du profil actuel";
+L["Import Profile"] = "Importer un profil";
+L["Import a profile from another player"] = "Importer un profil d'un autre joueur";
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%month%-%day%-%year%";

@@ -21,12 +21,24 @@ L['Bar Color'] = "条颜色";
 L['Use Class Color for Bar'] = "条使用职业颜色";
 L["Miscellaneous"] = "杂项";
 L['Hide Bar in combat'] = "战斗中隐藏";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "条填充";
 L['Module Spacing'] = "模块间距";
 L['Bar Margin'] = "条形边距";
 L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
 L['Hide order hall bar'] = "隐藏职业大厅条";
 L['Use ElvUI for tooltips'] = "使用ElvUI作為工具提示";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "位置选项";
@@ -109,6 +121,9 @@ L['Ready'] = "就绪";
 L['Travel Cooldowns'] = "传送冷却";
 L['Change Port Option'] = "更改传送选项";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "始终显示银币和铜币";
 L['Shorten Gold'] = "金钱缩写";
 L['Toggle Bags'] = "切换背包";
@@ -151,6 +166,7 @@ L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
 
 -- Travel (Translation needed)
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
@@ -172,6 +188,25 @@ L["Shadowlands"] = true;
 L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = true;
+
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+
+L["Invalid import string"] = true;
+L["Failed to decode import string"] = true;
+L["Failed to decompress import string"] = true;
+L["Failed to deserialize import string"] = true;
+L["Invalid profile format"] = true;
+L["Profile imported successfully as"] = true;
+
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%year%年%month%月%day%日";

@@ -24,12 +24,24 @@ L['Bar Color'] = "資訊列顏色";
 L['Use Class Color for Bar'] = "使用職業顏色";
 L["Miscellaneous"] = "其他";
 L['Hide Bar in combat'] = "戰鬥中隱藏";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "資訊列內距";
 L['Module Spacing'] = "模組間距";
 L['Bar Margin'] = "資訊列間距";
 L["Leftmost and rightmost margin of the bar modules"] = "資訊列模組最左邊和最右邊的間距";
 L['Hide order hall bar'] = "隱藏職業大廳列";
 L['Use ElvUI for tooltips'] = "使用ElvUI浮動提示";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "位置選項";
@@ -113,6 +125,9 @@ L['Ready'] = "完成";
 L['Travel Cooldowns'] = "旅行傳送冷卻";
 L['Change Port Option'] = "變更傳送選項";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "總是顯示銀和銅";
 L['Shorten Gold'] = "金額縮寫";
 L['Toggle Bags'] = "打開/關閉背包";
@@ -154,6 +169,7 @@ L['Available Ranks'] = "神兵武器等級";
 L['Artifact Knowledge'] = "神兵知識等級";
 
 -- Travel
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
@@ -209,6 +225,25 @@ L["Diablo 4"] = "暗黑破壞神IV"
 L["Blizzard Arcade Collection"] = "暴雪遊樂場典藏系列"
 L["Crash Bandicoot 4"] = "袋狼大進擊4"
 L["Hide Friends Playing Other Games"] = "隱藏其他遊戲好友"; -- used for the friend list function I added myself
+
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+
+L["Invalid import string"] = true;
+L["Failed to decode import string"] = true;
+L["Failed to decompress import string"] = true;
+L["Failed to deserialize import string"] = true;
+L["Invalid profile format"] = true;
+L["Profile imported successfully as"] = true;
+
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%year%年%month%月%day%日"

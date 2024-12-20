@@ -1,23 +1,21 @@
 # XIV_Databar Continued
 
-## [3.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.1) (2024-09-03)
+## [3.3](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.3) (2024-12-08)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.0.3...v3.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
-
-### _Retail :_
-
-- New Mythic+ Portals functionality in the Travel module, allowing you to have fast access to your known Mythic+ Portals and to cast that teleport.
-- Travel module fix (Acherus, Dreamgrove, ...) for Retail's API changes in 11.0.2.
-
-### _Cataclysm Classic :_
-
-- Added Archaeology in the Tradeskill module tooltip.
-- Added back the Right Click functionality in the Tradeskill module to make it possible to access the professions frame.
-
-### _Classic SoD :_
-
-- Tradeskill module fix.
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.2...v3.3) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Global :_
 
-- Code refactoring to fix underscores reassignments causing erros with some native Blizzard commands in XIV Databr Continued.
+- New profile export/import feature.
+- Bar positioning went through a major rework, you can now drag the bar to the desired position on your screen and lock the position.
+
+### _Retail :_
+
+- Fixed the cooldowns in the tooltip of the [Travel] module.
+- [Gold] tooltip now allows you to shows the amount of gold on your account, with options to make it realm and faction-agnostic.
+- Fixed overlapping issues occuring with [Mythic+ Teleports] module in the [Travel] module.
+
+### _Classic SoD and Anniversary :_
+
+- Fixed the "Font not set" error in the [Travel] module.
+

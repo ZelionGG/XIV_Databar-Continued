@@ -21,12 +21,24 @@ L['Bar Color'] = "Leistenfarbe";
 L['Use Class Color for Bar'] = "Benutze Klassenfarbe für Leiste";
 L["Miscellaneous"] = "Verschiedenes";
 L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Abstand zwischen Modulen";
 L['Bar Margin'] = "Balkenrand";
 L["Leftmost and rightmost margin of the bar modules"] = "Linker und rechter Rand der Balkenmodule";
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
 L['Use ElvUI for tooltips'] = "Verwende ElvUI für QuickInfos";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Positions Einstellungen";
@@ -109,6 +121,9 @@ L['Ready'] = "Bereit";
 L['Travel Cooldowns'] = "Reise Abklingzeiten";
 L['Change Port Option'] = "Teleport Einstellungen ändern";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
 L['Shorten Gold'] = "Gold abkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";
@@ -151,9 +166,15 @@ L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
 -- Travel (Translation needed)
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
+L['Show Mythic+ Teleports'] = true;
+L['Use Random Hearthstone'] = true;
+L['Empty Hearthstones List'] = true;
+L['Hearthstones Select'] = true;
+L['Hearthstones Select Desc'] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
@@ -167,6 +188,25 @@ L["Shadowlands"] = true;
 L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = "Aktuelle Season";
+
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+
+L["Invalid import string"] = true;
+L["Failed to decode import string"] = true;
+L["Failed to decompress import string"] = true;
+L["Failed to deserialize import string"] = true;
+L["Invalid profile format"] = true;
+L["Profile imported successfully as"] = true;
+
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
 
 -- Changelog
 L["%month%-%day%-%year%"] = true;

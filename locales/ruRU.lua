@@ -21,12 +21,24 @@ L['Bar Color'] = "Цвет полосы";
 L['Use Class Color for Bar'] = "Использовать цвет класса для полосы";
 L["Miscellaneous"] = "Разное";
 L['Hide Bar in combat'] = "Прятать полосу во время боя";
+L["Hide when in flight"] = true;
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
 L['Bar Margin'] = "Маржа бара"; -- Need Translation ?
 L["Leftmost and rightmost margin of the bar modules"] = true; -- Need translation
 L['Hide order hall bar'] = "Прятать полосу оплота класса";
 L['Use ElvUI for tooltips'] = "Используйте ElvUI для подсказок";
+L["Lock Bar"] = true;
+L["Lock the bar in place"] = true;
+L["Lock the bar to prevent dragging"] = true;
+L["Makes the bar span the entire screen width"] = true;
+L["Position the bar at the top or bottom of the screen"] = true;
+L["X Offset"] = true;
+L["Y Offset"] = true;
+L["Horizontal position of the bar"] = true;
+L["Vertical position of the bar"] = true;
+L["Behavior"] = true;
+L["Spacing"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Настройки позиционированя";
@@ -109,6 +121,9 @@ L['Ready'] = "Готово";
 L['Travel Cooldowns'] = "Способности для перемещения";
 L['Change Port Option'] = "Изменить назначение телепорта";
 
+L["Registered characters"] = true;
+L['Show Free Bag Space'] = true;
+L['Show Other Realms'] = true;
 L['Always Show Silver and Copper'] = "Всегда показывать серебро и медь";
 L['Shorten Gold'] = "Сокращать число золота";
 L['Toggle Bags'] = "Переключить видимость сумок";
@@ -151,6 +166,7 @@ L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
 
 -- Travel (Translation needed)
+L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
@@ -172,6 +188,25 @@ L["Shadowlands"] = true;
 L["Dragonflight"] = true;
 L["The War Within"] = true;
 L["Current season"] = true;
+
+-- Profile Import/Export
+L["Profile Sharing"] = true;
+
+L["Invalid import string"] = true;
+L["Failed to decode import string"] = true;
+L["Failed to decompress import string"] = true;
+L["Failed to deserialize import string"] = true;
+L["Invalid profile format"] = true;
+L["Profile imported successfully as"] = true;
+
+L["Copy the export string below:"] = true;
+L["Paste the import string below:"] = true;
+L["Import or export your profiles to share them with other players."] = true;
+L["Profile Import/Export"] = true;
+L["Export Profile"] = true;
+L["Export your current profile settings"] = true;
+L["Import Profile"] = true;
+L["Import a profile from another player"] = true;
 
 -- Changelog
 L["%month%-%day%-%year%"] = "%day%-%month%-%year%";
