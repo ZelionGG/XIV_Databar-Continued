@@ -2,8 +2,6 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
-local oldXp = UnitXP('player')
-local killsRemaining = 0
 
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
@@ -20,9 +18,6 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = {
-    }
-
     self.intToOpt = {
         [1] = 'currencyOne',
         [2] = 'currencyTwo',
@@ -238,7 +233,7 @@ function CurrencyModule:RegisterFrameEvents()
         end)
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
-    self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
+    self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
     self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
     self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
@@ -288,11 +283,31 @@ function CurrencyModule:RegisterFrameEvents()
     end)
 end
 
+function CurrencyModule:ExperienceGains()
+    -- Sorry but using global variables here was the cleanest way I could think of for implementing this feature!
+    CurXp = UnitXP('player')
+    MaxXp = UnitXPMax('player')
+    OldXp = OldXp or CurXp
+    KillsRemaining = KillsRemaining or 0
+    LastXp = LastXp or 0
+    XpGained = CurXp - OldXp
+    if XpGained > 0 then
+        KillsRemaining = (MaxXp - CurXp) / XpGained
+        LastXp = CurXp - OldXp
+    end
+    OldXp = UnitXP('player')
+    return XpGained, CurXp, MaxXp, KillsRemaining
+end
+
+function CurrencyModule:XpUpdate()
+    CurrencyModule:ExperienceGains()
+    CurrencyModule:Refresh()
+end
+
 function CurrencyModule:ShowTooltip()
     if not xb.db.profile.modules.currency.showTooltip then
         return
     end
-
     local r, g, b, _ = unpack(xb:HoverColors())
 
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
@@ -311,31 +326,15 @@ function CurrencyModule:ShowTooltip()
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
         -- Kills remaining
-        if self.event == PLAYER_XP_UPDATE then
-            local newXp = UnitXP('player')
-            local xpGained = newXp - oldXp
-            local lastXp = 0
-            if self.event == PLAYER_LEVEL_UP then
-                return -- There is a behavior where leveling up will show previous max xp and give a negative number. Unsure how to resolve.
-            end
-            if xpGained > 1 then
-                self.killsRemaining = (maxXp - curXp) / xpGained
-                self.lastXp = newXp - oldXp
-            end
-            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-                string.format('%d', self.killsRemaining), r, g, b, 1, 1, 1
-            )
-            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
-                string.format('%d', self.lastXp), r, g, b, 1, 1,
-                1)
-            oldXp = UnitXP('player')
-        end
-
-        -- Rested
+        GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+            string.format('%d', KillsRemaining), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+            string.format('%d', LastXp), r, g, b, 1, 1, 1)
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
                 string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
+        -- Rested
     else
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
@@ -350,6 +349,7 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:Show()
+    oldXp = UnitXP('player')
 end
 
 function CurrencyModule:GetDefaultOptions()
