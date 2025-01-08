@@ -925,7 +925,7 @@ function XIVBar:GetGeneralOptions()
         args = {
             positioning = self:GetPositioningOptions(),
             text = self:GetTextOptions(),
-            textColors = self:GetTextColorOptions()
+            color = self:GetColorOptions()
         }
     }
 end
@@ -1000,11 +1000,54 @@ function XIVBar:GetTextOptions()
     }
 end
 
+function XIVBar:GetColorOptions()
+    return {
+        name = L["Colors"],
+        type = "group",
+        inline = true,
+        order = 3,
+        args = {
+            barColor = {
+                name = L['Bar Color'],
+                type = "color",
+                order = 1,
+                hasAlpha = true,
+                set = function(info, r, g, b, a)
+                    if not self.db.profile.color.useCC then
+                        self:SetColor('barColor', r, g, b, a)
+                    else
+                        local cr, cg, cb, _ = self:GetClassColors()
+                        self:SetColor('barColor', cr, cg, cb, a)
+                    end
+                end,
+                get = function()
+                    return XIVBar:GetColor('barColor')
+                end
+            },
+            barCC = {
+                name = L['Use Class Color for Bar'],
+                desc = L["Only the alpha can be set with the color picker"],
+                type = "toggle",
+                order = 2,
+                set = function(info, val)
+                    XIVBar:SetColor('barColor', self:GetClassColors());
+                    self.db.profile.color.useCC = val;
+                    self:Refresh();
+                end,
+                get = function()
+                    return self.db.profile.color.useCC
+                end
+            },
+            textColors = self:GetTextColorOptions()
+        }
+    }
+end
+
 function XIVBar:GetTextColorOptions()
     return {
         name = L['Text Colors'],
         type = "group",
-        order = 3,
+        order = 4,
         inline = true,
         args = {
             normal = {
