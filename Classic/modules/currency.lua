@@ -3,6 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
+
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
     ---Proxy for C_CurrencyInfo.GetCurrencyListLink
     function GetCurrencyListLink(index)
@@ -17,14 +18,6 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = {697, -- Elder Charm of Good Fortune
-    752, -- Mogu Rune of Fate
-    776, -- Warforged Seal
-    994, -- Seal of Tempered Fate
-    1129, -- Seal of Inevitable Fate
-    1273 -- Seal of Broken Fate
-    }
-
     self.intToOpt = {
         [1] = 'currencyOne',
         [2] = 'currencyTwo',
@@ -210,7 +203,6 @@ function CurrencyModule:CreateFrames()
 end
 
 function CurrencyModule:RegisterFrameEvents()
-
     for i = 1, 3 do
         self.curButtons[i]:EnableMouse(true)
         self.curButtons[i]:RegisterForClicks("AnyUp")
@@ -241,7 +233,7 @@ function CurrencyModule:RegisterFrameEvents()
         end)
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
-    self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
+    self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
     self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
     self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
@@ -291,11 +283,31 @@ function CurrencyModule:RegisterFrameEvents()
     end)
 end
 
+function CurrencyModule:ExperienceGains()
+    -- Sorry but using global variables here was the cleanest way I could think of for implementing this feature!
+    CurXp = UnitXP('player')
+    MaxXp = UnitXPMax('player')
+    OldXp = OldXp or CurXp
+    KillsRemaining = KillsRemaining or 0
+    LastXp = LastXp or 0
+    XpGained = CurXp - OldXp
+    if XpGained > 0 then
+        KillsRemaining = (MaxXp - CurXp) / XpGained
+        LastXp = CurXp - OldXp
+    end
+    OldXp = UnitXP('player')
+    return XpGained, CurXp, MaxXp, KillsRemaining
+end
+
+function CurrencyModule:XpUpdate()
+    CurrencyModule:ExperienceGains()
+    CurrencyModule:Refresh()
+end
+
 function CurrencyModule:ShowTooltip()
     if not xb.db.profile.modules.currency.showTooltip then
         return
     end
-
     local r, g, b, _ = unpack(xb:HoverColors())
 
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
@@ -304,7 +316,6 @@ function CurrencyModule:ShowTooltip()
         xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
-
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
         local rested = GetXPExhaustion()
@@ -314,11 +325,16 @@ function CurrencyModule:ShowTooltip()
         -- Remaining
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
-        -- Rested
+        -- Kills remaining
+        GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+            string.format('%d', KillsRemaining), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+            string.format('%d', LastXp), r, g, b, 1, 1, 1)
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
                 string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
+        -- Rested
     else
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
@@ -333,6 +349,7 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:Show()
+    oldXp = UnitXP('player')
 end
 
 function CurrencyModule:GetDefaultOptions()
