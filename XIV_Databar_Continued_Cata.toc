@@ -2,7 +2,7 @@
 ## X-Interface: 40401
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
-## Version: 3.3
+## Version: 3.3.1
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
 ## SavedVariables: XIVBarDB
