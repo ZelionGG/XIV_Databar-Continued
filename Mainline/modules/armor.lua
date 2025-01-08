@@ -14,13 +14,18 @@ function ArmorModule:OnInitialize()
         [INVSLOT_HEAD] = {cur = 0, max = 0, pc = 0, text = HEADSLOT},
         [INVSLOT_SHOULDER] = {cur = 0, max = 0, pc = 0, text = SHOULDERSLOT},
         [INVSLOT_CHEST] = {cur = 0, max = 0, pc = 0, text = CHESTSLOT},
+        [INVSLOT_WRIST] = {cur = 0, max = 0, pc = 0, text = WRISTSLOT},
+        [INVSLOT_HAND] = {cur = 0, max = 0, pc = 0, text = HANDSSLOT},
         [INVSLOT_WAIST] = {cur = 0, max = 0, pc = 0, text = WAISTSLOT},
         [INVSLOT_LEGS] = {cur = 0, max = 0, pc = 0, text = LEGSSLOT},
         [INVSLOT_FEET] = {cur = 0, max = 0, pc = 0, text = FEETSLOT},
-        [INVSLOT_WRIST] = {cur = 0, max = 0, pc = 0, text = WRISTSLOT},
-        [INVSLOT_HAND] = {cur = 0, max = 0, pc = 0, text = HANDSSLOT},
         [INVSLOT_MAINHAND] = {cur = 0, max = 0, pc = 0, text = MAINHANDSLOT},
         [INVSLOT_OFFHAND] = {cur = 0, max = 0, pc = 0, text = SECONDARYHANDSLOT}
+    }
+    self.slotOrder = {
+        INVSLOT_HEAD, INVSLOT_SHOULDER, INVSLOT_CHEST, INVSLOT_WRIST,
+        INVSLOT_HAND, INVSLOT_WAIST, INVSLOT_LEGS, INVSLOT_FEET,
+        INVSLOT_MAINHAND, INVSLOT_OFFHAND
     }
     self.MapRects = {}
 end
@@ -67,7 +72,8 @@ function ArmorModule:RegisterFrameEvents()
             GameTooltip:AddLine("|cFFFFFFFF[|r" .. AUCTION_CATEGORY_ARMOR ..
                                     "|cFFFFFFFF]|r", r, g, b)
             GameTooltip:AddLine(" ")
-            for i, v in pairs(ArmorModule.durabilityList) do
+            for _, slotId in ipairs(ArmorModule.slotOrder) do
+                local v = ArmorModule.durabilityList[slotId]
                 if v.max and v.max > 0 then
                     local u20G, u20B = 1, 1
                     if v.pc <= 20 then u20G, u20B = 0, 0 end
@@ -190,8 +196,9 @@ function ArmorModule:UpdateDurabilityText()
     local text = ''
     local lowest = 101 -- store the most broken armor piece's percentage
 
-    for i, v in pairs(self.durabilityList) do
-        local curDur, maxDur = GetInventoryItemDurability(i)
+    for _, slotId in ipairs(self.slotOrder) do
+        local curDur, maxDur = GetInventoryItemDurability(slotId)
+        local v = self.durabilityList[slotId]
         if curDur and maxDur then
             v.cur = curDur
             v.max = maxDur
