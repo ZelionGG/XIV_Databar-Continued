@@ -234,7 +234,7 @@ function CurrencyModule:RegisterFrameEvents()
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
-    self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
+    self:RegisterEvent('PLAYER_LEVEL_UP', 'XpUpdate')
     self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
     self.currencyFrame:EnableMouse(true)
@@ -284,18 +284,38 @@ function CurrencyModule:RegisterFrameEvents()
 end
 
 function CurrencyModule:ExperienceGains()
-    -- Sorry but using global variables here was the cleanest way I could think of for implementing this feature!
+    -- Get current XP values
     CurXp = UnitXP('player')
     MaxXp = UnitXPMax('player')
+    
+    -- Initialize stored values if needed
     OldXp = OldXp or CurXp
-    KillsRemaining = KillsRemaining or 0
     LastXp = LastXp or 0
+    KillsRemaining = KillsRemaining or 0
+    
+    -- Check for level up (current XP will be less than old XP)
+    if CurXp < OldXp then
+        -- On level up, calculate kills remaining using last known XP gain
+        if LastXp > 0 then
+            KillsRemaining = MaxXp / LastXp
+        else
+            KillsRemaining = 0
+        end
+        OldXp = CurXp
+        XpGained = 0
+        return XpGained, CurXp, MaxXp, KillsRemaining
+    end
+    
+    -- Calculate and update XP changes
     XpGained = CurXp - OldXp
     if XpGained > 0 then
         KillsRemaining = (MaxXp - CurXp) / XpGained
-        LastXp = CurXp - OldXp
+        LastXp = XpGained
     end
-    OldXp = UnitXP('player')
+    
+    -- Store current XP for next update
+    OldXp = CurXp
+    
     return XpGained, CurXp, MaxXp, KillsRemaining
 end
 
@@ -326,15 +346,26 @@ function CurrencyModule:ShowTooltip()
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
         -- Kills remaining
-        GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-            string.format('%d', KillsRemaining), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
-            string.format('%d', LastXp), r, g, b, 1, 1, 1)
+        if KillsRemaining then
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                '~' .. string.format('%d', math.ceil(KillsRemaining)), r, g, b, 1, 1, 1)
+        else
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                string.format('%d', 0), r, g, b, 1, 1, 1)
+        end
+        -- Last xp gain
+        if LastXp then
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', LastXp), r, g, b, 1, 1, 1)
+        else
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', 0), r, g, b, 1, 1, 1)
+        end
+        -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
                 string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
-        -- Rested
     else
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
@@ -349,7 +380,7 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:Show()
-    oldXp = UnitXP('player')
+    OldXp = UnitXP('player')
 end
 
 function CurrencyModule:GetDefaultOptions()
