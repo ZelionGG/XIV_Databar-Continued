@@ -666,18 +666,15 @@ end
 
 function XIVBar:GetColor(name)
     local profile = self.db.profile.color
-    local a = profile[name].a
-    -- what a stupid hacky solution, the whole config part is kind of fucked and i dread having to come fix this eventually.
-    -- feel like just burning it all down and writing something from scratch when seeing shit like this. terrible library.
-    if name == 'normal' then
-        -- use class color for normal color
-        if profile.useTextCC then
-            local cr, cg, cb, _ = self:GetClassColors()
-            r, g, b = cr, cg, cb
-        end
+    local r, g, b, a = profile[name].r, profile[name].g, profile[name].b, profile[name].a
+    
+    if name == 'normal' and profile.useTextCC then
+        r, g, b, _ = self:GetClassColors()
+    elseif name == 'barColor' and profile.useCC then
+        r, g, b, _ = self:GetClassColors()
     end
-    -- use self-picked color for normal color
-    return profile[name].r, profile[name].g, profile[name].b, a
+
+    return r, g, b, a
 end
 
 function XIVBar:HoverColors()
