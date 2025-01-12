@@ -1,4 +1,4 @@
-## Interface: 110007, 110100
+## Interface: 110007
 ## X-Interface: 110007, 110100
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
