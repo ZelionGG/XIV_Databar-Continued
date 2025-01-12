@@ -716,9 +716,30 @@ function XIVBar:HideBarEvent()
     bar:RegisterEvent("PET_BATTLE_CLOSE")
     bar:RegisterEvent("TAXIMAP_CLOSED")
     bar:RegisterEvent("VEHICLE_POWER_SHOW")
+    bar:RegisterEvent("PLAYER_ENTERING_WORLD")
+    bar:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
     bar:SetScript("OnEvent", function(_, event, ...)
         local barFrame = XIVBar:GetFrame("bar")
+        
+        -- Handle zone changes and instance transitions
+        if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
+            C_Timer.After(0.5, function()
+                if not barFrame:IsVisible() then
+                    barFrame:Show()
+                end
+                -- Full refresh of the bar and modules
+                XIVBar:Refresh()
+                -- Force update module positions
+                if XIVBar.db.profile.general.barPosition == 'TOP' then
+                    OffsetUI()
+                else
+                    XIVBar:ResetUI()
+                end
+            end)
+            return
+        end
+        
         if self.db.profile.general.barFlightHide then
             if event == "VEHICLE_POWER_SHOW" then
                 if not barFrame:IsVisible() then barFrame:Show() end
@@ -754,6 +775,8 @@ function XIVBar:HideBarEvent()
             end
             if event == "PLAYER_REGEN_ENABLED" and not barFrame:IsVisible() then
                 barFrame:Show()
+                -- Refresh modules when showing after combat
+                XIVBar:Refresh()
             end
         end)
     else
