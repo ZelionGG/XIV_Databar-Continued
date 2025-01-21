@@ -1,8 +1,8 @@
 # XIV_Databar Continued
 
-## [3.3.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.3.1) (2025-01-08)
+## [3.4](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.4) (2025-01-21)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.3...v3.3.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.3.1...v3.4) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ## _Happy new year everyone ! Wishing you all the best in the coming year !_
 
