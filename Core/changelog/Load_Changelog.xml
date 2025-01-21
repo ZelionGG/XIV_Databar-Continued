@@ -38,6 +38,7 @@
 	<Script file='Old/v3/3.1.lua'/>
 	<Script file='Old/v3/3.2.lua'/>
 	<Script file='Old/v3/3.3.lua'/>
+	<Script file='Old/v3/3.3.1.lua'/>
 	<!-- LIVE -->
-	<Script file='3.3.1.lua'/>
+	<Script file='3.4.lua'/>
 </Ui>
