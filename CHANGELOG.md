@@ -1,11 +1,18 @@
 # XIV_Databar Continued
 
-## [3.4](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.4) (2025-01-21)
+## [3.4](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.4) (2025-01-24)
 
 [Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.3.1...v3.4) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ## _Happy new year everyone ! Wishing you all the best in the coming year !_
 
-### _Retail :_
+### _Global :_
 
-- Updated for Retail 11.0.7 (and pre 11.1).
+- Brought back the barColor and barCC options for the color and opacity of the databar.
+- Fixed the class color handling errors for the text and bar colors that caused the color to not properly use the class color when changing character.
+- Small refactoring of the **Armor** module to order the durability using the character profile logic from top-left to bottom-right.
+- Fixing a bug making the bar disappear when entering certain areas.
+
+### _Classic :_
+
+- Implemented a new Experience/Kill tracker that will allow you to see approximately how many mobs you need to kill to level up in the **Currency** module.
