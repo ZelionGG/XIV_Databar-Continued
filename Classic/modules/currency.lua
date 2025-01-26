@@ -3,14 +3,6 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
-
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
-    ---Proxy for C_CurrencyInfo.GetCurrencyListLink
-    function GetCurrencyListLink(index)
-        return C_CurrencyInfo.GetCurrencyListLink(index)
-    end
-end
-
 local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
 
 function CurrencyModule:GetName()
@@ -18,6 +10,14 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
+    self.rerollItems = {697, -- Elder Charm of Good Fortune
+    752, -- Mogu Rune of Fate
+    776, -- Warforged Seal
+    994, -- Seal of Tempered Fate
+    1129, -- Seal of Inevitable Fate
+    1273 -- Seal of Broken Fate
+    }
+
     self.intToOpt = {
         [1] = 'currencyOne',
         [2] = 'currencyTwo',
@@ -52,8 +52,7 @@ function CurrencyModule:Refresh()
     local db = xb.db.profile
     xb.constants.playerLevel = UnitLevel("player")
     if InCombatLockdown() then
-        if xb.constants.playerLevel < GetMaxLevelForExpansionLevel(GetExpansionLevel()) and
-            db.modules.currency.showXPbar then
+        if xb.constants.playerLevel < GetMaxPlayerLevel() and db.modules.currency.showXPbar then
             self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
             self.xpBar:SetValue(UnitXP('player'))
             self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
@@ -74,7 +73,7 @@ function CurrencyModule:Refresh()
     end
     self.xpFrame:Hide()
 
-    if xb.constants.playerLevel < GetMaxLevelForExpansionLevel(GetExpansionLevel()) and db.modules.currency.showXPbar then
+    if xb.constants.playerLevel < GetMaxPlayerLevel() and db.modules.currency.showXPbar then
         -- self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
 
         local textHeight = floor((xb:GetHeight() - 4) / 2)
@@ -111,19 +110,14 @@ function CurrencyModule:Refresh()
         self.xpFrame:Show()
     else -- show xp bar/show currencies
         local iconsWidth = 0
-        for i = 1, GetNumWatchedTokens() do
-            -- if db.modules.currency[self.intToOpt[i]] ~= '0' then
-            local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
-            iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
-            -- end
-            if i == 1 then
-                self.curButtons[1]:SetPoint('LEFT')
-            elseif i == 2 then
-                self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-            elseif i == 3 then
-                self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+        for i = 1, 3 do
+            if db.modules.currency[self.intToOpt[i]] ~= '0' then
+                iconsWidth = iconsWidth + self:StyleCurrencyFrame(tonumber(db.modules.currency[self.intToOpt[i]]), i)
             end
         end
+        self.curButtons[1]:SetPoint('LEFT')
+        self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
+        self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
         self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
     end -- show currencies
 
@@ -145,13 +139,14 @@ function CurrencyModule:Refresh()
     self.currencyFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint, xOffset, 0)
 end
 
-function CurrencyModule:StyleCurrencyFrame(curId, curQuantity, i)
+function CurrencyModule:StyleCurrencyFrame(curId, i)
     local db = xb.db.profile
     local iconSize = db.text.fontSize + db.general.barPadding
     local icon = xb.constants.mediaPath .. 'datatexts\\garres'
     if tContains(self.rerollItems, curId) then
         icon = xb.constants.mediaPath .. 'datatexts\\reroll'
     end
+    local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
 
     local iconPoint = 'RIGHT'
     local textPoint = 'LEFT'
@@ -163,26 +158,22 @@ function CurrencyModule:StyleCurrencyFrame(curId, curQuantity, i)
         padding = -(padding)
     end
 
-    local buttonWidth = 0
-    if curId ~= nil then
-        self.curIcons[i]:ClearAllPoints()
-        self.curText[i]:ClearAllPoints()
+    self.curIcons[i]:ClearAllPoints()
+    self.curText[i]:ClearAllPoints()
 
-        self.curIcons[i]:SetTexture(icon)
-        self.curIcons[i]:SetSize(iconSize, iconSize)
-        self.curIcons[i]:SetPoint(iconPoint)
-        self.curIcons[i]:SetVertexColor(xb:GetColor('normal'))
+    self.curIcons[i]:SetTexture(icon)
+    self.curIcons[i]:SetSize(iconSize, iconSize)
+    self.curIcons[i]:SetPoint(iconPoint)
+    self.curIcons[i]:SetVertexColor(xb:GetColor('normal'))
 
-        self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
-        self.curText[i]:SetTextColor(xb:GetColor('normal'))
-        self.curText[i]:SetText(curQuantity)
-        self.curText[i]:SetPoint(iconPoint, self.curIcons[i], textPoint, padding, 0)
+    self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
+    self.curText[i]:SetTextColor(xb:GetColor('normal'))
+    self.curText[i]:SetText(curInfo.quantity)
+    self.curText[i]:SetPoint(iconPoint, self.curIcons[i], textPoint, padding, 0)
 
-        buttonWidth = iconSize + self.curText[i]:GetStringWidth() + 5
-        self.curButtons[i]:SetSize(buttonWidth, xb:GetHeight())
-        self.curButtons[i]:Show()
-    end
-
+    local buttonWidth = iconSize + self.curText[i]:GetStringWidth() + 5
+    self.curButtons[i]:SetSize(buttonWidth, xb:GetHeight())
+    self.curButtons[i]:Show()
     return buttonWidth
 end
 
@@ -203,6 +194,7 @@ function CurrencyModule:CreateFrames()
 end
 
 function CurrencyModule:RegisterFrameEvents()
+
     for i = 1, 3 do
         self.curButtons[i]:EnableMouse(true)
         self.curButtons[i]:RegisterForClicks("AnyUp")
@@ -233,9 +225,9 @@ function CurrencyModule:RegisterFrameEvents()
         end)
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
-    self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
-    self:RegisterEvent('PLAYER_LEVEL_UP', 'XpUpdate')
-    self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
+    self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
+    self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
+    -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
     self.currencyFrame:EnableMouse(true)
     self.currencyFrame:SetScript('OnEnter', function()
@@ -283,59 +275,19 @@ function CurrencyModule:RegisterFrameEvents()
     end)
 end
 
-function CurrencyModule:ExperienceGains()
-    -- Get current XP values
-    CurXp = UnitXP('player')
-    MaxXp = UnitXPMax('player')
-    
-    -- Initialize stored values if needed
-    OldXp = OldXp or CurXp
-    LastXp = LastXp or 0
-    KillsRemaining = KillsRemaining or 0
-    
-    -- Check for level up (current XP will be less than old XP)
-    if CurXp < OldXp then
-        -- On level up, calculate kills remaining using last known XP gain
-        if LastXp > 0 then
-            KillsRemaining = MaxXp / LastXp
-        else
-            KillsRemaining = 0
-        end
-        OldXp = CurXp
-        XpGained = 0
-        return XpGained, CurXp, MaxXp, KillsRemaining
-    end
-    
-    -- Calculate and update XP changes
-    XpGained = CurXp - OldXp
-    if XpGained > 0 then
-        KillsRemaining = (MaxXp - CurXp) / XpGained
-        LastXp = XpGained
-    end
-    
-    -- Store current XP for next update
-    OldXp = CurXp
-    
-    return XpGained, CurXp, MaxXp, KillsRemaining
-end
-
-function CurrencyModule:XpUpdate()
-    CurrencyModule:ExperienceGains()
-    CurrencyModule:Refresh()
-end
-
 function CurrencyModule:ShowTooltip()
     if not xb.db.profile.modules.currency.showTooltip then
         return
     end
+
     local r, g, b, _ = unpack(xb:HoverColors())
 
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
 
-    if xb.constants.playerLevel < GetMaxLevelForExpansionLevel(GetExpansionLevel()) and
-        xb.db.profile.modules.currency.showXPbar then
+    if xb.constants.playerLevel < GetMaxPlayerLevel() and xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
+
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
         local rested = GetXPExhaustion()
@@ -345,22 +297,6 @@ function CurrencyModule:ShowTooltip()
         -- Remaining
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
-        -- Kills remaining
-        if KillsRemaining then
-            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-                '~' .. string.format('%d', math.ceil(KillsRemaining)), r, g, b, 1, 1, 1)
-        else
-            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
-                string.format('%d', 0), r, g, b, 1, 1, 1)
-        end
-        -- Last xp gain
-        if LastXp then
-            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
-                string.format('%d', LastXp), r, g, b, 1, 1, 1)
-        else
-            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
-                string.format('%d', 0), r, g, b, 1, 1, 1)
-        end
         -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
@@ -370,9 +306,13 @@ function CurrencyModule:ShowTooltip()
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
 
-        for i = 1, GetNumWatchedTokens() do
-            local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
-            GameTooltip:AddDoubleLine(name, string.format('%d', count), r, g, b, 1, 1, 1)
+        for i = 1, 3 do
+            if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
+                local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
+                local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
+                GameTooltip:AddDoubleLine(curInfo.name, string.format('%d/%d', curInfo.quantity, curInfo.maxQuantity),
+                    r, g, b, 1, 1, 1)
+            end
         end
 
         GameTooltip:AddLine(" ")
@@ -380,7 +320,21 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:Show()
-    OldXp = UnitXP('player')
+end
+
+function CurrencyModule:GetCurrencyOptions()
+    local curOpts = {
+        ['0'] = ''
+    }
+    for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
+        local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
+        if not listInfo.isHeader and not listInfo.isTypeUnused then
+            local cL = C_CurrencyInfo.GetCurrencyListLink(i)
+            curOpts[tostring(C_CurrencyInfo.GetCurrencyIDFromLink(cL))] =
+                C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetCurrencyIDFromLink(cL)).name
+        end
+    end
+    return curOpts
 end
 
 function CurrencyModule:GetDefaultOptions()
@@ -389,7 +343,10 @@ function CurrencyModule:GetDefaultOptions()
         showXPbar = true,
         xpBarCC = false,
         showTooltip = true,
-        textOnRight = true
+        textOnRight = true,
+        currencyOne = '0',
+        currencyTwo = '0',
+        currencyThree = '0'
     }
 end
 
@@ -465,6 +422,63 @@ function CurrencyModule:GetConfig()
                     xb.db.profile.modules.currency.textOnRight = val;
                     self:Refresh();
                 end
+            },
+            currency = {
+                type = 'group',
+                name = L['Currency Select'],
+                order = 5,
+                inline = true,
+                -- disabled = function() return (xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar); end, -- keep around in case
+                args = {
+                    currencyOne = {
+                        name = L['First Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+                        type = "select",
+                        order = 1,
+                        values = function()
+                            return self:GetCurrencyOptions();
+                        end,
+                        style = "dropdown",
+                        get = function()
+                            return xb.db.profile.modules.currency.currencyOne;
+                        end,
+                        set = function(info, value)
+                            xb.db.profile.modules.currency.currencyOne = value;
+                            self:Refresh();
+                        end
+                    },
+                    currencyTwo = {
+                        name = L['Second Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+                        type = "select",
+                        order = 2,
+                        values = function()
+                            return self:GetCurrencyOptions();
+                        end,
+                        style = "dropdown",
+                        get = function()
+                            return xb.db.profile.modules.currency.currencyTwo;
+                        end,
+                        set = function(info, value)
+                            xb.db.profile.modules.currency.currencyTwo = value;
+                            self:Refresh();
+                        end
+                    },
+                    currencyThree = {
+                        name = L['Third Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+                        type = "select",
+                        order = 3,
+                        values = function()
+                            return self:GetCurrencyOptions();
+                        end,
+                        style = "dropdown",
+                        get = function()
+                            return xb.db.profile.modules.currency.currencyThree;
+                        end,
+                        set = function(info, value)
+                            xb.db.profile.modules.currency.currencyThree = value;
+                            self:Refresh();
+                        end
+                    }
+                }
             }
         }
     }
