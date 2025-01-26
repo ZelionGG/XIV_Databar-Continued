@@ -3,6 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
+local isClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
     ---Proxy for C_CurrencyInfo.GetCurrencyListLink
@@ -75,8 +76,6 @@ function CurrencyModule:Refresh()
     self.xpFrame:Hide()
 
     if xb.constants.playerLevel < GetMaxLevelForExpansionLevel(GetExpansionLevel()) and db.modules.currency.showXPbar then
-        -- self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
-
         local textHeight = floor((xb:GetHeight() - 4) / 2)
         local barHeight = (iconSize - textHeight - 2)
         if barHeight < 2 then
@@ -109,29 +108,29 @@ function CurrencyModule:Refresh()
         self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
-    else -- show xp bar/show currencies
+    elseif not isClassicEra then -- Only show currencies if not in Classic Era
         local iconsWidth = 0
-        for i = 1, GetNumWatchedTokens() do
-            -- if db.modules.currency[self.intToOpt[i]] ~= '0' then
-            local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
-            iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
-            -- end
-            if i == 1 then
-                self.curButtons[1]:SetPoint('LEFT')
-            elseif i == 2 then
-                self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-            elseif i == 3 then
-                self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+        if GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
+            for i = 1, GetNumWatchedTokens() do
+                local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
+                if name then
+                    iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
+                    if i == 1 then
+                        self.curButtons[1]:SetPoint('LEFT')
+                    elseif i == 2 then
+                        self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
+                    elseif i == 3 then
+                        self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+                    end
+                end
             end
         end
         self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
-    end -- show currencies
+    end
 
-    -- self.currencyFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
     local anchorFrame = xb:GetFrame('tradeskillFrame')
-    -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
     if anchorFrame ~= nil and not anchorFrame:IsVisible() then
         if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
             anchorFrame = xb:GetFrame('clockFrame')
