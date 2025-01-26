@@ -28,6 +28,7 @@ function CurrencyModule:OnInitialize()
     self.curButtons = {}
     self.curIcons = {}
     self.curText = {}
+    self.rerollItems = {} -- Initialize empty rerollItems table
 end
 
 function CurrencyModule:OnEnable()
