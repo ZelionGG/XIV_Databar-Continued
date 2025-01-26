@@ -85,9 +85,9 @@ function ArmorModule:RegisterFrameEvents()
                     GameTooltip:AddDoubleLine(format(
                                                   '|T%s:14:14:0:0:64:64:4:60:4:60|t %s',
                                                   GetInventoryItemTexture(
-                                                      'player', i),
+                                                      'player', slotId),
                                                   GetInventoryItemLink('player',
-                                                                       i)),
+                                                                       slotId)),
                                               string.format('%d/%d (%d%%)',
                                                             v.cur, v.max, v.pc),
                                               r, g, b, 1, u20G, u20B)
