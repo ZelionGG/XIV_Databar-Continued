@@ -1,6 +1,3 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Script file="Libs\LibClassicSpecs\LibClassicSpecs.lua" />
-  <Script file="Libs\LibDetours-1.0\LibDetours-1.0.lua" />
-  <Script file="Libs\LibClassicInspector\LibClassicInspector.lua" />
   <Include file="Libs\LibAddonCompat-1.0\LibAddonCompat-1.0.xml" />
 </Ui>
