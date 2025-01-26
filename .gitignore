@@ -137,3 +137,5 @@ luac.out
 # Embedded Libriaries
 Libs
 .history/
+XIV_Databar_Continued.code-workspace
+.vscode/settings.json
