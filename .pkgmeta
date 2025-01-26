@@ -21,9 +21,6 @@ externals:
   Libs/LibSharedMedia-3.0: https://repos.curseforge.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
   Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
   Classic/Libs/LibAddonCompat-1.0: https://github.com/Eliote/LibAddonCompat-1.0
-  Classic/Libs/LibClassicInspector: https://github.com/zik0666/TacoTip-updated-for-Cataclysm-pre-patch-game-version/tree/master/Libs/LibClassicInspector
-  Classic/Libs/LibClassicSpecs: https://github.com/tstirrat/LibClassicSpecs
-  Classic/Libs/LibDetours-1.0: https://github.com/zik0666/TacoTip-updated-for-Cataclysm-pre-patch-game-version/tree/master/Libs/LibDetours-1.0
 
 manual-changelog:
   filename: CHANGELOG.md

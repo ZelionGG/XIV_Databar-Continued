@@ -136,6 +136,4 @@ luac.out
 ### WoW Development ###
 # Embedded Libriaries
 Libs
-!Classic/Libs/LibClassicInspector
-!Classic/Libs/LibDetours-1.0
 .history/
