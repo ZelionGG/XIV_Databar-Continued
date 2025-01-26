@@ -5,24 +5,6 @@ local L = XIVBar.L;
 
 local TalentModule = xb:NewModule("TalentModule", 'AceEvent-3.0')
 
-local LibClassicSpecs = LibStub("LibClassicSpecs")
-local CI = LibStub("LibClassicInspector")
-
-local GetNumClasses = _G.GetNumClasses or LibClassicSpecs.GetNumClasses
-local GetClassInfo = _G.GetClassInfo or LibClassicSpecs.GetClassInfo
-local GetNumSpecializationsForClassID = _G.GetNumSpecializationsForClassID or
-                                            LibClassicSpecs.GetNumSpecializationsForClassID
-
-local GetActiveSpecGroup = _G.GetActiveSpecGroup or LibClassicSpecs.GetActiveSpecGroup
-
-local GetSpecialization = _G.GetSpecialization or LibClassicSpecs.GetSpecialization
-local GetSpecializationInfo = _G.GetSpecializationInfo or LibClassicSpecs.GetSpecializationInfo
-local GetSpecializationInfoForClassID = _G.GetSpecializationInfoForClassID or
-                                            LibClassicSpecs.GetSpecializationInfoForClassID
-
-local GetSpecializationRole = _G.GetSpecializationRole or LibClassicSpecs.GetSpecializationRole
-local GetSpecializationRoleByID = _G.GetSpecializationRoleByID or LibClassicSpecs.GetSpecializationRoleByID
-
 function TalentModule:GetName()
     return TALENTS;
 end
@@ -129,31 +111,64 @@ function TalentModule:Refresh()
     end
 
     local guid = UnitGUID('player')
-    local localizedClass, class = UnitClass('player')
+    local localizedClass, class, classIndex = UnitClass('player')
 
-    self.firstSpecID = CI:GetSpecialization(guid, 1)
-    self.secondSpecID = CI:GetSpecialization(guid, 2)
+    -- Get active spec group (1 or 2)
+    local active = GetActiveTalentGroup()
+    self.currentSpecID = active
 
-    local active = CI:GetActiveTalentGroup(guid)
-    self.currentSpecID = CI:GetSpecialization(guid, active)
+    -- Get talent info for both specs
+    local highestPoints1, name1, activeTab1 = 0, "", 1
+    local highestPoints2, name2, activeTab2 = 0, "", 1
+    
+    -- Get number of specs available (will be 2 in SoD, 1 in vanilla)
+    local numSpecs = GetNumTalentGroups()
+    
+    -- Get info for first spec
+    for i = 1, GetNumTalentTabs() do
+        local tabID, _, _, _, pointsSpent = GetTalentTabInfo(i, false, false, 1)
+        local _, name, _, _, _, _ = GetSpecializationInfoForSpecID(tabID)
+        pointsSpent = tonumber(pointsSpent) or 0
+        if pointsSpent > highestPoints1 then
+            highestPoints1 = pointsSpent
+            name1 = name or "Unknown"
+            activeTab1 = i
+        end
+    end
+    
+    -- Get info for second spec if available
+    if numSpecs > 1 then
+        for i = 1, GetNumTalentTabs() do
+            local tabID, _, _, _, pointsSpent = GetTalentTabInfo(i, false, false, 2)
+            local _, name, _, _, _, _ = GetSpecializationInfoForSpecID(tabID)
+            pointsSpent = tonumber(pointsSpent) or 0
+            if pointsSpent > highestPoints2 then
+                highestPoints2 = pointsSpent
+                name2 = name or "Unknown"
+                activeTab2 = i
+            end
+        end
+    end
 
-    local name = ""
-    if (self.currentSpecID == nil) then
-        name = "Not set"
-    else
-        name = CI:GetSpecializationName(class, self.currentSpecID, true)
+    local name = "Not set"
+    local activeTab = 1
+    if active == 1 and highestPoints1 > 0 then
+        name = name1
+        activeTab = activeTab1
+    elseif active == 2 and highestPoints2 > 0 then
+        name = name2
+        activeTab = activeTab2
     end
 
     local iconSize = db.text.fontSize + db.general.barPadding
     local textHeight = db.text.fontSize
 
     self.specIcon:SetTexture(self.classIcon)
-    if (self.currentSpecID == nil) then
+    if name == "Not set" then
         self.specIcon:SetTexCoord(unpack(self.specCoords[1]))
     else
-        self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
+        self.specIcon:SetTexCoord(unpack(self.specCoords[activeTab]))
     end
-
     self.specIcon:SetSize(iconSize, iconSize)
     self.specIcon:SetPoint('LEFT')
     self.specIcon:SetVertexColor(xb:GetColor('normal'))
@@ -295,6 +310,15 @@ function TalentModule:CreateSpecPopup()
         return;
     end
 
+    -- Reset existing buttons
+    for _, button in pairs(self.specButtons) do
+        if button then
+            button:Hide()
+            button:SetParent(nil)
+        end
+    end
+    wipe(self.specButtons)
+
     local db = xb.db.profile
     local iconSize = db.text.fontSize + db.general.barPadding
     self.specOptionString = self.specOptionString or self.specPopup:CreateFontString(nil, 'OVERLAY')
@@ -310,73 +334,81 @@ function TalentModule:CreateSpecPopup()
     local changedWidth = false
 
     local guid = UnitGUID('player')
-    local localizedClass, class = UnitClass('player')
+    local localizedClass, class, classIndex = UnitClass('player')
 
     -- We check if character has dual-spec
     local numSpecs = GetNumTalentGroups()
 
     for i = 1, numSpecs do
-        if self.specButtons[i] == nil then
-            local specID = CI:GetSpecialization(guid, i)
-            local name = ""
-            if (specID == nil) then
-                name = "Not set"
-            else
-                name = CI:GetSpecializationName(class, specID, true)
+        local name = "Not set"
+        local activeTab = 1
+        
+        -- Get highest points spec for this spec group
+        local highestPoints = 0
+        for tabIndex = 1, GetNumTalentTabs() do
+            local tabID, _, _, _, pointsSpent = GetTalentTabInfo(tabIndex, false, false, i)
+            pointsSpent = tonumber(pointsSpent) or 0
+            if pointsSpent > highestPoints then
+                highestPoints = pointsSpent
+                local _, specName = GetSpecializationInfoForSpecID(tabID)
+                name = specName or "Not set"
+                activeTab = tabIndex
             end
-            local button = CreateFrame('BUTTON', nil, self.specPopup)
-            local buttonText = button:CreateFontString(nil, 'OVERLAY')
-            local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
+        end
 
-            buttonIcon:SetTexture(self.classIcon)
-            if (specID == nil) then
-                buttonIcon:SetTexCoord(unpack(self.specCoords[1]))
-            else
-                buttonIcon:SetTexCoord(unpack(self.specCoords[specID]))
-            end
-            buttonIcon:SetSize(iconSize, iconSize)
-            buttonIcon:SetPoint('LEFT')
-            buttonIcon:SetVertexColor(xb:GetColor('normal'))
+        local button = CreateFrame('BUTTON', nil, self.specPopup)
+        local buttonText = button:CreateFontString(nil, 'OVERLAY')
+        local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
 
-            buttonText:SetFont(xb:GetFont(db.text.fontSize))
+        buttonIcon:SetTexture(self.classIcon)
+        if name == "Not set" then
+            buttonIcon:SetTexCoord(unpack(self.specCoords[1]))
+        else
+            buttonIcon:SetTexCoord(unpack(self.specCoords[activeTab]))
+        end
+        buttonIcon:SetSize(iconSize, iconSize)
+        buttonIcon:SetPoint('LEFT')
+        buttonIcon:SetVertexColor(xb:GetColor('normal'))
+
+        buttonText:SetFont(xb:GetFont(db.text.fontSize))
+        buttonText:SetTextColor(xb:GetColor('normal'))
+        buttonText:SetText(name)
+        buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
+        local textWidth = iconSize + 5 + buttonText:GetStringWidth()
+
+        button:SetID(i)
+        button:SetSize(textWidth, iconSize)
+        button.isSettable = true
+
+        button:EnableMouse(true)
+        button:RegisterForClicks('AnyUp')
+
+        button:SetScript('OnEnter', function()
+            buttonText:SetTextColor(r, g, b, 1)
+        end)
+
+        button:SetScript('OnLeave', function()
             buttonText:SetTextColor(xb:GetColor('normal'))
-            buttonText:SetText(name)
-            buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
-            local textWidth = iconSize + 5 + buttonText:GetStringWidth()
+        end)
 
-            button:SetID(i)
-            button:SetSize(textWidth, iconSize)
-            button.isSettable = true
-
-            button:EnableMouse(true)
-            button:RegisterForClicks('AnyUp')
-
-            button:SetScript('OnEnter', function()
-                buttonText:SetTextColor(r, g, b, 1)
-            end)
-
-            button:SetScript('OnLeave', function()
-                buttonText:SetTextColor(xb:GetColor('normal'))
-            end)
-
-            button:SetScript('OnClick', function(self, button)
-                if InCombatLockdown() then
-                    return;
-                end
-                if button == 'LeftButton' then
-                    SetActiveTalentGroup(i)
-                end
-                TalentModule.specPopup:Hide()
-            end)
-
-            self.specButtons[i] = button
-
-            if textWidth > popupWidth then
-                popupWidth = textWidth
-                changedWidth = true
+        button:SetScript('OnClick', function(self, button)
+            if InCombatLockdown() then
+                return;
             end
-        end -- if nil
-    end -- for ipairs portOptions
+            if button == 'LeftButton' then
+                SetActiveTalentGroup(i)
+            end
+            TalentModule.specPopup:Hide()
+        end)
+
+        self.specButtons[i] = button
+
+        if textWidth > popupWidth then
+            popupWidth = textWidth
+            changedWidth = true
+        end
+    end
+
     for portId, button in pairs(self.specButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
@@ -386,7 +418,8 @@ function TalentModule:CreateSpecPopup()
         else
             button:Hide()
         end
-    end -- for id/button in portButtons
+    end
+
     if changedWidth then
         popupWidth = popupWidth + self.extraPadding
     end
@@ -398,6 +431,7 @@ function TalentModule:CreateSpecPopup()
     if popupWidth < (self.specOptionString:GetStringWidth() + self.extraPadding) then
         popupWidth = (self.specOptionString:GetStringWidth() + self.extraPadding)
     end
+
     self.specPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 
     local popupPadding = xb.constants.popupPadding
