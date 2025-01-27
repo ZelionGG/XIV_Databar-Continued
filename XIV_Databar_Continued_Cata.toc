@@ -1,5 +1,4 @@
 ## Interface: 40401
-## X-Interface: 40401
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
