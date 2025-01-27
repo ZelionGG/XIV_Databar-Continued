@@ -1,6 +1,6 @@
 # XIV_Databar Continued
 
-## [3.4](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.4) (2025-01-24)
+## [3.4](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.4) (2025-01-27)
 
 [Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.3.1...v3.4) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
@@ -16,3 +16,10 @@
 ### _Classic :_
 
 - Implemented a new Experience/Kill tracker that will allow you to see approximately how many mobs you need to kill to level up in the **Currency** module.
+- Fixed the **Talents** module so that the popup and the bar shows the right information.
+- Fixed the **Armor** module showing the head item for each slot.
+
+### _Classic SoD :_
+
+- Removed the Calendar button from the **Clock** module.
+- Fixed the **Currency** module to remove the Currency part for classic SoD and showing the XP bar correctly for Cataclysm Classic.
