@@ -97,12 +97,6 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
 ## Roadmap
 
-- [x] Add a Loadout manager (next to the talent manager) that will allow you to change your talents easily
-- [x] Hearthstones
-    - [x] Add a hearthstone randomizer (uses a random hearthstone each time you click the button)
-    - [x] Add an option to favor Hearthstones
-- [ ] Changelog in the GUI 
-
 See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
