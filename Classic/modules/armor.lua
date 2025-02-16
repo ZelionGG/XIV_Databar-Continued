@@ -5,81 +5,35 @@ local L = XIVBar.L;
 
 local ArmorModule = xb:NewModule("ArmorModule", 'AceEvent-3.0')
 
-function ArmorModule:GetName()
-    return AUCTION_CATEGORY_ARMOR;
-end
+function ArmorModule:GetName() return AUCTION_CATEGORY_ARMOR; end
 
 function ArmorModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.durabilityLowest = 0
     self.durabilityList = {
-        [INVSLOT_HEAD] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = HEADSLOT
-        },
-        [INVSLOT_SHOULDER] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = SHOULDERSLOT
-        },
-        [INVSLOT_CHEST] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = CHESTSLOT
-        },
-        [INVSLOT_WAIST] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = WAISTSLOT
-        },
-        [INVSLOT_LEGS] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = LEGSSLOT
-        },
-        [INVSLOT_FEET] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = FEETSLOT
-        },
-        [INVSLOT_WRIST] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = WRISTSLOT
-        },
-        [INVSLOT_HAND] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = HANDSSLOT
-        },
-        [INVSLOT_MAINHAND] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = MAINHANDSLOT
-        },
-        [INVSLOT_OFFHAND] = {
-            cur = 0,
-            max = 0,
-            pc = 0,
-            text = SECONDARYHANDSLOT
-        }
+        [INVSLOT_HEAD] = {cur = 0, max = 0, pc = 0, text = HEADSLOT},
+        [INVSLOT_SHOULDER] = {cur = 0, max = 0, pc = 0, text = SHOULDERSLOT},
+        [INVSLOT_CHEST] = {cur = 0, max = 0, pc = 0, text = CHESTSLOT},
+        [INVSLOT_WRIST] = {cur = 0, max = 0, pc = 0, text = WRISTSLOT},
+        [INVSLOT_HAND] = {cur = 0, max = 0, pc = 0, text = HANDSSLOT},
+        [INVSLOT_WAIST] = {cur = 0, max = 0, pc = 0, text = WAISTSLOT},
+        [INVSLOT_LEGS] = {cur = 0, max = 0, pc = 0, text = LEGSSLOT},
+        [INVSLOT_FEET] = {cur = 0, max = 0, pc = 0, text = FEETSLOT},
+        [INVSLOT_MAINHAND] = {cur = 0, max = 0, pc = 0, text = MAINHANDSLOT},
+        [INVSLOT_OFFHAND] = {cur = 0, max = 0, pc = 0, text = SECONDARYHANDSLOT}
+    }
+    self.slotOrder = {
+        INVSLOT_HEAD, INVSLOT_SHOULDER, INVSLOT_CHEST, INVSLOT_WRIST,
+        INVSLOT_HAND, INVSLOT_WAIST, INVSLOT_LEGS, INVSLOT_FEET,
+        INVSLOT_MAINHAND, INVSLOT_OFFHAND
     }
     self.MapRects = {}
 end
 
 function ArmorModule:OnEnable()
     if self.armorFrame == nil then
-        self.armorFrame = CreateFrame("FRAME", AUCTION_CATEGORY_ARMOR, xb:GetFrame('bar'))
+        self.armorFrame = CreateFrame("FRAME", AUCTION_CATEGORY_ARMOR,
+                                      xb:GetFrame('bar'))
         xb:RegisterFrame('armorFrame', self.armorFrame)
     end
     self.armorFrame:Show()
@@ -95,14 +49,18 @@ function ArmorModule:OnDisable()
 end
 
 function ArmorModule:CreateFrames()
-    self.armorButton = self.armorButton or CreateFrame('BUTTON', nil, self.armorFrame)
+    self.armorButton = self.armorButton or
+                           CreateFrame('BUTTON', nil, self.armorFrame)
     self.armorButton:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
     self.armorButton:RegisterEvent("PLAYER_TARGET_CHANGED")
     self.armorButton:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-    self.armorIcon = self.armorIcon or self.armorButton:CreateTexture(nil, 'OVERLAY')
-    self.armorText = self.armorText or self.armorButton:CreateFontString(nil, 'OVERLAY')
-    self.coordText = self.coordText or self.armorButton:CreateFontString(nil, 'OVERLAY')
+    self.armorIcon = self.armorIcon or
+                         self.armorButton:CreateTexture(nil, 'OVERLAY')
+    self.armorText = self.armorText or
+                         self.armorButton:CreateFontString(nil, 'OVERLAY')
+    self.coordText = self.coordText or
+                         self.armorButton:CreateFontString(nil, 'OVERLAY')
 end
 
 function ArmorModule:RegisterFrameEvents()
@@ -113,19 +71,26 @@ function ArmorModule:RegisterFrameEvents()
     self.armorButton:SetScript('OnEnter', function()
         if not InCombatLockdown() then
             ArmorModule:SetArmorColor()
-            GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_' .. xb.miniTextPosition)
+            GameTooltip:SetOwner(ArmorModule.armorFrame,
+                                 'ANCHOR_' .. xb.miniTextPosition)
             local r, g, b, _ = unpack(xb:HoverColors())
-            GameTooltip:AddLine("|cFFFFFFFF[|r" .. AUCTION_CATEGORY_ARMOR .. "|cFFFFFFFF]|r", r, g, b)
+            GameTooltip:AddLine("|cFFFFFFFF[|r" .. AUCTION_CATEGORY_ARMOR ..
+                                    "|cFFFFFFFF]|r", r, g, b)
             GameTooltip:AddLine(" ")
-            for i, v in pairs(ArmorModule.durabilityList) do
+            for _, slotId in ipairs(ArmorModule.slotOrder) do
+                local v = ArmorModule.durabilityList[slotId]
                 if v.max and v.max > 0 then
                     local u20G, u20B = 1, 1
-                    if v.pc <= 20 then
-                        u20G, u20B = 0, 0
-                    end
-                    GameTooltip:AddDoubleLine(format('|T%s:14:14:0:0:64:64:4:60:4:60|t %s',
-                        GetInventoryItemTexture('player', i), GetInventoryItemLink('player', i)),
-                        string.format('%d/%d (%d%%)', v.cur, v.max, v.pc), r, g, b, 1, u20G, u20B)
+                    if v.pc <= 20 then u20G, u20B = 0, 0 end
+                    GameTooltip:AddDoubleLine(format(
+                                                  '|T%s:14:14:0:0:64:64:4:60:4:60|t %s',
+                                                  GetInventoryItemTexture(
+                                                      'player', slotId),
+                                                  GetInventoryItemLink('player',
+                                                                       slotId)),
+                                              string.format('%d/%d (%d%%)',
+                                                            v.cur, v.max, v.pc),
+                                              r, g, b, 1, u20G, u20B)
 
                     -- GameTooltip:AddDoubleLine(format('|T%s:14:14:0:0:64:64:4:60:4:60|t %s', GetInventoryItemTexture('player', i), GetInventoryItemLink('player', i))..string.format('%d/%d (%d%%)', v.cur, v.max, v.pc), r, g, b, 1, u20G, u20B )		
                 end
@@ -142,21 +107,15 @@ function ArmorModule:RegisterFrameEvents()
     end)
 
     self.armorButton:SetScript('OnEvent', function(_, event)
-        if event == 'UNIT_INVENTORY_CHANGED' then
-            self:Refresh()
-        end
+        if event == 'UNIT_INVENTORY_CHANGED' then self:Refresh() end
     end)
 
     self:RegisterMessage('XIVBar_FrameHide', function(_, name)
-        if name == 'microMenuFrame' then
-            self:Refresh()
-        end
+        if name == 'microMenuFrame' then self:Refresh() end
     end)
 
     self:RegisterMessage('XIVBar_FrameShow', function(_, name)
-        if name == 'microMenuFrame' then
-            self:Refresh()
-        end
+        if name == 'microMenuFrame' then self:Refresh() end
     end)
 
     self:RegisterEvent('UPDATE_INVENTORY_DURABILITY')
@@ -165,9 +124,7 @@ end
 function ArmorModule:RegisterCoordTicker()
     if xb.db.profile.modules.armor.showCoords then
         self.coordTicker = C_Timer.NewTicker(0.2, function()
-            if InCombatLockdown() then
-                return
-            end
+            if InCombatLockdown() then return end
             self:UpdatePlayerCoordinates()
         end)
     end
@@ -192,9 +149,7 @@ function ArmorModule:SetArmorColor()
 end
 
 function ArmorModule:Refresh()
-    if self.armorFrame == nil then
-        return;
-    end
+    if self.armorFrame == nil then return; end
     local db = xb.db.profile.modules.armor
     if not db.enabled then
         self:Disable();
@@ -227,8 +182,8 @@ function ArmorModule:Refresh()
         self:RegisterCoordTicker()
     end
 
-    self.armorFrame:SetSize(5 + iconSize + self.armorText:GetStringWidth() + self.coordText:GetStringWidth(),
-        xb:GetHeight())
+    self.armorFrame:SetSize(5 + iconSize + self.armorText:GetStringWidth() +
+                                self.coordText:GetStringWidth(), xb:GetHeight())
 
     self.armorButton:SetAllPoints()
 
@@ -243,13 +198,12 @@ function ArmorModule:Refresh()
     end
 
     self.armorFrame:ClearAllPoints()
-    self.armorFrame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+    self.armorFrame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset,
+                             0)
     self:SetArmorColor()
 end
 
-function ArmorModule:UPDATE_INVENTORY_DURABILITY()
-    self:Refresh()
-end
+function ArmorModule:UPDATE_INVENTORY_DURABILITY() self:Refresh() end
 
 function ArmorModule:UpdateDurabilityText(layer)
     local db = xb.db.profile.modules.armor
@@ -257,15 +211,14 @@ function ArmorModule:UpdateDurabilityText(layer)
 
     local lowest = 101 -- store the most broken armor piece's percentage
 
-    for i, v in pairs(self.durabilityList) do
-        local curDur, maxDur = GetInventoryItemDurability(i)
+    for _, slotId in ipairs(self.slotOrder) do
+        local curDur, maxDur = GetInventoryItemDurability(slotId)
+        local v = self.durabilityList[slotId]
         if curDur and maxDur then
             v.cur = curDur
             v.max = maxDur
             v.pc = math.floor((curDur / maxDur) * 100)
-            if v.pc < lowest then
-                lowest = v.pc
-            end
+            if v.pc < lowest then lowest = v.pc end
         end
     end
 
@@ -301,24 +254,22 @@ function ArmorModule:UpdatePlayerCoordinates()
 
     self.coordText:Show()
     local map_id = C_Map.GetBestMapForUnit('player')
-    if not map_id then
-        return
-    end
+    if not map_id then return end
 
     local rects = self.MapRects[map_id]
     if not rects then
         rects = {}
-        local _, topleft = C_Map.GetWorldPosFromMapPos(map_id, CreateVector2D(0, 0))
-        local _, bottomright = C_Map.GetWorldPosFromMapPos(map_id, CreateVector2D(1, 1))
+        local _, topleft = C_Map.GetWorldPosFromMapPos(map_id,
+                                                       CreateVector2D(0, 0))
+        local _, bottomright = C_Map.GetWorldPosFromMapPos(map_id,
+                                                           CreateVector2D(1, 1))
         bottomright:Subtract(topleft)
         rects = {topleft.x, topleft.y, bottomright.x, bottomright.y}
         self.MapRects[map_id] = rects
     end
 
     local x, y = UnitPosition('player')
-    if not x then
-        return
-    end
+    if not x then return end
     x = floor(((x - rects[1]) / rects[3]) * 10000) / 100
     y = floor(((y - rects[2]) / rects[4]) * 10000) / 100
 

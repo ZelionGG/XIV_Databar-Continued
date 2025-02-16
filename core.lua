@@ -666,18 +666,15 @@ end
 
 function XIVBar:GetColor(name)
     local profile = self.db.profile.color
-    local a = profile[name].a
-    -- what a stupid hacky solution, the whole config part is kind of fucked and i dread having to come fix this eventually.
-    -- feel like just burning it all down and writing something from scratch when seeing shit like this. terrible library.
-    if name == 'normal' then
-        -- use class color for normal color
-        if profile.useTextCC then
-            local cr, cg, cb, _ = self:GetClassColors()
-            r, g, b = cr, cg, cb
-        end
+    local r, g, b, a = profile[name].r, profile[name].g, profile[name].b, profile[name].a
+    
+    if name == 'normal' and profile.useTextCC then
+        r, g, b, _ = self:GetClassColors()
+    elseif name == 'barColor' and profile.useCC then
+        r, g, b, _ = self:GetClassColors()
     end
-    -- use self-picked color for normal color
-    return profile[name].r, profile[name].g, profile[name].b, a
+
+    return r, g, b, a
 end
 
 function XIVBar:HoverColors()
@@ -719,9 +716,30 @@ function XIVBar:HideBarEvent()
     bar:RegisterEvent("PET_BATTLE_CLOSE")
     bar:RegisterEvent("TAXIMAP_CLOSED")
     bar:RegisterEvent("VEHICLE_POWER_SHOW")
+    bar:RegisterEvent("PLAYER_ENTERING_WORLD")
+    bar:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
     bar:SetScript("OnEvent", function(_, event, ...)
         local barFrame = XIVBar:GetFrame("bar")
+        
+        -- Handle zone changes and instance transitions
+        if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
+            C_Timer.After(0.5, function()
+                if not barFrame:IsVisible() then
+                    barFrame:Show()
+                end
+                -- Full refresh of the bar and modules
+                XIVBar:Refresh()
+                -- Force update module positions
+                if XIVBar.db.profile.general.barPosition == 'TOP' then
+                    OffsetUI()
+                else
+                    XIVBar:ResetUI()
+                end
+            end)
+            return
+        end
+        
         if self.db.profile.general.barFlightHide then
             if event == "VEHICLE_POWER_SHOW" then
                 if not barFrame:IsVisible() then barFrame:Show() end
@@ -757,6 +775,8 @@ function XIVBar:HideBarEvent()
             end
             if event == "PLAYER_REGEN_ENABLED" and not barFrame:IsVisible() then
                 barFrame:Show()
+                -- Refresh modules when showing after combat
+                XIVBar:Refresh()
             end
         end)
     else
@@ -925,7 +945,7 @@ function XIVBar:GetGeneralOptions()
         args = {
             positioning = self:GetPositioningOptions(),
             text = self:GetTextOptions(),
-            textColors = self:GetTextColorOptions()
+            color = self:GetColorOptions()
         }
     }
 end
@@ -1000,11 +1020,54 @@ function XIVBar:GetTextOptions()
     }
 end
 
+function XIVBar:GetColorOptions()
+    return {
+        name = L["Colors"],
+        type = "group",
+        inline = true,
+        order = 3,
+        args = {
+            barColor = {
+                name = L['Bar Color'],
+                type = "color",
+                order = 1,
+                hasAlpha = true,
+                set = function(info, r, g, b, a)
+                    if not self.db.profile.color.useCC then
+                        self:SetColor('barColor', r, g, b, a)
+                    else
+                        local cr, cg, cb, _ = self:GetClassColors()
+                        self:SetColor('barColor', cr, cg, cb, a)
+                    end
+                end,
+                get = function()
+                    return XIVBar:GetColor('barColor')
+                end
+            },
+            barCC = {
+                name = L['Use Class Color for Bar'],
+                desc = L["Only the alpha can be set with the color picker"],
+                type = "toggle",
+                order = 2,
+                set = function(info, val)
+                    XIVBar:SetColor('barColor', self:GetClassColors());
+                    self.db.profile.color.useCC = val;
+                    self:Refresh();
+                end,
+                get = function()
+                    return self.db.profile.color.useCC
+                end
+            },
+            textColors = self:GetTextColorOptions()
+        }
+    }
+end
+
 function XIVBar:GetTextColorOptions()
     return {
         name = L['Text Colors'],
         type = "group",
-        order = 3,
+        order = 4,
         inline = true,
         args = {
             normal = {

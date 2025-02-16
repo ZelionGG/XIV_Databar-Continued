@@ -3,6 +3,8 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
+local isClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC then
     ---Proxy for C_CurrencyInfo.GetCurrencyListLink
     function GetCurrencyListLink(index)
@@ -17,14 +19,6 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-    self.rerollItems = {697, -- Elder Charm of Good Fortune
-    752, -- Mogu Rune of Fate
-    776, -- Warforged Seal
-    994, -- Seal of Tempered Fate
-    1129, -- Seal of Inevitable Fate
-    1273 -- Seal of Broken Fate
-    }
-
     self.intToOpt = {
         [1] = 'currencyOne',
         [2] = 'currencyTwo',
@@ -34,6 +28,7 @@ function CurrencyModule:OnInitialize()
     self.curButtons = {}
     self.curIcons = {}
     self.curText = {}
+    self.rerollItems = {} -- Initialize empty rerollItems table
 end
 
 function CurrencyModule:OnEnable()
@@ -82,8 +77,6 @@ function CurrencyModule:Refresh()
     self.xpFrame:Hide()
 
     if xb.constants.playerLevel < GetMaxLevelForExpansionLevel(GetExpansionLevel()) and db.modules.currency.showXPbar then
-        -- self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
-
         local textHeight = floor((xb:GetHeight() - 4) / 2)
         local barHeight = (iconSize - textHeight - 2)
         if barHeight < 2 then
@@ -116,29 +109,29 @@ function CurrencyModule:Refresh()
         self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
-    else -- show xp bar/show currencies
+    elseif not isClassicEra then -- Only show currencies if not in Classic Era
         local iconsWidth = 0
-        for i = 1, GetNumWatchedTokens() do
-            -- if db.modules.currency[self.intToOpt[i]] ~= '0' then
-            local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
-            iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
-            -- end
-            if i == 1 then
-                self.curButtons[1]:SetPoint('LEFT')
-            elseif i == 2 then
-                self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-            elseif i == 3 then
-                self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+        if GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
+            for i = 1, GetNumWatchedTokens() do
+                local name, count, icon, currencyID = GetBackpackCurrencyInfo(i)
+                if name then
+                    iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
+                    if i == 1 then
+                        self.curButtons[1]:SetPoint('LEFT')
+                    elseif i == 2 then
+                        self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
+                    elseif i == 3 then
+                        self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+                    end
+                end
             end
         end
         self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
-    end -- show currencies
+    end
 
-    -- self.currencyFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
     local anchorFrame = xb:GetFrame('tradeskillFrame')
-    -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
     if anchorFrame ~= nil and not anchorFrame:IsVisible() then
         if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
             anchorFrame = xb:GetFrame('clockFrame')
@@ -210,7 +203,6 @@ function CurrencyModule:CreateFrames()
 end
 
 function CurrencyModule:RegisterFrameEvents()
-
     for i = 1, 3 do
         self.curButtons[i]:EnableMouse(true)
         self.curButtons[i]:RegisterForClicks("AnyUp")
@@ -241,8 +233,8 @@ function CurrencyModule:RegisterFrameEvents()
         end)
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
-    self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
-    self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
+    self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
+    self:RegisterEvent('PLAYER_LEVEL_UP', 'XpUpdate')
     self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
     self.currencyFrame:EnableMouse(true)
@@ -291,11 +283,51 @@ function CurrencyModule:RegisterFrameEvents()
     end)
 end
 
+function CurrencyModule:ExperienceGains()
+    -- Get current XP values
+    CurXp = UnitXP('player')
+    MaxXp = UnitXPMax('player')
+    
+    -- Initialize stored values if needed
+    OldXp = OldXp or CurXp
+    LastXp = LastXp or 0
+    KillsRemaining = KillsRemaining or 0
+    
+    -- Check for level up (current XP will be less than old XP)
+    if CurXp < OldXp then
+        -- On level up, calculate kills remaining using last known XP gain
+        if LastXp > 0 then
+            KillsRemaining = MaxXp / LastXp
+        else
+            KillsRemaining = 0
+        end
+        OldXp = CurXp
+        XpGained = 0
+        return XpGained, CurXp, MaxXp, KillsRemaining
+    end
+    
+    -- Calculate and update XP changes
+    XpGained = CurXp - OldXp
+    if XpGained > 0 then
+        KillsRemaining = (MaxXp - CurXp) / XpGained
+        LastXp = XpGained
+    end
+    
+    -- Store current XP for next update
+    OldXp = CurXp
+    
+    return XpGained, CurXp, MaxXp, KillsRemaining
+end
+
+function CurrencyModule:XpUpdate()
+    CurrencyModule:ExperienceGains()
+    CurrencyModule:Refresh()
+end
+
 function CurrencyModule:ShowTooltip()
     if not xb.db.profile.modules.currency.showTooltip then
         return
     end
-
     local r, g, b, _ = unpack(xb:HoverColors())
 
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
@@ -304,7 +336,6 @@ function CurrencyModule:ShowTooltip()
         xb.db.profile.modules.currency.showXPbar then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
-
         local curXp = UnitXP('player')
         local maxXp = UnitXPMax('player')
         local rested = GetXPExhaustion()
@@ -314,6 +345,22 @@ function CurrencyModule:ShowTooltip()
         -- Remaining
         GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
+        -- Kills remaining
+        if KillsRemaining then
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                '~' .. string.format('%d', math.ceil(KillsRemaining)), r, g, b, 1, 1, 1)
+        else
+            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+                string.format('%d', 0), r, g, b, 1, 1, 1)
+        end
+        -- Last xp gain
+        if LastXp then
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', LastXp), r, g, b, 1, 1, 1)
+        else
+            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+                string.format('%d', 0), r, g, b, 1, 1, 1)
+        end
         -- Rested
         if rested then
             GameTooltip:AddDoubleLine(L['Rested'] .. ':',
@@ -333,6 +380,7 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:Show()
+    OldXp = UnitXP('player')
 end
 
 function CurrencyModule:GetDefaultOptions()
