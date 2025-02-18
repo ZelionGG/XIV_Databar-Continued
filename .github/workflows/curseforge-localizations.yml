@@ -16,7 +16,5 @@ jobs:
 
       - name: Upload localizations
         uses: p3lim/curseforge-localizations@v1
-        with:
-          handle_missing: DeletePhrase # optional
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
