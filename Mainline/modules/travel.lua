@@ -64,6 +64,24 @@ function TravelModule:OnInitialize()
     self.noMythicTeleport = true
 end
 
+local portal = C_CVar.GetCVar("portal")
+if portal == "US" then
+    XIVBar.SEASON_START_DATES = {
+        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
+        ["2025-03-04"] = "TWW_2",  -- TWW Season 2 start date
+    }
+elseif portal == "EU" then
+    XIVBar.SEASON_START_DATES = {
+        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
+        ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
+    }
+else
+    XIVBar.SEASON_START_DATES = {
+        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
+        ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
+    }
+end
+
 -- Skin Support for ElvUI/TukUI
 -- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
@@ -559,6 +577,53 @@ function TravelModule:SetMythicColor()
     end -- else
 end
 
+function TravelModule:GetCurrentSeason()
+    local currentDate = date("%Y-%m-%d")
+    local currentSeason = nil
+    local latestDate = nil
+    
+    -- Find the most recent season start date that is before or equal to today
+    for startDate, seasonKey in pairs(XIVBar.SEASON_START_DATES) do
+        if startDate <= currentDate and (latestDate == nil or startDate > latestDate) then
+            latestDate = startDate
+            currentSeason = seasonKey
+        end
+    end
+    
+    return currentSeason
+end
+
+-- Helper function to resolve teleport references
+function TravelModule:ResolveTeleportReference(teleportRef)
+    if type(teleportRef) == "string" then
+        -- Parse the reference (format: "ExpansionKey.TeleportKey")
+        local expansionKey, teleportKey = strsplit(".", teleportRef)
+        if expansionKey and teleportKey and xb.MythicTeleports[expansionKey] and xb.MythicTeleports[expansionKey].teleports[teleportKey] then
+            return xb.MythicTeleports[expansionKey].teleports[teleportKey]
+        end
+    end
+    return teleportRef -- Return as-is if not a reference or reference not found
+end
+
+-- Helper function to create a teleport button for the dropdown menu
+local function CreateTeleportButton(teleportData, spellName)
+    local frame = CreateFrame("Button", nil, nil, "UIDropDownCustomMenuEntryTemplate")
+    frame:SetSize(100, 16)
+    
+    local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId) or spellName
+    
+    local text = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    text:SetPoint("LEFT", 10, 0)
+    text:SetText(dungeonName)
+    
+    frame:SetScript("OnClick", function()
+        CastSpellByID(teleportData.teleportId)
+        CloseDropDownMenus()
+    end)
+    
+    return frame
+end
+
 function TravelModule:CreatePortPopup()
     if not self.portPopup then return; end
 
@@ -635,288 +700,166 @@ function TravelModule:CreatePortPopup()
         else
             button:Hide()
         end
-    end -- for id/button in portButtons
-    if changedWidth then popupWidth = popupWidth + self.extraPadding end
-
-    if popupWidth < self.portButton:GetWidth() then
-        popupWidth = self.portButton:GetWidth()
     end
-
-    if popupWidth < (self.portOptionString:GetStringWidth() + self.extraPadding) then
-        popupWidth =
-            (self.portOptionString:GetStringWidth() + self.extraPadding)
-    end
-    self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
 
 function TravelModule:CreateMythicPopup()
-    local mythicTeleports = {
-        [1] = {name = L["Classic"]},
-        [2] = {name = L["Burning Crusade"]},
-        [3] = {name = L["Wrath of the Lich King"]},
-        [4] = {
-            name = L["Cataclysm"],
-            teleports = {
-                [1] = {
-                    teleportId = 445424, -- Grim Batol Teleport
-                    dungeonId = 304 -- Grim Batol
-                },
-                [2] = {
-                    teleportId = 410080, -- The Vortex Pinnacle Teleport
-                    dungeonId = 311 -- The Vortex Pinnacle
-                },
-                [3] = {
-                    teleportId = 424142, -- Throne of the Tides Teleport
-                    dungeonId = 302 -- Throne of the Tides
-                }
-            }
-        },
-        [5] = {
-            name = L["Mists of Pandaria"],
-            teleports = {
-                [1] = {
-                    teleportId = 131204, -- Temple of the Jade Serpent Teleport
-                    dungeonId = 464 -- Temple of the Jade Serpent
-                }
-            }
-        },
-        [6] = {
-            name = L["Warlords of Draenor"],
-            teleports = {
-                [1] = {
-                    teleportId = 159897, -- Auchindoun Teleport
-                    dungeonId = 820 -- Auchindoun
-                },
-                [2] = {
-                    teleportId = 159895, -- Bloodmaul Slag Mines Teleport
-                    dungeonId = 787 -- Bloodmaul Slag Mines
-                },
-                [3] = {
-                    teleportId = 159900, -- Grimrail Depot Teleport
-                    dungeonId = 822 -- Grimrail Depot
-                },
-                [4] = {
-                    teleportId = 159896, -- Iron Docks Teleport
-                    dungeonId = 821 -- Iron Docks
-                },
-                [5] = {
-                    teleportId = 159898, -- Skyreach Teleport
-                    dungeonId = 779 -- Skyreach
-                },
-                [6] = {
-                    teleportId = 159899, -- Shadowmoon Burial Grounds Teleport
-                    dungeonId = 783 -- Shadowmoon Burial Grounds
-                },
-                [7] = {
-                    teleportId = 159901, -- The Everbloom Teleport
-                    dungeonId = 824 -- The Everbloom
-                },
-                [8] = {
-                    teleportId = 159902, -- Upper Blackrock Spire Teleport
-                    dungeonId = 828 -- Upper Blackrock Spire
-                }
-            }
-        },
-        [7] = {
-            name = L["Legion"],
-            teleports = {
-                [1] = {
-                    teleportId = 424153, -- -- Black Rook Hold Teleport
-                    dungeonId = 1204 -- -- Black Rook Hold
-                },
-                [2] = {
-                    teleportId = 393766, -- Court of Stars Teleport
-                    dungeonId = 1318 -- Court of Stars
-                },
-                [3] = {
-                    teleportId = 424163, -- Darkheart Thicket Teleport
-                    dungeonId = 1201 -- Darkheart Thicket
-                },
-                [4] = {
-                    teleportId = 393764, -- Halls of Valor Teleport
-                    dungeonId = 1473 -- Halls of Valor
-                },
-                [5] = {
-                    teleportId = 410078, -- Neltharion's Lair Teleport
-                    dungeonId = 1206 -- Neltharion's Lair
-                }
-            }
-        },
-        [8] = {
-            name = L["Battle for Azeroth"],
-            teleports = {
-                [1] = {
-                    teleportId = 424187, -- Atal'Dazar Teleport
-                    dungeonId = 1668 -- Atal'Dazar
-                },
-                [2] = {
-                    teleportId = 410071, -- Freehold Teleport
-                    dungeonId = 1672 -- Freehold
-                },
-                [3] = {
-                    teleportId = 464256, -- Siege of Boralus Teleport
-                    dungeonId = 1700 -- Siege of Boralus
-                },
-                [4] = {
-                    teleportId = 410074, -- The Underrot Teleport
-                    dungeonId = 1711 -- The Underrot
-                },
-                [5] = {
-                    teleportId = 424167, -- Waycrest Manor Teleport
-                    dungeonId = 1705 -- Waycrest Manor
-                }
-            }
-        },
-        [9] = {
-            name = L["Shadowlands"],
-            teleports = {
-                [1] = {
-                    teleportId = 354468, -- De Other Side Teleport
-                    dungeonId = 2080 -- De Other Side
-                },
-                [2] = {
-                    teleportId = 354464, -- Mists of Tirna Scithe Teleport
-                    dungeonId = 2072 -- Mists of Tirna Scithe
-                },
-                [3] = {
-                    teleportId = 354463, -- Plaguefall Teleport
-                    dungeonId = 2069 -- Plaguefall
-                },
-                [4] = {
-                    teleportId = 354469, -- Sanguine Depths Teleport
-                    dungeonId = 2082 -- Sanguine Depths
-                },
-                [5] = {
-                    teleportId = 354466, -- Spires of Ascension Teleport
-                    dungeonId = 2076 -- Spires of Ascension
-                },
-                [6] = {
-                    teleportId = 367416, -- Tazavesh, the Veiled Market Teleport
-                    dungeonId = 2225 -- Tazavesh, the Veiled Market
-                },
-                [7] = {
-                    teleportId = 354467, -- Theater of Pain Teleport
-                    dungeonId = 2078 -- Theater of Pain
-                },
-                [8] = {
-                    teleportId = 354462, -- The Necrotic Wake Teleport
-                    dungeonId = 2070 -- The Necrotic Wake
-                }
-            }
-        },
-        [10] = {
-            name = L["Dragonflight"],
-            teleports = {
-                [1] = {
-                    teleportId = 393273, -- Algeth'ar Academy Teleport
-                    dungeonId = 2366 -- Algeth'ar Academy
-                },
-                [2] = {
-                    teleportId = 393267, -- Brackenhide Hollow Teleport
-                    dungeonId = 2362 -- Brackenhide Hollow
-                },
-                [3] = {
-                    teleportId = 424197, -- Dawn of the Infinite Teleport
-                    dungeonId = 2430 -- Dawn of the Infinite
-                },
-                [4] = {
-                    teleportId = 393283, -- Halls of Infusion Teleport
-                    dungeonId = 2364 -- Halls of Infusion
-                },
-                [5] = {
-                    teleportId = 393276, -- Neltharus Teleport
-                    dungeonId = 2356 -- Neltharus
-                },
-                [6] = {
-                    teleportId = 393256, -- Ruby Life Pools Teleport
-                    dungeonId = 2361 -- Ruby Life Pools
-                },
-                [7] = {
-                    teleportId = 393279, -- The Azure Vault Teleport
-                    dungeonId = 2332 -- The Azure Vault
-                },
-                [8] = {
-                    teleportId = 393262, -- The Nokhud Offensive Teleport
-                    dungeonId = 2368 -- The Nokhud Offensive
-                },
-                [9] = {
-                    teleportId = 393222, -- Uldaman: Legacy of Tyr Teleport
-                    dungeonId = 2352 -- Uldaman: Legacy of Tyr
-                }
-            }
-        },
-        [11] = {name = L["The War Within"]},
-        [12] = {
-            name = L["Current season"],
-            teleports = {
-                [1] = {
-                    teleportId = 445417, -- Ara-Kara, City of Echoes Teleport
-                    dungeonId = 2604 -- Ara-Kara, City of Echoes
-                },
-                [2] = {
-                    teleportId = 445416, -- City of Threads Teleport
-                    dungeonId = 2642 -- City of Threads
-                },
-                [3] = {
-                    teleportId = 445424, -- Grim Batol Teleport
-                    dungeonId = 304 -- Grim Batol
-                },
-                [4] = {
-                    teleportId = 354464, -- Mists of Tirna Scithe Teleport
-                    dungeonId = 2072 -- Mists of Tirna Scithe
-                },
-                [5] = {
-                    teleportId = 445418, -- Siege of Boralus Teleport
-                    dungeonId = 1700 -- Siege of Boralus
-                },
-                [6] = {
-                    teleportId = 445414, -- The Dawnbreaker Teleport
-                    dungeonId = 2523 -- The Dawnbreaker
-                },
-                [7] = {
-                    teleportId = 354462, -- The Necrotic Wake Teleport
-                    dungeonId = 2070 -- The Necrotic Wake
-                },
-                [8] = {
-                    teleportId = 445269, -- The Stonevault Teleport
-                    dungeonId = 2693 -- The Stonevault
-                }
-            }
-        }
-    }
-
-    -- Loop on each mythicTeleports item and check foreach if spell known, if known, add to new table
+    -- Get the current season
+    local currentSeason = self:GetCurrentSeason()
+    
+    -- Create popup menu
+    local expansions = {}
+    
+    -- Sort expansions by their order
+    for expKey, expData in pairs(xb.MythicTeleports) do
+        -- Skip season-specific entries when building the expansion list
+        if not (expKey:match("^TWW_%d+$") or expKey == "CURRENT") then
+            table.insert(expansions, {key = expKey, data = expData})
+        end
+    end
+    
+    table.sort(expansions, function(a, b) return a.data.order < b.data.order end)
+    
     local filteredTeleports = {}
-    for mythicKey, mythicData in ipairs(mythicTeleports) do
-        if (xb.db.profile.curSeasonOnly and mythicKey == 12) or not xb.db.profile.curSeasonOnly then
-            if mythicData.teleports then
-                local newTeleports = {}
-                local i = 1
-                for index, spell in ipairs(mythicData.teleports) do
-                    if IsSpellKnown(spell.teleportId) then
-                        self.noMythicTeleport = false
-                        newTeleports[i] = {
-                            teleportId = spell.teleportId,
-                            dungeonId = spell.dungeonId
-                        }
-                        i = i + 1
+    if xb.db.profile.curSeasonOnly then
+        -- Use the current season teleports if available
+        if currentSeason and xb.MythicTeleports[currentSeason] then
+            local teleports = {}
+            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
+                -- Resolve the teleport reference
+                local value = self:ResolveTeleportReference(teleportRef)
+                
+                -- Check if the teleport is valid and the spell is known
+                if value and value.teleportId then
+                    local spellName = C_Spell.GetSpellName(value.teleportId)
+                    if spellName and IsSpellKnown(value.teleportId) then
+                        table.insert(teleports, value)
                     end
                 end
-                if next(newTeleports) then
-                    mythicData.teleports = newTeleports
-                    table.insert(filteredTeleports, mythicData)
+            end
+            
+            -- Sort teleports alphabetically by name
+            table.sort(teleports, function(a, b)
+                return (a.name or "") < (b.name or "")
+            end)
+            
+            if #teleports > 0 then
+                table.insert(filteredTeleports, {
+                    name = L["Current Season"],
+                    teleports = teleports
+                })
+            end
+        end
+        
+        -- If no current season teleports, use the default CURRENT
+        if #filteredTeleports == 0 and xb.MythicTeleports.CURRENT then
+            local teleports = {}
+            for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local spellName = C_Spell.GetSpellName(value.teleportId)
+                    if spellName and IsSpellKnown(value.teleportId) then
+                        table.insert(teleports, value)
+                    end
                 end
-            else
-                table.insert(filteredTeleports, mythicData)
+            end
+            
+            -- Sort teleports alphabetically by name
+            table.sort(teleports, function(a, b)
+                return (a.name or "") < (b.name or "")
+            end)
+            
+            if #teleports > 0 then
+                table.insert(filteredTeleports, {
+                    name = L["Current Season"],
+                    teleports = teleports
+                })
+            end
+        end
+    else
+        -- If not curSeasonOnly, show all expansions
+        local expansions = {}
+        for key, expansion in pairs(xb.MythicTeleports) do
+            if key ~= "CURRENT" and not string.match(key, "TWW_%d") then
+                table.insert(expansions, {
+                    key = key,
+                    data = expansion
+                })
+            end
+        end
+        
+        -- Sort expansions by order (reverse chronological)
+        table.sort(expansions, function(a, b)
+            local orderA = a.data.order or 0
+            local orderB = b.data.order or 0
+            return orderA > orderB
+        end)
+        
+        -- Process each expansion
+        for _, expansion in ipairs(expansions) do
+            local teleports = {}
+            
+            -- Check if this is a regular expansion with teleports array
+            if expansion.data.teleports then
+                for teleportKey, value in pairs(expansion.data.teleports) do
+                    if value.teleportId then
+                        local spellName = C_Spell.GetSpellName(value.teleportId)
+                        if spellName and IsSpellKnown(value.teleportId) then
+                            table.insert(teleports, value)
+                        end
+                    end
+                end
+                
+                -- Sort teleports alphabetically by name
+                table.sort(teleports, function(a, b)
+                    local nameA = GetLFGDungeonInfo(a.dungeonId) or ""
+                    local nameB = GetLFGDungeonInfo(b.dungeonId) or ""
+                    return nameA < nameB
+                end)
+                
+                if #teleports > 0 then
+                    table.insert(filteredTeleports, {
+                        name = expansion.data.name,
+                        teleports = teleports
+                    })
+                end
+            end
+        end
+        
+        -- Add current season at the bottom if available
+        if currentSeason and xb.MythicTeleports[currentSeason] then
+            local teleports = {}
+            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local spellName = C_Spell.GetSpellName(value.teleportId)
+                    if spellName and IsSpellKnown(value.teleportId) then
+                        table.insert(teleports, value)
+                    end
+                end
+            end
+            
+            -- Sort teleports alphabetically by name
+            table.sort(teleports, function(a, b)
+                local nameA = GetLFGDungeonInfo(a.dungeonId) or ""
+                local nameB = GetLFGDungeonInfo(b.dungeonId) or ""
+                return nameA < nameB
+            end)
+            
+            if #teleports > 0 then
+                table.insert(filteredTeleports, {
+                    name = L["Current Season"],
+                    teleports = teleports
+                })
             end
         end
     end
 
     local function CreateTeleportButton(value, spellName)
         local button = CreateFrame("Button",
-                                   "TravelMenuTeleportButton" .. spellName,
-                                   UIParent,
-                                   "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+                               "TravelMenuTeleportButton" .. spellName,
+                               UIParent,
+                               "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
 
         name = GetLFGDungeonInfo(value.dungeonId)
         button:SetText(name)
@@ -939,7 +882,7 @@ function TravelModule:CreateMythicPopup()
         button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
 
         button:HookScript("PostClick",
-                          function(self, button, down)
+                      function(self, button, down)
             CloseDropDownMenus()
         end)
 
@@ -970,39 +913,44 @@ function TravelModule:CreateMythicPopup()
                 separator.notCheckable = true
                 UIDropDownMenu_AddButton(separator, level)
 
-                -- Loop on each mythicTeleports item and check foreach if spell known, if not, don't show anything
-                for mythicKey, mythicData in ipairs(filteredTeleports) do
-                    if mythicData.teleports then
-                        local newTeleports = {}
-                        local i = 1
-                        for index, spell in ipairs(mythicData.teleports) do
-                            if IsSpellKnown(spell.teleportId) then
-                                self.noMythicTeleport = false
-                                newTeleports[i] = {
-                                    teleportId = spell.teleportId,
-                                    dungeonId = spell.dungeonId
-                                }
-                                i = i + 1
-                            end
-                        end
-                        if next(newTeleports) then
-                            mythicData.teleports = newTeleports
-                            local info = UIDropDownMenu_CreateInfo()
-                            info.text, info.checked = mythicData.name, false
-                            info.menuList, info.hasArrow = mythicData.teleports, true
-                            info.notCheckable = true
-                            info.value = mythicData.teleports
-                            UIDropDownMenu_AddButton(info)
-                        end
+                -- Add expansions with teleports as menu items
+                for _, expData in ipairs(filteredTeleports) do
+                    if expData.teleports and next(expData.teleports) then
+                        local info = UIDropDownMenu_CreateInfo()
+                        info.text, info.checked = expData.name, false
+                        info.menuList, info.hasArrow = expData.teleports, true
+                        info.notCheckable = true
+                        info.value = expData.teleports
+                        UIDropDownMenu_AddButton(info)
                     end
                 end
             else
+                -- Create a table to hold teleport data with dungeon names
+                local sortedTeleports = {}
                 for key, value in ipairs(menuList) do
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-
+                    -- Resolve the teleport reference if needed
+                    local teleportData = TravelModule:ResolveTeleportReference(value)
+                    if teleportData and teleportData.teleportId then
+                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
+                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                        
+                        table.insert(sortedTeleports, {
+                            teleportData = teleportData,
+                            spellName = spellName,
+                            dungeonName = dungeonName
+                        })
+                    end
+                end
+                
+                -- Sort by dungeon name alphabetically
+                table.sort(sortedTeleports, function(a, b)
+                    return a.dungeonName < b.dungeonName
+                end)
+                
+                -- Add sorted teleports to the menu
+                for _, teleport in ipairs(sortedTeleports) do
                     local info = UIDropDownMenu_CreateInfo()
-
-                    info.customFrame = CreateTeleportButton(value, spellName)
+                    info.customFrame = CreateTeleportButton(teleport.teleportData, teleport.spellName)
                     UIDropDownMenu_AddButton(info, level)
                 end
             end
@@ -1029,15 +977,35 @@ function TravelModule:CreateMythicPopup()
             separator.notCheckable = true
             UIDropDownMenu_AddButton(separator, level)
                 
-            for mythicKey, mythicData in ipairs(filteredTeleports) do
-                for key, value in ipairs(mythicData.teleports) do
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-
-                    local info = UIDropDownMenu_CreateInfo()
-
-                    info.customFrame = CreateTeleportButton(value, spellName)
-                    UIDropDownMenu_AddButton(info, level)
+            -- Create a table to hold all teleport data with dungeon names
+            local allTeleports = {}
+            for _, expData in ipairs(filteredTeleports) do
+                for _, value in ipairs(expData.teleports) do
+                    -- Resolve the teleport reference if needed
+                    local teleportData = TravelModule:ResolveTeleportReference(value)
+                    if teleportData and teleportData.teleportId then
+                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
+                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                        
+                        table.insert(allTeleports, {
+                            teleportData = teleportData,
+                            spellName = spellName,
+                            dungeonName = dungeonName
+                        })
+                    end
                 end
+            end
+            
+            -- Sort by dungeon name alphabetically
+            table.sort(allTeleports, function(a, b)
+                return a.dungeonName < b.dungeonName
+            end)
+            
+            -- Add sorted teleports to the menu
+            for _, teleport in ipairs(allTeleports) do
+                local info = UIDropDownMenu_CreateInfo()
+                info.customFrame = CreateTeleportButton(teleport.teleportData, teleport.spellName)
+                UIDropDownMenu_AddButton(info, level)
             end
         end, 'MENU')
     end
@@ -1150,9 +1118,7 @@ function TravelModule:Refresh()
 
         self:CreateMythicPopup()
 
-        if not self.noMythicTeleport then
-            self.mythicButton:Show()
-        end
+        self.mythicButton:Show()
     end
 
     local popupPadding = xb.constants.popupPadding
@@ -1184,9 +1150,6 @@ function TravelModule:Refresh()
     end
 
     if (xb.db.profile.enableMythicPortals) then
-        if not self.noMythicTeleport then
-            self.mythicButton:Show()
-        end
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
