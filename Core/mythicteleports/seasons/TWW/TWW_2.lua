@@ -17,6 +17,6 @@ xb.MythicTeleports.TWW_2 = {
 
         -- BFA dungeons
         "BFA.TML",
-        "BFA.OMG",
+        "BFA.OMG"
     }
 }

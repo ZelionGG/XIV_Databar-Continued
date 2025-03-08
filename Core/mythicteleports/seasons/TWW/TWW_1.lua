@@ -16,7 +16,7 @@ xb.MythicTeleports.TWW_1 = {
         "SL.NW",
 
         -- BFA dungeons
-        "BFA.SoB"
+        "BFA.SoB",
 
         -- Cataclysm dungeons
         "CATA.GB"
