@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="expansions/classic.lua"/>
+  <Script file="expansions/tbc.lua"/>
+  <Script file="expansions/wotlk.lua"/>
+  <Script file="expansions/cataclysm.lua"/>
+  <Script file="expansions/mop.lua"/>
+  <Script file="expansions/wod.lua"/>
+  <Script file="expansions/legion.lua"/>
+  <Script file="expansions/bfa.lua"/>
+  <Script file="expansions/shadowlands.lua"/>
+  <Script file="expansions/dragonflight.lua"/>
+  <Script file="expansions/tww.lua"/>
+</Ui>
