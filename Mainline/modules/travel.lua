@@ -745,7 +745,7 @@ function TravelModule:CreateMythicPopup()
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
-                    name = L["Current Season"],
+                    name = L["Current season"],
                     teleports = teleports
                 })
             end
@@ -771,7 +771,7 @@ function TravelModule:CreateMythicPopup()
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
-                    name = L["Current Season"],
+                    name = L["Current season"],
                     teleports = teleports
                 })
             end
@@ -848,7 +848,7 @@ function TravelModule:CreateMythicPopup()
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
-                    name = L["Current Season"],
+                    name = L["Current season"],
                     teleports = teleports
                 })
             end
