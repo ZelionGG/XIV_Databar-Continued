@@ -10,6 +10,8 @@ function MenuModule:GetName()
 end
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
+local TitleIconVersion_Small = Enum.TitleIconVersion and Enum.TitleIconVersion.Small
+
 function MenuModule:OnInitialize()
     self.LTip = LibStub('LibQTip-1.0')
     self.mediaFolder = xb.constants.mediaPath .. 'microbar\\'
@@ -596,6 +598,17 @@ function MenuModule:SocialHover(hoverFunc)
                         friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
                     end
 
+                    local clientIcon = ''
+                    if C_Texture.GetTitleIconTexture then
+						C_Texture.GetTitleIconTexture(gameAccount.clientProgram, TitleIconVersion_Small, function(success, texture)
+							if success then
+								local fullText = _G.BNet_GetValidatedCharacterNameWithClientEmbeddedTexture(gameAccount.characterName, friendAccInfo.battleTag, texture, 32, 32, 16)
+                                -- Hacky Trick : Extract only the icon part (first part before any character name)
+                                clientIcon = fullText:match("(|T.-|t)")
+                            end
+						end)
+					end
+
                     local charName = gameAccount.characterName -- gets the friend's character name
                     local gameClient = gameAccount.clientProgram -- the application that the friend is online with - can be any game or 'App'/'Mobile'
                     local realmName = gameAccount.realmName -- gets the realm name the friend's char is on
@@ -605,7 +618,7 @@ function MenuModule:SocialHover(hoverFunc)
                     local isWoW = false -- tracks whether the friend is playing WoW or not, default being that the friend isn't
                     local isClassic = false -- tracks whether the friend is logged into classic or not, default being that the friend isn't
                     local statusIcon = FRIENDS_TEXTURE_ONLINE -- get icon for online friends, might later be changed to afk/dnd icons
-                    local socialIcon = BNet_GetClientEmbeddedAtlas(gameClient, 16) -- get icon for the friend's application
+                    local socialIcon = clientIcon -- get icon for the friend's application
                     local gameName = MenuModule.socialIcons[gameClient].text -- name of the application the friend is currently using - can be any game or 'App'/'Mobile'
                     local note = friendAccInfo.note -- note of the friend, if there is no note it's an empty string
                     local charNameFormat = '' -- format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
