@@ -966,7 +966,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            PlayerSpellsUtil.TogglePlayerSpellsFrame(3)
+            PlayerSpellsUtil.ToggleSpellBookFrame()
         end
     end; -- spell
 
@@ -975,7 +975,7 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            PlayerSpellsUtil.TogglePlayerSpellsFrame(2)
+            PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
         end
     end; -- talent
 
