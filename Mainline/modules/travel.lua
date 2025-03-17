@@ -1149,10 +1149,15 @@ function TravelModule:Refresh()
     self.portPopup:Hide()
 
     self.mythicPopup:ClearAllPoints()
-
-    self.mythicPopup.point = "BOTTOM"
-    self.mythicPopup.relativePoint = "TOP"
-
+    
+    if db.general.barPosition == 'TOP' then
+        self.mythicPopup.point = "TOP"
+        self.mythicPopup.relativePoint = "BOTTOM"
+    else
+        self.mythicPopup.point = "BOTTOM"
+        self.mythicPopup.relativePoint = "TOP"
+    end
+    
     self:SkinFrame(self.mythicPopup, "SpecToolTip")
     self.mythicPopup:Hide()
 
