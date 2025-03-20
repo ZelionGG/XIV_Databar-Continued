@@ -690,6 +690,7 @@ function TravelModule:CreatePortPopup()
             end
         end -- if nil
     end -- for ipairs portOptions
+    
     for portId, button in pairs(self.portButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
@@ -700,7 +701,19 @@ function TravelModule:CreatePortPopup()
         else
             button:Hide()
         end
+    end -- for id/button in portButtons
+    
+    if changedWidth then popupWidth = popupWidth + self.extraPadding end
+
+    if popupWidth < self.portButton:GetWidth() then
+        popupWidth = self.portButton:GetWidth()
     end
+
+    if popupWidth < (self.portOptionString:GetStringWidth() + self.extraPadding) then
+        popupWidth =
+            (self.portOptionString:GetStringWidth() + self.extraPadding)
+    end
+    self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
 
 function TravelModule:CreateMythicPopup()
@@ -1136,10 +1149,15 @@ function TravelModule:Refresh()
     self.portPopup:Hide()
 
     self.mythicPopup:ClearAllPoints()
-
-    self.mythicPopup.point = "BOTTOM"
-    self.mythicPopup.relativePoint = "TOP"
-
+    
+    if db.general.barPosition == 'TOP' then
+        self.mythicPopup.point = "TOP"
+        self.mythicPopup.relativePoint = "BOTTOM"
+    else
+        self.mythicPopup.point = "BOTTOM"
+        self.mythicPopup.relativePoint = "TOP"
+    end
+    
     self:SkinFrame(self.mythicPopup, "SpecToolTip")
     self.mythicPopup:Hide()
 

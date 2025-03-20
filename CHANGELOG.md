@@ -1,10 +1,12 @@
 # XIV_Databar Continued
 
-## [3.5.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.5.1) (2025-03-08)
+## [3.5.2](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.5.2) (2025-03-18)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.5...v3.5.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.5.1...v3.5.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Retail :_
 
-- Rework of the [Mythic+] functionnality to make the [Current Season] easier to maintain and dynamic using season start dates.
-- Fixed the alphabetical ordering of dungeons in the [Mythic+] functionnality.
+- Fixed activity icons in the **Micromenu** social popup.
+- Fixed the Teleports popup not showing in the **Travel** module.
+- Fixed the Mythic+ Teleports popup positioning in the **Travel** module to make it dynamic depending on the bar position on screen.
+- Tentative change to the Spellbook and Talents **Micromenu** buttons APIs.
