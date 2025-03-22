@@ -366,6 +366,14 @@ function TravelModule:UpdatePortOptions()
         }
     end
 
+    if xb.constants.playerClass == 'SHAMAN' and not self.portOptions[556] then
+        local spellInfo = GetSpellInfo(556)
+        self.portOptions[556] = {
+            portId = 556,
+            text = spellInfo.name
+        }
+    end
+
     if xb.constants.playerClass == 'MAGE' and not self.portOptions[193759] then
         self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
     end
