@@ -462,7 +462,9 @@ function TravelModule:SetHearthColor()
             --end
         end -- if toy/item
         if IsPlayerSpell(v) then
-            local start, duration = GetSpellCooldown(v)
+            local spellCooldownInfo = GetSpellCooldown(v)
+            local start = spellCooldownInfo.startTime
+            local duration = spellCooldownInfo.duration
             --if start == 0 then
                 local spellInfo = GetSpellInfo(v)
                 if spellInfo then
@@ -526,7 +528,9 @@ function TravelModule:SetPortColor()
         local hearthActive = false
 
         if IsPlayerSpell(v) then
-            local start, duration = GetSpellCooldown(v)
+            local spellCooldownInfo = GetSpellCooldown(v)
+            local start = spellCooldownInfo.startTime
+            local duration = spellCooldownInfo.duration
             --if start == 0 then
                 local spellInfo = GetSpellInfo(v)
                 if spellInfo then
@@ -1214,7 +1218,9 @@ function TravelModule:ShowTooltip()
                     else
                         -- Handle spells (including class-specific teleports)
                         if IsSpellKnown(v.portId) then
-                            local start, duration = GetSpellCooldown(v.portId)
+                            local spellCooldownInfo = GetSpellCooldown(v.portId)
+                            local start = spellCooldownInfo.startTime
+                            local duration = spellCooldownInfo.duration
                             
                             -- Always show cooldown info
                             local remainingCooldown = 0
