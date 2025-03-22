@@ -366,6 +366,14 @@ function TravelModule:UpdatePortOptions()
         }
     end
 
+    if xb.constants.playerClass == 'SHAMAN' and not self.portOptions[556] then
+        local spellInfo = GetSpellInfo(556)
+        self.portOptions[556] = {
+            portId = 556,
+            text = spellInfo.name
+        }
+    end
+
     if xb.constants.playerClass == 'MAGE' and not self.portOptions[193759] then
         self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
     end
@@ -454,7 +462,9 @@ function TravelModule:SetHearthColor()
             --end
         end -- if toy/item
         if IsPlayerSpell(v) then
-            local start, duration = GetSpellCooldown(v)
+            local spellCooldownInfo = GetSpellCooldown(v)
+            local start = spellCooldownInfo.startTime
+            local duration = spellCooldownInfo.duration
             --if start == 0 then
                 local spellInfo = GetSpellInfo(v)
                 if spellInfo then
@@ -518,7 +528,9 @@ function TravelModule:SetPortColor()
         local hearthActive = false
 
         if IsPlayerSpell(v) then
-            local start, duration = GetSpellCooldown(v)
+            local spellCooldownInfo = GetSpellCooldown(v)
+            local start = spellCooldownInfo.startTime
+            local duration = spellCooldownInfo.duration
             --if start == 0 then
                 local spellInfo = GetSpellInfo(v)
                 if spellInfo then
@@ -1206,7 +1218,9 @@ function TravelModule:ShowTooltip()
                     else
                         -- Handle spells (including class-specific teleports)
                         if IsSpellKnown(v.portId) then
-                            local start, duration = GetSpellCooldown(v.portId)
+                            local spellCooldownInfo = GetSpellCooldown(v.portId)
+                            local start = spellCooldownInfo.startTime
+                            local duration = spellCooldownInfo.duration
                             
                             -- Always show cooldown info
                             local remainingCooldown = 0
