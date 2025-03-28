@@ -11,9 +11,17 @@ xb.MythicTeleports.TWW = {
             teleportId = 445417, -- Ara-Kara, City of Echoes Teleport
             dungeonId = 2604, -- Ara-Kara, City of Echoes
         },
+        CBM = {
+            teleportId = 445440, -- Cinderbrew Meadery Teleport
+            dungeonId = 2689, -- Cinderbrew Meadery
+        },
         CoT = {
             teleportId = 445416, -- City of Threads Teleport
             dungeonId = 2642, -- City of Threads
+        },
+        DFC = {
+            teleportId = 445441, -- Darkflame Cleft Teleport
+            dungeonId = 2518, -- Darkflame Cleft
         },
         TDB = {
             teleportId = 445414, -- The Dawnbreaker Teleport
@@ -27,20 +35,12 @@ xb.MythicTeleports.TWW = {
             teleportId = 445444, -- Priory of the Sacred Flame Teleport
             dungeonId = 2695, -- Priory of the Sacred Flame
         },
-        CBM = {
-            teleportId = 445440, -- Cinderbrew Meadery Teleport
-            dungeonId = 2689, -- Cinderbrew Meadery
-        },
         OFG = {
             teleportId = 1216786, -- Operation: Floodgate Teleport
             dungeonId = 2791, -- Operation: Floodgate
         },
-        DFC = {
-            teleportId = 445441, -- Darkflame Cleft Teleport
-            dungeonId = 2518, -- Darkflame Cleft
-        },
         TR = {
-            teleportId = 445443, -- the Rookery Teleport
+            teleportId = 445443, -- The Rookery Teleport
             dungeonId = 2637, -- The Rookery
         }
     }

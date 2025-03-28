@@ -27,7 +27,7 @@ xb.MythicTeleports.BFA = {
             teleportId = 424167, -- Waycrest Manor Teleport
             dungeonId = 1705, -- Waycrest Manor
         },
-        OM = {
+        OMG = {
             teleportId = 373274, -- Operation: Mechagon Teleport
             dungeonId = 2006, -- Operation: Mechagon
         },
