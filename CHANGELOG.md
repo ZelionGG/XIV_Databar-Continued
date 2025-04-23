@@ -8,3 +8,7 @@
 
 - Updated for **11.1.5**.
 - Added 4 missing Hearthstones toys in the **Travel** Mythic+ module.
+
+### _Classic SoD :_
+
+- Updated for **1.15.7**.

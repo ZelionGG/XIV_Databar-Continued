@@ -8,9 +8,11 @@ XIVBar.Changelog[3550] = {
         ["zhTW"] = {},
         ["enUS"] = {
             "[Retail] Updated for [11.1.5]."
+            "[Classic SoD] Updated for [1.15.7]."
         },
         ["frFR"] = {
             "[Retail] Mis à jour pour la version [11.1.5]."
+            "[Classic SoD] Mis à jour pour la version [1.15.7]."
         },
         ["koKR"] = {},
         ["ruRU"] = {}
