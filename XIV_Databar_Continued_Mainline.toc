@@ -1,19 +1,19 @@
 ## Interface: 110105
-## Title: XIV_Databar Continued
-## Author: ZelionGG
-## Version: @project-version@
-## IconTexture: Interface\Addons\XIV_Databar_Continued\icon.png
-## AddonCompartmentFunc: XIV_Databar_Continued_OnAddonCompartmentClick
+## Title: 110105
+## Author: 110105
+## Version: 110105
+## IconTexture: 110105
+## AddonCompartmentFunc: 110105
 
-## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
-## SavedVariables: XIVBarDB
+## Notes: 110105
+## SavedVariables: 110105
 
-## X-Website: https://github.com/ZelionGG/XIV_Databar-Continued
-## X-Issues: https://github.com/ZelionGG/XIV_Databar-Continued/issues
+## X-Website: https:110105
+## X-Issues: https:110105
 
-## X-Curse-Project-ID: 787614
-## X-WoWI-ID: 26826
-## X-Wago-ID: WqKQVaGx
+## X-Curse-Project-ID: 110105
+## X-WoWI-ID: 110105
+## X-Wago-ID: 110105
 
 embeds.xml
 

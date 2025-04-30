@@ -1,17 +1,17 @@
 ## Interface: 11507
-## Title: XIV_Databar Continued
-## Author: ZelionGG
-## Version: @project-version@
+## Title: 11507
+## Author: 11507
+## Version: 11507
 
-## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
-## SavedVariables: XIVBarDB
+## Notes: 11507
+## SavedVariables: 11507
 
-## X-Website: https://github.com/ZelionGG/XIV_Databar-Continued
-## X-Issues: https://github.com/ZelionGG/XIV_Databar-Continued/issues
+## X-Website: https:11507
+## X-Issues: https:11507
 
-## X-Curse-Project-ID: 787614
-## X-WoWI-ID: 26826
-## X-Wago-ID: WqKQVaGx
+## X-Curse-Project-ID: 11507
+## X-WoWI-ID: 11507
+## X-Wago-ID: 11507
 
 embeds.xml
 Classic\embeds.xml

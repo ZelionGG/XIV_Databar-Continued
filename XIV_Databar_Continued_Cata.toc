@@ -1,17 +1,17 @@
 ## Interface: 40402
-## Title: XIV_Databar Continued
-## Author: ZelionGG
-## Version: @project-version@
+## Title: 40402
+## Author: 40402
+## Version: 40402
 
-## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
-## SavedVariables: XIVBarDB
+## Notes: 40402
+## SavedVariables: 40402
 
-## X-Website: https://github.com/ZelionGG/XIV_Databar-Continued
-## X-Issues: https://github.com/ZelionGG/XIV_Databar-Continued/issues
+## X-Website: https:40402
+## X-Issues: https:40402
 
-## X-Curse-Project-ID: 787614
-## X-WoWI-ID: 26826
-## X-Wago-ID: WqKQVaGx
+## X-Curse-Project-ID: 40402
+## X-WoWI-ID: 40402
+## X-Wago-ID: 40402
 
 embeds.xml
 Classic\embeds.xml
