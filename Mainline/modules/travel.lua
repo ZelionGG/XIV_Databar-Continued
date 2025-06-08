@@ -635,6 +635,56 @@ function TravelModule:IsKnownTeleportSpell(teleportId)
     end
 end
 
+-- Utility function to check if any mythic teleport is available
+function TravelModule:HasAvailableMythicTeleports()
+    local currentSeason = self:GetCurrentSeason()
+    
+    if xb.db.profile.curSeasonOnly then
+        -- Check current season teleports
+        if currentSeason and xb.MythicTeleports[currentSeason] then
+            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                    if knownId then
+                        return true
+                    end
+                end
+            end
+        end
+        
+        -- If no teleports in current season, check CURRENT
+        if xb.MythicTeleports.CURRENT then
+            for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                    if knownId then
+                        return true
+                    end
+                end
+            end
+        end
+    else
+        -- Check all expansions
+        for _, expansion in pairs(xb.MythicTeleports) do
+            if expansion.teleports then
+                for _, teleportRef in ipairs(expansion.teleports) do
+                    local value = self:ResolveTeleportReference(teleportRef)
+                    if value and value.teleportId then
+                        local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                        if knownId then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return false
+end
+
 -- Utility function to get teleport information
 function TravelModule:GetTeleportInfo(teleportData)
     local teleportId = teleportData.teleportId
@@ -1058,59 +1108,8 @@ function TravelModule:Refresh()
     if self.mythicButton then self.mythicButton:Hide() end
 
     if (xb.db.profile.enableMythicPortals) then
-        -- Check if any teleport is available
-        local hasTeleports = false
-        local currentSeason = self:GetCurrentSeason()
-        
-        if xb.db.profile.curSeasonOnly then
-            -- Check current season teleports
-            if currentSeason and xb.MythicTeleports[currentSeason] then
-                for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
-                    local value = self:ResolveTeleportReference(teleportRef)
-                    if value and value.teleportId then
-                        local knownId = self:IsKnownTeleportSpell(value.teleportId)
-                        if knownId then
-                            hasTeleports = true
-                            break
-                        end
-                    end
-                end
-            end
-            
-            -- If no teleports in current season, check CURRENT
-            if not hasTeleports and xb.MythicTeleports.CURRENT then
-                for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
-                    local value = self:ResolveTeleportReference(teleportRef)
-                    if value and value.teleportId then
-                        local knownId = self:IsKnownTeleportSpell(value.teleportId)
-                        if knownId then
-                            hasTeleports = true
-                            break
-                        end
-                    end
-                end
-            end
-        else
-            -- Check all expansions
-            for _, expansion in pairs(xb.MythicTeleports) do
-                if expansion.teleports then
-                    for _, teleportRef in ipairs(expansion.teleports) do
-                        local value = self:ResolveTeleportReference(teleportRef)
-                        if value and value.teleportId then
-                            local knownId = self:IsKnownTeleportSpell(value.teleportId)
-                            if knownId then
-                                hasTeleports = true
-                                break
-                            end
-                        end
-                    end
-                    if hasTeleports then break end
-                end
-            end
-        end
-        
         -- Only show the button if teleports are available
-        if hasTeleports then
+        if self:HasAvailableMythicTeleports() then
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
             self.mythicText:SetText(L['M+ Teleports'])
 
