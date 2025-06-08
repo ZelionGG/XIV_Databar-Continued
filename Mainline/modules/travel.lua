@@ -760,9 +760,19 @@ function TravelModule:CreateMythicPopup()
                 
                 -- Check if the teleport is valid and the spell is known
                 if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
+                    if type(value.teleportId) == "table" then
+                        for _, id in ipairs(value.teleportId) do
+                            local spellName = C_Spell.GetSpellName(id)
+                            if spellName and IsSpellKnown(id) then
+                                table.insert(teleports, value)
+                                break
+                            end
+                        end
+                    else
+                        local spellName = C_Spell.GetSpellName(value.teleportId)
+                        if spellName and IsSpellKnown(value.teleportId) then
+                            table.insert(teleports, value)
+                        end
                     end
                 end
             end
@@ -786,9 +796,19 @@ function TravelModule:CreateMythicPopup()
             for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
                 local value = self:ResolveTeleportReference(teleportRef)
                 if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
+                    if type(value.teleportId) == "table" then
+                        for _, id in ipairs(value.teleportId) do
+                            local spellName = C_Spell.GetSpellName(id)
+                            if spellName and IsSpellKnown(id) then
+                                table.insert(teleports, value)
+                                break
+                            end
+                        end
+                    else
+                        local spellName = C_Spell.GetSpellName(value.teleportId)
+                        if spellName and IsSpellKnown(value.teleportId) then
+                            table.insert(teleports, value)
+                        end
                     end
                 end
             end
@@ -832,9 +852,19 @@ function TravelModule:CreateMythicPopup()
             if expansion.data.teleports then
                 for teleportKey, value in pairs(expansion.data.teleports) do
                     if value.teleportId then
-                        local spellName = C_Spell.GetSpellName(value.teleportId)
-                        if spellName and IsSpellKnown(value.teleportId) then
-                            table.insert(teleports, value)
+                        if type(value.teleportId) == "table" then
+                            for _, id in ipairs(value.teleportId) do
+                                local spellName = C_Spell.GetSpellName(id)
+                                if spellName and IsSpellKnown(id) then
+                                    table.insert(teleports, value)
+                                    break
+                                end
+                            end
+                        else
+                            local spellName = C_Spell.GetSpellName(value.teleportId)
+                            if spellName and IsSpellKnown(value.teleportId) then
+                                table.insert(teleports, value)
+                            end
                         end
                     end
                 end
@@ -861,9 +891,19 @@ function TravelModule:CreateMythicPopup()
             for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
                 local value = self:ResolveTeleportReference(teleportRef)
                 if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
+                    if type(value.teleportId) == "table" then
+                        for _, id in ipairs(value.teleportId) do
+                            local spellName = C_Spell.GetSpellName(id)
+                            if spellName and IsSpellKnown(id) then
+                                table.insert(teleports, value)
+                                break
+                            end
+                        end
+                    else
+                        local spellName = C_Spell.GetSpellName(value.teleportId)
+                        if spellName and IsSpellKnown(value.teleportId) then
+                            table.insert(teleports, value)
+                        end
                     end
                 end
             end
@@ -960,14 +1000,30 @@ function TravelModule:CreateMythicPopup()
                     -- Resolve the teleport reference if needed
                     local teleportData = TravelModule:ResolveTeleportReference(value)
                     if teleportData and teleportData.teleportId then
-                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
-                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
-                        
-                        table.insert(sortedTeleports, {
-                            teleportData = teleportData,
-                            spellName = spellName,
-                            dungeonName = dungeonName
-                        })
+                        if type(teleportData.teleportId) == "table" then
+                            for _, id in ipairs(teleportData.teleportId) do
+                                if IsSpellKnown(id) then
+                                    local spellName = C_Spell.GetSpellName(id)
+                                    local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                                    
+                                    table.insert(sortedTeleports, {
+                                        teleportData = teleportData,
+                                        spellName = spellName,
+                                        dungeonName = dungeonName
+                                    })
+                                    break
+                                end
+                            end
+                        else
+                            local spellName = C_Spell.GetSpellName(teleportData.teleportId)
+                            local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                            
+                            table.insert(sortedTeleports, {
+                                teleportData = teleportData,
+                                spellName = spellName,
+                                dungeonName = dungeonName
+                            })
+                        end
                     end
                 end
                 
@@ -1013,14 +1069,30 @@ function TravelModule:CreateMythicPopup()
                     -- Resolve the teleport reference if needed
                     local teleportData = TravelModule:ResolveTeleportReference(value)
                     if teleportData and teleportData.teleportId then
-                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
-                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
-                        
-                        table.insert(allTeleports, {
-                            teleportData = teleportData,
-                            spellName = spellName,
-                            dungeonName = dungeonName
-                        })
+                        if type(teleportData.teleportId) == "table" then
+                            for _, id in ipairs(teleportData.teleportId) do
+                                if IsSpellKnown(id) then
+                                    local spellName = C_Spell.GetSpellName(id)
+                                    local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                                    
+                                    table.insert(allTeleports, {
+                                        teleportData = teleportData,
+                                        spellName = spellName,
+                                        dungeonName = dungeonName
+                                    })
+                                    break
+                                end
+                            end
+                        else
+                            local spellName = C_Spell.GetSpellName(teleportData.teleportId)
+                            local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+                            
+                            table.insert(allTeleports, {
+                                teleportData = teleportData,
+                                spellName = spellName,
+                                dungeonName = dungeonName
+                            })
+                        end
                     end
                 end
             end
