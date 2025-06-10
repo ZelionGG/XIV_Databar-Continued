@@ -12,13 +12,18 @@ local GetItemCooldown = C_Container.GetItemCooldown
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellInfo = C_Spell.GetSpellInfo
 
+local GetAreaInfo = C_Map.GetAreaInfo
+
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+
+local UnitFactionGroup = UnitFactionGroup
 
 function TravelModule:GetName() return L['Travel']; end
 
 function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.garrisonHearth = 110560
+    self.playerFaction = UnitFactionGroup("player")
     self.hearthstones = {
         236687, -- Explosive Hearthstone
         228940, -- Notorious Thread's Hearthstone
@@ -66,6 +71,7 @@ function TravelModule:OnInitialize()
     self.availableHearthstones = {}
     self.selectedHearthstones = {}
     self.noMythicTeleport = true
+    self.mageTeleportButtons = {}
 end
 
 local portal = C_CVar.GetCVar("portal")
@@ -197,6 +203,22 @@ function TravelModule:CreateFrames()
                            CreateFrame('FRAME', 'mythicPopup',
                                        self.mythicButton,
                                        'UIDropDownMenuTemplate')
+                                       
+    -- Mage teleports button
+    self.teleportsButton = self.teleportsButton or
+                            CreateFrame('BUTTON', 'teleportsButton',
+                                        self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+    self.teleportsIcon = self.teleportsIcon or
+                          self.teleportsButton:CreateTexture(nil, 'OVERLAY')
+    self.teleportsText = self.teleportsText or
+                          self.teleportsButton:CreateFontString(nil, 'OVERLAY')
+                          
+    -- Mage teleports popup
+    self.teleportsPopup = self.teleportsPopup or
+                           CreateFrame('FRAME', 'teleportsPopup',
+                                       self.teleportsButton,
+                                       'UIDropDownMenuTemplate')
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -319,6 +341,36 @@ function TravelModule:RegisterFrameEvents()
             self.tooltipTimer:Cancel()
             self.tooltipTimer = nil
         end
+        GameTooltip:Hide()
+    end)
+
+    -- Teleports button events
+    self.teleportsButton:EnableMouse(true)
+    self.teleportsButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
+    self.teleportsButton:SetAttribute('type', 'teleportsFunction')
+    self.teleportsButton.HandlesGlobalMouseEvent = function() return true end
+    
+    self.teleportsButton.teleportsFunction = self.teleportsButton.teleportsFunction or
+                                           function()
+            if not InCombatLockdown() then
+                ToggleDropDownMenu(1, nil, self.teleportsPopup, self.teleportsButton,
+                                  0, 0, nil, nil, nil)
+            end
+        end
+        
+    self.teleportsButton:SetScript('OnClick', function(_, button, down)
+        if button == 'LeftButton' and down == false then
+            self.teleportsButton.teleportsFunction()
+        end
+    end)
+    
+    self.teleportsButton:SetScript('OnEnter', function()
+        TravelModule:SetTeleportsColor()
+        if InCombatLockdown() then return end
+    end)
+    
+    self.teleportsButton:SetScript('OnLeave', function()
+        TravelModule:SetTeleportsColor()
         GameTooltip:Hide()
     end)
 end
@@ -593,6 +645,18 @@ function TravelModule:SetMythicColor()
     end -- else
 end
 
+function TravelModule:SetTeleportsColor()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    
+    if self.teleportsButton:IsMouseOver() then
+        self.teleportsText:SetTextColor(unpack(xb:HoverColors()))
+    else
+        self.teleportsIcon:SetVertexColor(xb:GetColor('normal'))
+        self.teleportsText:SetTextColor(xb:GetColor('normal'))
+    end
+end
+
 function TravelModule:GetCurrentSeason()
     local currentDate = date("%Y-%m-%d")
     local currentSeason = nil
@@ -633,6 +697,11 @@ function TravelModule:IsKnownTeleportSpell(teleportId)
     else
         return IsSpellKnown(teleportId) and teleportId or nil
     end
+end
+
+-- Utility function to check if player is a mage
+function TravelModule:IsMage()
+    return xb.constants.playerClass == 'MAGE'
 end
 
 -- Utility function to check if any mythic teleport is available
@@ -727,6 +796,45 @@ function TravelModule:CollectTeleports(teleportsList)
     end)
     
     return result
+end
+
+-- Utility function to create a mage teleport button
+function TravelModule:CreateMageTeleportButton(teleportId, areaId)
+    local spellName = C_Spell.GetSpellName(teleportId)
+    local areaName = GetAreaInfo(areaId)
+    
+    if not spellName or not areaName then return nil end
+    
+    local button = CreateFrame("Button",
+                           "TravelMenuMageTeleportButton" .. teleportId,
+                           UIParent,
+                           "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+
+    button:SetText(areaName)
+    button:SetAttribute("type", "spell")
+    button:SetAttribute("spell", spellName)
+    button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+
+    -- Hide the checkboxes
+    for i, region in pairs {button:GetRegions()} do
+        if region:GetObjectType() == "Texture" then region:Hide() end
+    end
+
+    -- Move the text to the right by 5 units
+    local text = button:GetFontString()
+    text:SetPoint('LEFT', 5, 0)
+    local font, _, flags = text:GetFont()
+    text:SetFont(font, 12, flags)
+
+    local textWidth = text:GetStringWidth()
+    button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
+
+    button:HookScript("PostClick",
+                  function(self, button, down)
+        CloseDropDownMenus()
+    end)
+
+    return button
 end
 
 -- Utility function to create a teleport button
@@ -853,6 +961,102 @@ function TravelModule:CreatePortPopup()
             (self.portOptionString:GetStringWidth() + self.extraPadding)
     end
     self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
+end
+
+function TravelModule:CreateMageTeleportsPopup()
+    if not self.teleportsPopup then return; end
+    
+    -- Get the appropriate teleport data based on player faction
+    local teleportData = nil
+    if self.playerFaction == "Alliance" then
+        teleportData = xb.MageTeleports.alliance
+    else
+        teleportData = xb.MageTeleports.horde
+    end
+    
+    if not teleportData then return end
+    
+    -- Function to add title and separator to the menu
+    local function AddMenuHeader(level)
+        -- Title
+        local info = UIDropDownMenu_CreateInfo()
+        local r, g, b, _ = unpack(xb:HoverColors())
+        info.text = '[|cFF' .. string.format('%02x', r * 255) ..
+                        string.format('%02x', g * 255) ..
+                        string.format('%02x', b * 255) ..
+                        teleportData.name .. '|r]'
+        info.notClickable, info.notCheckable = true, true
+        UIDropDownMenu_AddButton(info, level)
+
+        -- Separator
+        local separator = UIDropDownMenu_CreateInfo()
+        separator.text = ""
+        separator.disabled = true
+        separator.notClickable = true
+        separator.isTitle = true
+        separator.leftPadding = 10
+        separator.textHeight = 1 -- Makes the separator line thinner
+        separator.notCheckable = true
+        UIDropDownMenu_AddButton(separator, level)
+    end
+    
+    -- Initialize the dropdown menu
+    UIDropDownMenu_Initialize(self.teleportsPopup, function(self, level, menuList)
+        if (level or 1) == 1 then
+            AddMenuHeader(level)
+            
+            -- Add teleports submenu
+            if teleportData.teleports and #teleportData.teleports > 0 then
+                local info = UIDropDownMenu_CreateInfo()
+                info.text, info.checked = L["Teleports"], false
+                info.menuList, info.hasArrow = "teleports", true
+                info.notCheckable = true
+                UIDropDownMenu_AddButton(info, level)
+            end
+            
+            -- Add portals submenu
+            if teleportData.portals and #teleportData.portals > 0 then
+                local info = UIDropDownMenu_CreateInfo()
+                info.text, info.checked = L["Portals"], false
+                info.menuList, info.hasArrow = "portals", true
+                info.notCheckable = true
+                UIDropDownMenu_AddButton(info, level)
+            end
+        elseif menuList == "teleports" then
+            -- Add teleport spells
+            for _, teleport in ipairs(teleportData.teleports) do
+                if IsSpellKnown(teleport.teleportId) then
+                    local info = UIDropDownMenu_CreateInfo()
+                    info.customFrame = TravelModule:CreateMageTeleportButton(teleport.teleportId, teleport.areaId)
+                    if info.customFrame then
+                        UIDropDownMenu_AddButton(info, level)
+                    end
+                end
+            end
+        elseif menuList == "portals" then
+            -- Add portal spells
+            for _, portal in ipairs(teleportData.portals) do
+                if IsSpellKnown(portal.teleportId) then
+                    local info = UIDropDownMenu_CreateInfo()
+                    info.customFrame = TravelModule:CreateMageTeleportButton(portal.teleportId, portal.areaId)
+                    if info.customFrame then
+                        UIDropDownMenu_AddButton(info, level)
+                    end
+                end
+            end
+        end
+    end, 'MENU')
+    
+    for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
+        local button = _G["DropDownList1Button" .. i]
+        if button then
+            local text = button:GetFontString()
+            if text then
+                local font, _, flags = text:GetFont()
+                text:SetFont(font, 12, flags)
+            end
+        end
+    end
 end
 
 function TravelModule:CreateMythicPopup()
@@ -1132,6 +1336,38 @@ function TravelModule:Refresh()
             self.mythicButton:Show()
         end
     end
+    
+    -- Mage Teleports Part
+    if self.teleportsButton then self.teleportsButton:Hide() end
+    
+    if self:IsMage() then
+        self.teleportsText:SetFont(xb:GetFont(db.text.fontSize))
+        self.teleportsText:SetText(L['Teleports'])
+        
+        self.teleportsButton:SetSize(self.teleportsText:GetWidth() + iconSize +
+                                   db.general.barPadding, xb:GetHeight())
+                                   
+        -- Position the teleports button to the left of the mythic button if it exists and is visible
+        if self.mythicButton and self.mythicButton:IsVisible() then
+            self.teleportsButton:SetPoint("RIGHT", self.mythicButton, "LEFT", -(db.general.barPadding), 0)
+        else
+            self.teleportsButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+        end
+        
+        self.teleportsText:SetPoint("RIGHT")
+        
+        self.teleportsIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
+        self.teleportsIcon:SetSize(iconSize, iconSize)
+        
+        self.teleportsIcon:SetPoint("RIGHT", self.teleportsText, "LEFT",
+                                 -(db.general.barPadding), 0)
+                                 
+        self:SetTeleportsColor()
+        
+        self:CreateMageTeleportsPopup()
+        
+        self.teleportsButton:Show()
+    end
 
     local popupPadding = xb.constants.popupPadding
     local popupPoint = 'BOTTOM'
@@ -1159,6 +1395,19 @@ function TravelModule:Refresh()
     
     self:SkinFrame(self.mythicPopup, "SpecToolTip")
     self.mythicPopup:Hide()
+    
+    self.teleportsPopup:ClearAllPoints()
+    
+    if db.general.barPosition == 'TOP' then
+        self.teleportsPopup.point = "TOP"
+        self.teleportsPopup.relativePoint = "BOTTOM"
+    else
+        self.teleportsPopup.point = "BOTTOM"
+        self.teleportsPopup.relativePoint = "TOP"
+    end
+    
+    self:SkinFrame(self.teleportsPopup, "SpecToolTip")
+    self.teleportsPopup:Hide()
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
     self.portButton:Show()
@@ -1170,6 +1419,10 @@ function TravelModule:Refresh()
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
+    end
+    
+    if self:IsMage() and self.teleportsButton:IsVisible() then
+        totalWidth = totalWidth + self.teleportsButton:GetWidth()
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -1326,6 +1579,11 @@ function TravelModule:GetConfig()
             table.insert(hearthstonesTable, i, v)
         end
     end
+    
+    -- Add translations for teleports if they don't exist
+    if not L["Teleports"] then L["Teleports"] = "Teleports" end
+    if not L["Portals"] then L["Portals"] = "Portals" end
+    if not L["Mage Teleports"] then L["Mage Teleports"] = "Mage Teleports" end
 
     return {
         name = self:GetName(),
