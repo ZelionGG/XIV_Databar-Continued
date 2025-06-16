@@ -609,7 +609,7 @@ function TravelModule:GetCurrentSeason()
     return currentSeason
 end
 
--- Helper function to resolve teleport references
+-- Utility function to resolve teleport references
 function TravelModule:ResolveTeleportReference(teleportRef)
     if type(teleportRef) == "string" then
         -- Parse the reference (format: "ExpansionKey.TeleportKey")
@@ -621,23 +621,146 @@ function TravelModule:ResolveTeleportReference(teleportRef)
     return teleportRef -- Return as-is if not a reference or reference not found
 end
 
--- Helper function to create a teleport button for the dropdown menu
-local function CreateTeleportButton(teleportData, spellName)
-    local frame = CreateFrame("Button", nil, nil, "UIDropDownCustomMenuEntryTemplate")
-    frame:SetSize(100, 16)
+-- Utility function to check if a teleport spell is known
+function TravelModule:IsKnownTeleportSpell(teleportId)
+    if type(teleportId) == "table" then
+        for _, id in ipairs(teleportId) do
+            if IsSpellKnown(id) then
+                return id
+            end
+        end
+        return nil
+    else
+        return IsSpellKnown(teleportId) and teleportId or nil
+    end
+end
+
+-- Utility function to check if any mythic teleport is available
+function TravelModule:HasAvailableMythicTeleports()
+    local currentSeason = self:GetCurrentSeason()
     
-    local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId) or spellName
+    if xb.db.profile.curSeasonOnly then
+        -- Check current season teleports
+        if currentSeason and xb.MythicTeleports[currentSeason] then
+            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                    if knownId then
+                        return true
+                    end
+                end
+            end
+        end
+        
+        -- If no teleports in current season, check CURRENT
+        if xb.MythicTeleports.CURRENT then
+            for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
+                local value = self:ResolveTeleportReference(teleportRef)
+                if value and value.teleportId then
+                    local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                    if knownId then
+                        return true
+                    end
+                end
+            end
+        end
+    else
+        -- Check all expansions
+        for _, expansion in pairs(xb.MythicTeleports) do
+            if expansion.teleports then
+                for _, teleportRef in ipairs(expansion.teleports) do
+                    local value = self:ResolveTeleportReference(teleportRef)
+                    if value and value.teleportId then
+                        local knownId = self:IsKnownTeleportSpell(value.teleportId)
+                        if knownId then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
     
-    local text = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    text:SetPoint("LEFT", 10, 0)
-    text:SetText(dungeonName)
+    return false
+end
+
+-- Utility function to get teleport information
+function TravelModule:GetTeleportInfo(teleportData)
+    local teleportId = teleportData.teleportId
+    local knownId = self:IsKnownTeleportSpell(teleportId)
     
-    frame:SetScript("OnClick", function()
-        CastSpellByID(teleportData.teleportId)
-        CloseDropDownMenus()
+    if knownId then
+        local spellName = C_Spell.GetSpellName(knownId)
+        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
+        
+        if spellName and dungeonName then
+            return {
+                teleportData = teleportData,
+                spellName = spellName,
+                dungeonName = dungeonName,
+                knownId = knownId
+            }
+        end
+    end
+    
+    return nil
+end
+
+-- Utility function to collect teleports from a season or expansion
+function TravelModule:CollectTeleports(teleportsList)
+    local result = {}
+    
+    for _, teleportRef in ipairs(teleportsList) do
+        local teleportData = self:ResolveTeleportReference(teleportRef)
+        if teleportData then
+            local teleportInfo = self:GetTeleportInfo(teleportData)
+            if teleportInfo then
+                table.insert(result, teleportInfo)
+            end
+        end
+    end
+    
+    -- Sort alphabetically by dungeon name
+    table.sort(result, function(a, b)
+        return a.dungeonName < b.dungeonName
     end)
     
-    return frame
+    return result
+end
+
+-- Utility function to create a teleport button
+function TravelModule:CreateTeleportButton(teleportInfo)
+    local button = CreateFrame("Button",
+                           "TravelMenuTeleportButton" .. teleportInfo.spellName,
+                           UIParent,
+                           "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+
+    button:SetText(teleportInfo.dungeonName)
+    button:SetAttribute("type", "spell")
+    button:SetAttribute("spell", teleportInfo.spellName)
+    button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+
+    -- Hide the checkboxes
+    for i, region in pairs {button:GetRegions()} do
+        if region:GetObjectType() == "Texture" then region:Hide() end
+    end
+
+    -- Move the text to the right by 5 units
+    local text = button:GetFontString()
+    text:SetPoint('LEFT', 5, 0)
+    local font, _, flags = text:GetFont()
+    text:SetFont(font, 12, flags)
+
+    local textWidth = text:GetStringWidth()
+    button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
+
+    button:HookScript("PostClick",
+                  function(self, button, down)
+        CloseDropDownMenus()
+    end)
+
+    return button
 end
 
 function TravelModule:CreatePortPopup()
@@ -737,40 +860,12 @@ function TravelModule:CreateMythicPopup()
     local currentSeason = self:GetCurrentSeason()
     
     -- Create popup menu
-    local expansions = {}
-    
-    -- Sort expansions by their order
-    for expKey, expData in pairs(xb.MythicTeleports) do
-        -- Skip season-specific entries when building the expansion list
-        if not (expKey:match("^TWW_%d+$") or expKey == "CURRENT") then
-            table.insert(expansions, {key = expKey, data = expData})
-        end
-    end
-    
-    table.sort(expansions, function(a, b) return a.data.order < b.data.order end)
-    
     local filteredTeleports = {}
+    
     if xb.db.profile.curSeasonOnly then
-        -- Use the current season teleports if available
+        -- Use current season if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
-            local teleports = {}
-            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
-                -- Resolve the teleport reference
-                local value = self:ResolveTeleportReference(teleportRef)
-                
-                -- Check if the teleport is valid and the spell is known
-                if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
-                    end
-                end
-            end
-            
-            -- Sort teleports alphabetically by name
-            table.sort(teleports, function(a, b)
-                return (a.name or "") < (b.name or "")
-            end)
+            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
@@ -780,23 +875,9 @@ function TravelModule:CreateMythicPopup()
             end
         end
         
-        -- If no current season teleports, use the default CURRENT
+        -- If no teleports for current season, use CURRENT
         if #filteredTeleports == 0 and xb.MythicTeleports.CURRENT then
-            local teleports = {}
-            for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
-                local value = self:ResolveTeleportReference(teleportRef)
-                if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
-                    end
-                end
-            end
-            
-            -- Sort teleports alphabetically by name
-            table.sort(teleports, function(a, b)
-                return (a.name or "") < (b.name or "")
-            end)
+            local teleports = self:CollectTeleports(xb.MythicTeleports.CURRENT.teleports)
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
@@ -826,24 +907,19 @@ function TravelModule:CreateMythicPopup()
         
         -- Process each expansion
         for _, expansion in ipairs(expansions) do
-            local teleports = {}
-            
-            -- Check if this is a regular expansion with teleports array
             if expansion.data.teleports then
-                for teleportKey, value in pairs(expansion.data.teleports) do
-                    if value.teleportId then
-                        local spellName = C_Spell.GetSpellName(value.teleportId)
-                        if spellName and IsSpellKnown(value.teleportId) then
-                            table.insert(teleports, value)
-                        end
+                local teleports = {}
+                
+                for _, value in pairs(expansion.data.teleports) do
+                    local teleportInfo = self:GetTeleportInfo(value)
+                    if teleportInfo then
+                        table.insert(teleports, teleportInfo)
                     end
                 end
                 
-                -- Sort teleports alphabetically by name
+                -- Sort alphabetically by dungeon name
                 table.sort(teleports, function(a, b)
-                    local nameA = GetLFGDungeonInfo(a.dungeonId) or ""
-                    local nameB = GetLFGDungeonInfo(b.dungeonId) or ""
-                    return nameA < nameB
+                    return a.dungeonName < b.dungeonName
                 end)
                 
                 if #teleports > 0 then
@@ -857,23 +933,7 @@ function TravelModule:CreateMythicPopup()
         
         -- Add current season at the bottom if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
-            local teleports = {}
-            for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
-                local value = self:ResolveTeleportReference(teleportRef)
-                if value and value.teleportId then
-                    local spellName = C_Spell.GetSpellName(value.teleportId)
-                    if spellName and IsSpellKnown(value.teleportId) then
-                        table.insert(teleports, value)
-                    end
-                end
-            end
-            
-            -- Sort teleports alphabetically by name
-            table.sort(teleports, function(a, b)
-                local nameA = GetLFGDungeonInfo(a.dungeonId) or ""
-                local nameB = GetLFGDungeonInfo(b.dungeonId) or ""
-                return nameA < nameB
-            end)
+            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
             
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
@@ -884,63 +944,34 @@ function TravelModule:CreateMythicPopup()
         end
     end
 
-    local function CreateTeleportButton(value, spellName)
-        local button = CreateFrame("Button",
-                               "TravelMenuTeleportButton" .. spellName,
-                               UIParent,
-                               "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
+    -- Function to add title and separator to the menu
+    local function AddMenuHeader(level)
+        -- Title
+        local info = UIDropDownMenu_CreateInfo()
+        local r, g, b, _ = unpack(xb:HoverColors())
+        info.text = '[|cFF' .. string.format('%02x', r * 255) ..
+                        string.format('%02x', g * 255) ..
+                        string.format('%02x', b * 255) ..
+                        L['Mythic+ Teleports'] .. '|r]'
+        info.notClickable, info.notCheckable = true, true
+        UIDropDownMenu_AddButton(info, level)
 
-        name = GetLFGDungeonInfo(value.dungeonId)
-        button:SetText(name)
-        button:SetAttribute("type", "spell")
-        button:SetAttribute("spell", spellName)
-        button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
-
-        -- Hide the checkboxes
-        for i, region in pairs {button:GetRegions()} do
-            if region:GetObjectType() == "Texture" then region:Hide() end
-        end
-
-        -- Move the text to the right by 5 units
-        local text = button:GetFontString()
-        text:SetPoint('LEFT', 5, 0)
-        local font, _, flags = text:GetFont()
-        text:SetFont(font, 12, flags)
-
-        local textWidth = text:GetStringWidth()
-        button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
-
-        button:HookScript("PostClick",
-                      function(self, button, down)
-            CloseDropDownMenus()
-        end)
-
-        return button
+        -- Separator
+        local separator = UIDropDownMenu_CreateInfo()
+        separator.text = ""
+        separator.disabled = true
+        separator.notClickable = true
+        separator.isTitle = true
+        separator.leftPadding = 10
+        separator.textHeight = 1 -- Makes the separator line thinner
+        separator.notCheckable = true
+        UIDropDownMenu_AddButton(separator, level)
     end
 
-    if not xb.db.profile.curSeasonOnly then -- If not curSeasonOnly, show a 2 levels dropdown menu
+    if not xb.db.profile.curSeasonOnly then -- Two-level menu
         UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
             if (level or 1) == 1 then
-                -- Title
-                local info = UIDropDownMenu_CreateInfo()
-                local r, g, b, _ = unpack(xb:HoverColors())
-                info.text = '[|cFF' .. string.format('%02x', r * 255) ..
-                                string.format('%02x', g * 255) ..
-                                string.format('%02x', b * 255) ..
-                                L['Mythic+ Teleports'] .. '|r]'
-                info.notClickable, info.notCheckable = true, true
-                UIDropDownMenu_AddButton(info)
-
-                -- Separator
-                local separator = UIDropDownMenu_CreateInfo()
-                separator.text = ""
-                separator.disabled = true
-                separator.notClickable = true
-                separator.isTitle = true
-                separator.leftPadding = 10
-                separator.textHeight = 1 -- Makes the separator line thinner
-                separator.notCheckable = true
-                UIDropDownMenu_AddButton(separator, level)
+                AddMenuHeader(level)
 
                 -- Add expansions with teleports as menu items
                 for _, expData in ipairs(filteredTeleports) do
@@ -950,82 +981,31 @@ function TravelModule:CreateMythicPopup()
                         info.menuList, info.hasArrow = expData.teleports, true
                         info.notCheckable = true
                         info.value = expData.teleports
-                        UIDropDownMenu_AddButton(info)
+                        UIDropDownMenu_AddButton(info, level)
                     end
                 end
             else
-                -- Create a table to hold teleport data with dungeon names
-                local sortedTeleports = {}
-                for key, value in ipairs(menuList) do
-                    -- Resolve the teleport reference if needed
-                    local teleportData = TravelModule:ResolveTeleportReference(value)
-                    if teleportData and teleportData.teleportId then
-                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
-                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
-                        
-                        table.insert(sortedTeleports, {
-                            teleportData = teleportData,
-                            spellName = spellName,
-                            dungeonName = dungeonName
-                        })
-                    end
-                end
-                
-                -- Sort by dungeon name alphabetically
-                table.sort(sortedTeleports, function(a, b)
-                    return a.dungeonName < b.dungeonName
-                end)
-                
                 -- Add sorted teleports to the menu
-                for _, teleport in ipairs(sortedTeleports) do
+                for _, teleport in ipairs(menuList) do
                     local info = UIDropDownMenu_CreateInfo()
-                    info.customFrame = CreateTeleportButton(teleport.teleportData, teleport.spellName)
+                    info.customFrame = TravelModule:CreateTeleportButton(teleport)
                     UIDropDownMenu_AddButton(info, level)
                 end
             end
         end, 'MENU')
-    else -- If curSeasonOnly, only show a single-level dropdown menu
+    else -- Single-level menu
         UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
-            local info = UIDropDownMenu_CreateInfo()
-            local r, g, b, _ = unpack(xb:HoverColors())
-            info.text = '[|cFF' .. string.format('%02x', r * 255) ..
-                            string.format('%02x', g * 255) ..
-                            string.format('%02x', b * 255) ..
-                            L['Mythic+ Teleports'] .. '|r]'
-            info.notClickable, info.notCheckable = true, true
-            UIDropDownMenu_AddButton(info)
-
-            -- Separator
-            local separator = UIDropDownMenu_CreateInfo()
-            separator.text = ""
-            separator.disabled = true
-            separator.notClickable = true
-            separator.isTitle = true
-            separator.leftPadding = 10
-            separator.textHeight = 1 -- Makes the separator line thinner
-            separator.notCheckable = true
-            UIDropDownMenu_AddButton(separator, level)
+            AddMenuHeader(level)
                 
-            -- Create a table to hold all teleport data with dungeon names
+            -- Add all teleports to the menu
             local allTeleports = {}
             for _, expData in ipairs(filteredTeleports) do
-                for _, value in ipairs(expData.teleports) do
-                    -- Resolve the teleport reference if needed
-                    local teleportData = TravelModule:ResolveTeleportReference(value)
-                    if teleportData and teleportData.teleportId then
-                        local spellName = C_Spell.GetSpellName(teleportData.teleportId)
-                        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
-                        
-                        table.insert(allTeleports, {
-                            teleportData = teleportData,
-                            spellName = spellName,
-                            dungeonName = dungeonName
-                        })
-                    end
+                for _, teleport in ipairs(expData.teleports) do
+                    table.insert(allTeleports, teleport)
                 end
             end
             
-            -- Sort by dungeon name alphabetically
+            -- Sort by dungeon name
             table.sort(allTeleports, function(a, b)
                 return a.dungeonName < b.dungeonName
             end)
@@ -1033,7 +1013,7 @@ function TravelModule:CreateMythicPopup()
             -- Add sorted teleports to the menu
             for _, teleport in ipairs(allTeleports) do
                 local info = UIDropDownMenu_CreateInfo()
-                info.customFrame = CreateTeleportButton(teleport.teleportData, teleport.spellName)
+                info.customFrame = TravelModule:CreateTeleportButton(teleport)
                 UIDropDownMenu_AddButton(info, level)
             end
         end, 'MENU')
@@ -1128,26 +1108,29 @@ function TravelModule:Refresh()
     if self.mythicButton then self.mythicButton:Hide() end
 
     if (xb.db.profile.enableMythicPortals) then
-        self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
-        self.mythicText:SetText(L['M+ Teleports'])
+        -- Only show the button if teleports are available
+        if self:HasAvailableMythicTeleports() then
+            self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
+            self.mythicText:SetText(L['M+ Teleports'])
 
-        self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
-                                      db.general.barPadding, xb:GetHeight())
-        self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+            self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
+                                       db.general.barPadding, xb:GetHeight())
+            self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
 
-        self.mythicText:SetPoint("RIGHT")
+            self.mythicText:SetPoint("RIGHT")
 
-        self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
-        self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
+            self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
+            self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
 
-        self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
-                                 -(db.general.barPadding) + 5, 0)
+            self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
+                                     -(db.general.barPadding) + 5, 0)
 
-        self:SetMythicColor()
+            self:SetMythicColor()
 
-        self:CreateMythicPopup()
+            self:CreateMythicPopup()
 
-        self.mythicButton:Show()
+            self.mythicButton:Show()
+        end
     end
 
     local popupPadding = xb.constants.popupPadding
