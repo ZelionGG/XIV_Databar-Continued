@@ -32,7 +32,7 @@ xb.MythicTeleports.BFA = {
             dungeonId = 2006, -- Operation: Mechagon
         },
         TML = {
-            teleportId = 467555, -- The MOTHERLODE!! Teleport
+            teleportId = {467555, 467553}, -- The MOTHERLODE!! Teleport
             dungeonId = 1707, -- The MOTHERLODE!!
         }
     }

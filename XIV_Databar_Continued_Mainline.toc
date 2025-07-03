@@ -1,4 +1,4 @@
-## Interface: 110105
+## Interface: 110107
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
@@ -19,10 +19,10 @@ embeds.xml
 
 locales\locales.xml
 core.lua
-Core\changelog\Load_Changelog.xml
 Core\modules\load_modules.xml
 
-Core\mythicteleports\expansions.xml
-Core\mythicteleports\seasons.xml
+Core\utils\changelog\Load_Changelog.xml
+Core\utils\mythicteleports\expansions.xml
+Core\utils\mythicteleports\seasons.xml
 
 Mainline\modules\load_modules.xml
