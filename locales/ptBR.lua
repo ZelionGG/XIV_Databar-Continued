@@ -123,8 +123,8 @@ L['Travel Cooldowns'] = true;
 L['Change Port Option'] = "Alterar Opção de Teleporte";
 
 L["Registered characters"] = true;
-L['Show Free Bag Space'] = true;
-L['Show Other Realms'] = true;
+L['Show Free Bag Space'] = "Mostrar espaço livre na bolsa";
+L['Show Other Realms'] = "Mostrar Outros Servidores";
 L['Always Show Silver and Copper'] = "Sempre mostrar Prata e Bronze";
 L['Shorten Gold'] = "Encurtar Ouro";
 L['Toggle Bags'] = "Mostrar bolsa";
