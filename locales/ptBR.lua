@@ -29,8 +29,8 @@ L["Leftmost and rightmost margin of the bar modules"] = "Margem esquerda e direi
 L['Hide order hall bar'] = "Ocultar barra dos Salões de Classe";
 L['Use ElvUI for tooltips'] = "Usar ElvUI para dicas";
 L["Lock Bar"] = "Travar Barra";
-L["Lock the bar in place"] = "Travar a barra no lugar";
-L["Lock the bar to prevent dragging"] = "Travar para impedir movimentação";
+L["Lock the bar in place"] = "Travar barra";
+L["Lock the bar to prevent dragging"] = "Impedir movimentação";
 L["Makes the bar span the entire screen width"] = "Ocupar toda a largura da tela";
 L["Position the bar at the top or bottom of the screen"] = "Posicionar a barra no topo ou embaixo da tela";
 L["X Offset"] = "Deslocamento X";
@@ -41,12 +41,12 @@ L["Behavior"] = "Comportamento";
 L["Spacing"] = "Espaçamento";
 
 -- Positioning Options
-L['Positioning Options'] = "Positions Einstellungen";
-L['Horizontal Position'] = "Horizontale Position";
-L['Bar Width'] = "Leistenbreite";
-L['Left'] = "Links";
-L['Center'] = "Mitte";
-L['Right'] = "Rechts";
+L['Positioning Options'] = "Configurações de Posicionamento";
+L['Horizontal Position'] = "Posição Horizontal";
+L['Bar Width'] = "Largura da Barra";
+L['Left'] = "Esquerda";
+L['Center'] = "Centro";
+L['Right'] = "Direita";
 
 -- Media
 L['Font'] = "Fonte";
@@ -104,8 +104,8 @@ L['Durability Warning Threshold'] = "Aviso de Durabilidade";
 L['Show Item Level'] = "Mostrar item level";
 L['Show Coordinates'] = "Mostrar coordenadas";
 
-L['Master Volume'] = "Haupt-Lautstärke";
-L["Volume step"] = "Lautstärken Schritte";
+L['Master Volume'] = "Volume geral";
+L["Volume step"] = true;
 
 L['Time Format'] = "Formato da Hora";
 L['Use Server Time'] = "Usar hora do Servidor";
@@ -120,51 +120,51 @@ L['Travel'] = true;
 L['Port Options'] = "Opções de Teleporte";
 L['Ready'] = true;
 L['Travel Cooldowns'] = true;
-L['Change Port Option'] = "Teleport Einstellungen ändern";
+L['Change Port Option'] = "Alterar Opção de Teleporte";
 
 L["Registered characters"] = true;
 L['Show Free Bag Space'] = true;
 L['Show Other Realms'] = true;
-L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
-L['Shorten Gold'] = "Gold abkürzen";
-L['Toggle Bags'] = "Taschen anzeigen";
-L['Session Total'] = "Sitzung total";
-L['Daily Total'] = "Heute total";
-L['Gold rounded values'] = "Gold runden";
+L['Always Show Silver and Copper'] = "Sempre mostrar Prata e Bronze";
+L['Shorten Gold'] = "Encurtar Ouro";
+L['Toggle Bags'] = "Mostrar bolsa";
+L['Session Total'] = true;
+L['Daily Total'] = true;
+L['Gold rounded values'] = "Valores arredondados de ouro";
 
-L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
-L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
-L['Show Tooltips'] = "Tooltips anzeigen";
-L['Text on Right'] = "Text auf der rechten Seite";
-L['Currency Select'] = "Währung auswählen";
-L['First Currency'] = "Währung #1";
-L['Second Currency'] = "Währung #2";
-L['Third Currency'] = "Währung #3";
-L['Rested'] = "Ausgeruht";
+L['Show XP Bar Below Max Level'] = "Mostrar barra de XP abaixo do nível máximo";
+L['Use Class Colors for XP Bar'] = "Usar cores de classe para a barra de XP";
+L['Show Tooltips'] = true;
+L['Text on Right'] = "Texto à Direita";
+L['Currency Select'] = "Seleção de Moeda";
+L['First Currency'] = "Moeda #1";
+L['Second Currency'] = "Moeda #2";
+L['Third Currency'] = "Moeda #3";
+L['Rested'] = "Descansado";
 
-L['Show World Ping'] = "Welt-Ping anzeigen";
-L['Number of Addons To Show'] = "Maximale Anzahl für Addon Anzeige";
-L['Addons to Show in Tooltip'] = "Addons die im Tooltip angezeigt werden";
-L['Show All Addons in Tooltip with Shift'] = "Alle Addons im Tooltip anzeigen via Shift";
-L['Memory Usage'] = "Speichernutzung";
-L['Garbage Collect'] = "Speicher säubern";
-L['Cleaned'] = "Gesäubert";
+L['Show World Ping'] = "Mostrar Ping Global";
+L['Number of Addons To Show'] = "Número de Addons a Mostrar";
+L['Addons to Show in Tooltip'] = "Addons a Mostrar no Tooltip";
+L['Show All Addons in Tooltip with Shift'] = "Mostrar todos os addons no tooltip com Shift";
+L['Memory Usage'] = "Uso de Memória";
+L['Garbage Collect'] = "Limpeza de Memória";
+L['Cleaned'] = "Limpo";
 
-L['Use Class Colors'] = "Klassenfarben benutzen";
+L['Use Class Colors'] = "Usar Cores de Classe";
 L['Cooldowns'] = true;
-L['Toggle Profession Frame'] = 'Berufsfenster anzeigen';
-L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
+L['Toggle Profession Frame'] = "Profissões";
+L['Toggle Profession Spellbook'] = true;
 
-L['Set Specialization'] = "Spezialisierung auswählen";
-L['Set Loadout'] = "Konfiguration auswählen";
-L['Set Loot Specialization'] = "Beute Spezialisierung auswählen";
-L['Current Specialization'] = "Aktuelle Spezialisierung";
-L['Current Loot Specialization'] = "Aktuelle Beute Spezialisierung";
-L['Talent Minimum Width'] = "Minimale Breite für Talente";
-L['Open Artifact'] = "Artefakt öffen";
-L['Remaining'] = "Verbleibend";
-L['Available Ranks'] = "Verfügbare Ränge";
-L['Artifact Knowledge'] = "Artefaktwissen";
+L['Set Specialization'] = "Trocar Especialização";
+L['Set Loadout'] = "Trocar Loadout";
+L['Set Loot Specialization'] = "Trocar Especialização de Saque";
+L['Current Specialization'] = "Especialização Atual";
+L['Current Loot Specialization'] = "Especialização de Saque Atual";
+L['Talent Minimum Width'] = "Largura Mínima dos Talentos";
+L['Open Artifact'] = true;
+L['Remaining'] = "Restante";
+L['Available Ranks'] = "Ranks Disponíveis";
+L['Artifact Knowledge'] = "Conhecimento de Artefato";
 
 -- Travel (Translation needed)
 L['Hearthstone'] = true;
@@ -193,21 +193,21 @@ L["Current season"] = "Temporada Atual";
 -- Profile Import/Export
 L["Profile Sharing"] = true;
 
-L["Invalid import string"] = true;
-L["Failed to decode import string"] = true;
-L["Failed to decompress import string"] = true;
-L["Failed to deserialize import string"] = true;
-L["Invalid profile format"] = true;
-L["Profile imported successfully as"] = true;
+L["Invalid import string"] = "String de importação inválida";
+L["Failed to decode import string"] = "Falha ao decodificar a string de importação";
+L["Failed to decompress import string"] = "Falha ao descomprimir a string de importação";
+L["Failed to deserialize import string"] = "Falha ao desserializar a string de importação";
+L["Invalid profile format"] = "Formato de perfil inválido";
+L["Profile imported successfully as"] = "Perfil importado com sucesso como";
 
-L["Copy the export string below:"] = true;
-L["Paste the import string below:"] = true;
-L["Import or export your profiles to share them with other players."] = true;
+L["Copy the export string below:"] = "Copie a string de exportação abaixo:";
+L["Paste the import string below:"] = "Cole a string de importação abaixo:";
+L["Import or export your profiles to share them with other players."] = "Importe ou exporte seus perfis para compartilhá-los com outros jogadores.";
 L["Profile Import/Export"] = "Importar/Exportar Perfil";
 L["Export Profile"] = "Exportar Perfil";
-L["Export your current profile settings"] = true;
+L["Export your current profile settings"] = "Exportar as configurações do seu perfil atual";
 L["Import Profile"] = "Importar Perfil";
-L["Import a profile from another player"] = true;
+L["Import a profile from another player"] = "Importar perfil de outro jogador";
 
 -- Changelog
 L["%month%-%day%-%year%"] = true;
