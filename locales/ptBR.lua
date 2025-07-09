@@ -118,18 +118,18 @@ L['Hide Event Text'] = "Ocultar texto do evento";
 
 L['Travel'] = true;
 L['Port Options'] = "Opções de Teleporte";
-L['Ready'] = true;
-L['Travel Cooldowns'] = true;
+L['Ready'] = "Pronto";
+L['Travel Cooldowns'] = "Recargas de Teleporte";
 L['Change Port Option'] = "Alterar Opção de Teleporte";
 
-L["Registered characters"] = true;
+L["Registered characters"] = "Personagens registrados";
 L['Show Free Bag Space'] = "Mostrar espaço livre na bolsa";
 L['Show Other Realms'] = "Mostrar Outros Servidores";
 L['Always Show Silver and Copper'] = "Sempre mostrar Prata e Bronze";
 L['Shorten Gold'] = "Encurtar Ouro";
 L['Toggle Bags'] = "Mostrar bolsa";
-L['Session Total'] = true;
-L['Daily Total'] = true;
+L['Session Total'] = "Total da Sessão";
+L['Daily Total'] = "Total do Dia";
 L['Gold rounded values'] = "Valores arredondados de ouro";
 
 L['Show XP Bar Below Max Level'] = "Mostrar barra de XP abaixo do nível máximo";
@@ -151,9 +151,9 @@ L['Garbage Collect'] = "Limpeza de Memória";
 L['Cleaned'] = "Limpo";
 
 L['Use Class Colors'] = "Usar Cores de Classe";
-L['Cooldowns'] = true;
+L['Cooldowns'] = "Tempo de Recarga";
 L['Toggle Profession Frame'] = "Profissões";
-L['Toggle Profession Spellbook'] = true;
+L['Toggle Profession Spellbook'] = "Magias de Profissão";
 
 L['Set Specialization'] = "Trocar Especialização";
 L['Set Loadout'] = "Trocar Loadout";
@@ -161,21 +161,21 @@ L['Set Loot Specialization'] = "Trocar Especialização de Saque";
 L['Current Specialization'] = "Especialização Atual";
 L['Current Loot Specialization'] = "Especialização de Saque Atual";
 L['Talent Minimum Width'] = "Largura Mínima dos Talentos";
-L['Open Artifact'] = true;
+L['Open Artifact'] = "Abrir Artefato";
 L['Remaining'] = "Restante";
 L['Available Ranks'] = "Ranks Disponíveis";
 L['Artifact Knowledge'] = "Conhecimento de Artefato";
 
 -- Travel (Translation needed)
-L['Hearthstone'] = true;
-L['M+ Teleports'] = true;
-L['Only show current season'] = true;
-L["Mythic+ Teleports"] = true;
-L['Show Mythic+ Teleports'] = true;
-L['Use Random Hearthstone'] = true;
-L['Empty Hearthstones List'] = true;
-L['Hearthstones Select'] = true;
-L['Hearthstones Select Desc'] = true;
+L['Hearthstone'] = "Pedra de Regresso";
+L['M+ Teleports'] =  "Teleportes de M+";
+L['Only show current season'] = "Mostrar Temporada Atual";
+L["Mythic+ Teleports"] = "Teleportes de Mitica+";
+L['Show Mythic+ Teleports'] = "Mostrar Teleportes de Mitica+";
+L['Use Random Hearthstone'] = "Usar Pedra de Regresso aleatória";
+L['Empty Hearthstones List'] = "Esvaziar lista de Pedra de Regresso";
+L['Hearthstones Select'] = "Selecionar Pedra de Regresso";
+L['Hearthstones Select Desc'] = "Selecionar a Pedra de Regresso";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
@@ -191,7 +191,7 @@ L["The War Within"] = true;
 L["Current season"] = "Temporada Atual";
 
 -- Profile Import/Export
-L["Profile Sharing"] = true;
+L["Profile Sharing"] = "Compartilhamento de perfis";
 
 L["Invalid import string"] = "String de importação inválida";
 L["Failed to decode import string"] = "Falha ao decodificar a string de importação";
@@ -211,7 +211,7 @@ L["Import a profile from another player"] = "Importar perfil de outro jogador";
 
 -- Changelog
 L["%month%-%day%-%year%"] = true;
-L["Version"] = true;
+L["Version"] = "Versão";
 L["Important"] = "Importante";
 L["New"] = "Novo";
 L["Improvment"] = "Melhorias";
