@@ -66,7 +66,7 @@ L['Hover'] = "Mouse sobre";
 -------------------- MODULES ---------------------------
 
 L['Micromenu'] = true;
-L['Show Social Tooltips'] = true;
+L['Show Social Tooltips'] = "Mostrar informações da lista de amigos";
 L['Main Menu Icon Right Spacing'] = "Espaçamento à Direita do Ícone do Menu Principal";
 L['Icon Spacing'] = "Espaçamento dos Ícones";
 L["Hide BNet App Friends"] = "Ocultar Amigos da BNet";
@@ -134,7 +134,7 @@ L['Gold rounded values'] = "Valores arredondados de ouro";
 
 L['Show XP Bar Below Max Level'] = "Mostrar barra de XP abaixo do nível máximo";
 L['Use Class Colors for XP Bar'] = "Usar cores de classe para a barra de XP";
-L['Show Tooltips'] = true;
+L['Show Tooltips'] = "Mostrar informações";
 L['Text on Right'] = "Texto à Direita";
 L['Currency Select'] = "Seleção de Moeda";
 L['First Currency'] = "Moeda #1";
