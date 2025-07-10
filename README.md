@@ -107,10 +107,11 @@ See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) 
 
 ## Localization
 
-- PhatsoTGT - German Localization
-- Amanthuul - Russian Localization
-- Yaoenqi - Chinese Localization
-- [class2u](https://github.com/class2u) - Chinese (Taiwan) Localization
+- PhatsoTGT - German
+- Amanthuul - Russian
+- Yaoenqi - Chinese
+- [class2u](https://github.com/class2u) - Chinese (Taiwan)
+- [BrunoKrugel](https://github.com/BrunoKrugel) - Brazilian Portuguese
 
 __I am actually looking for people that want to help with localization of XIV_Databar Continued, don't hesitate to check [#10](https://github.com/ZelionGG/XIV_Databar-Continued/issues/10) and to contact me on [X (Twitter)](https://twitter.com/ZelionGG)__ 
 
