@@ -31,12 +31,8 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-        <a href="#about-the-project">About The Project</a>
-        <ul>
-            <li><a href="#built-with">Built With</a></li>
-        </ul>
-    </li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#slash-commands">Slash Commands</a></li>
     <li><a href="#modules">Modules</a></li>
     <li><a href="#features">Features</a></li>
@@ -48,6 +44,13 @@
   </ol>
 </details>
 
+## Download
+
+[![CurseForge](https://cf.way2muchnoise.eu/title/787614.svg?badge_style=for_the_badge)](https://www.curseforge.com/wow/addons/xiv-databar-continued) [![Wago](https://tinyurl.com/WagoBadge)](https://addons.wago.io/addons/xiv-databar-continued)
+[![WowInterface](https://tinyurl.com/WoWInterfaceBadge)](https://www.wowinterface.com/downloads/info26826-3.7.html) [![Github Releases](https://img.shields.io/badge/GitHub%20Releases-121013?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
@@ -56,14 +59,6 @@
 Pursuing the work of MilleXIV, [Vicious-wow](https://github.com/Vicious-wow/XIV_Databar) and [Kozoaku](https://github.com/Kozoaku/XIV_Databar).
 
 A reworking of [SX_Databar by saxitoxin](https://www.wowinterface.com/downloads/info23745-SX_DataBar.html).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Lua][Lua]][Lua-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
