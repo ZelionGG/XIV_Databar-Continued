@@ -91,6 +91,7 @@ function TravelModule:RegisterFrameEvents()
     self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
     self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
     self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
+
     self.hearthButton:EnableMouse(true)
     self.hearthButton:RegisterForClicks('AnyUp')
     self.hearthButton:SetAttribute('type', 'macro')
@@ -178,7 +179,7 @@ function TravelModule:SetHearthColor()
         local hearthActive = true
         for i, v in ipairs(self.hearthstones) do
             if IsUsableItem(v) then
-                if C_Container.GetItemCooldown(v) == 0 then
+                --if C_Container.GetItemCooldown(v) == 0 then
                     local name, _ = GetItemInfo(v)
                     hearthName = name
                     if hearthName ~= nil then
@@ -187,28 +188,28 @@ function TravelModule:SetHearthColor()
                                                        "/cast " .. hearthName)
                         break
                     end
-                end
+                --end
             end -- if item
             if PlayerHasToy(v) then
-                if C_Container.GetItemCooldown(v) == 0 then
+                --if C_Container.GetItemCooldown(v) == 0 then
                     local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
                     hearthName = name
                     if hearthName ~= nil then
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
+                                                       "/use item:" .. v .. " " .. hearthName)
                         break
                     end
-                end
+                --end
             end -- if toy
             if IsPlayerSpell(v) then
-                if GetSpellCooldown(v) == 0 then
+                --if GetSpellCooldown(v) == 0 then
                     local name, _ = GetSpellInfo(v)
                     hearthName = name
                     hearthActive = true
                     self.hearthButton:SetAttribute("macrotext",
                                                    "/cast " .. hearthName)
-                end
+                --end
             end -- if is spell
         end -- for hearthstones
         if not hearthActive then
@@ -247,7 +248,7 @@ function TravelModule:SetPortColor()
         local hearthname = ''
         local hearthActive = false
         if (IsUsableItem(v)) then
-            if C_Container.GetItemCooldown(v) == 0 then
+            --if C_Container.GetItemCooldown(v) == 0 then
                 local name, _ = GetItemInfo(v)
                 hearthName = name
                 if hearthName ~= nil then
@@ -255,10 +256,10 @@ function TravelModule:SetPortColor()
                     self.portButton:SetAttribute("macrotext",
                                                  "/cast " .. hearthName)
                 end
-            end
+            --end
         end -- if toy/item
         if (PlayerHasToy(v)) then
-            if C_Container.GetItemCooldown(v) == 0 then
+            --if C_Container.GetItemCooldown(v) == 0 then
                 local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
                 hearthName = name
                 if hearthName ~= nil then
@@ -266,10 +267,10 @@ function TravelModule:SetPortColor()
                     self.portButton:SetAttribute("macrotext",
                                                  "/cast " .. hearthName)
                 end
-            end
+            --end
         end -- if toy/item
         if IsPlayerSpell(v) then
-            if GetSpellCooldown(v) == 0 then
+            --if GetSpellCooldown(v) == 0 then
                 local name, _ = GetSpellInfo(v)
                 hearthName = name
                 if hearthName ~= nil then
@@ -277,7 +278,7 @@ function TravelModule:SetPortColor()
                     self.portButton:SetAttribute("macrotext",
                                                  "/cast " .. hearthName)
                 end
-            end
+            --end
         end -- if is spell
 
         if not hearthActive then

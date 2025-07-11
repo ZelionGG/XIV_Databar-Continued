@@ -2,8 +2,8 @@
   <Script file="armor.lua" />
   <Script file="currency.lua" />
   <Script file="gold.lua" />
-  <Script file="talents.lua" />
   <Script file="tradeskill.lua" />
-  <Script file="Cata/travel.lua" />
-  <Script file="Cata/micromenu.lua" />
+  <Script file="Classic/talents.lua" />
+  <Script file="Classic/travel.lua" />
+  <Script file="Classic/micromenu.lua" />
 </Ui>
