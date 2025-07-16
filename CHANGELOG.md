@@ -1,9 +1,9 @@
 # XIV_Databar Continued
 
-## [3.7](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.7) (2025-07-03)
+## [3.7.1](https://github.com/ZelionGG/XIV_Databar-Continued/tree/v3.7.1) (2025-07-16)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.6.1...v3.7) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.7...v3.7.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-### _Retail :_
+### _Global :_
 
-- TOC update for Mists of Pandaria Classic pre-patch **5.5.0**.
+- XIV Databar Continued is now translated in Brazilian Portuguese (thank you **BrunoKrugel**).
