@@ -11,6 +11,10 @@ xb.MythicTeleports.SL = {
             teleportId = 354468, -- De Other Side Teleport
             dungeonId = 2080 -- De Other Side
         },
+        HoA = {
+            teleportId = 354465, -- Halls of Atonement Teleport
+            dungeonId = 2074 -- Halls of Atonement
+        },
         MoTS = {
             teleportId = 354464, -- Mists of Tirna Scithe Teleport
             dungeonId = 2072 -- Mists of Tirna Scithe

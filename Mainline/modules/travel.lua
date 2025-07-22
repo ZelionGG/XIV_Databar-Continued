@@ -73,16 +73,19 @@ if portal == "US" then
     XIVBar.SEASON_START_DATES = {
         ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
         ["2025-03-04"] = "TWW_2",  -- TWW Season 2 start date
+        ["2025-08-12"] = "TWW_3" -- TWW Season 3 start date
     }
 elseif portal == "EU" then
     XIVBar.SEASON_START_DATES = {
         ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
         ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
+        ["2025-08-13"] = "TWW_3" -- TWW Season 3 start date
     }
 else
     XIVBar.SEASON_START_DATES = {
         ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
         ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
+        ["2025-08-13"] = "TWW_3" -- TWW Season 3 start date
     }
 end
 

@@ -1,4 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <Script file="seasons/TWW/TWW_1.lua"/>
   <Script file="seasons/TWW/TWW_2.lua"/>
+  <Script file="seasons/TWW/TWW_3.lua"/>
 </Ui>
