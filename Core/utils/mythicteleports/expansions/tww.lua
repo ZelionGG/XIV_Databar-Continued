@@ -23,6 +23,10 @@ xb.MythicTeleports.TWW = {
             teleportId = 445441, -- Darkflame Cleft Teleport
             dungeonId = 2518, -- Darkflame Cleft
         },
+        EDAD = {
+            teleportId = 1237215, -- Eco-Dome Al'dani Teleport
+            dungeonId = 2987, -- Eco-Dome Al'dani
+        },
         TDB = {
             teleportId = 445414, -- The Dawnbreaker Teleport
             dungeonId = 2523, -- The Dawnbreaker
