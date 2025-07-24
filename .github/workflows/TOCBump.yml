@@ -18,6 +18,7 @@ jobs:
         uses: p3lim/toc-interface-updater@v4
         with:
           beta: false   # this is optional
+          ptr: true
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
