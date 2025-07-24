@@ -3,9 +3,6 @@ name: Update TOC Interface version(s)
 on:
   schedule:
     - cron: 0 3 * * *
-#  push:
-#    branches:
-#      - master
 
 jobs:
   run:
@@ -17,7 +14,8 @@ jobs:
       - name: Update TOC Interface version
         uses: p3lim/toc-interface-updater@v4
         with:
-          beta: false   # this is optional
+          beta: false
+          ptr: true
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
