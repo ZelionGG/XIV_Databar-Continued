@@ -20,6 +20,8 @@ function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.garrisonHearth = 110560
     self.hearthstones = {
+        246565, -- Cosmic Hearthstone
+        245970, -- P.O.S.T. Master's Express Hearthstone
         236687, -- Explosive Hearthstone
         228940, -- Notorious Thread's Hearthstone
         200630, -- Ohn'ir Windsage's Hearthstone
