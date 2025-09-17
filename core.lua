@@ -149,8 +149,11 @@ function XIVBar:OnInitialize()
                     if exportString then
                         local dialog = StaticPopup_Show("XIVBAR_EXPORT_PROFILE")
                         if dialog then
-                            dialog.editBox:SetText(exportString)
-                            dialog.editBox:HighlightText()
+                            local eb = dialog.editBox or dialog.EditBox
+                            if eb then
+                                eb:SetText(exportString)
+                                eb:HighlightText()
+                            end
                         end
                     end
                 end,
@@ -427,9 +430,12 @@ StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
     editBoxWidth = 350,
     maxLetters = 0,
     OnShow = function(self)
-        self.editBox:SetAutoFocus(true)
-        self.editBox:SetJustifyH("LEFT")
-        self.editBox:SetWidth(350)
+        local eb = self.editBox or self.EditBox
+        if eb then
+            eb:SetAutoFocus(true)
+            eb:SetJustifyH("LEFT")
+            eb:SetWidth(350)
+        end
     end,
     EditBoxOnEscapePressed = function(self)
         self:GetParent():Hide()
@@ -448,12 +454,16 @@ StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
     editBoxWidth = 350,
     maxLetters = 0,
     OnShow = function(self)
-        self.editBox:SetAutoFocus(true)
-        self.editBox:SetJustifyH("LEFT")
-        self.editBox:SetWidth(350)
+        local eb = self.editBox or self.EditBox
+        if eb then
+            eb:SetAutoFocus(true)
+            eb:SetJustifyH("LEFT")
+            eb:SetWidth(350)
+        end
     end,
     OnAccept = function(self)
-        local importString = self.editBox:GetText()
+        local eb = self.editBox or self.EditBox
+        local importString = eb and eb:GetText() or ""
         XIVBar:ImportProfile(importString)
     end,
     EditBoxOnEscapePressed = function(self)
