@@ -23,6 +23,7 @@ function TravelModule:OnInitialize()
         246565, -- Cosmic Hearthstone
         245970, -- P.O.S.T. Master's Express Hearthstone
         236687, -- Explosive Hearthstone
+        235016, -- Redeployment Module
         228940, -- Notorious Thread's Hearthstone
         200630, -- Ohn'ir Windsage's Hearthstone
         190196, -- Enlightened Hearthstone
