@@ -589,131 +589,133 @@ function MenuModule:SocialHover(hoverFunc)
             -- iterate through every bnet friend - get their info and add the friend as an interactable line in the tooltip
             for i = 1, BNGetNumFriends() do
                 local friendAccInfo = C_BattleNet.GetFriendAccountInfo(i)
-                local gameAccount = friendAccInfo.gameAccountInfo
+                if friendAccInfo then
+                    local gameAccount = friendAccInfo.gameAccountInfo
 
-                -- executes if the friend is online
-                if gameAccount.isOnline then
-                    -- if the friend has no battle tag, set it to 'No Tag'
-                    if not friendAccInfo.battleTag then
-                        friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
-                    end
+                    -- executes if the friend is online
+                    if gameAccount.isOnline then
+                        -- if the friend has no battle tag, set it to 'No Tag'
+                        if not friendAccInfo.battleTag then
+                            friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
+                        end
 
-                    local clientIcon = ''
-                    if C_Texture.GetTitleIconTexture then
-						C_Texture.GetTitleIconTexture(gameAccount.clientProgram, TitleIconVersion_Small, function(success, texture)
-							if success then
-								local fullText = _G.BNet_GetValidatedCharacterNameWithClientEmbeddedTexture(gameAccount.characterName, friendAccInfo.battleTag, texture, 32, 32, 16)
-                                -- Hacky Trick : Extract only the icon part (first part before any character name)
-                                clientIcon = fullText:match("(|T.-|t)")
+                        local clientIcon = ''
+                        if C_Texture.GetTitleIconTexture then
+				    		C_Texture.GetTitleIconTexture(gameAccount.clientProgram, TitleIconVersion_Small, function(success, texture)
+				    			if success then
+				    				local fullText = _G.BNet_GetValidatedCharacterNameWithClientEmbeddedTexture(gameAccount.characterName, friendAccInfo.battleTag, texture, 32, 32, 16)
+                                    -- Hacky Trick : Extract only the icon part (first part before any character name)
+                                    clientIcon = fullText:match("(|T.-|t)")
+                                end
+				    		end)
+				    	end
+
+                        local charName = gameAccount.characterName -- gets the friend's character name
+                        local gameClient = gameAccount.clientProgram -- the application that the friend is online with - can be any game or 'App'/'Mobile'
+                        local realmName = gameAccount.realmName -- gets the realm name the friend's char is on
+                        local faction = gameAccount.factionName -- gets the friend's currently logged in char's faction
+                        local zone = gameAccount.areaName -- zone name to be displayed when the friend is playing retail WoW
+                        local richPresence = gameAccount.richPresence -- rich presence is used here to determine whether a friend logged into WoW is playing classic
+                        local isWoW = false -- tracks whether the friend is playing WoW or not, default being that the friend isn't
+                        local isClassic = false -- tracks whether the friend is logged into classic or not, default being that the friend isn't
+                        local statusIcon = FRIENDS_TEXTURE_ONLINE -- get icon for online friends, might later be changed to afk/dnd icons
+                        local socialIcon = clientIcon -- get icon for the friend's application
+                        local gameName = MenuModule.socialIcons[gameClient].text -- name of the application the friend is currently using - can be any game or 'App'/'Mobile'
+                        local note = friendAccInfo.note -- note of the friend, if there is no note it's an empty string
+                        local charNameFormat = '' -- format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
+
+                        -- if the friend is afk, set the icon left to the friend's name to afk
+                        if friendAccInfo.isAFK or gameAccount.isGameAFK then
+                            statusIcon = FRIENDS_TEXTURE_AFK
+                        end
+                        -- if the friend is set to 'do not disturb', set the icon left to the friend's name to dnd
+                        if friendAccInfo.isDND or gameAccount.isGameBusy then
+                            statusIcon = FRIENDS_TEXTURE_DND
+                        end
+                        -- if the friend has a note, color and display it
+                        if note ~= '' then
+                            note = "(|cffecd672" .. note .. "|r)"
+                        end
+
+                        -- if the friend is playing World of Warcraft - note that this is true for both retail and classic. yes, blizzard is retarded.
+                        if gameClient == BNET_CLIENT_WOW then
+                            isWoW = true
+                            -- checks if the friend is logged into classic or retail
+                            if richPresence:find(L['Classic']) then
+                                isClassic = true
+                                -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
+                            elseif (not faction) or (faction == playerFaction) then
+                                charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" ..
+                                                     (realmName or L['No Info']) .. "|r)"
+                                -- friend is playing retail WoW but is playing on the player's opposite faction
+                            else
+                                local factionColors = {
+                                    ['Alliance'] = "ff008ee8",
+                                    ['Horde'] = "ffc80000"
+                                }
+                                charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - |cffecd672" ..
+                                                     (charName or L['No Info']) .. "|r)"
                             end
-						end)
-					end
-
-                    local charName = gameAccount.characterName -- gets the friend's character name
-                    local gameClient = gameAccount.clientProgram -- the application that the friend is online with - can be any game or 'App'/'Mobile'
-                    local realmName = gameAccount.realmName -- gets the realm name the friend's char is on
-                    local faction = gameAccount.factionName -- gets the friend's currently logged in char's faction
-                    local zone = gameAccount.areaName -- zone name to be displayed when the friend is playing retail WoW
-                    local richPresence = gameAccount.richPresence -- rich presence is used here to determine whether a friend logged into WoW is playing classic
-                    local isWoW = false -- tracks whether the friend is playing WoW or not, default being that the friend isn't
-                    local isClassic = false -- tracks whether the friend is logged into classic or not, default being that the friend isn't
-                    local statusIcon = FRIENDS_TEXTURE_ONLINE -- get icon for online friends, might later be changed to afk/dnd icons
-                    local socialIcon = clientIcon -- get icon for the friend's application
-                    local gameName = MenuModule.socialIcons[gameClient].text -- name of the application the friend is currently using - can be any game or 'App'/'Mobile'
-                    local note = friendAccInfo.note -- note of the friend, if there is no note it's an empty string
-                    local charNameFormat = '' -- format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
-
-                    -- if the friend is afk, set the icon left to the friend's name to afk
-                    if friendAccInfo.isAFK or gameAccount.isGameAFK then
-                        statusIcon = FRIENDS_TEXTURE_AFK
-                    end
-                    -- if the friend is set to 'do not disturb', set the icon left to the friend's name to dnd
-                    if friendAccInfo.isDND or gameAccount.isGameBusy then
-                        statusIcon = FRIENDS_TEXTURE_DND
-                    end
-                    -- if the friend has a note, color and display it
-                    if note ~= '' then
-                        note = "(|cffecd672" .. note .. "|r)"
-                    end
-
-                    -- if the friend is playing World of Warcraft - note that this is true for both retail and classic. yes, blizzard is retarded.
-                    if gameClient == BNET_CLIENT_WOW then
-                        isWoW = true
-                        -- checks if the friend is logged into classic or retail
-                        if richPresence:find(L['Classic']) then
-                            isClassic = true
-                            -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
-                        elseif (not faction) or (faction == playerFaction) then
-                            charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" ..
-                                                 (realmName or L['No Info']) .. "|r)"
-                            -- friend is playing retail WoW but is playing on the player's opposite faction
-                        else
-                            local factionColors = {
-                                ['Alliance'] = "ff008ee8",
-                                ['Horde'] = "ffc80000"
-                            }
-                            charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - |cffecd672" ..
-                                                 (charName or L['No Info']) .. "|r)"
-                        end
-                    end
-
-                    -- clientsList contains all game related clients a bnet friend can have - being on mobile or just in the app is excluded from this list
-                    local clientsList = {BNET_CLIENT_WOW, BNET_CLIENT_SC2, BNET_CLIENT_D3, BNET_CLIENT_FEN,
-                                         BNET_CLIENT_WTCG, BNET_CLIENT_HEROES, BNET_CLIENT_OVERWATCH, BNET_CLIENT_SC,
-                                         BNET_CLIENT_DESTINY2, BNET_CLIENT_COD, BNET_CLIENT_COD_MW, BNET_CLIENT_COD_MW2,
-                                         BNET_CLIENT_COD_BOCW, BNET_CLIENT_WC3}
-
-                    -- set up tooltip line for the friend unless he's not logged into a game and 'hide bnet app friends' is true
-                    if tContains(clientsList, gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
-                        -- lineLeft displays status icon, bnet name and the friend's note
-                        local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon,
-                            friendAccInfo.accountName, note)
-                        local lineRight = ''
-
-                        -- friend is not playing wow, format is "GameName [Icon]"
-                        if not isWoW then
-                            lineRight = string.format("%s %s", gameName, socialIcon)
-                            -- friend is playing classic WoW, format is "WoW Classic [Icon]"
-                        elseif isClassic then
-                            lineRight = string.format("%s %s", richPresence, socialIcon)
-                            -- friend is playing retail WoW, format is "(Name-Realm) Zone [Icon]"
-                        else
-                            lineRight = string.format("%s %s %s", charNameFormat, zone, socialIcon)
                         end
 
-                        -- add left and right line to the tooltip
-                        tooltip:AddLine(lineLeft, lineRight)
-                        -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
-                        tooltip:SetLineScript(tooltip:GetLineCount(), "OnEnter", function()
-                            self.lineHover = true
-                        end)
-                        tooltip:SetLineScript(tooltip:GetLineCount(), "OnLeave", function()
-                            self.lineHover = false
-                        end)
-                        tooltip:SetLineScript(tooltip:GetLineCount(), "OnMouseUp", function(self, _, button)
-                            -- player left clicks on the friend, checks whether a modifier was used or not after
-                            if button == "LeftButton" then
-                                -- player pressed SHIFT/ALT/CTRL when left clicking the friend
-                                if modifierFunc() then
-                                    -- invite to group / raid if possible
-                                    if CanGroupWithAccount(friendAccInfo.bnetAccountID) then
-                                        C_PartyInfo.InviteUnit(charName .. "-" .. realmName)
-                                        -- InviteToGroup(charName .. "-" .. realmName)
+                        -- clientsList contains all game related clients a bnet friend can have - being on mobile or just in the app is excluded from this list
+                        local clientsList = {BNET_CLIENT_WOW, BNET_CLIENT_SC2, BNET_CLIENT_D3, BNET_CLIENT_FEN,
+                                             BNET_CLIENT_WTCG, BNET_CLIENT_HEROES, BNET_CLIENT_OVERWATCH, BNET_CLIENT_SC,
+                                             BNET_CLIENT_DESTINY2, BNET_CLIENT_COD, BNET_CLIENT_COD_MW, BNET_CLIENT_COD_MW2,
+                                             BNET_CLIENT_COD_BOCW, BNET_CLIENT_WC3}
+
+                        -- set up tooltip line for the friend unless he's not logged into a game and 'hide bnet app friends' is true
+                        if tContains(clientsList, gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
+                            -- lineLeft displays status icon, bnet name and the friend's note
+                            local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon,
+                                friendAccInfo.accountName, note)
+                            local lineRight = ''
+
+                            -- friend is not playing wow, format is "GameName [Icon]"
+                            if not isWoW then
+                                lineRight = string.format("%s %s", gameName, socialIcon)
+                                -- friend is playing classic WoW, format is "WoW Classic [Icon]"
+                            elseif isClassic then
+                                lineRight = string.format("%s %s", richPresence, socialIcon)
+                                -- friend is playing retail WoW, format is "(Name-Realm) Zone [Icon]"
+                            else
+                                lineRight = string.format("%s %s %s", charNameFormat, zone, socialIcon)
+                            end
+
+                            -- add left and right line to the tooltip
+                            tooltip:AddLine(lineLeft, lineRight)
+                            -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
+                            tooltip:SetLineScript(tooltip:GetLineCount(), "OnEnter", function()
+                                self.lineHover = true
+                            end)
+                            tooltip:SetLineScript(tooltip:GetLineCount(), "OnLeave", function()
+                                self.lineHover = false
+                            end)
+                            tooltip:SetLineScript(tooltip:GetLineCount(), "OnMouseUp", function(self, _, button)
+                                -- player left clicks on the friend, checks whether a modifier was used or not after
+                                if button == "LeftButton" then
+                                    -- player pressed SHIFT/ALT/CTRL when left clicking the friend
+                                    if modifierFunc() then
+                                        -- invite to group / raid if possible
+                                        if CanGroupWithAccount(friendAccInfo.bnetAccountID) then
+                                            C_PartyInfo.InviteUnit(charName .. "-" .. realmName)
+                                            -- InviteToGroup(charName .. "-" .. realmName)
+                                        end
+                                        -- player did not use a modifier when left clicking on the friend, send a bnet whisper
+                                    else
+                                        ChatFrame_SendBNetTell(friendAccInfo.accountName)
                                     end
-                                    -- player did not use a modifier when left clicking on the friend, send a bnet whisper
-                                else
-                                    ChatFrame_SendBNetTell(friendAccInfo.accountName)
-                                end
 
-                                -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
-                            elseif button == "RightButton" then
-                                if (not isClassic and charName and faction == playerFaction) then
-                                    ChatFrame_SendTell(charName .. "-" .. realmName)
+                                    -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
+                                elseif button == "RightButton" then
+                                    if (not isClassic and charName and faction == playerFaction) then
+                                        ChatFrame_SendTell(charName .. "-" .. realmName)
+                                    end
                                 end
-                            end
-                        end)
-                    end -- optApp
-                end -- isOnline
+                            end)
+                        end -- optApp
+                    end -- isOnline
+                end -- friendAccInfo
             end -- for in BNGetNumFriends
         end -- totalBNOnlineFriends
 
