@@ -310,8 +310,13 @@ function CurrencyModule:ShowTooltip()
             if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
                 local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
                 local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
-                GameTooltip:AddDoubleLine(curInfo.name, string.format('%d/%d', curInfo.quantity, curInfo.maxQuantity),
-                    r, g, b, 1, 1, 1)
+                if(curInfo.useTotalEarnedForMaxQty) then
+                    GameTooltip:AddDoubleLine(curInfo.name, string.format('%d (%d/%d)', curInfo.quantity, curInfo.totalEarned, curInfo.maxQuantity),
+                        r, g, b, 1, 1, 1)
+                else
+                    GameTooltip:AddDoubleLine(curInfo.name, string.format('%d', curInfo.quantity),
+                        r, g, b, 1, 1, 1)
+                end
             end
         end
 
