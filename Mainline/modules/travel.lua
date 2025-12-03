@@ -150,6 +150,14 @@ function TravelModule:CreateFrames()
     self.hearthText = self.hearthText or
                           self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
+    -- Housing Part
+    self.houseButton = self.houseButton or
+                            CreateFrame('BUTTON', 'houseButton',
+                                        self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+    self.houseIcon = self.houseIcon or
+                          self.houseButton:CreateTexture(nil, 'OVERLAY')
+
     -- Portals Part
     self.portButton = self.portButton or
                           CreateFrame('BUTTON', 'portButton', self.hearthFrame,
@@ -214,6 +222,31 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:EnableMouse(true)
     self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
     self.hearthButton:SetAttribute('type', 'macro')
+
+    self.houseButton:EnableMouse(true)
+    self.houseButton:RegisterForClicks('AnyUp', 'AnyDown')
+    self.houseButton:SetScript('OnClick', function()
+        if C_Housing and C_Housing.EnterHouse then
+            C_Housing.EnterHouse()
+        else
+            print("|cFF00FFFFXIV_Databar:|r L'API Housing n'est pas encore disponible.")
+        end
+    end)
+
+    self.houseButton:SetScript('OnEnter', function(self)
+        if InCombatLockdown() then return end
+        GameTooltip:SetOwner(self, 'ANCHOR_' .. xb.miniTextPosition)
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("Maison")
+        GameTooltip:AddLine("Téléportation vers votre foyer", 1, 1, 1)
+        GameTooltip:Show()
+        TravelModule.houseIcon:SetVertexColor(unpack(xb:HoverColors()))
+    end)
+
+    self.houseButton:SetScript('OnLeave', function()
+        GameTooltip:Hide()
+        TravelModule.houseIcon:SetVertexColor(xb:GetColor('normal'))
+    end)
 
     self.portButton:EnableMouse(true)
     self.portButton:RegisterForClicks("AnyUp", "AnyDown")
@@ -333,7 +366,7 @@ function TravelModule:UpdatePortOptions()
     if not self.portOptions then self.portOptions = {} end
     if IsUsableItem(128353) and not self.portOptions[128353] then
         self.portOptions[128353] = {
-            portId = 128353,
+            portId = 128353, 
             text = GetItemInfo(128353)
         } -- admiral's compass
     end
@@ -603,7 +636,7 @@ function TravelModule:GetCurrentSeason()
     local currentDate = date("%Y-%m-%d")
     local currentSeason = nil
     local latestDate = nil
-
+    
     -- Find the most recent season start date that is before or equal to today
     for startDate, seasonKey in pairs(XIVBar.SEASON_START_DATES) do
         if startDate <= currentDate and (latestDate == nil or startDate > latestDate) then
@@ -611,7 +644,7 @@ function TravelModule:GetCurrentSeason()
             currentSeason = seasonKey
         end
     end
-
+    
     return currentSeason
 end
 
@@ -644,7 +677,7 @@ end
 -- Utility function to check if any mythic teleport is available
 function TravelModule:HasAvailableMythicTeleports()
     local currentSeason = self:GetCurrentSeason()
-
+    
     if xb.db.profile.curSeasonOnly then
         -- Check current season teleports
         if currentSeason and xb.MythicTeleports[currentSeason] then
@@ -658,7 +691,7 @@ function TravelModule:HasAvailableMythicTeleports()
                 end
             end
         end
-
+        
         -- If no teleports in current season, check CURRENT
         if xb.MythicTeleports.CURRENT then
             for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
@@ -687,7 +720,7 @@ function TravelModule:HasAvailableMythicTeleports()
             end
         end
     end
-
+    
     return false
 end
 
@@ -695,11 +728,11 @@ end
 function TravelModule:GetTeleportInfo(teleportData)
     local teleportId = teleportData.teleportId
     local knownId = self:IsKnownTeleportSpell(teleportId)
-
+    
     if knownId then
         local spellName = C_Spell.GetSpellName(knownId)
         local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
-
+        
         if spellName and dungeonName then
             return {
                 teleportData = teleportData,
@@ -709,14 +742,14 @@ function TravelModule:GetTeleportInfo(teleportData)
             }
         end
     end
-
+    
     return nil
 end
 
 -- Utility function to collect teleports from a season or expansion
 function TravelModule:CollectTeleports(teleportsList)
     local result = {}
-
+    
     for _, teleportRef in ipairs(teleportsList) do
         local teleportData = self:ResolveTeleportReference(teleportRef)
         if teleportData then
@@ -726,12 +759,12 @@ function TravelModule:CollectTeleports(teleportsList)
             end
         end
     end
-
+    
     -- Sort alphabetically by dungeon name
     table.sort(result, function(a, b)
         return a.dungeonName < b.dungeonName
     end)
-
+    
     return result
 end
 
@@ -835,7 +868,7 @@ function TravelModule:CreatePortPopup()
             end
         end -- if nil
     end -- for ipairs portOptions
-
+    
     for portId, button in pairs(self.portButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
@@ -847,7 +880,7 @@ function TravelModule:CreatePortPopup()
             button:Hide()
         end
     end -- for id/button in portButtons
-
+    
     if changedWidth then popupWidth = popupWidth + self.extraPadding end
 
     if popupWidth < self.portButton:GetWidth() then
@@ -864,15 +897,15 @@ end
 function TravelModule:CreateMythicPopup()
     -- Get the current season
     local currentSeason = self:GetCurrentSeason()
-
+    
     -- Create popup menu
     local filteredTeleports = {}
-
+    
     if xb.db.profile.curSeasonOnly then
         -- Use current season if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
-
+            
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
                     name = L["Current season"],
@@ -880,11 +913,11 @@ function TravelModule:CreateMythicPopup()
                 })
             end
         end
-
+        
         -- If no teleports for current season, use CURRENT
         if #filteredTeleports == 0 and xb.MythicTeleports.CURRENT then
             local teleports = self:CollectTeleports(xb.MythicTeleports.CURRENT.teleports)
-
+            
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
                     name = L["Current season"],
@@ -903,31 +936,31 @@ function TravelModule:CreateMythicPopup()
                 })
             end
         end
-
+        
         -- Sort expansions by order (reverse chronological)
         table.sort(expansions, function(a, b)
             local orderA = a.data.order or 0
             local orderB = b.data.order or 0
             return orderA > orderB
         end)
-
+        
         -- Process each expansion
         for _, expansion in ipairs(expansions) do
             if expansion.data.teleports then
                 local teleports = {}
-
+                
                 for _, value in pairs(expansion.data.teleports) do
                     local teleportInfo = self:GetTeleportInfo(value)
                     if teleportInfo then
                         table.insert(teleports, teleportInfo)
                     end
                 end
-
+                
                 -- Sort alphabetically by dungeon name
                 table.sort(teleports, function(a, b)
                     return a.dungeonName < b.dungeonName
                 end)
-
+                
                 if #teleports > 0 then
                     table.insert(filteredTeleports, {
                         name = expansion.data.name,
@@ -936,11 +969,11 @@ function TravelModule:CreateMythicPopup()
                 end
             end
         end
-
+        
         -- Add current season at the bottom if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
-
+            
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
                     name = L["Current season"],
@@ -1002,7 +1035,7 @@ function TravelModule:CreateMythicPopup()
     else -- Single-level menu
         UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
             AddMenuHeader(level)
-
+                
             -- Add all teleports to the menu
             local allTeleports = {}
             for _, expData in ipairs(filteredTeleports) do
@@ -1010,12 +1043,12 @@ function TravelModule:CreateMythicPopup()
                     table.insert(allTeleports, teleport)
                 end
             end
-
+            
             -- Sort by dungeon name
             table.sort(allTeleports, function(a, b)
                 return a.dungeonName < b.dungeonName
             end)
-
+            
             -- Add sorted teleports to the menu
             for _, teleport in ipairs(allTeleports) do
                 local info = UIDropDownMenu_CreateInfo()
@@ -1089,13 +1122,23 @@ function TravelModule:Refresh()
 
     self:SetHearthColor()
 
+    -- Housing Part
+    self.houseButton:SetSize(iconSize, xb:GetHeight())
+    self.houseButton:SetPoint("RIGHT", self.hearthButton, "LEFT", -(db.general.barPadding), 0)
+
+    self.houseIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
+    self.houseIcon:SetSize(iconSize, iconSize)
+    self.houseIcon:SetPoint("CENTER")
+    self.houseIcon:SetVertexColor(xb:GetColor('normal'))
+    self.houseButton:Show()
+
     -- Portals Part
     self.portText:SetFont(xb:GetFont(db.text.fontSize))
     self.portText:SetText(xb.db.char.portItem.text)
 
     self.portButton:SetSize(self.portText:GetWidth() + iconSize +
                                 db.general.barPadding, xb:GetHeight())
-    self.portButton:SetPoint("RIGHT", self.hearthButton, "LEFT",
+    self.portButton:SetPoint("RIGHT", self.houseButton, "LEFT",
                              -(db.general.barPadding), 0)
 
     self.portText:SetPoint("RIGHT")
@@ -1154,7 +1197,7 @@ function TravelModule:Refresh()
     self.portPopup:Hide()
 
     self.mythicPopup:ClearAllPoints()
-
+    
     if db.general.barPosition == 'TOP' then
         self.mythicPopup.point = "TOP"
         self.mythicPopup.relativePoint = "BOTTOM"
@@ -1162,11 +1205,15 @@ function TravelModule:Refresh()
         self.mythicPopup.point = "BOTTOM"
         self.mythicPopup.relativePoint = "TOP"
     end
-
+    
     self:SkinFrame(self.mythicPopup, "SpecToolTip")
     self.mythicPopup:Hide()
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
+    if self.houseButton:IsVisible() then
+        totalWidth = totalWidth + self.houseButton:GetWidth() + db.general.barPadding
+    end
+
     self.portButton:Show()
     if self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
@@ -1188,18 +1235,15 @@ function TravelModule:ShowTooltip()
         GameTooltip:ClearLines()
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
-
+        
         -- Show hearthstone cooldown
         local hearthstoneId = 6948 -- Regular Hearthstone ID
-        local remainingCooldown = 0
-        if GetItemCount and GetItemCount(hearthstoneId) and GetItemCount(hearthstoneId) > 0 then
+        if C_Item.DoesItemExistByID(hearthstoneId) then
             local startTime, duration = GetItemCooldown(hearthstoneId)
-            if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
-                remainingCooldown = (startTime + duration - GetTime())
-            end
+            local remainingCooldown = (startTime + duration - GetTime())
+            local cdString = self:FormatCooldown(remainingCooldown)
+            GameTooltip:AddDoubleLine(L['Hearthstone'], cdString, r, g, b, 1, 1, 1)
         end
-        local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
-        GameTooltip:AddDoubleLine(L['Hearthstone'], cdString, r, g, b, 1, 1, 1)
 
         -- Show teleport cooldowns
         if self.portOptions then
@@ -1207,12 +1251,9 @@ function TravelModule:ShowTooltip()
                 if v and v.portId and v.text then
                     if PlayerHasToy(v.portId) or (IsUsableItem(v.portId) and not IsSpellKnown(v.portId)) then
                         -- Handle items and toys
-                        local remainingCooldown = 0
                         local startTime, duration = GetItemCooldown(v.portId)
-                        if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
-                            remainingCooldown = (startTime + duration - GetTime())
-                        end
-                        local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
+                        local remainingCooldown = (startTime + duration - GetTime())
+                        local cdString = self:FormatCooldown(remainingCooldown)
                         GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
                     else
                         -- Handle spells (including class-specific teleports)
@@ -1220,7 +1261,7 @@ function TravelModule:ShowTooltip()
                             local spellCooldownInfo = GetSpellCooldown(v.portId)
                             local start = spellCooldownInfo.startTime
                             local duration = spellCooldownInfo.duration
-
+                            
                             -- Always show cooldown info
                             local remainingCooldown = 0
                             if start and duration then
@@ -1235,7 +1276,7 @@ function TravelModule:ShowTooltip()
                 end
             end
         end
-
+        
         GameTooltip:AddLine(" ")
         GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Port Option'], r, g, b, 1, 1, 1)
         GameTooltip:Show()
