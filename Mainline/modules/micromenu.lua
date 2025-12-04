@@ -930,7 +930,7 @@ function MenuModule:CreateClickFunctions()
     end
 
     self.functions.menu = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -945,7 +945,7 @@ function MenuModule:CreateClickFunctions()
     end; -- menu
 
     self.functions.chat = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -954,7 +954,7 @@ function MenuModule:CreateClickFunctions()
     end; -- chat
 
     self.functions.guild = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -963,7 +963,7 @@ function MenuModule:CreateClickFunctions()
     end; -- guild
 
     self.functions.social = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -972,7 +972,7 @@ function MenuModule:CreateClickFunctions()
     end; -- social
 
     self.functions.char = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -981,7 +981,7 @@ function MenuModule:CreateClickFunctions()
     end; -- char
 
     self.functions.spell = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -990,7 +990,7 @@ function MenuModule:CreateClickFunctions()
     end; -- spell
 
     self.functions.talent = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -999,7 +999,7 @@ function MenuModule:CreateClickFunctions()
     end; -- talent
 
     self.functions.journal = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1008,7 +1008,7 @@ function MenuModule:CreateClickFunctions()
     end; -- journal
 
     self.functions.lfg = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1017,7 +1017,7 @@ function MenuModule:CreateClickFunctions()
     end; -- lfg
 
     self.functions.pet = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1026,7 +1026,7 @@ function MenuModule:CreateClickFunctions()
     end; -- pet
 
     self.functions.ach = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1035,7 +1035,7 @@ function MenuModule:CreateClickFunctions()
     end; -- ach
 
     self.functions.quest = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1044,7 +1044,7 @@ function MenuModule:CreateClickFunctions()
     end; -- quest
 
     self.functions.pvp = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1053,7 +1053,8 @@ function MenuModule:CreateClickFunctions()
     end; -- pvp
 
     self.functions.shop = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        --if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1062,7 +1063,7 @@ function MenuModule:CreateClickFunctions()
     end; -- shop
 
     self.functions.house = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
@@ -1073,7 +1074,7 @@ function MenuModule:CreateClickFunctions()
     end; -- house
 
     self.functions.help = function(self, button, down)
-        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+        if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
