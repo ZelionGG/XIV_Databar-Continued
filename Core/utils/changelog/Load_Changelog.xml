@@ -54,6 +54,7 @@
 	<Script file='Old/v3/3.7.3.lua'/>
 	<Script file='Old/v3/3.7.4.lua'/>
 	<Script file='Old/v3/3.7.5.lua'/>
+	<Script file='Old/v3/3.7.6.lua'/>
 	<!-- LIVE -->
-	<Script file='3.7.6.lua'/>
+	<Script file='3.8.lua'/>
 </Ui>
