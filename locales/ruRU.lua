@@ -173,7 +173,9 @@ L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
 L['Show Mythic+ Teleports'] = true;
 L['Use Random Hearthstone'] = true;
-L['Empty Hearthstones List'] = "If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
+local retrievingData = "Получение данных..."
+L['Retrieving data'] = retrievingData;
+L['Empty Hearthstones List'] = "Если вы видите '" .. retrievingData .. "' в списке ниже, просто переключите вкладку или откройте это меню заново, чтобы обновить данные.";
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
 

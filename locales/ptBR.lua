@@ -174,7 +174,9 @@ L['Only show current season'] = "Mostrar Temporada Atual";
 L["Mythic+ Teleports"] = "Teleportes de Mitica+";
 L['Show Mythic+ Teleports'] = "Mostrar Teleportes de Mitica+";
 L['Use Random Hearthstone'] = "Usar Pedra de Regresso aleatória";
-L['Empty Hearthstones List'] = "Esvaziar lista de Pedra de Regresso";
+local retrievingData = "Recuperando dados..."
+L['Retrieving data'] = retrievingData;
+L['Empty Hearthstones List'] = "Se você vir '" .. retrievingData .. "' na lista abaixo, basta mudar de aba ou reabrir este menu para atualizar os dados."
 L['Hearthstones Select'] = "Selecionar Pedra de Regresso";
 L['Hearthstones Select Desc'] = "Selecionar a Pedra de Regresso";
 

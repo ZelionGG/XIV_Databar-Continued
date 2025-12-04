@@ -173,7 +173,9 @@ L['Only show current season'] = "N'afficher que les téléportations de la saiso
 L["Mythic+ Teleports"] = "Téléportations Mythique+";
 L['Show Mythic+ Teleports'] = "Montrer les téléportations Mythique+";
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
-L['Empty Hearthstones List'] = "Si vous voyez une liste vide, /reload votre interface afin de recharger les données quelques secondes après le chargement initial (Blizzard charge les informations des objets de manière asynchrone)."
+local retrievingData = "Récupération des données..."
+L['Retrieving data'] = retrievingData;
+L['Empty Hearthstones List'] = "Si vous voyez '" .. retrievingData .. "' dans la liste ci-dessous, changez simplement d'onglet ou rouvrez ce menu pour rafraîchir les données."
 L['Hearthstones Select'] = "Sélection des pierres de foyers";
 L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')";
 

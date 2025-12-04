@@ -173,7 +173,9 @@ L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
 L['Show Mythic+ Teleports'] = true;
 L['Use Random Hearthstone'] = true;
-L['Empty Hearthstones List'] = true;
+local retrievingData = "Daten werden abgerufen..."
+L['Retrieving data'] = retrievingData;
+L['Empty Hearthstones List'] = "Wenn du '" .. retrievingData .. "' in der Liste unten siehst, wechsle einfach den Tab oder öffne dieses Menü erneut, um die Daten zu aktualisieren.";
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = true;
 
