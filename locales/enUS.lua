@@ -95,6 +95,7 @@ L['Show PVP Button'] = true;
 L['Show Pets Button'] = true;
 L['Show Shop Button'] = true;
 L['Show Help Button'] = true;
+L['Show Housing Button'] = true;
 L['No Info'] = true;
 L['Classic'] = true;
 L['Alliance'] = true;

@@ -94,6 +94,7 @@ L['Show PVP Button'] = "Zeige PVP Taste";
 L['Show Pets Button'] = "Zeige Haustier Taste";
 L['Show Shop Button'] = "Zeige Shop Taste";
 L['Show Help Button'] = "Zeige Hilfe Taste";
+L['Show Housing Button'] = true; -- TODO: translate
 L['No Info'] = "Keine Informationen";
 L['Classic'] = true;
 L['Alliance'] = "Allianz";

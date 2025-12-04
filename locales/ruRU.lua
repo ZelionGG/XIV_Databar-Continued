@@ -94,6 +94,7 @@ L['Show PVP Button'] = "Игрок против игрока";
 L['Show Pets Button'] = "Коллекции";
 L['Show Shop Button'] = "Магазин";
 L['Show Help Button'] = "Помощь";
+L['Show Housing Button'] = true; -- TODO: translate
 L['No Info'] = "Нет информации";
 L['Classic'] = true;
 L['Alliance'] = "Альянс";

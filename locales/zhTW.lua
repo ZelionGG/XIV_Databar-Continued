@@ -98,6 +98,7 @@ L['Show PVP Button'] = "顯示 PVP 按鈕";
 L['Show Pets Button'] = "顯示收藏按鈕";
 L['Show Shop Button'] = "顯示遊戲商城按鈕";
 L['Show Help Button'] = "顯示客服支援按鈕";
+L['Show Housing Button'] = true; -- TODO: translate
 L['No Info'] = "沒有資訊";
 L['Classic'] = "經典版";
 L['Alliance'] = "聯盟";
