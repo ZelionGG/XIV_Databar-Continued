@@ -141,7 +141,10 @@ function TravelModule:UpdatePortOptions()
     if not self.portOptions then self.portOptions = {} end
 
     if xb.constants.playerClass == 'DRUID' and not self.portOptions[18960] then
-        self.portOptions[18960] = {portId = 18960, text = C_Map.GetMapInfo(241)}
+        local mapInfo = C_Map.GetMapInfo(241)
+        if mapInfo then
+            self.portOptions[18960] = {portId = 18960, text = mapInfo.name}
+        end
     end
 
     if xb.constants.playerClass == 'DEATHKNIGHT' and not self.portOptions[50977] then
