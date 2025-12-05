@@ -1,4 +1,4 @@
-## Interface: 11508
+## Interface: 11508, 20505
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
