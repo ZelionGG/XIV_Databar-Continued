@@ -1,4 +1,4 @@
-## Interface: 50502, 50503
+## Interface: 50503
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
