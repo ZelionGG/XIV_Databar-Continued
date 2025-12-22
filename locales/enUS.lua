@@ -95,6 +95,7 @@ L['Show PVP Button'] = true;
 L['Show Pets Button'] = true;
 L['Show Shop Button'] = true;
 L['Show Help Button'] = true;
+L['Show Housing Button'] = true;
 L['No Info'] = true;
 L['Classic'] = true;
 L['Alliance'] = true;
@@ -175,12 +176,12 @@ L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
 L['Show Mythic+ Teleports'] = true;
-L['Use Random Hearthstone'] = true;
-L['Empty Hearthstones List'] =
-"If you see an empty list, /reload your UI a few seconds after the initial loading (Blizzard is loading items informations asynchronously so that's the only solution for now)."
+L['Use Random Hearthstone'] = "Use Random Hearthstone";
+local retrievingData = "Retrieving data..."
+L['Retrieving data'] = retrievingData;
+L['Empty Hearthstones List'] = "If you see '" .. retrievingData .. "' in the list below, simply switch tabs or reopen this menu to refresh the data.";
 L['Hearthstones Select'] = true;
-L['Hearthstones Select Desc'] =
-"Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
+L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

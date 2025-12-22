@@ -1330,15 +1330,42 @@ function TravelModule:GetDefaultOptions()
     }
 end
 
-function TravelModule:GetConfig()
-    local hearthstonesTable = {}
-
-    if xb.db.profile.hearthstonesList then
-        for i, v in pairs(xb.db.profile.hearthstonesList) do
-            table.insert(hearthstonesTable, i, v)
-        end
+function TravelModule:GetHearthstoneValues()
+    if xb.db.profile.hearthstoneCache == nil then
+        xb.db.profile.hearthstoneCache = {}
     end
 
+    local values = {}
+    for i, v in ipairs(self.hearthstones) do
+        if self:IsUsable(v) then
+            local name = GetItemInfo(v)
+
+            if not name then
+                local _, toyName = C_ToyBox.GetToyInfo(v)
+                name = toyName
+            end
+
+            if not name and IsPlayerSpell(v) then
+                local spellInfo = GetSpellInfo(v)
+                if spellInfo then name = spellInfo.name end
+            end
+
+            if name then
+                values[v] = name
+                xb.db.profile.hearthstoneCache[v] = name
+            else
+                if xb.db.profile.hearthstoneCache[v] then
+                    values[v] = xb.db.profile.hearthstoneCache[v]
+                else
+                    values[v] = L['Retrieving data'] .. " (" .. v .. ")"
+                end
+            end
+        end
+    end
+    return values
+end
+
+function TravelModule:GetConfig()
     return {
         name = self:GetName(),
         type = "group",
@@ -1419,7 +1446,7 @@ function TravelModule:GetConfig()
                 name = L['Hearthstones Select'],
                 desc = L['Hearthstones Select Desc'],
                 type = "multiselect",
-                values = hearthstonesTable,
+                values = function() return self:GetHearthstoneValues() end,
                 get = function(_, key)
                     return xb.db.profile.selectedHearthstones[key]
                 end,
