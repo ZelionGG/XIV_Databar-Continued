@@ -154,8 +154,6 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
                 if frame:IsShown() then
                     frame:Hide()
                     self.hiddenByXIV[frame] = true
-                else
-                    self.hiddenByXIV[frame] = nil
                 end
             else
                 if self.hiddenByXIV[frame] then
