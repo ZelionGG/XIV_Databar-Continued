@@ -67,6 +67,9 @@ L['Hover'] = "Survol";
 
 L['Micromenu'] = "Micro menu";
 L['Show Social Tooltips'] = "Montrer les bulles de contacts";
+L['Blizzard Micromenu'] = "Micro menu Blizzard";
+L['Disable Blizzard Micromenu'] = "Désactiver le micro menu Blizzard";
+L['Blizzard Micromenu Disclaimer'] = "Si vous utilisez un autre addon d'interface (ex : ElvUI), masquez sa microbar dans les options de cet addon.";
 L['Main Menu Icon Right Spacing'] = "Décalage à droite du micro menu";
 L['Icon Spacing'] = "Espacement des icônes";
 L["Hide BNet App Friends"] = "Masquer amis BNet applications";

@@ -67,6 +67,9 @@ L['Hover'] = "Mouseover";
 
 L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
+L['Blizzard Micromenu'] = true;
+L['Disable Blizzard Micromenu'] = true;
+L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.';
 L['Main Menu Icon Right Spacing'] = "Hauptmenü Symbolabstand Rechts";
 L['Icon Spacing'] = "Symbolabstand";
 L["Hide BNet App Friends"] = "BNet App-Freunde verbergen";

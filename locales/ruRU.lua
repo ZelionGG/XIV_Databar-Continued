@@ -67,6 +67,9 @@ L['Hover'] = "По наведению";
 
 L['Micromenu'] = "Микроменю";
 L['Show Social Tooltips'] = "Показывать подсказки гильдии и друзей";
+L['Blizzard Micromenu'] = true;
+L['Disable Blizzard Micromenu'] = true;
+L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.';
 L['Main Menu Icon Right Spacing'] = "Расстояние от кнопки меню до других кнопок";
 L['Icon Spacing'] = "Расстояние между кнопками";
 L["Hide BNet App Friends"] = true;
