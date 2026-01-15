@@ -140,8 +140,6 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
         return
     end
 
-    self.hiddenByXIV = self.hiddenByXIV or {}
-
     local frames = {
         _G.MicroMenuContainer,
         _G.MainMenuBarMicroButtons,
@@ -151,17 +149,9 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
     for _, frame in ipairs(frames) do
         if frame then
             if hide then
-                if frame:IsShown() then
-                    frame:Hide()
-                    self.hiddenByXIV[frame] = true
-                else
-                    self.hiddenByXIV[frame] = nil
-                end
+                frame:Hide()
             else
-                if self.hiddenByXIV[frame] then
-                    frame:Show()
-                    self.hiddenByXIV[frame] = nil
-                end
+                frame:Show()
             end
         end
     end
