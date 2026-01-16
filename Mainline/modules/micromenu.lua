@@ -763,7 +763,7 @@ function MenuModule:SocialHover(hoverFunc)
                                         end
                                         -- player did not use a modifier when left clicking on the friend, send a bnet whisper
                                     else
-                                        ChatFrame_SendBNetTell(friendAccInfo.accountName)
+                                        ChatFrameUtil.SendBNetTell(friendAccInfo.accountName)
                                     end
 
                                     -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
