@@ -126,6 +126,45 @@ function MenuModule:SkinFrame(frame, name)
     end
 end
 
+function MenuModule:ToggleBlizzardMicroMenu(force)
+    local hide = xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
+    if force ~= nil then
+        hide = force
+    end
+
+    if InCombatLockdown() then
+        self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+            self:ToggleBlizzardMicroMenu(force)
+            self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+        end)
+        return
+    end
+
+    self.hiddenByXIV = self.hiddenByXIV or {}
+
+    local frames = {
+        _G.MicroMenuContainer,
+        _G.MainMenuBarMicroButtons,
+        _G.MicroButtonAndBagsBar,
+    }
+
+    for _, frame in ipairs(frames) do
+        if frame then
+            if hide then
+                if frame:IsShown() then
+                    frame:Hide()
+                    self.hiddenByXIV[frame] = true
+                end
+            else
+                if self.hiddenByXIV[frame] then
+                    frame:Show()
+                    self.hiddenByXIV[frame] = nil
+                end
+            end
+        end
+    end
+end
+
 function MenuModule:OnEnable()
     if not xb.db.profile.modules.microMenu.enabled then
         return;
@@ -136,6 +175,7 @@ function MenuModule:OnEnable()
     end
 
     self.microMenuFrame:Show()
+    self:ToggleBlizzardMicroMenu()
 
     if not self.frames.menu then
         self:CreateFrames()
@@ -147,6 +187,7 @@ end
 
 function MenuModule:OnDisable()
     self.microMenuFrame:Hide()
+    self:ToggleBlizzardMicroMenu(false)
     self:UnregisterFrameEvents()
     xb:Refresh()
 end
@@ -156,6 +197,8 @@ function MenuModule:Refresh()
         self:Disable();
         return;
     end
+
+    self:ToggleBlizzardMicroMenu()
 
     if self.frames.menu == nil then
         return;
@@ -1087,6 +1130,7 @@ function MenuModule:GetDefaultOptions()
     return 'microMenu', {
         enabled = true,
         showTooltips = true,
+        disableBlizzardMicroMenu = false,
         combatEn = false,
         mainMenuSpacing = 2,
         iconSpacing = 2,
@@ -1147,6 +1191,36 @@ function MenuModule:GetConfig()
                     xb.db.profile.modules.microMenu.showTooltips = val;
                     self:Refresh();
                 end
+            },
+
+            blizzardMicroMenu = {
+                type = "group",
+                name = L['Blizzard Micromenu'],
+                order = 1.5,
+                inline = true,
+                args = {
+                    disableBlizzardMicroMenu = {
+                        name = L['Disable Blizzard Micromenu'],
+                        order = 1,
+                        type = "toggle",
+                        width = "full",
+                        get = function()
+                            return xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.disableBlizzardMicroMenu = val
+                            self:ToggleBlizzardMicroMenu()
+                            self:Refresh()
+                        end
+                    },
+
+                    blizzardMicroMenuDisclaimer = {
+                        name = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. L['Blizzard Micromenu Disclaimer'],
+                        order = 2,
+                        type = "description",
+                        width = "full"
+                    },
+                }
             },
 
             appFriendsHide = {

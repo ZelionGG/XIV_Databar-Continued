@@ -68,6 +68,12 @@ L['Hover'] = true;
 
 L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
+L['Blizzard Micromenu'] = true;
+L['Disable Blizzard Micromenu'] = true;
+L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.';
+L['Blizzard Bags Bar'] = true;
+L['Disable Blizzard Bags Bar'] = true;
+L['Blizzard Bags Bar Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its bags bar in that addon\'s settings.';
 L['Main Menu Icon Right Spacing'] = true;
 L['Icon Spacing'] = true;
 L["Hide BNet App Friends"] = true;

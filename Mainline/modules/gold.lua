@@ -67,6 +67,48 @@ local function ConvertDateToNumber(month, day, year)
     return tonumber(year .. month .. day)
 end
 
+function GoldModule:ToggleBlizzardBagsBar(force)
+    local hide = xb.db.profile.modules.gold.disableBlizzardBagsBar
+    if force ~= nil then
+        hide = force
+    end
+
+    if InCombatLockdown() then
+        self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+            self:ToggleBlizzardBagsBar(force)
+            self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+        end)
+        return
+    end
+
+    self.hiddenBagsByXIV = self.hiddenBagsByXIV or {}
+
+    local frames = {
+        _G.BagsBar,
+        _G.MainMenuBarBackpackButton,
+        _G.CharacterBag0Slot,
+        _G.CharacterBag1Slot,
+        _G.CharacterBag2Slot,
+        _G.CharacterBag3Slot,
+    }
+
+    for _, frame in ipairs(frames) do
+        if frame then
+            if hide then
+                if frame:IsShown() then
+                    frame:Hide()
+                    self.hiddenBagsByXIV[frame] = true
+                end
+            else
+                if self.hiddenBagsByXIV[frame] then
+                    frame:Show()
+                    self.hiddenBagsByXIV[frame] = nil
+                end
+            end
+        end
+    end
+end
+
 function GoldModule:GetName()
     return BONUS_ROLL_REWARD_MONEY;
 end
@@ -118,6 +160,7 @@ function GoldModule:OnEnable()
         xb:RegisterFrame('goldFrame', self.goldFrame)
     end
     self.goldFrame:Show()
+    self:ToggleBlizzardBagsBar()
 
     local fullCharName = xb.constants.playerName .. "-" .. xb.constants.playerRealm
     xb.db.global.characters[fullCharName].sessionMoney = 0
@@ -130,6 +173,7 @@ end
 
 function GoldModule:OnDisable()
     self.goldFrame:Hide()
+    self:ToggleBlizzardBagsBar(false)
     self:UnregisterEvent('PLAYER_MONEY')
     self:UnregisterEvent('BAG_UPDATE')
 end
@@ -143,6 +187,8 @@ function GoldModule:Refresh()
         self:Disable();
         return;
     end
+
+    self:ToggleBlizzardBagsBar()
 
     if InCombatLockdown() then
         self.goldText:SetFont(xb:GetFont(db.text.fontSize))
@@ -499,6 +545,7 @@ end
 function GoldModule:GetDefaultOptions()
     return 'gold', {
         enabled = true,
+        disableBlizzardBagsBar = false,
         showSmallCoins = false,
         showFreeBagSpace = true,
         shortThousands = false,
@@ -565,6 +612,32 @@ function GoldModule:GetConfig()
                     xb.db.profile.modules.gold.showFreeBagSpace = val;
                     self:Refresh();
                 end
+            },
+            blizzardBagsBar = {
+                type = "group",
+                name = L['Blizzard Bags Bar'],
+                order = 4.5,
+                inline = true,
+                args = {
+                    disableBlizzardBagsBar = {
+                        name = L['Disable Blizzard Bags Bar'],
+                        order = 1,
+                        type = "toggle",
+                        width = "full",
+                        get = function() return xb.db.profile.modules.gold.disableBlizzardBagsBar; end,
+                        set = function(_, val)
+                            xb.db.profile.modules.gold.disableBlizzardBagsBar = val;
+                            self:ToggleBlizzardBagsBar()
+                            self:Refresh();
+                        end
+                    },
+                    blizzardBagsBarDisclaimer = {
+                        name = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. L['Blizzard Bags Bar Disclaimer'],
+                        order = 2,
+                        type = "description",
+                        width = "full"
+                    }
+                }
             },
             characters = {
                 name = L['Registered characters'],

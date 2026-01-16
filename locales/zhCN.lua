@@ -67,6 +67,12 @@ L['Hover'] = "鼠标悬停";
 
 L['Micromenu'] = "微型菜单";
 L['Show Social Tooltips'] = "显示社交提示";
+L['Blizzard Micromenu'] = true;
+L['Disable Blizzard Micromenu'] = true;
+L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.';
+L['Blizzard Bags Bar'] = true;
+L['Disable Blizzard Bags Bar'] = true;
+L['Blizzard Bags Bar Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its bags bar in that addon\'s settings.';
 L['Main Menu Icon Right Spacing'] = "主菜单图标右间距";
 L['Icon Spacing'] = "图标间距";
 L["Hide BNet App Friends"] = true;
