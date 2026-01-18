@@ -18,5 +18,5 @@
 
 ### _TBC Anniversary :_
 
-- Added full compatibility support.
+- Added full support.
 
