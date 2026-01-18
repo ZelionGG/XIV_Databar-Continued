@@ -223,4 +223,5 @@ L["Version"] = true;
 L["Important"] = true;
 L["New"] = "Nouveau";
 L["Improvment"] = "Améliorations";
+L["Bugfix"] = "Corrections de bugs";
 L["Changelog"] = "Historique de modifications";

@@ -227,4 +227,5 @@ L["Version"] = true;
 L["Important"] = true;
 L["New"] = true;
 L["Improvment"] = true;
+L["Bugfix"] = true;
 L["Changelog"] = true;

@@ -223,4 +223,5 @@ L["Version"] = true;
 L["Important"] = "Wichtig";
 L["New"] = "Neu";
 L["Improvment"] = "Verbesserung";
+L["Bugfix"] = true; -- To Translate
 L["Changelog"] = "Änderungen";

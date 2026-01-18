@@ -260,4 +260,5 @@ L["Version"] = "版本"
 L["Important"] = "重要"
 L["New"] = "新增"
 L["Improvment"] = "改善"
+L["Bugfix"] = true; -- To Translate
 L["Changelog"] = "更新記錄"
