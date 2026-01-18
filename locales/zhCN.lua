@@ -69,6 +69,7 @@ L['Micromenu'] = "微型菜单";
 L['Show Social Tooltips'] = "显示社交提示";
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
+L["Keep Queue Status Icon"] = true;
 L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.';
 L['Blizzard Bags Bar'] = true;
 L['Disable Blizzard Bags Bar'] = true;

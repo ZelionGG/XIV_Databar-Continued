@@ -164,6 +164,42 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
             end
         end
     end
+
+    local keepQueueStatus = xb.db.profile.modules.microMenu.keepQueueStatusIcon
+    local queueButton = _G.QueueStatusButton
+    if queueButton then
+        if hide and keepQueueStatus then
+            if not self.queueStatusOriginalParent then
+                self.queueStatusOriginalParent = queueButton:GetParent()
+                self.queueStatusOriginalPoint = {queueButton:GetPoint(1)}
+            end
+            queueButton:SetParent(UIParent)
+            if self.queueStatusOriginalPoint and self.queueStatusOriginalPoint[1] then
+                queueButton:ClearAllPoints()
+                queueButton:SetPoint(self.queueStatusOriginalPoint[1], UIParent,
+                                     self.queueStatusOriginalPoint[1],
+                                     self.queueStatusOriginalPoint[4],
+                                     self.queueStatusOriginalPoint[5])
+            end
+            queueButton:Show()
+        elseif hide and not keepQueueStatus then
+            if self.queueStatusOriginalParent then
+                queueButton:SetParent(self.queueStatusOriginalParent)
+                if self.queueStatusOriginalPoint and self.queueStatusOriginalPoint[1] then
+                    queueButton:ClearAllPoints()
+                    queueButton:SetPoint(unpack(self.queueStatusOriginalPoint))
+                end
+            end
+            queueButton:Hide()
+        elseif not hide and self.queueStatusOriginalParent then
+            queueButton:SetParent(self.queueStatusOriginalParent)
+            if self.queueStatusOriginalPoint and self.queueStatusOriginalPoint[1] then
+                queueButton:ClearAllPoints()
+                queueButton:SetPoint(unpack(self.queueStatusOriginalPoint))
+            end
+            queueButton:Show()
+        end
+    end
 end
 
 function MenuModule:OnEnable()
@@ -1147,6 +1183,7 @@ function MenuModule:GetDefaultOptions()
         enabled = true,
         showTooltips = true,
         disableBlizzardMicroMenu = false,
+        keepQueueStatusIcon = false,
         combatEn = false,
         mainMenuSpacing = 2,
         iconSpacing = 2,
@@ -1230,9 +1267,27 @@ function MenuModule:GetConfig()
                         end
                     },
 
+                    keepQueueStatusIcon = {
+                        name = L['Keep Queue Status Icon'],
+                        order = 2,
+                        type = "toggle",
+                        width = "full",
+                        disabled = function()
+                            return not xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
+                        end,
+                        get = function()
+                            return xb.db.profile.modules.microMenu.keepQueueStatusIcon
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.keepQueueStatusIcon = val
+                            self:ToggleBlizzardMicroMenu()
+                            self:Refresh()
+                        end
+                    },
+
                     blizzardMicroMenuDisclaimer = {
                         name = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. L['Blizzard Micromenu Disclaimer'],
-                        order = 2,
+                        order = 3,
                         type = "description",
                         width = "full"
                     },

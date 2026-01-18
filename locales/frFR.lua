@@ -69,6 +69,7 @@ L['Micromenu'] = "Micro menu";
 L['Show Social Tooltips'] = "Montrer les bulles de contacts";
 L['Blizzard Micromenu'] = "Micro menu Blizzard";
 L['Disable Blizzard Micromenu'] = "Désactiver le micro menu Blizzard";
+L['Keep Queue Status Icon'] = "Garder l'icône de la file d'attente";
 L['Blizzard Micromenu Disclaimer'] = "Si vous utilisez un autre addon d'interface (ex : ElvUI), masquez sa microbar dans les options de cet addon.";
 L['Blizzard Bags Bar'] = "Barre des sacs Blizzard";
 L['Disable Blizzard Bags Bar'] = "Désactiver la barre des sacs Blizzard";
