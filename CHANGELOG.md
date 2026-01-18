@@ -10,6 +10,7 @@
 
 ### _Retail :_
 
+- Fixed the "Queue" icon not showing anymore when you disable Blizzard's micromenu in the **Micromenu** module.
 - Added Naaru's Embrace hearthstone to the **Travel** module.
 
 ### _Mists of Pandaria Classic :_

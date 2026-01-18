@@ -40,7 +40,9 @@ XIVBar.Changelog[4000] = {
     bugfix = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
+        ["enUS"] = {
+            "[Retail] Fixed the \"Queue\" icon not showing anymore when you disable Blizzard's micromenu",
+        },
         ["frFR"] = {},
         ["koKR"] = {},
         ["ruRU"] = {}
