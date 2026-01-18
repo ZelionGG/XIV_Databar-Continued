@@ -99,6 +99,21 @@ end
 
 compat.ToggleChatMenu = TryToggleChatMenu
 
+-- Shop toggle helper: micro-menu button (if present), otherwise ToggleStoreUI.
+local function TryToggleStore()
+    local storeButton = _G.StoreMicroButton
+    if storeButton and storeButton.Click then
+        storeButton:Click()
+        return
+    end
+
+    if _G.ToggleStoreUI then
+        _G.ToggleStoreUI()
+    end
+end
+
+compat.ToggleStore = TryToggleStore
+
 compat.features = {
     microMenu = {
         achievements = not compat.isClassicOrTBC,

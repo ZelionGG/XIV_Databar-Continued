@@ -1061,8 +1061,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            StoreMicroButton:Click()
-            --ToggleStoreUI()
+            if compat and compat.ToggleStore then
+                compat.ToggleStore()
+            else
+                ToggleStoreUI()
+            end
         end
     end; -- shop
 
