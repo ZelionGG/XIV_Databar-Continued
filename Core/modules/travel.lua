@@ -2,6 +2,7 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local compat = xb.compat
 
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
@@ -60,7 +61,10 @@ function TravelModule:OnInitialize()
         556, -- Astral Recall
         168907, -- Holographic Digitalization Hearthstone
         142298, -- Astonishingly Scarlet Slippers
-        210455 -- Draenic Hologem
+        210455, -- Draenic Hologem
+        260221, -- Naaru's Embrace (Classic)
+        263489, -- Naaru's Embrace (Retail)
+        184871 -- Dark Portal (Classic)
     }
 
     self.portButtons = {}
@@ -643,6 +647,9 @@ end
 
 -- Utility function to check if any mythic teleport is available
 function TravelModule:HasAvailableMythicTeleports()
+    if not compat.isMainline then
+        return false
+    end
     local currentSeason = self:GetCurrentSeason()
 
     if xb.db.profile.curSeasonOnly then
@@ -862,6 +869,9 @@ function TravelModule:CreatePortPopup()
 end
 
 function TravelModule:CreateMythicPopup()
+    if not compat.isMainline then
+        return
+    end
     -- Get the current season
     local currentSeason = self:GetCurrentSeason()
 
@@ -1056,18 +1066,55 @@ function TravelModule:Refresh()
         end)
     end
 
+    local db = xb.db.profile
+    local allowMythic = compat.isMainline and db.enableMythicPortals
+
+    self:UpdatePortOptions()
+    local hasPortOptions = false
+    if self.portOptions then
+        for _, option in pairs(self.portOptions) do
+            if option and option.portId and self:IsUsable(option.portId) then
+                hasPortOptions = true
+                break
+            end
+        end
+    end
+
+    if not allowMythic and self.mythicButton then
+        self.mythicButton:Hide()
+    end
+
+    if not hasPortOptions and self.portButton then
+        self.portButton:Hide()
+    end
+
     if InCombatLockdown() then
         self.hearthText:SetText(GetBindLocation())
         self.portText:SetText(xb.db.char.portItem.text)
         self:SetHearthColor()
         self:SetPortColor()
-        self:SetMythicColor()
+        if allowMythic then
+            self:SetMythicColor()
+        end
+
+        local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
+        if hasPortOptions then
+            self.portButton:Show()
+        end
+        if self.portButton:IsVisible() then
+            totalWidth = totalWidth + self.portButton:GetWidth()
+        end
+
+        if allowMythic and self.mythicButton:IsVisible() then
+            totalWidth = totalWidth + self.mythicButton:GetWidth()
+        end
+
+        self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+        self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
+        self.hearthFrame:Show()
         return
     end
 
-    self:UpdatePortOptions()
-
-    local db = xb.db.profile
     -- local iconSize = (xb:GetHeight() / 2)
     local iconSize = db.text.fontSize + db.general.barPadding
 
@@ -1090,30 +1137,36 @@ function TravelModule:Refresh()
     self:SetHearthColor()
 
     -- Portals Part
-    self.portText:SetFont(xb:GetFont(db.text.fontSize))
-    self.portText:SetText(xb.db.char.portItem.text)
+    if hasPortOptions then
+        self.portButton:Show()
+        self.portText:SetFont(xb:GetFont(db.text.fontSize))
+        self.portText:SetText(xb.db.char.portItem.text)
 
-    self.portButton:SetSize(self.portText:GetWidth() + iconSize +
-                                db.general.barPadding, xb:GetHeight())
-    self.portButton:SetPoint("RIGHT", self.hearthButton, "LEFT",
-                             -(db.general.barPadding), 0)
+        self.portButton:SetSize(self.portText:GetWidth() + iconSize +
+                                    db.general.barPadding, xb:GetHeight())
+        self.portButton:SetPoint("RIGHT", self.hearthButton, "LEFT",
+                                 -(db.general.barPadding), 0)
 
-    self.portText:SetPoint("RIGHT")
+        self.portText:SetPoint("RIGHT")
 
-    self.portIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
-    self.portIcon:SetSize(iconSize, iconSize)
+        self.portIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
+        self.portIcon:SetSize(iconSize, iconSize)
 
-    self.portIcon:SetPoint("RIGHT", self.portText, "LEFT",
-                           -(db.general.barPadding), 0)
+        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT",
+                               -(db.general.barPadding), 0)
 
-    self:SetPortColor()
+        self:SetPortColor()
 
-    self:CreatePortPopup()
+        self:CreatePortPopup()
+    else
+        self.portButton:Hide()
+        self.portPopup:Hide()
+    end
 
     -- M+ Part
     if self.mythicButton then self.mythicButton:Hide() end
 
-    if (xb.db.profile.enableMythicPortals) then
+    if allowMythic then
         -- Only show the button if teleports are available
         if self:HasAvailableMythicTeleports() then
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
@@ -1167,12 +1220,11 @@ function TravelModule:Refresh()
     self.mythicPopup:Hide()
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
-    self.portButton:Show()
     if self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    if (xb.db.profile.enableMythicPortals) then
+    if allowMythic then
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
@@ -1324,7 +1376,7 @@ function TravelModule:GetDefaultOptions()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
     return 'travel', {
         enabled = true,
-        enableMythicPortals = true,
+        enableMythicPortals = compat.isMainline,
         curSeasonOnly = false,
         randomizeHs = false
     }
@@ -1391,11 +1443,13 @@ function TravelModule:GetConfig()
                 order = 18,
                 name = L['Mythic+ Teleports'],
                 type = 'header',
+                hidden = function() return not compat.isMainline end
             },
             enableMythicPortals = {
                 name = L['Show Mythic+ Teleports'],
                 order = 20,
                 type = "toggle",
+                hidden = function() return not compat.isMainline end,
                 get = function()
                     return xb.db.profile.enableMythicPortals;
                 end,
@@ -1409,6 +1463,7 @@ function TravelModule:GetConfig()
                 name = L['Only show current season'],
                 order = 25,
                 type = "toggle",
+                hidden = function() return not compat.isMainline end,
                 get = function()
                     return xb.db.profile.curSeasonOnly;
                 end,

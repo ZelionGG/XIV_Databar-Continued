@@ -2,6 +2,8 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local compat = xb.compat or {}
+local IsAddOnLoaded = compat.IsAddOnLoaded or IsAddOnLoaded
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
@@ -291,7 +293,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.ach and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if mm.ach and compat.features and compat.features.microMenu and compat.features.microMenu.achievements then
         self.frames.ach = CreateFrame("BUTTON", "ach", parentFrame)
         parentFrame = self.frames.ach
     else
@@ -309,7 +311,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.lfg and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if mm.lfg and compat.features and compat.features.microMenu and compat.features.microMenu.lfg then
         self.frames.lfg = CreateFrame("BUTTON", "lfg", parentFrame)
         parentFrame = self.frames.lfg
     else
@@ -318,16 +320,17 @@ function MenuModule:CreateFrames()
         end
     end
 
-    --   if mm.journal then
-    --     self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
-    --     parentFrame = self.frames.journal
-    --   else
-    --     if self.frames.journal then
-    --       self.frames.journal = nil
-    --     end
-    --   end
+    if mm.journal and compat.features and compat.features.microMenu and compat.features.microMenu.journal and
+        IsAddOnLoaded("Blizzard_Journal") then
+        self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
+        parentFrame = self.frames.journal
+    else
+        if self.frames.journal then
+            self.frames.journal = nil
+        end
+    end
 
-    if mm.pvp and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if mm.pvp and compat.features and compat.features.microMenu and compat.features.microMenu.pvp then
         self.frames.pvp = CreateFrame("BUTTON", "pvp", parentFrame)
         parentFrame = self.frames.pvp
     else
@@ -336,7 +339,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.pet and WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if mm.pet and compat.features and compat.features.microMenu and compat.features.microMenu.pet then
         self.frames.pet = CreateFrame("BUTTON", "pet", parentFrame)
         parentFrame = self.frames.pet
     else
@@ -693,7 +696,11 @@ function MenuModule:SocialHover(hoverFunc)
                                     end
                                     -- player did not use a modifier when left clicking on the friend, send a bnet whisper
                                 else
-                                    ChatFrame_SendBNetTell(friendAccInfo.accountName)
+                                    if compat.SendBNetWhisper then
+                                        compat.SendBNetWhisper(friendAccInfo.bnetAccountID, friendAccInfo.accountName)
+                                    else
+                                        ChatFrame_SendBNetTell(friendAccInfo.accountName)
+                                    end
                                 end
 
                                 -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
@@ -990,7 +997,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            PVEFrame_ToggleFrame()
+            if compat and compat.ToggleLFG then
+                compat.ToggleLFG()
+            else
+                PVEFrame_ToggleFrame()
+            end
         end
     end; -- lfg
 
@@ -1026,7 +1037,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            TogglePVPFrame()
+            if compat and compat.TogglePVP then
+                compat.TogglePVP()
+            else
+                TogglePVPFrame()
+            end
         end
     end; -- pvp
 

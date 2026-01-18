@@ -3,6 +3,8 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
 function TravelModule:GetName()

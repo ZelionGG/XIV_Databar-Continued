@@ -1,16 +1,28 @@
-local AddOnName, XIVBar = ...;
-local _G = _G;
-local xb = XIVBar;
-local L = XIVBar.L;
+local AddOnName, XIVBar = ...
+local _G = _G
+local xb = XIVBar
+local L = XIVBar.L
+local compat = XIVBar.compat or {}
 
 local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
-local LibAddonCompat = LibStub("LibAddonCompat-1.0")
+
+local LibStub = _G.LibStub
+local LibAddonCompat = nil
+local IsAddOnLoaded = compat.IsAddOnLoaded or (C_AddOns and C_AddOns.IsAddOnLoaded)
 
 function TradeskillModule:GetName()
-    return TRADESKILLS;
+    return TRADESKILLS
 end
 
 function TradeskillModule:OnInitialize()
+    if not compat.isMainline and LibStub then
+        LibAddonCompat = LibStub("LibAddonCompat-1.0")
+    end
+
+    if compat.isMainline and LibStub then
+        self.LTip = LibStub('LibQTip-1.0')
+    end
+
     self.profIcons = {
         [164] = 'blacksmithing',
         [165] = 'leatherworking',
@@ -61,15 +73,6 @@ function TradeskillModule:OnEnable()
         maxLvl = nil,
         offset = nil
     }
-    self.first_aid = {
-        idx = nil,
-        id = nil,
-        name = nil,
-        defIcon = nil,
-        lvl = nil,
-        maxLvl = nil,
-        offset = nil
-    }
     self.fish = {
         idx = nil,
         id = nil,
@@ -80,6 +83,15 @@ function TradeskillModule:OnEnable()
         offset = nil
     }
     self.cook = {
+        idx = nil,
+        id = nil,
+        name = nil,
+        defIcon = nil,
+        lvl = nil,
+        maxLvl = nil,
+        offset = nil
+    }
+    self.first_aid = {
         idx = nil,
         id = nil,
         name = nil,
@@ -101,130 +113,124 @@ function TradeskillModule:OnDisable()
     self:UnregisterEvent('UNIT_SPELLCAST_STOP')
 end
 
-function TradeskillModule:UpdateProfValues()
-    -- update profession indexes before anything else or receive a million bugs when (un)learning professions
-    if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-        self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx = GetProfessions() -- this is the most important line in the entire fucking module
-    else
-        self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx = LibAddonCompat:GetProfessions()
+local function IsCataClassic()
+    return LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3)
+end
+
+local function GetProfessionInfoCompat(index)
+    if compat.isMainline then
+        return GetProfessionInfo(index)
     end
-    -- if firstProf.idx doesn't exist, the player hasn't learned any profession and thus the tradeskillFrame is hidden
+
+    if IsCataClassic() then
+        return GetProfessionInfo(index)
+    end
+
+    if LibAddonCompat then
+        return LibAddonCompat:GetProfessionInfo(index)
+    end
+
+    return GetProfessionInfo(index)
+end
+
+local function GetProfessionsCompat()
+    if compat.isMainline then
+        return GetProfessions()
+    end
+
+    if IsCataClassic() then
+        return GetProfessions()
+    end
+
+    if LibAddonCompat then
+        return LibAddonCompat:GetProfessions()
+    end
+
+    return GetProfessions()
+end
+
+function TradeskillModule:UpdateProfValues()
+    self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx =
+        GetProfessionsCompat()
+
     if not self.firstProf.idx then
         self.tradeskillFrame:Hide()
     else
-        -- player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
         self.tradeskillFrame:Show()
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.firstProf.idx)
-            self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset, self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.firstProf.idx)
-            self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset, self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.firstProf.idx)
+        self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset,
+            self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
         self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
         self.firstProfBar:SetValue(self.firstProf.lvl)
     end
 
-    -- if secondProf.idx doesn't exist, hide the secondProfFrame 
     if not self.secondProf.idx then
         self.secondProfFrame:Hide()
     else
-        -- player has two profession, setting second one. show secondProfFrame because it might've been hidden before
         self.secondProfFrame:Show()
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.secondProf.idx)
-            self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.secondProf.idx)
-            self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.secondProf.idx)
+        self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl,
+            self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
         self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
         self.secondProfBar:SetValue(self.secondProf.lvl)
     end
 
-    -- update values for secondary professions if they exist (first aid / archaeology / fishing / cooking)
-    -- update first aid
-    if self.first_aid.idx then
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.first_aid.idx)
-            self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset, self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.first_aid.idx)
-            self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset, self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+    if self.first_aid.idx and not compat.isMainline then
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.first_aid.idx)
+        self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset,
+            self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
     end
-    -- update archaeology
+
     if self.arch.idx then
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.arch.idx)
-            self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.arch.idx)
-            self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.arch.idx)
+        self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name,
+            defIcon, lvl, maxLvl, offset, id
     end
-    -- update fishing
+
     if self.fish.idx then
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.fish.idx)
-            self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.fish.idx)
-            self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.fish.idx)
+        self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name,
+            defIcon, lvl, maxLvl, offset, id
     end
-    -- update cooking
+
     if self.cook.idx then
-        if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfo(self.cook.idx)
-            self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name, defIcon, lvl, maxLvl, offset, id
-        else
-            local name, defIcon, lvl, maxLvl, _, offset, id, _ = LibAddonCompat:GetProfessionInfo(self.cook.idx)
-            self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name, defIcon, lvl, maxLvl, offset, id
-        end
+        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.cook.idx)
+        self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name,
+            defIcon, lvl, maxLvl, offset, id
     end
 end
 
 function TradeskillModule:Refresh()
-    -- don't refresh anything while in combat because why the fuck would you?
     if InCombatLockdown() then
         return
     end
-    -- do this before updating prof values or get rekt by bugs because refresh triggers a thousand times before anything is even loaded
     if self.tradeskillFrame == nil then
         return
     end
-    -- similar reasons for the line above apply here
+
     local db = xb.db.profile
     if not db.modules.tradeskill.enabled then
         self:Disable()
         return
     end
 
-    -- update before doing anything here mister addon creator. if we have no professions, why the fuck would we refresh anything?
     self:UpdateProfValues()
-    -- get the hell out of this function if we have no professions
-    if not self.firstProf.name then
+    if not self.firstProf.idx then
         return
     end
 
-    -- prepare tradeskillFrame bar width and profession icon size
-    local iconSize = db.text.fontSize + db.general.barPadding
     local totalWidth = 0
 
-    -- setting width and position for profession 1 frame
     self:StyleTradeskillFrame('firstProf')
     totalWidth = totalWidth + self.firstProfFrame:GetWidth()
     self.firstProfFrame:SetPoint('LEFT')
 
-    -- setting width and position for profession 2 frame if it exists, otherwise its frame is hidden anyway
     if self.secondProf.idx then
         self:StyleTradeskillFrame('secondProf')
         totalWidth = totalWidth + self.secondProfFrame:GetWidth()
         self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
     end
 
-    -- final touches on our precious tradeskillFrame
     self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
@@ -265,7 +271,7 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
         self[prefix .. 'Text']:SetPoint('TOPLEFT', self[prefix .. 'Icon'], 'TOPRIGHT', 5, 0)
         self[prefix .. 'Bar']:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
         if db.modules.tradeskill.barCC then
-            rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
+            local rPerc, gPerc, bPerc = xb:GetClassColors()
             self[prefix .. 'Bar']:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
         else
             self[prefix .. 'Bar']:SetStatusBarColor(xb:GetColor('normal'))
@@ -298,14 +304,25 @@ end
 function TradeskillModule:SetProfScripts(prefix)
     self[prefix .. 'Frame']:SetScript('OnMouseDown', function(_, button)
         if button == 'LeftButton' then
-            -- workaround, toggling spellbooks for tailoring / engineering / inscription is bugged on blizzard's side
-            -- i prefer this over the alternative of casting a spell via SecureActionButtonTemplate frames anyway
-            if self[prefix].offset ~= nil then
-                CastSpell(self[prefix].offset + 1, "Spell")
+            if compat.isMainline then
+                local currentProfessionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+                if currentProfessionInfo and currentProfessionInfo.professionID == self[prefix].id then
+                    C_TradeSkillUI.CloseTradeSkill()
+                    return
+                end
+                C_TradeSkillUI.OpenTradeSkill(self[prefix].id)
+            else
+                if self[prefix].offset ~= nil then
+                    CastSpell(self[prefix].offset + 1, "Spell")
+                end
             end
-        elseif button == 'RightButton' then 
-            if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-                ToggleSpellBook(BOOKTYPE_PROFESSION) 
+        elseif button == 'RightButton' then
+            if compat.isMainline then
+                ToggleProfessionsBook()
+            else
+                if IsCataClassic() then
+                    ToggleSpellBook(BOOKTYPE_PROFESSION)
+                end
             end
         end
     end)
@@ -322,9 +339,8 @@ function TradeskillModule:SetProfScripts(prefix)
 
     self[prefix .. 'Frame']:SetScript('OnLeave', function()
         if InCombatLockdown() then
-            return;
+            return
         end
-        local db = xb.db.profile
         self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
         if xb.db.profile.modules.tradeskill.showTooltip then
             GameTooltip:Hide()
@@ -368,6 +384,33 @@ function TradeskillModule:RegisterFrameEvents()
     end)
 end
 
+function TradeskillModule:SkinFrame(frame, name)
+    if not compat.isMainline then
+        return
+    end
+
+    if xb.db.profile.general.useElvUI and IsAddOnLoaded and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
+        if frame.StripTextures then
+            frame:StripTextures()
+        end
+        if frame.SetTemplate then
+            frame:SetTemplate("Transparent")
+        end
+
+        local close = _G[name .. "CloseButton"] or frame.CloseButton
+        if close and close.SetAlpha then
+            if ElvUI then
+                ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+            end
+
+            if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+                Tukui[1].SkinCloseButton(close)
+            end
+            close:SetAlpha(1)
+        end
+    end
+end
+
 function TradeskillModule:ShowTooltip()
     local r, g, b, _ = unpack(xb:HoverColors())
     GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_' .. xb.miniTextPosition)
@@ -389,17 +432,14 @@ function TradeskillModule:ShowTooltip()
     if self.arch.idx then
         self:ListTooltipProfession('arch', r, g, b)
     end
-    if self.first_aid.idx then
+    if self.first_aid.idx and not compat.isMainline then
         self:ListTooltipProfession('first_aid', r, g, b)
     end
 
-    -- in case there's daily crafts in shadowlands, add a section under the professions for cooldowns
-    -- probably works with: C_TradeSkillUI.GetRecipeInfo() and GetSpellCooldown()
-
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Profession Frame'], r, g, b, 1, 1, 1)
-    if LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3) then
-        GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Toggle Profession Spellbook'], r, g, b, 1, 1, 1)
+    if compat.isMainline or IsCataClassic() then
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Toggle Profession Spellbook'], r, g, b, 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -428,7 +468,7 @@ function TradeskillModule:GetConfig()
                 order = 0,
                 type = "toggle",
                 get = function()
-                    return xb.db.profile.modules.tradeskill.enabled;
+                    return xb.db.profile.modules.tradeskill.enabled
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.tradeskill.enabled = val
@@ -445,11 +485,11 @@ function TradeskillModule:GetConfig()
                 order = 2,
                 type = "toggle",
                 get = function()
-                    return xb.db.profile.modules.tradeskill.barCC;
+                    return xb.db.profile.modules.tradeskill.barCC
                 end,
                 set = function(_, val)
-                    xb.db.profile.modules.tradeskill.barCC = val;
-                    self:Refresh();
+                    xb.db.profile.modules.tradeskill.barCC = val
+                    self:Refresh()
                 end
             },
             showTooltip = {
@@ -457,11 +497,11 @@ function TradeskillModule:GetConfig()
                 order = 3,
                 type = "toggle",
                 get = function()
-                    return xb.db.profile.modules.tradeskill.showTooltip;
+                    return xb.db.profile.modules.tradeskill.showTooltip
                 end,
                 set = function(_, val)
-                    xb.db.profile.modules.tradeskill.showTooltip = val;
-                    self:Refresh();
+                    xb.db.profile.modules.tradeskill.showTooltip = val
+                    self:Refresh()
                 end
             }
         }

@@ -1,4 +1,4 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="talents.lua" />
   <Script file="micromenu.lua" />
-  <Script file="talent.lua" />
 </Ui>

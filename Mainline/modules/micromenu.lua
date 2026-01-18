@@ -2,6 +2,7 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local compat = xb.compat
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
@@ -765,7 +766,6 @@ function MenuModule:SocialHover(hoverFunc)
                                     else
                                         ChatFrameUtil.SendBNetTell(friendAccInfo.accountName)
                                     end
-
                                     -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
                                 elseif button == "RightButton" then
                                     if (not isClassic and charName and faction == playerFaction) then
@@ -1055,7 +1055,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleLFDParentFrame()
+            if compat and compat.ToggleLFG then
+                compat.ToggleLFG()
+            else
+                ToggleLFDParentFrame()
+            end
         end
     end; -- lfg
 
@@ -1091,7 +1095,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            TogglePVPUI()
+            if compat and compat.TogglePVP then
+                compat.TogglePVP()
+            else
+                TogglePVPUI()
+            end
         end
     end; -- pvp
 

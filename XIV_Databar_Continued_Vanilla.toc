@@ -18,6 +18,7 @@ Classic\embeds.xml
 
 locales\locales.xml
 core.lua
+Core\compat.lua
 
 Core\utils\changelog\Load_Changelog.xml
 
