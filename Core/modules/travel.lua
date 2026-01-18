@@ -448,11 +448,11 @@ function TravelModule:SetHearthColor()
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
-                        self.availableHearthstones[v] = {name = hearthName}
+                        self.availableHearthstones[v] = {macro = "/use item:" .. v}
                     else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
+                                                       "/use item:" .. v)
                         break
                     end
                 end
@@ -461,15 +461,18 @@ function TravelModule:SetHearthColor()
         if PlayerHasToy(v) then
             --if GetItemCooldown(v) == 0 then
                 local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
+                if not name then
+                    name = GetItemInfo(v)
+                end
                 hearthName = name
                 if hearthName ~= nil then
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
-                        self.availableHearthstones[v] = {name = hearthName}
+                        self.availableHearthstones[v] = {macro = "/use item:" .. v}
                     else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
+                                                       "/use item:" .. v)
                         break
                     end
                 end
@@ -485,7 +488,7 @@ function TravelModule:SetHearthColor()
                     hearthName = spellInfo.name
                     if xb.db.profile.randomizeHs then
                         table.insert(keyset, i)
-                        self.availableHearthstones[v] = {name = hearthName}
+                        self.availableHearthstones[v] = {macro = "/cast " .. hearthName}
                     else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
@@ -500,7 +503,7 @@ function TravelModule:SetHearthColor()
         random_elem = usedHearthstones[math.random(#usedHearthstones)]
         for k, v in pairs(self.availableHearthstones) do
             if k == random_elem then
-                self.hearthButton:SetAttribute("macrotext", "/cast " .. v.name)
+                self.hearthButton:SetAttribute("macrotext", v.macro)
                 break
             end
         end
