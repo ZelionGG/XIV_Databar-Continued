@@ -41,9 +41,11 @@ XIVBar.Changelog[4000] = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {
-            "[Retail] Fixed the \"Queue\" icon not showing anymore when you disable Blizzard's micromenu",
+            "[Retail] Fixed the \"Queue\" icon not showing anymore when you disable Blizzard's micromenu in the [Micromenu] module.",
         },
-        ["frFR"] = {},
+        ["frFR"] = {
+            "[Retail] Correction de l'icône \"File d'attente\" qui n'apparaissait plus lorsque vous désactiviez le micromenu de Blizzard dans le module [Micromenu].",
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     }
