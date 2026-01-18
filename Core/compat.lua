@@ -6,6 +6,7 @@ local WOW_PROJECT_CATACLYSM_CLASSIC = _G.WOW_PROJECT_CATACLYSM_CLASSIC
 local WOW_PROJECT_MISTS_CLASSIC = _G.WOW_PROJECT_MISTS_CLASSIC
 XIVBar.compat = compat
 
+-- Version flags
 compat.projectId = WOW_PROJECT_ID
 compat.isClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 compat.isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
@@ -16,11 +17,16 @@ compat.isMists = WOW_PROJECT_MISTS_CLASSIC and WOW_PROJECT_ID == WOW_PROJECT_MIS
 compat.isClassicOrTBC = compat.isClassicEra or compat.isTBC
 compat.isClassicProgression = compat.isWrath or compat.isCata or compat.isMists
 
+-- Addon API helpers
+-- compat.IsAddOnLoaded: wrapper to avoid errors if C_AddOns is missing
+-- (e.g. older Classic builds).
 local fallbackIsAddOnLoaded = _G.IsAddOnLoaded or function()
     return false
 end
 compat.IsAddOnLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or fallbackIsAddOnLoaded
 
+-- Battle.net whisper helper: APIs differ by version/patch.
+-- Try multiple functions in a safe order.
 local ChatFrameUtil = _G.ChatFrameUtil
 local function TrySendBNetWhisper(accountId, accountName)
     if _G.ChatFrame_SendBNWhisper then
@@ -42,6 +48,8 @@ end
 
 compat.SendBNetWhisper = TrySendBNetWhisper
 
+-- LFG toggle helper: Retail via PVEFrame, Classic via LFGMinimapFrame.
+-- Falls back to legacy toggles when needed.
 local function TryToggleLFG()
     local lfgFrame = _G.LFGMinimapFrame
     if lfgFrame and lfgFrame.Click then
@@ -58,6 +66,7 @@ end
 
 compat.ToggleLFG = TryToggleLFG
 
+-- PVP toggle helper: legacy LFGMinimapFrame button, otherwise modern PVP UI.
 local function TryTogglePVP()
     local lfgFrame = _G.LFGMinimapFrame
     if lfgFrame and lfgFrame.Click then
@@ -76,6 +85,8 @@ end
 
 compat.TogglePVP = TryTogglePVP
 
+-- Chat menu toggle helper: modern menu (ChatFrameMenuButton) or
+-- classic menu (ChatMenu/ChatFrame_ToggleMenu).
 local function TryToggleChatMenu()
     local chatMenuButton = _G.ChatFrameMenuButton
     if chatMenuButton and chatMenuButton.OpenMenu then
@@ -114,6 +125,8 @@ end
 
 compat.ToggleStore = TryToggleStore
 
+-- Feature flags to show/hide buttons based on version.
+-- UI modules read these flags before creating buttons.
 compat.features = {
     microMenu = {
         achievements = not compat.isClassicOrTBC,
