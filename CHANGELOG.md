@@ -1,9 +1,22 @@
 # XIV_Databar Continued
 
-## [3.9.1](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/3.9.1) (2026-01-17)
+## [4.0](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/4.0) (2026-01-18)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.9...v3.9.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v3.9.1...v4.0) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+
+### _Global :_
+
+- Major internal refactor to centralize version-specific logic (compat layer), unify modules/loaders, and reduce duplication across Retail/Classic variants. Common modules now live in shared locations, while version-specific behavior is isolated behind compat helpers. This simplifies long-term maintenance, reduces regressions when new WoW flavors arrive, and makes deployments more consistent. Version bumped to 4.0 due to the scope of these architecture and maintenance changes.
 
 ### _Retail :_
 
-- #97 - Fixed BNet whisper not working from the Friends tooltip in the [Micromenu] module.
+- Added Naaru's Embrace hearthstone to the **Travel** module.
+
+### _Mists of Pandaria Classic :_
+
+- Added Naaru's Embrace hearthstone to the **Travel** module.
+
+### _TBC Anniversary :_
+
+- Added full compatibility support.
+

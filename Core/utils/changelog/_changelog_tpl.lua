@@ -26,5 +26,13 @@ XIVBar.Changelog[9999] = {
         ["frFR"] = {},
         ["koKR"] = {},
         ["ruRU"] = {}
+    },
+    bugfix = {
+        ["zhCN"] = {},
+        ["zhTW"] = {},
+        ["enUS"] = {},
+        ["frFR"] = {},
+        ["koKR"] = {},
+        ["ruRU"] = {}
     }
 }
