@@ -602,7 +602,11 @@ function TalentModule:CreateSpecPopupVanilla()
                 return
             end
             if clickButton == 'LeftButton' then
-                SetActiveTalentGroup(i)
+                if SetActiveTalentGroup then
+                    SetActiveTalentGroup(i)
+                elseif SetActiveSpecGroup then
+                    SetActiveSpecGroup(i)
+                end
             end
             TalentModule.specPopup:Hide()
         end)
