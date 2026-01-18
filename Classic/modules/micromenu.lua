@@ -320,8 +320,7 @@ function MenuModule:CreateFrames()
         end
     end
 
-    if mm.journal and compat.features and compat.features.microMenu and compat.features.microMenu.journal and
-        IsAddOnLoaded("Blizzard_Journal") then
+    if mm.journal and compat.features and compat.features.microMenu and compat.features.microMenu.journal then
         self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
         parentFrame = self.frames.journal
     else
@@ -932,10 +931,10 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            if ChatMenu:IsVisible() then
-                ChatMenu:Hide()
-            else
-                ChatFrame_ToggleMenu()
+            if compat and compat.ToggleChatMenu then
+                compat.ToggleChatMenu()
+            elseif _G.ChatFrame_ToggleMenu then
+                _G.ChatFrame_ToggleMenu()
             end
         end
     end; -- chat
@@ -985,12 +984,24 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- talent
 
-    --   self.functions.journal = function(self, button, down)
-    --     if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
-    --     if button == "LeftButton" then
-    --   		ToggleEncounterJournal()
-    --   	end
-    --   end; --journal
+    self.functions.journal = function(self, button, down)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" then
+            if _G.ToggleEncounterJournal then
+                _G.ToggleEncounterJournal()
+                return
+            end
+            if _G.LoadAddOn then
+                pcall(_G.LoadAddOn, "Blizzard_EncounterJournal")
+                pcall(_G.LoadAddOn, "Blizzard_Journal")
+                if _G.ToggleEncounterJournal then
+                    _G.ToggleEncounterJournal()
+                end
+            end
+        end
+    end; -- journal
 
     self.functions.lfg = function(self, button, down)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
@@ -1050,7 +1061,8 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            ToggleStoreUI()
+            StoreMicroButton:Click()
+            --ToggleStoreUI()
         end
     end; -- shop
 
@@ -1344,6 +1356,22 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
+                    ach = {
+                        name = L['Show Achievements Button'],
+                        order = 8,
+                        type = "toggle",
+                        hidden = function()
+                            return not (compat.features and compat.features.microMenu and compat.features.microMenu.achievements)
+                        end,
+                        get = function()
+                            return xb.db.profile.modules.microMenu.ach;
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.ach = val;
+                            self:UpdateMenu();
+                            self:Refresh();
+                        end
+                    },
                     lfg = {
                         name = L['Show LFG Button'],
                         order = 10,
@@ -1353,6 +1381,54 @@ function MenuModule:GetConfig()
                         end,
                         set = function(_, val)
                             xb.db.profile.modules.microMenu.lfg = val;
+                            self:UpdateMenu();
+                            self:Refresh();
+                        end
+                    },
+                    journal = {
+                        name = L['Show Journal Button'],
+                        order = 11,
+                        type = "toggle",
+                        hidden = function()
+                            return not (compat.features and compat.features.microMenu and compat.features.microMenu.journal)
+                        end,
+                        get = function()
+                            return xb.db.profile.modules.microMenu.journal;
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.journal = val;
+                            self:UpdateMenu();
+                            self:Refresh();
+                        end
+                    },
+                    pvp = {
+                        name = L['Show PVP Button'],
+                        order = 12,
+                        type = "toggle",
+                        hidden = function()
+                            return not (compat.features and compat.features.microMenu and compat.features.microMenu.pvp)
+                        end,
+                        get = function()
+                            return xb.db.profile.modules.microMenu.pvp;
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.pvp = val;
+                            self:UpdateMenu();
+                            self:Refresh();
+                        end
+                    },
+                    pet = {
+                        name = L['Show Pets Button'],
+                        order = 13,
+                        type = "toggle",
+                        hidden = function()
+                            return not (compat.features and compat.features.microMenu and compat.features.microMenu.pet)
+                        end,
+                        get = function()
+                            return xb.db.profile.modules.microMenu.pet;
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.pet = val;
                             self:UpdateMenu();
                             self:Refresh();
                         end

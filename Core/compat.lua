@@ -76,6 +76,29 @@ end
 
 compat.TogglePVP = TryTogglePVP
 
+local function TryToggleChatMenu()
+    local chatMenuButton = _G.ChatFrameMenuButton
+    if chatMenuButton and chatMenuButton.OpenMenu then
+        chatMenuButton:OpenMenu()
+        return
+    end
+
+    local chatMenu = _G.ChatMenu
+    if chatMenu and chatMenu.IsVisible then
+        if chatMenu:IsVisible() then
+            chatMenu:Hide()
+        else
+            if _G.ChatFrame_ToggleMenu then
+                _G.ChatFrame_ToggleMenu()
+            end
+        end
+    elseif _G.ChatFrame_ToggleMenu then
+        _G.ChatFrame_ToggleMenu()
+    end
+end
+
+compat.ToggleChatMenu = TryToggleChatMenu
+
 compat.features = {
     microMenu = {
         achievements = not compat.isClassicOrTBC,

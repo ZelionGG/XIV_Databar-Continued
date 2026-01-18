@@ -992,7 +992,11 @@ function MenuModule:CreateClickFunctions()
             return;
         end
         if button == "LeftButton" then
-            _G.ChatFrameMenuButton:OpenMenu()
+            if compat and compat.ToggleChatMenu then
+                compat.ToggleChatMenu()
+            elseif _G.ChatFrameMenuButton and _G.ChatFrameMenuButton.OpenMenu then
+                _G.ChatFrameMenuButton:OpenMenu()
+            end
         end
     end; -- chat
 
