@@ -249,6 +249,36 @@ function XIVBar:OnInitialize()
             }
         end
 
+        -- Checking localized "Bugfix" category
+        local bugfix_localized = {}
+        if data.bugfix and data.bugfix[GetLocale()] ~= nil and next(data.bugfix[GetLocale()]) ~= nil then
+            bugfix_localized = data.bugfix[GetLocale()]
+        elseif data.bugfix then
+            bugfix_localized = data.bugfix["enUS"]
+        end
+
+        local bugfix = data.bugfix and bugfix_localized
+        if bugfix and #bugfix > 0 then
+            page.bugfixHeader = {
+                order = 9,
+                type = "header",
+                name = orange(L["Bugfix"]) or orange("Bugfix")
+            }
+            page.bugfix = {
+                order = 10,
+                type = "description",
+                name = function()
+                    local text = ""
+                    for index, line in ipairs(bugfix) do
+                        text = text .. index .. ". " ..
+                                   renderChangelogLine(line) .. "\n"
+                    end
+                    return text .. "\n"
+                end,
+                fontSize = "medium"
+            }
+        end
+
         -- Checking localized "New" category
         local new_localized = {}
         if data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
