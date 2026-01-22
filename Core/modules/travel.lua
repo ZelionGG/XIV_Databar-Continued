@@ -1247,12 +1247,11 @@ function TravelModule:ShowTooltip()
         -- Show hearthstone cooldown
         local hearthstoneId = 6948 -- Regular Hearthstone ID
         local remainingCooldown = 0
-        if GetItemCount and GetItemCount(hearthstoneId) and GetItemCount(hearthstoneId) > 0 then
-            local startTime, duration = GetItemCooldown(hearthstoneId)
-            if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
-                remainingCooldown = (startTime + duration - GetTime())
-            end
+        local startTime, duration = GetItemCooldown(hearthstoneId)
+        if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
+            remainingCooldown = (startTime + duration - GetTime())
         end
+
         local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
         GameTooltip:AddDoubleLine(L['Hearthstone'], cdString, r, g, b, 1, 1, 1)
 

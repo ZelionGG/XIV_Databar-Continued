@@ -353,11 +353,12 @@ function XIVBar:OnInitialize()
     AceConfig:RegisterOptionsTable(AddOnName .. "_ProfileSharing", profileSharingOptions)
 
     -- Add to Blizzard options
-    AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
+    local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L['Modules'], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L['Changelog'], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_ProfileSharing", 'Profile Sharing', "XIV Bar Continued")
+    self.optionsCategory = mainCategory
 
     self.timerRefresh = false
 
@@ -692,7 +693,11 @@ function XIVBar:OnEnable()
 end
 
 function XIVBar:ToggleConfig()
-    Settings.OpenToCategory("XIV Bar Continued")
+    if self.optionsCategory then
+        Settings.OpenToCategory(self.optionsCategory)
+    else
+        Settings.OpenToCategory("XIV Bar Continued")
+    end
 end
 
 function XIVBar:SetColor(name, r, g, b, a)
@@ -936,15 +941,17 @@ function OffsetUI()
     local buffsAreaTopOffset = offset;
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-        if (PlayerFrame and not PlayerFrame:IsUserPlaced() and
-            not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
-            PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19,
-                                 -4 - offset)
-        end
+        if not (XIVBar.compat and XIVBar.compat.isTBC) then
+            if (PlayerFrame and not PlayerFrame:IsUserPlaced() and
+                not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
+                PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19,
+                                     -4 - offset)
+            end
 
-        if (TargetFrame and not TargetFrame:IsUserPlaced()) then
-            TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250,
-                                 -4 - offset);
+            if (TargetFrame and not TargetFrame:IsUserPlaced()) then
+                TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250,
+                                     -4 - offset);
+            end
         end
 
         local ticketStatusFrameShown = TicketStatusFrame and
