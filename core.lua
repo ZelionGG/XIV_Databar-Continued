@@ -941,15 +941,17 @@ function OffsetUI()
     local buffsAreaTopOffset = offset;
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-        if (PlayerFrame and not PlayerFrame:IsUserPlaced() and
-            not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
-            PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19,
-                                 -4 - offset)
-        end
+        if not (XIVBar.compat and XIVBar.compat.isTBC) then
+            if (PlayerFrame and not PlayerFrame:IsUserPlaced() and
+                not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
+                PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19,
+                                     -4 - offset)
+            end
 
-        if (TargetFrame and not TargetFrame:IsUserPlaced()) then
-            TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250,
-                                 -4 - offset);
+            if (TargetFrame and not TargetFrame:IsUserPlaced()) then
+                TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250,
+                                     -4 - offset);
+            end
         end
 
         local ticketStatusFrameShown = TicketStatusFrame and
