@@ -451,7 +451,7 @@ function TravelModule:SetHearthColor()
                     else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
+                                                       "/use item:" .. v)
                         break
                     end
                 end
@@ -471,7 +471,7 @@ function TravelModule:SetHearthColor()
                     else
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
+                                                       "/use item:" .. v)
                         break
                     end
                 end
