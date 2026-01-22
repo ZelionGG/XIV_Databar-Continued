@@ -150,14 +150,9 @@ function TalentModule:GetCurrentLoadoutName()
 end
 
 function TalentModule:Refresh()
-    if InCombatLockdown() then
-        return
-    end
+    if not self.talentFrame then return end
 
     local db = xb.db.profile
-    if self.talentFrame == nil then
-        return
-    end
     if not db.modules.talent.enabled then
         self:Disable()
         return
@@ -211,23 +206,6 @@ function TalentModule:Refresh()
 
     self.specText:Show()
 
-    self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
-    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-        self.specFrame:SetPoint('LEFT', self.loadoutFrame, 'RIGHT', 0, 0)
-    else
-        self.specFrame:SetPoint('LEFT')
-    end
-
-    if self.specFrame:GetWidth() < db.modules.talent.minWidth then
-        self.specFrame:SetWidth(db.modules.talent.minWidth)
-    end
-
-    if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-        self.talentFrame:SetSize(self.loadoutFrame:GetWidth() + self.specFrame:GetWidth(), xb:GetHeight())
-    else
-        self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
-    end
-
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
     local anchorFrame = xb:GetFrame('clockFrame')
@@ -241,7 +219,27 @@ function TalentModule:Refresh()
             xOffset = 0
         end
     end
-    self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+
+    if not InCombatLockdown() then
+        self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
+        if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+            self.specFrame:SetPoint('LEFT', self.loadoutFrame, 'RIGHT', 0, 0)
+        else
+            self.specFrame:SetPoint('LEFT')
+        end
+
+        if self.specFrame:GetWidth() < db.modules.talent.minWidth then
+            self.specFrame:SetWidth(db.modules.talent.minWidth)
+        end
+
+        if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+            self.talentFrame:SetSize(self.loadoutFrame:GetWidth() + self.specFrame:GetWidth(), xb:GetHeight())
+        else
+            self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
+        end
+
+        self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+    end
 
     self:CreateLoadoutPopup()
     self:CreateSpecPopup()
@@ -277,7 +275,7 @@ function TalentModule:CreateLoadoutFrames()
 end
 
 function TalentModule:CreateTalentFrames()
-    self.specFrame = self.specFrame or CreateFrame('BUTTON', nil, self.talentFrame, 'SecureActionButtonTemplate')
+    self.specFrame = self.specFrame or CreateFrame('BUTTON', nil, self.talentFrame, 'InsecureActionButtonTemplate')
     self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
     self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
 
@@ -716,7 +714,8 @@ function TalentModule:CreateLootSpecPopup()
             local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
 
             buttonIcon:SetTexture(self.classIcon)
-            buttonIcon:SetTexCoord(unpack(self.specCoords[specId]))
+            local coords = self.specCoords[specId] or self.specCoords[self.currentSpecID] or self.specCoords[1]
+            buttonIcon:SetTexCoord(unpack(coords))
             buttonIcon:SetSize(iconSize, iconSize)
             buttonIcon:SetPoint('LEFT')
             buttonIcon:SetVertexColor(xb:GetColor('normal'))

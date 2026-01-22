@@ -65,6 +65,8 @@ function CurrencyModule:Refresh()
         if xb.constants.playerLevel < maxLevel and db.modules.currency.showXPbar then
             self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
             self.xpBar:SetValue(UnitXP('player'))
+            self.xpText:SetFont(xb:GetFont(db.text.fontSize))
+            self.xpText:SetTextColor(xb:GetColor('normal'))
             self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
         end
         return
@@ -94,7 +96,7 @@ function CurrencyModule:Refresh()
         self.xpIcon:SetPoint('LEFT')
         self.xpIcon:SetVertexColor(xb:GetColor('normal'))
 
-        self.xpText:SetFont(xb:GetFont(textHeight))
+        self.xpText:SetFont(xb:GetFont(db.text.fontSize))
         self.xpText:SetTextColor(xb:GetColor('normal'))
         self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
         self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)

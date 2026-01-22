@@ -856,7 +856,9 @@ function XIVBar:Refresh()
     end
 
     local barColor = self.db.profile.color.barColor
-    self.frames.bar:ClearAllPoints()
+    if not InCombatLockdown() then
+        self.frames.bar:ClearAllPoints()
+    end
     
     -- Use saved position if not in fullscreen mode
     if not self.db.profile.general.barFullscreen then
@@ -882,14 +884,18 @@ function XIVBar:Refresh()
         end
         self.frames.bar:SetWidth(self.db.profile.general.barWidth)
     else
-        self.frames.bar:SetPoint(self.db.profile.general.barPosition)
-        self.frames.bar:SetPoint("LEFT", self.db.profile.general.barMargin, 0)
-        self.frames.bar:SetPoint("RIGHT", -self.db.profile.general.barMargin, 0)
+        if not InCombatLockdown() then
+            self.frames.bar:SetPoint(self.db.profile.general.barPosition)
+            self.frames.bar:SetPoint("LEFT", self.db.profile.general.barMargin, 0)
+            self.frames.bar:SetPoint("RIGHT", -self.db.profile.general.barMargin, 0)
+        end
     end
     
-    self.frames.bar:SetHeight(self:GetHeight())
-    self.frames.bgTexture:SetColorTexture(self:GetColor('barColor'))
-    self.frames.bgTexture:SetAllPoints()
+    if not InCombatLockdown() then
+        self.frames.bar:SetHeight(self:GetHeight())
+        self.frames.bgTexture:SetColorTexture(self:GetColor('barColor'))
+        self.frames.bgTexture:SetAllPoints()
+    end
 
     for name, module in self:IterateModules() do
         if module['Refresh'] == nil then return; end

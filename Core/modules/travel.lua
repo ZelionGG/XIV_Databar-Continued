@@ -163,15 +163,6 @@ function TravelModule:CreateFrames()
     self.portText = self.portText or
                         self.portButton:CreateFontString(nil, 'OVERLAY')
 
-    -- Mythic+ Part
-    self.mythicButton = self.mythicButton or
-                            CreateFrame('BUTTON', 'mythicButton',
-                                        self.hearthFrame,
-                                        'SecureActionButtonTemplate')
-    self.mythicIcon = self.mythicIcon or
-                          self.mythicButton:CreateTexture(nil, 'OVERLAY')
-    self.mythicText = self.mythicText or
-                          self.mythicButton:CreateFontString(nil, 'OVERLAY')
 
     local template =
         (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or
@@ -202,11 +193,40 @@ function TravelModule:CreateFrames()
         end
     end
 
-    -- Mythic+ popup
-    self.mythicPopup = self.mythicPopup or
-                           CreateFrame('FRAME', 'mythicPopup',
-                                       self.mythicButton,
-                                       'UIDropDownMenuTemplate')
+end
+
+function TravelModule:CreateMythicFrames()
+    if self.mythicButton or InCombatLockdown() then
+        return
+    end
+
+    self.mythicButton = CreateFrame('BUTTON', 'mythicButton', self.hearthFrame,
+                                    'InsecureActionButtonTemplate')
+    self.mythicIcon = self.mythicButton:CreateTexture(nil, 'OVERLAY')
+    self.mythicText = self.mythicButton:CreateFontString(nil, 'OVERLAY')
+    self.mythicPopup = CreateFrame('FRAME', 'mythicPopup', self.mythicButton,
+                                   'UIDropDownMenuTemplate')
+
+    self.mythicButton:EnableMouse(true)
+    self.mythicButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
+    self.mythicButton:SetAttribute('type', 'mythicFunction')
+    self.mythicButton.HandlesGlobalMouseEvent = function() return true end
+
+    self.mythicButton.mythicFunction = function()
+        if not InCombatLockdown() then
+            ToggleDropDownMenu(1, nil, self.mythicPopup, self.mythicButton, 0, 0)
+        end
+    end
+
+    self.mythicButton:SetScript('OnEnter', function()
+        TravelModule:SetMythicColor()
+        if InCombatLockdown() then return end
+    end)
+
+    self.mythicButton:SetScript('OnLeave', function()
+        TravelModule:SetMythicColor()
+        GameTooltip:Hide()
+    end)
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -242,18 +262,6 @@ function TravelModule:RegisterFrameEvents()
         if button == 'RightButton' then self:Hide() end
     end)
 
-    self.mythicButton:EnableMouse(true)
-    self.mythicButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
-    self.mythicButton:SetAttribute('type', 'mythicFunction')
-    self.mythicButton.HandlesGlobalMouseEvent = function() return true end
-
-    self.mythicButton.mythicFunction = self.mythicButton.mythicFunction or
-                                           function()
-            if not InCombatLockdown() then
-                ToggleDropDownMenu(1, nil, self.mythicPopup, self.mythicButton,
-                                   0, 0)
-            end
-        end
 
     -- Heartstone Randomizer
     if xb.db.profile.randomizeHs then
@@ -292,15 +300,6 @@ function TravelModule:RegisterFrameEvents()
         GameTooltip:Hide()
     end)
 
-    self.mythicButton:SetScript('OnEnter', function()
-        TravelModule:SetMythicColor()
-        if InCombatLockdown() then return end
-    end)
-
-    self.mythicButton:SetScript('OnLeave', function()
-        TravelModule:SetMythicColor()
-        GameTooltip:Hide()
-    end)
 
     self.portButton:SetScript('OnEnter', function()
         TravelModule:SetPortColor()
@@ -1083,7 +1082,15 @@ function TravelModule:Refresh()
         end
     end
 
-    if not allowMythic and self.mythicButton then
+    if allowMythic and not self.mythicButton then
+        if InCombatLockdown() then
+            self.pendingMythicCreate = true
+        else
+            self:CreateMythicFrames()
+        end
+    end
+
+    if not allowMythic and self.mythicButton and not InCombatLockdown() then
         self.mythicButton:Hide()
     end
 
@@ -1101,20 +1108,20 @@ function TravelModule:Refresh()
         end
 
         local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
-        if hasPortOptions then
+        if hasPortOptions and self.portButton and not self.portButton:IsVisible() then
             self.portButton:Show()
         end
         if self.portButton:IsVisible() then
             totalWidth = totalWidth + self.portButton:GetWidth()
         end
 
-        if allowMythic and self.mythicButton:IsVisible() then
+        if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
 
-        self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
-        self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
-        self.hearthFrame:Show()
+        --self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+        --self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
+        --self.hearthFrame:Show()
         return
     end
 
@@ -1167,9 +1174,11 @@ function TravelModule:Refresh()
     end
 
     -- M+ Part
-    if self.mythicButton then self.mythicButton:Hide() end
+    if self.mythicButton and not InCombatLockdown() then
+        self.mythicButton:Hide()
+    end
 
-    if allowMythic then
+    if allowMythic and self.mythicButton then
         -- Only show the button if teleports are available
         if self:HasAvailableMythicTeleports() then
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
@@ -1209,25 +1218,27 @@ function TravelModule:Refresh()
     self:SkinFrame(self.portPopup, "SpecToolTip")
     self.portPopup:Hide()
 
-    self.mythicPopup:ClearAllPoints()
+    if self.mythicPopup then
+        self.mythicPopup:ClearAllPoints()
 
-    if db.general.barPosition == 'TOP' then
-        self.mythicPopup.point = "TOP"
-        self.mythicPopup.relativePoint = "BOTTOM"
-    else
-        self.mythicPopup.point = "BOTTOM"
-        self.mythicPopup.relativePoint = "TOP"
+        if db.general.barPosition == 'TOP' then
+            self.mythicPopup.point = "TOP"
+            self.mythicPopup.relativePoint = "BOTTOM"
+        else
+            self.mythicPopup.point = "BOTTOM"
+            self.mythicPopup.relativePoint = "TOP"
+        end
+
+        self:SkinFrame(self.mythicPopup, "SpecToolTip")
+        self.mythicPopup:Hide()
     end
-
-    self:SkinFrame(self.mythicPopup, "SpecToolTip")
-    self.mythicPopup:Hide()
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
     if self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    if allowMythic then
+    if allowMythic and self.mythicButton then
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
