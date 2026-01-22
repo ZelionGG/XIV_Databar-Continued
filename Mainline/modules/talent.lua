@@ -754,9 +754,12 @@ function TalentModule:CreateLootSpecPopup()
                     if self:GetID() ~= 0 then
                         id, name = GetSpecializationInfo(self:GetID())
                     else
-                        name = GetSpecializationInfo(GetSpecialization())
+                        local currentSpecIndex = GetSpecialization()
+                        if currentSpecIndex then
+                            id, name = GetSpecializationInfo(currentSpecIndex)
+                        end
                     end
-                    SetLootSpecialization(id)
+                    SetLootSpecialization(id or 0)
                 end
                 TalentModule.lootSpecPopup:Hide()
             end)
