@@ -1094,11 +1094,18 @@ function TravelModule:Refresh()
         self.mythicButton:Hide()
     end
 
-    if not hasPortOptions and self.portButton then
+    if not hasPortOptions and self.portButton and not InCombatLockdown() then
         self.portButton:Hide()
     end
 
     if InCombatLockdown() then
+        if not select(1, self.hearthText:GetFont()) then
+            self.hearthText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
+        end
+        if not select(1, self.portText:GetFont()) then
+            self.portText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
+        end
+
         self.hearthText:SetText(GetBindLocation())
         self.portText:SetText(xb.db.char.portItem.text)
         self:SetHearthColor()

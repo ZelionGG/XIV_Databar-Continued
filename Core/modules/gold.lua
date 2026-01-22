@@ -243,7 +243,6 @@ function GoldModule:Refresh()
             self.bagText:SetFont(xb:GetFont(db.text.fontSize))
             self.bagText:SetText('(' .. tostring(freeSpace) .. ')')
         end
-        return
     end
 
     local iconSize = db.text.fontSize + db.general.barPadding
@@ -305,9 +304,6 @@ function GoldModule:RegisterFrameEvents()
     self:RegisterEvent('BAG_UPDATE', 'Refresh')
 
     self.goldButton:SetScript('OnEnter', function()
-        if InCombatLockdown() then
-            return
-        end
         self.goldText:SetTextColor(unpack(xb:HoverColors()))
         self.bagText:SetTextColor(unpack(xb:HoverColors()))
 
@@ -319,18 +315,12 @@ function GoldModule:RegisterFrameEvents()
     end)
 
     self.goldButton:SetScript('OnLeave', function()
-        if InCombatLockdown() then
-            return
-        end
         self.goldText:SetTextColor(xb:GetColor('normal'))
         self.bagText:SetTextColor(xb:GetColor('normal'))
         GameTooltip:Hide()
     end)
 
     self.goldButton:SetScript('OnClick', function(_, button)
-        if InCombatLockdown() then
-            return
-        end
         ToggleAllBags()
     end)
 

@@ -103,6 +103,14 @@ function ClockModule:Refresh()
     end ]]
 
     self.clockText:SetFont(xb:GetFont(db.modules.clock.fontSize))
+    local dateString = nil
+    if xb.db.profile.modules.clock.serverTime then
+        dateString = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
+    else
+        local clockTime = time()
+        dateString = date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime)
+    end
+    self.clockText:SetText(dateString)
     self:SetClockColor()
 
     self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
@@ -117,6 +125,8 @@ function ClockModule:Refresh()
     self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
     if xb.db.profile.modules.clock.hideEventText then
         self.eventText:Hide()
+    else
+        self.eventText:Show()
     end
 end
 
@@ -143,7 +153,7 @@ function ClockModule:RegisterFrameEvents()
             end
             ClockModule.clockText:SetText(dateString)
 
-            if not xb.db.profile.modules.clock.hideEventText then
+            if not xb.db.profile.modules.clock.hideEventText and C_Calendar and C_Calendar.GetNumPendingInvites then
                 local eventInvites = C_Calendar.GetNumPendingInvites()
                 if eventInvites > 0 then
                     ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
