@@ -5,6 +5,7 @@ local floor = math.floor
 local AceAddon, AceAddonMinor = _G.LibStub('AceAddon-3.0')
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local SetBarMouseoverScripts
 
 AceAddon:NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
@@ -49,7 +50,8 @@ XIVBar.defaults = {
             point = "CENTER",
             relativePoint = "CENTER",
             xOffset = 0,
-            yOffset = 0
+            yOffset = 0,
+            showOnMouseover = false,
         },
         color = {
             barColor = {r = 0.094, g = 0.094, b = 0.094, a = 0.75},
@@ -448,7 +450,20 @@ function XIVBar:OnInitialize()
             args = {
                 positioning = self:GetPositioningOptions(),
                 text = self:GetTextOptions(),
-                textColors = self:GetTextColorOptions()
+                textColors = self:GetTextColorOptions(),
+                showOnMouseover = {
+                    name = L["Show on mouseover"],
+                    desc = L["Show the bar only when the mouse is over it"],
+                    type = "toggle",
+                    order = 10,
+                    get = function()
+                        return self.db.profile.general.showOnMouseover
+                    end,
+                    set = function(_, val)
+                        self.db.profile.general.showOnMouseover = val
+                        SetBarMouseoverScripts()
+                    end
+                }
             }
         }
     end
@@ -676,6 +691,20 @@ function XIVBar:CreateMainBar()
     end
 end
 
+function XIVBar:ResetUI()
+    if UIParent_UpdateTopFramePositions then
+        UIParent_UpdateTopFramePositions()
+    end
+end
+
+function OffsetUI()
+    local offset = XIVBar.frames.bar:GetHeight();
+    local buffsAreaTopOffset = offset;
+
+    BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205,
+                       0 - buffsAreaTopOffset);
+end
+
 function XIVBar:OnEnable()
     self:CreateMainBar()
     self:Refresh()
@@ -901,6 +930,8 @@ function XIVBar:Refresh()
         if module['Refresh'] == nil then return; end
         module:Refresh()
     end
+
+    SetBarMouseoverScripts()
 end
 
 function XIVBar:GetFont(size)
@@ -942,52 +973,98 @@ function XIVBar:PrintTable(table, prefix)
     end
 end
 
-function OffsetUI()
-    local offset = XIVBar.frames.bar:GetHeight();
-    local buffsAreaTopOffset = offset;
+SetBarMouseoverScripts = function()
+    local bar = XIVBar.frames and XIVBar.frames.bar
+    if not bar then return end
 
-    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-        if not (XIVBar.compat and XIVBar.compat.isTBC) then
-            if (PlayerFrame and not PlayerFrame:IsUserPlaced() and
-                not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
-                PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19,
-                                     -4 - offset)
-            end
-
-            if (TargetFrame and not TargetFrame:IsUserPlaced()) then
-                TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250,
-                                     -4 - offset);
-            end
-        end
-
-        local ticketStatusFrameShown = TicketStatusFrame and
-                                           TicketStatusFrame:IsShown();
-        local gmChatStatusFrameShown = GMChatStatusFrame and
-                                           GMChatStatusFrame:IsShown();
-        if (ticketStatusFrameShown) then
-            TicketStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -180,
-                                       0 - offset);
-            buffsAreaTopOffset = buffsAreaTopOffset +
-                                     TicketStatusFrame:GetHeight();
-        end
-        if (gmChatStatusFrameShown) then
-            GMChatStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -170,
-                                       -5 - offset);
-            buffsAreaTopOffset = buffsAreaTopOffset +
-                                     GMChatStatusFrame:GetHeight() + 5;
-        end
-        if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
-            buffsAreaTopOffset = buffsAreaTopOffset + 13;
-        end
-
-        BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205,
-                           0 - buffsAreaTopOffset);
+    local function IsMouseOverBar()
+        return MouseIsOver(bar)
     end
-end
 
-function XIVBar:ResetUI()
-    if topOffsetBlizz then UIParent_UpdateTopFramePositions = topOffsetBlizz end
-    UIParent_UpdateTopFramePositions();
+    local function IsBarChild(frame)
+        local parent = frame and frame:GetParent()
+        while parent do
+            if parent == bar then
+                return true
+            end
+            parent = parent:GetParent()
+        end
+        return false
+    end
+
+    local function showBar()
+        bar._xivHidePending = false
+        if bar._xivMouseoverVisible then
+            return
+        end
+        bar._xivMouseoverVisible = true
+        if UIFrameFadeIn then
+            UIFrameFadeIn(bar, 0.15, bar:GetAlpha(), 1)
+        else
+            bar:SetAlpha(1)
+        end
+    end
+
+    local function hideBarIfOut()
+        -- Petit délai pour laisser le curseur passer d'un enfant à l'autre sans clignoter
+        if bar._xivHidePending then return end
+        bar._xivHidePending = true
+        C_Timer.After(0.12, function()
+            bar._xivHidePending = false
+            if not IsMouseOverBar() then
+                bar._xivMouseoverVisible = false
+                if UIFrameFadeOut then
+                    UIFrameFadeOut(bar, 0.15, bar:GetAlpha(), 0)
+                else
+                    bar:SetAlpha(0)
+                end
+            end
+        end)
+    end
+
+    if XIVBar.db and XIVBar.db.profile and XIVBar.db.profile.general.showOnMouseover then
+        bar._xivMouseoverVisible = false
+        bar._xivHidePending = false
+        bar:SetAlpha(0)
+        bar:SetScript('OnEnter', showBar)
+        bar:SetScript('OnLeave', hideBarIfOut)
+        bar:SetScript('OnUpdate', function(self, elapsed)
+            self._xivMouseoverElapsed = (self._xivMouseoverElapsed or 0) + elapsed
+            if self._xivMouseoverElapsed < 0.05 then return end
+            self._xivMouseoverElapsed = 0
+            if IsMouseOverBar() then
+                showBar()
+            else
+                hideBarIfOut()
+            end
+        end)
+        -- Apply the same handlers to all registered module frames so the bar stays visible when hovering them
+        if XIVBar.frames then
+            for name, frame in pairs(XIVBar.frames) do
+                if frame and frame ~= bar and frame.EnableMouse and frame.SetScript and IsBarChild(frame) then
+                    frame:EnableMouse(true)
+                    frame:SetScript('OnEnter', showBar)
+                    frame:SetScript('OnLeave', hideBarIfOut)
+                end
+            end
+        end
+    else
+        bar:SetAlpha(1)
+        bar:SetScript('OnEnter', nil)
+        bar:SetScript('OnLeave', nil)
+        bar:SetScript('OnUpdate', nil)
+        bar._xivMouseoverElapsed = nil
+        bar._xivMouseoverVisible = nil
+        bar._xivHidePending = nil
+        if XIVBar.frames then
+            for name, frame in pairs(XIVBar.frames) do
+                if frame and frame ~= bar and frame.SetScript and IsBarChild(frame) then
+                    frame:SetScript('OnEnter', nil)
+                    frame:SetScript('OnLeave', nil)
+                end
+            end
+        end
+    end
 end
 
 function XIVBar:GetGeneralOptions()
@@ -998,7 +1075,20 @@ function XIVBar:GetGeneralOptions()
         args = {
             positioning = self:GetPositioningOptions(),
             text = self:GetTextOptions(),
-            color = self:GetColorOptions()
+            textColors = self:GetTextColorOptions(),
+            showOnMouseover = {
+                name = L["Show on mouseover"],
+                desc = L["Show the bar only when the mouse is over it"],
+                type = "toggle",
+                order = 10,
+                get = function()
+                    return self.db.profile.general.showOnMouseover
+                end,
+                set = function(_, val)
+                    self.db.profile.general.showOnMouseover = val
+                    SetBarMouseoverScripts()
+                end
+            }
         }
     }
 end
