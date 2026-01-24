@@ -994,6 +994,9 @@ SetBarMouseoverScripts = function()
 
     local function showBar()
         bar._xivHidePending = false
+        if not bar._xivMouseoverEnabled then
+            return
+        end
         if bar._xivMouseoverVisible then
             return
         end
@@ -1009,8 +1012,16 @@ SetBarMouseoverScripts = function()
         -- Petit délai pour laisser le curseur passer d'un enfant à l'autre sans clignoter
         if bar._xivHidePending then return end
         bar._xivHidePending = true
+        bar._xivHideToken = (bar._xivHideToken or 0) + 1
+        local token = bar._xivHideToken
         C_Timer.After(0.12, function()
             bar._xivHidePending = false
+            if token ~= bar._xivHideToken then
+                return
+            end
+            if not bar._xivMouseoverEnabled then
+                return
+            end
             if not IsMouseOverBar() then
                 bar._xivMouseoverVisible = false
                 if UIFrameFadeOut then
@@ -1023,6 +1034,7 @@ SetBarMouseoverScripts = function()
     end
 
     if XIVBar.db and XIVBar.db.profile and XIVBar.db.profile.general.showOnMouseover then
+        bar._xivMouseoverEnabled = true
         bar._xivMouseoverVisible = false
         bar._xivHidePending = false
         bar:SetAlpha(0)
@@ -1032,6 +1044,9 @@ SetBarMouseoverScripts = function()
             self._xivMouseoverElapsed = (self._xivMouseoverElapsed or 0) + elapsed
             if self._xivMouseoverElapsed < 0.05 then return end
             self._xivMouseoverElapsed = 0
+            if not bar._xivMouseoverEnabled then
+                return
+            end
             if IsMouseOverBar() then
                 showBar()
             else
@@ -1049,6 +1064,12 @@ SetBarMouseoverScripts = function()
             end
         end
     else
+        bar._xivMouseoverEnabled = false
+        bar._xivHideToken = (bar._xivHideToken or 0) + 1
+        if UIFrameFadeRemoveFrame then
+            UIFrameFadeRemoveFrame(bar)
+        end
+        bar._xivHidePending = false
         bar:SetAlpha(1)
         bar:SetScript('OnEnter', nil)
         bar:SetScript('OnLeave', nil)
