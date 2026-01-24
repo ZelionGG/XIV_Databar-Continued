@@ -89,33 +89,39 @@ function SystemModule:Refresh()
     end
 
     if db.modules.system.showWorld then
-        self.worldPingText:SetText('000' .. MILLISECONDS_ABBR)
+        self.worldPingText:SetText(L['W'] .. ": 000" .. MILLISECONDS_ABBR)
     elseif self.worldPing then
         self.worldPingText:SetText('')
     end
 
-    self.pingText:SetText('000' .. MILLISECONDS_ABBR) -- get the widest we can be
+    -- use localized labels to size for wider glyphs (e.g., Chinese)
+    local gapIconToText = 3
+    local gapTextToWorld = 3
 
-    local pingWidest = self.pingText:GetStringWidth() + 5
-    if db.modules.system.showWorld then
-        self.worldPingText:SetPoint('LEFT', self.pingText, 'RIGHT', 5, 0)
-        pingWidest = pingWidest + self.worldPingText:GetStringWidth() + 5
-    end
-    self.pingText:SetPoint('LEFT', self.pingIcon, 'RIGHT', 5, 0)
-
+    -- set actual texts before measuring to avoid trailing empty space
     self:UpdateTexts()
 
+    local pingWidest = self.pingText:GetStringWidth() + gapIconToText
+    if db.modules.system.showWorld then
+        self.worldPingText:SetPoint('LEFT', self.pingText, 'RIGHT', gapTextToWorld, 0)
+        pingWidest = pingWidest + gapTextToWorld + self.worldPingText:GetStringWidth()
+    end
+    self.pingText:SetPoint('LEFT', self.pingIcon, 'RIGHT', gapIconToText, 0)
+
     self.fpsFrame:SetSize(fpsWidest + iconSize + 5, xb:GetHeight())
-    self.fpsFrame:SetPoint('LEFT')
-
     self.pingFrame:SetSize(pingWidest + iconSize, xb:GetHeight())
-    self.pingFrame:SetPoint('LEFT', self.fpsFrame, 'RIGHT', 5, 0)
 
+    -- grow left: anchor ping on the right edge, then place fps to its left
     self.systemFrame:SetSize(self.fpsFrame:GetWidth() + self.pingFrame:GetWidth(), xb:GetHeight())
+    self.pingFrame:ClearAllPoints()
+    self.pingFrame:SetPoint('RIGHT', self.systemFrame, 'RIGHT', 0, 0)
+    self.fpsFrame:ClearAllPoints()
+    self.fpsFrame:SetPoint('RIGHT', self.pingFrame, 'LEFT', -gapIconToText, 0)
 
     -- self.systemFrame:SetSize()
     local relativeAnchorPoint = 'LEFT'
-    local xOffset = db.general.moduleSpacing
+    -- spacing toward gold: use configured module spacing
+    local xOffset = db.general.moduleSpacing - 5
     local parentFrame = xb:GetFrame('goldFrame');
     if not xb.db.profile.modules.gold.enabled then
         if xb.db.profile.modules.travel.enabled then
