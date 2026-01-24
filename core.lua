@@ -1056,10 +1056,10 @@ SetBarMouseoverScripts = function()
         -- Apply the same handlers to all registered module frames so the bar stays visible when hovering them
         if XIVBar.frames then
             for name, frame in pairs(XIVBar.frames) do
-                if frame and frame ~= bar and frame.EnableMouse and frame.SetScript and IsBarChild(frame) then
+                if frame and frame ~= bar and frame.EnableMouse and frame.HookScript and IsBarChild(frame) then
                     frame:EnableMouse(true)
-                    frame:SetScript('OnEnter', showBar)
-                    frame:SetScript('OnLeave', hideBarIfOut)
+                    frame:HookScript('OnEnter', showBar)
+                    frame:HookScript('OnLeave', hideBarIfOut)
                 end
             end
         end
@@ -1077,14 +1077,6 @@ SetBarMouseoverScripts = function()
         bar._xivMouseoverElapsed = nil
         bar._xivMouseoverVisible = nil
         bar._xivHidePending = nil
-        if XIVBar.frames then
-            for name, frame in pairs(XIVBar.frames) do
-                if frame and frame ~= bar and frame.SetScript and IsBarChild(frame) then
-                    frame:SetScript('OnEnter', nil)
-                    frame:SetScript('OnLeave', nil)
-                end
-            end
-        end
     end
 end
 
