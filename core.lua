@@ -1076,19 +1076,6 @@ function XIVBar:GetGeneralOptions()
             positioning = self:GetPositioningOptions(),
             text = self:GetTextOptions(),
             textColors = self:GetTextColorOptions(),
-            showOnMouseover = {
-                name = L["Show on mouseover"],
-                desc = L["Show the bar only when the mouse is over it"],
-                type = "toggle",
-                order = 10,
-                get = function()
-                    return self.db.profile.general.showOnMouseover
-                end,
-                set = function(_, val)
-                    self.db.profile.general.showOnMouseover = val
-                    SetBarMouseoverScripts()
-                end
-            }
         }
     }
 end
@@ -1435,6 +1422,19 @@ function XIVBar:GetPositioningOptions()
                 end,
                 set = function(_, val)
                     self.db.profile.general.barFlightHide = val
+                end
+            },
+            showOnMouseover = {
+                name = L["Show on mouseover"],
+                desc = L["Show the bar only when you mouseover it"],
+                type = "toggle",
+                order = 10.5,
+                get = function()
+                    return self.db.profile.general.showOnMouseover
+                end,
+                set = function(_, val)
+                    self.db.profile.general.showOnMouseover = val
+                    SetBarMouseoverScripts()
                 end
             },
             spacingHeader = {
