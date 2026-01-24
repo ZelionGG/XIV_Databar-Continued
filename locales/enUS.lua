@@ -68,6 +68,7 @@ L['Hover'] = true;
 
 L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
+L['Show Accessibility Tooltips'] = true;
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
 L["Keep Queue Status Icon"] = true;

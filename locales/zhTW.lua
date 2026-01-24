@@ -71,6 +71,7 @@ L['Hover'] = "滑鼠指向時";
 L['Social'] = "好友";
 L['Micromenu'] = "微型選單";
 L['Show Social Tooltips'] = "顯示公會/好友名單";
+L['Show Accessibility Tooltips'] = true; -- Needs Translation
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
 L["Keep Queue Status Icon"] = true;

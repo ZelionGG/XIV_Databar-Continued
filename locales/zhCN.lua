@@ -67,6 +67,7 @@ L['Hover'] = "鼠标悬停";
 
 L['Micromenu'] = "微型菜单";
 L['Show Social Tooltips'] = "显示社交提示";
+L['Show Accessibility Tooltips'] = true; -- Needs Translation
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
 L["Keep Queue Status Icon"] = true;

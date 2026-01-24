@@ -67,6 +67,7 @@ L['Hover'] = "Survol";
 
 L['Micromenu'] = "Micro menu";
 L['Show Social Tooltips'] = "Montrer les bulles de contacts";
+L['Show Accessibility Tooltips'] = "Montrer les bulles d'accessibilité";
 L['Blizzard Micromenu'] = "Micro menu Blizzard";
 L['Disable Blizzard Micromenu'] = "Désactiver le micro menu Blizzard";
 L['Keep Queue Status Icon'] = "Garder l'icône de la file d'attente";

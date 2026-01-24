@@ -67,6 +67,7 @@ L['Hover'] = "Mouse sobre";
 
 L['Micromenu'] = true;
 L['Show Social Tooltips'] = "Mostrar informações da lista de amigos";
+L['Show Accessibility Tooltips'] = "Mostrar informações de acessibilidade";
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
 L["Keep Queue Status Icon"] = true;

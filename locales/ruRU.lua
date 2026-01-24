@@ -67,6 +67,7 @@ L['Hover'] = "По наведению";
 
 L['Micromenu'] = "Микроменю";
 L['Show Social Tooltips'] = "Показывать подсказки гильдии и друзей";
+L['Show Accessibility Tooltips'] = true; -- Needs Translation
 L['Blizzard Micromenu'] = true;
 L['Disable Blizzard Micromenu'] = true;
 L["Keep Queue Status Icon"] = true;

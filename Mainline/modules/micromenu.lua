@@ -99,6 +99,25 @@ function MenuModule:OnInitialize()
             text = 'Crash Bandicoot 4'
         }
     }
+
+    self.buttonInfo = {
+        menu   = { binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
+        chat   = { binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
+        guild  = { binding = 'TOGGLEGUILD',            label = GUILD },
+        social = { binding = 'TOGGLESOCIAL',           label = SOCIAL_LABEL },
+        char   = { binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
+        spell  = { binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
+        talent = { binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
+        ach    = { binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
+        quest  = { binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
+        lfg    = { binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
+        journal= { binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
+        pvp    = { binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
+        pet    = { binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
+        house  = { binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
+        shop   = { binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
+        help   = { binding = 'TOGGLEHELP',             label = HELP_BUTTON },
+    }
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -614,6 +633,7 @@ function MenuModule:DefaultHover(name)
             self.tipHover = (name == 'social')
             self.gtipHover = (name == 'guild')
         end
+        self:ShowButtonTooltip(name)
     end
 end
 
@@ -625,7 +645,47 @@ function MenuModule:DefaultLeave(name)
         if self.icons[name] ~= nil then
             self.icons[name]:SetVertexColor(xb:GetColor('normal'))
         end
+        GameTooltip:Hide()
     end
+end
+
+function MenuModule:GetButtonTooltipText(name)
+    local info = self.buttonInfo and self.buttonInfo[name]
+    if not info or not info.label then return nil end
+    local label, binding = info.label, info.binding
+
+    if binding then
+        local key1, key2 = GetBindingKey(binding)
+        local keys = {}
+        if key1 and key1 ~= '' then keys[#keys+1] = GetBindingText(key1, nil, false) end
+        if key2 and key2 ~= '' then keys[#keys+1] = GetBindingText(key2, nil, false) end
+        if #keys > 0 then
+            return string.format('|cFFFFFFFF%s|r |cFFFFD200(%s)|r', label, table.concat(keys, ' / '))
+        end
+    end
+
+    return string.format('|cFFFFFFFF%s|r', label)
+end
+
+function MenuModule:ShowButtonTooltip(name)
+    if not xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+        return
+    end
+    if name == 'social' or name == 'guild' then
+        return
+    end
+    local text = self:GetButtonTooltipText(name)
+    if not text then
+        return
+    end
+    local frame = self.frames[name]
+    if not frame then
+        return
+    end
+    GameTooltip:SetOwner(frame, 'ANCHOR_' .. xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine(text)
+    GameTooltip:Show()
 end
 
 function MenuModule:SocialHover(hoverFunc)
@@ -776,7 +836,7 @@ function MenuModule:SocialHover(hoverFunc)
                                 lineRight = string.format("%s %s", richPresence, socialIcon)
                                 -- friend is playing retail WoW, format is "(Name-Realm) Zone [Icon]"
                             else
-                                lineRight = string.format("%s %s %s", charNameFormat, zone, socialIcon)
+                                lineRight = string.format("%s %s %s", charNameFormat, zone or L['No Info'], socialIcon)
                             end
 
                             -- add left and right line to the tooltip
@@ -1182,6 +1242,7 @@ function MenuModule:GetDefaultOptions()
     return 'microMenu', {
         enabled = true,
         showTooltips = true,
+        showAccessibilityTooltips = false,
         disableBlizzardMicroMenu = false,
         keepQueueStatusIcon = false,
         combatEn = false,
@@ -1220,6 +1281,7 @@ function MenuModule:GetConfig()
                 name = ENABLE,
                 order = 0,
                 type = "toggle",
+                width = "full",
                 get = function()
                     return xb.db.profile.modules.microMenu.enabled;
                 end,
@@ -1242,6 +1304,19 @@ function MenuModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.microMenu.showTooltips = val;
+                    self:Refresh();
+                end
+            },
+
+            showAccessibilityTooltips = {
+                name = L['Show Accessibility Tooltips'],
+                order = 1.25,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.microMenu.showAccessibilityTooltips;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.microMenu.showAccessibilityTooltips = val;
                     self:Refresh();
                 end
             },

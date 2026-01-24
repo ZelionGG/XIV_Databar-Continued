@@ -67,6 +67,7 @@ L['Hover'] = "Mouseover";
 
 L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
+L['Show Accessibility Tooltips'] = true; -- Needs Translation
 L['Blizzard Micromenu'] = true; -- No Translate needed
 L['Disable Blizzard Micromenu'] = "Deaktiviere Blizzard Micromenu";
 L["Keep Queue Status Icon"] = "Zeige Wartenschlangen Statussymbol";
