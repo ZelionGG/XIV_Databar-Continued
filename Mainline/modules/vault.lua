@@ -58,6 +58,11 @@ end
 -- Format a slot display value for the compact tooltip summary.
 local function FormatSlotValue(typeId, activity)
     if not IsActivityUnlocked(activity) then
+        local progress = activity and activity.progress or 0
+        local threshold = activity and activity.threshold or 0
+        if threshold > 0 then
+            return string.format('%d/%d', progress, threshold)
+        end
         return '-'
     end
 
@@ -94,7 +99,7 @@ local function BuildSlotSummary(typeId, activities)
         end
         values[index] = value
     end
-    return table.concat(values, ' / ')
+    return table.concat(values, ' | ')
 end
 
 -- Module display name.
