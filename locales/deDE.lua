@@ -176,6 +176,8 @@ L['Remaining'] = "Verbleibend";
 L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
+L['Show Button Text'] = true; -- Needs Translation 
+
 -- Travel (Translation needed)
 L['Hearthstone'] = "Ruhestein";
 L['M+ Teleports'] = "M+ Teleporter";

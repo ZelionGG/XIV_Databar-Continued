@@ -177,6 +177,8 @@ L['Remaining'] = "還需要";
 L['Available Ranks'] = "神兵武器等級";
 L['Artifact Knowledge'] = "神兵知識等級";
 
+L['Show Button Text'] = true; -- Needs Translation 
+
 -- Travel
 L['Hearthstone'] = true;
 L['M+ Teleports'] = true;

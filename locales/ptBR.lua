@@ -177,6 +177,8 @@ L['Remaining'] = "Restante";
 L['Available Ranks'] = "Ranks Disponíveis";
 L['Artifact Knowledge'] = "Conhecimento de Artefato";
 
+L['Show Button Text'] = true; -- Needs Translation 
+
 -- Travel (Translation needed)
 L['Hearthstone'] = "Pedra de Regresso";
 L['M+ Teleports'] =  "Teleportes de M+";

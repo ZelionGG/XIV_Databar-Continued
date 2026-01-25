@@ -176,6 +176,8 @@ L['Remaining'] = "Restant";
 L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
 
+L['Show Button Text'] = "Afficher le texte du bouton";
+
 -- Travel
 L['Hearthstone'] = "Pierre de foyer";
 L['M+ Teleports'] = "Téléportations M+";

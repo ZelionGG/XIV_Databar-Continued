@@ -176,6 +176,8 @@ L['Remaining'] = "Осталось";
 L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
 
+L['Show Button Text'] = true; -- Needs Translation 
+
 -- Travel (Translation needed)
 L['Hearthstone'] = true;
 L['M+ Teleports'] = true;

@@ -180,6 +180,8 @@ L['Last xp gain'] = true;
 L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
 
+L['Show Button Text'] = true;
+
 -- Travel
 L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
