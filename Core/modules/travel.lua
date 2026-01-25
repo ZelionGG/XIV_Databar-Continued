@@ -239,6 +239,13 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
     self.hearthButton:SetAttribute('type', 'macro')
 
+    -- TomeOfTeleportation right-click function
+    self.hearthButton.tomeFunction = self.hearthButton.tomeFunction or function()
+        if SlashCmdList["TELEPORTER"] then
+            SlashCmdList["TELEPORTER"]("")
+        end
+    end
+
     self.portButton:EnableMouse(true)
     self.portButton:RegisterForClicks("AnyUp", "AnyDown")
     self.portButton:SetAttribute('*type1', 'macro')
@@ -1068,6 +1075,25 @@ function TravelModule:Refresh()
         end)
     end
 
+    -- TomeOfTeleportation integration
+    local useTome = xb.db.profile.modules.travel.useTomeOfTeleportation
+    if not InCombatLockdown() then
+        if useTome then
+            -- Only register left button for the secure macro action
+            self.hearthButton:RegisterForClicks('LeftButtonUp', 'LeftButtonDown')
+            -- Handle right-click separately for TomeOfTeleportation
+            self.hearthButton:SetScript('OnMouseUp', function(_, button)
+                if button == 'RightButton' and self.hearthButton.tomeFunction then
+                    self.hearthButton.tomeFunction()
+                end
+            end)
+        else
+            -- Register all buttons for normal operation
+            self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
+            self.hearthButton:SetScript('OnMouseUp', nil)
+        end
+    end
+
     local db = xb.db.profile
     local allowMythic = compat.isMainline and db.enableMythicPortals
 
@@ -1154,7 +1180,7 @@ function TravelModule:Refresh()
     self:SetHearthColor()
 
     -- Portals Part
-    if hasPortOptions then
+    if hasPortOptions and not useTome then
         self.portButton:Show()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
         self.portText:SetText(xb.db.char.portItem.text)
@@ -1180,12 +1206,12 @@ function TravelModule:Refresh()
         self.portPopup:Hide()
     end
 
-    -- M+ Part
+    -- M+ Part - also hide when using TomeOfTeleportation
     if self.mythicButton and not InCombatLockdown() then
         self.mythicButton:Hide()
     end
 
-    if allowMythic and self.mythicButton then
+    if allowMythic and self.mythicButton and not useTome then
         -- Only show the button if teleports are available
         if self:HasAvailableMythicTeleports() then
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
@@ -1241,11 +1267,11 @@ function TravelModule:Refresh()
     end
 
     local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
-    if self.portButton:IsVisible() then
+    if not useTome and self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    if allowMythic and self.mythicButton then
+    if not useTome and allowMythic and self.mythicButton then
         if self.mythicButton:IsVisible() then
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
@@ -1256,6 +1282,43 @@ function TravelModule:Refresh()
 end
 
 function TravelModule:ShowTooltip()
+    local useTome = xb.db.profile.modules.travel.useTomeOfTeleportation
+
+    if useTome then
+        -- Simplified tooltip for TomeOfTeleportation mode
+        GameTooltip:SetOwner(self.hearthButton, 'ANCHOR_' .. xb.miniTextPosition)
+        GameTooltip:ClearLines()
+        local r, g, b, _ = unpack(xb:HoverColors())
+        GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
+
+        -- Show hearthstone cooldown
+        local hearthstoneId = 6948
+        local remainingCooldown = 0
+        local startTime, duration = GetItemCooldown(hearthstoneId)
+        if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
+            remainingCooldown = (startTime + duration - GetTime())
+        end
+        local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
+        GameTooltip:AddDoubleLine(L['Hearthstone'], cdString, r, g, b, 1, 1, 1)
+
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Open Tome Of Teleportation'], r, g, b, 1, 1, 1)
+        GameTooltip:Show()
+
+        -- Update the tooltip every second
+        if not self.tooltipTimer then
+            self.tooltipTimer = C_Timer.NewTicker(1, function()
+                if GameTooltip:IsOwned(self.hearthButton) then
+                    self:ShowTooltip()
+                else
+                    self.tooltipTimer:Cancel()
+                    self.tooltipTimer = nil
+                end
+            end)
+        end
+        return
+    end
+
     if not self.portPopup:IsVisible() then
         GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
         GameTooltip:ClearLines()
@@ -1398,7 +1461,8 @@ function TravelModule:GetDefaultOptions()
         enabled = true,
         enableMythicPortals = compat.isMainline,
         curSeasonOnly = false,
-        randomizeHs = false
+        randomizeHs = false,
+        useTomeOfTeleportation = false
     }
 end
 
@@ -1528,6 +1592,29 @@ function TravelModule:GetConfig()
                 set = function(_, key, state)
                     xb.db.profile.selectedHearthstones[key] = state
                     self:Refresh()
+                end
+            },
+            tomeHeader = {
+                order = 60,
+                name = L['Tome Of Teleportation Integration'],
+                type = 'header'
+            },
+            tomeDesc = {
+                order = 61,
+                name = L['Tome Of Teleportation Desc'],
+                type = 'description'
+            },
+            useTomeOfTeleportation = {
+                name = L['Enable Tome Of Teleportation'],
+                order = 62,
+                type = "toggle",
+                width = "full",
+                get = function()
+                    return xb.db.profile.modules.travel.useTomeOfTeleportation
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.travel.useTomeOfTeleportation = val
+                    TravelModule:Refresh()
                 end
             }
         }
