@@ -68,21 +68,20 @@ local function FormatSlotValue(typeId, activity)
 
     if typeId == Enum.WeeklyRewardChestThresholdType.Raid then
         local diffName = activity.level and DifficultyUtil and DifficultyUtil.GetDifficultyName and DifficultyUtil.GetDifficultyName(activity.level)
-        return diffName or (L['Unlocked'] or 'Unlocked')
+        return diffName
     end
 
     if typeId == Enum.WeeklyRewardChestThresholdType.Activities then
         if activity.level and activity.level > 0 then
             return string.format('M+%d', activity.level)
         end
-        return L['Heroic'] or 'Heroic'
+        return WEEKLY_REWARDS_HEROIC
     end
 
     if typeId == Enum.WeeklyRewardChestThresholdType.World then
         if activity.level and activity.level > 0 then
-            return string.format('%s %d %s', L['Tier'] or 'Tier', activity.level, L['Delve'] or 'Delve')
+            return string.format(GREAT_VAULT_WORLD_TIER, activity.level)
         end
-        return L['World activity'] or 'World activity'
     end
 
     return '-'
@@ -104,7 +103,7 @@ end
 
 -- Module display name.
 function VaultModule:GetName()
-    return VAULT or "Vault"
+    return DELVES_GREAT_VAULT_LABEL
 end
 
 -- Render the Great Vault tooltip with compact rewards + M+ keystone line.
@@ -119,7 +118,7 @@ function VaultModule:ShowTooltip()
 
     GameTooltip:SetOwner(self.vaultFrame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. (L['Vault'] or 'Vault') .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. DELVES_GREAT_VAULT_LABEL .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
 
     -- Refresh data if needed
@@ -141,7 +140,7 @@ function VaultModule:ShowTooltip()
         local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(mapId)
         local iconTexture = texture
         local icon = iconTexture and string.format(' |T%s:16|t', iconTexture) or ''
-        local label = MYTHIC_PLUS_KEYSTONE or (L['Mythic+ Keystone'] or 'Mythic+ Keystone')
+        local label = WEEKLY_REWARDS_MYTHIC_KEYSTONE
         local value = string.format('+%d %s%s', keystoneLevel, mapName or '', icon)
         GameTooltip:AddLine(' ')
         GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
@@ -266,7 +265,7 @@ function VaultModule:Refresh()
     self.text:SetFont(xb:GetFont(db.text.fontSize))
     self.text:SetTextColor(xb:GetColor('normal'))
     if db.modules.vault.showLabel then
-        self.text:SetText(L['Vault'] or 'Vault')
+        self.text:SetText(DELVES_GREAT_VAULT_LABEL)
         self.text:Show()
     else
         self.text:SetText('')
@@ -282,7 +281,7 @@ function VaultModule:Refresh()
     self.text:SetPoint('LEFT', self.icon, 'RIGHT', 5, 0)
 
     local anchor = getAnchorFrame()
-    local spacing = db.general.moduleSpacing
+    local spacing = db.general.moduleSpacing - 5
     if anchor and anchor ~= xb:GetFrame('bar') then
         self.vaultFrame:ClearAllPoints()
         self.vaultFrame:SetPoint('RIGHT', anchor, 'LEFT', -spacing, 0)
@@ -316,7 +315,7 @@ function VaultModule:GetConfig()
                 end
             },
             showLabel = {
-                name = L['Show label'] or 'Show label',
+                name = L['Show Button Text'],
                 order = 1,
                 type = "toggle",
                 get = function()
@@ -328,7 +327,7 @@ function VaultModule:GetConfig()
                 end
             },
             showTooltip = {
-                name = L['Show tooltip'] or 'Show tooltip',
+                name = L['Show Tooltips'],
                 order = 2,
                 type = "toggle",
                 get = function()
