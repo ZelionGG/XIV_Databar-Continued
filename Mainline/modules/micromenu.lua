@@ -187,20 +187,25 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
     local keepQueueStatus = xb.db.profile.modules.microMenu.keepQueueStatusIcon
     local queueButton = _G.QueueStatusButton
     if queueButton then
+        if not self.queueStatusOriginalParent then
+            self.queueStatusOriginalParent = queueButton:GetParent()
+            self.queueStatusOriginalPoint = {queueButton:GetPoint(1)}
+        end
         if hide and keepQueueStatus then
             if not self.queueStatusOriginalParent then
                 self.queueStatusOriginalParent = queueButton:GetParent()
                 self.queueStatusOriginalPoint = {queueButton:GetPoint(1)}
             end
+
+            local left, bottom = queueButton:GetLeft(), queueButton:GetBottom()
+
             queueButton:SetParent(UIParent)
-            if self.queueStatusOriginalPoint and self.queueStatusOriginalPoint[1] then
-                queueButton:ClearAllPoints()
-                queueButton:SetPoint(self.queueStatusOriginalPoint[1], UIParent,
-                                     self.queueStatusOriginalPoint[1],
-                                     self.queueStatusOriginalPoint[4],
-                                     self.queueStatusOriginalPoint[5])
+            queueButton:ClearAllPoints()
+            if left and bottom then
+                queueButton:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left, bottom)
+            elseif self.queueStatusOriginalPoint and self.queueStatusOriginalPoint[1] then
+                queueButton:SetPoint(unpack(self.queueStatusOriginalPoint))
             end
-            queueButton:Show()
         elseif hide and not keepQueueStatus then
             if self.queueStatusOriginalParent then
                 queueButton:SetParent(self.queueStatusOriginalParent)
@@ -216,7 +221,6 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
                 queueButton:ClearAllPoints()
                 queueButton:SetPoint(unpack(self.queueStatusOriginalPoint))
             end
-            queueButton:Show()
         end
     end
 end
