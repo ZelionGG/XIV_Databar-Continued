@@ -12,6 +12,6 @@
 
 ### _Retail :_
 
-- Added the **Great Vault** module, allowing you to quickly access the vault view and see your progress in the tooltip.
+- Added the **Great Vault** module, allowing you to quickly access the vault view and see your progress in the tooltip. The tooltip also contains a reminder of which **Mythic Keystone** you have.
 - Fixed Queue Eye Icon behavior of the **Micromenu** module.
 
