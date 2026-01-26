@@ -272,6 +272,8 @@ function MenuModule:Refresh()
         return
     end
 
+    self:ApplyCombatState()
+
     -- get the user's designated modifier for the social and guild tooltip hover function
     self.modifier = self.modifiers[xb.db.profile.modules.microMenu.modifierTooltip]
 
@@ -325,69 +327,76 @@ end
 function MenuModule:CreateFrames()
     parentFrame = xb:GetFrame('microMenuFrame')
     local mm = xb.db.profile.modules.microMenu
+    self.actionTypes = {}
     local buttons = {
         {
             key = 'menu',
             frameName = 'XIVBar_MenuButton',
-            template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            setup = function(frame)
-                local mb = MainMenuMicroButton
-                if not mb then return end
-                local function restore(state)
-                    if not state or not state.point or not state.point[1] then return end
-                    local targetAlpha = (state.alpha and state.alpha > 0) and state.alpha or 1
-                    mb:SetParent(state.parent)
-                    mb:ClearAllPoints()
-                    mb:SetPoint(unpack(state.point))
-                    mb:SetAlpha(targetAlpha)
-                    if state.shown then mb:Show() else mb:Hide() end
-                    mb:EnableMouse(state.mouse and true or false)
-                    local p = state.parent
-                    if p and p.IsObjectType and p:IsObjectType('Frame') then
-                        if p.PositionButtons then
-                            p:PositionButtons()
-                        elseif p.UpdateButtons then
-                            p:UpdateButtons()
-                        end
-                    end
-                end
-                frame:HookScript('PreClick', function(_, button)
-                    if button ~= 'LeftButton' then return end
-                    frame._xivbarMainMenuRestore = {
-                        parent = mb:GetParent(),
-                        point = { mb:GetPoint() },
-                        alpha = mb:GetAlpha(),
-                        shown = mb:IsShown(),
-                        mouse = mb:IsMouseEnabled(),
-                    }
-                    mb:SetParent(frame)
-                    mb:ClearAllPoints()
-                    mb:SetAllPoints(frame)
-                    mb:SetAlpha(0)
-                    mb:Show()
-                    mb:EnableMouse(true)
-                end)
-                frame:HookScript('PostClick', function(_, button)
-                    if button ~= 'LeftButton' then return end
-                    if GameMenuFrame and GameMenuFrame:IsShown() then
-                        if not GameMenuFrame.XIVBarMenuRestoreHook then
-                            GameMenuFrame:HookScript('OnHide', function()
-                                restore(frame._xivbarMainMenuRestore)
-                            end)
-                            GameMenuFrame.XIVBarMenuRestoreHook = true
-                        end
-                    else
-                        C_Timer.After(0.01, function()
-                            restore(frame._xivbarMainMenuRestore)
-                        end)
-                    end
-                end)
-                frame:SetAttribute('*type1', 'click')
-                frame:SetAttribute('*clickbutton1', mb)
-                frame:SetAttribute('*shift-type2', 'macro')
-                frame:SetAttribute('*shift-macrotext2', '/reload')
-                frame:SetAttribute('useOnKeyDown', false)
-            end,
+            -- template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            -- setup = function(frame)
+            --     local mb = MainMenuMicroButton
+            --     if not mb then return end
+            --     local function restore(state)
+            --         if not state or not state.point or not state.point[1] then return end
+            --         local targetAlpha = (state.alpha and state.alpha > 0) and state.alpha or 1
+            --         mb:SetParent(state.parent)
+            --         mb:ClearAllPoints()
+            --         mb:SetPoint(unpack(state.point))
+            --         mb:SetAlpha(targetAlpha)
+            --         if state.shown then mb:Show() else mb:Hide() end
+            --         mb:EnableMouse(state.mouse and true or false)
+            --         local p = state.parent
+            --         if p and p.IsObjectType and p:IsObjectType('Frame') then
+            --             if p.PositionButtons then
+            --                 p:PositionButtons()
+            --             elseif p.UpdateButtons then
+            --                 p:UpdateButtons()
+            --             end
+            --         end
+            --     end
+            --     frame:HookScript('PreClick', function(_, button)
+            --         if button ~= 'LeftButton' then return end
+            --         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            --             return
+            --         end
+            --         frame._xivbarMainMenuRestore = {
+            --             parent = mb:GetParent(),
+            --             point = { mb:GetPoint() },
+            --             alpha = mb:GetAlpha(),
+            --             shown = mb:IsShown(),
+            --             mouse = mb:IsMouseEnabled(),
+            --         }
+            --         mb:SetParent(frame)
+            --         mb:ClearAllPoints()
+            --         mb:SetAllPoints(frame)
+            --         mb:SetAlpha(0)
+            --         mb:Show()
+            --         mb:EnableMouse(true)
+            --     end)
+            --     frame:HookScript('PostClick', function(_, button)
+            --         if button ~= 'LeftButton' then return end
+            --         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            --             return
+            --         end
+            --         if GameMenuFrame and GameMenuFrame:IsShown() then
+            --             if not GameMenuFrame.XIVBarMenuRestoreHook then
+            --                 GameMenuFrame:HookScript('OnHide', function()
+            --                     restore(frame._xivbarMainMenuRestore)
+            --                 end)
+            --                 GameMenuFrame.XIVBarMenuRestoreHook = true
+            --             end
+            --         else
+            --             C_Timer.After(0, function()
+            --                 restore(frame._xivbarMainMenuRestore)
+            --             end)
+            --         end
+            --     end)
+            --     frame:SetAttribute('*type1', 'click')
+            --     frame:SetAttribute('*clickbutton1', mb)
+            --     frame:SetAttribute('*shift-type2', 'macro')
+            --     frame:SetAttribute('*shift-macrotext2', '/reload')
+            --     frame:SetAttribute('useOnKeyDown', false)
+            -- end,
         },
         {
             key = 'chat', frameName = 'XIVBar_ChatButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -414,12 +423,10 @@ function MenuModule:CreateFrames()
             micro = CharacterMicroButton,
         },
         {
-            key = 'spell', frameName = 'XIVBar_SpellButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            micro = PlayerSpellsMicroButton,
+            key = 'spell', frameName = 'XIVBar_SpellButton',
         },
         {
-            key = 'talent', frameName = 'XIVBar_TalentButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            micro = PlayerSpellsMicroButton,
+            key = 'talent', frameName = 'XIVBar_TalentButton',
         },
         {
             key = 'ach', frameName = 'XIVBar_AchievementButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -480,6 +487,7 @@ function MenuModule:CreateFrames()
             if actionType then
                 frame:SetAttribute('*type1', actionType)
                 frame:EnableMouse(true)
+                self.actionTypes[cfg.key] = actionType
                 if not mm.combatEn then
                     RegisterStateDriver(frame, 'combatlock', '[combat] combat; nocombat')
                     frame:SetAttribute('_onstate-combatlock', string.format([[if newstate == 'combat' then
@@ -489,6 +497,8 @@ function MenuModule:CreateFrames()
                             self:SetAttribute('*type1', '%s')
                             self:EnableMouse(true)
                         end]], actionType))
+                else
+                    UnregisterStateDriver(frame, 'combatlock')
                 end
             end
 
@@ -526,6 +536,39 @@ function MenuModule:CreateFrames()
                 PlayerSpellsFrame:SetTab(tab)
             end
         end)
+    end
+
+    self:ApplyCombatState()
+end
+
+function MenuModule:ApplyCombatState()
+    local mm = xb.db.profile.modules.microMenu
+    if InCombatLockdown() then
+        self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+            self:ApplyCombatState()
+            self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+        end)
+        return
+    end
+
+    for name, frame in pairs(self.frames) do
+        local actionType = self.actionTypes and self.actionTypes[name]
+        if frame and actionType then
+            if not mm.combatEn then
+                RegisterStateDriver(frame, 'combatlock', '[combat] combat; nocombat')
+                frame:SetAttribute('_onstate-combatlock', string.format([[if newstate == 'combat' then
+                        self:SetAttribute('*type1', nil)
+                        self:EnableMouse(false)
+                    else
+                        self:SetAttribute('*type1', '%s')
+                        self:EnableMouse(true)
+                    end]], actionType))
+            else
+                UnregisterStateDriver(frame, 'combatlock')
+                frame:SetAttribute('*type1', actionType)
+                frame:EnableMouse(true)
+            end
+        end
     end
 end
 
@@ -1123,15 +1166,16 @@ function MenuModule:CreateClickFunctions()
     end
 
     self.functions.menu = function(self, button, down)
-        if InCombatLockdown() then
+        if InCombatLockdown() and not xb.db.profile.modules.microMenu.combatEn then
             return;
         end
-        if button == "LeftButton" then
+        if button == "LeftButton" and not InCombatLockdown() then
             ToggleFrame(GameMenuFrame)
         elseif button == "RightButton" then
             if IsShiftKeyDown() then
-                ReloadUI()
+                C_UI.Reload()
             else
+                if InCombatLockdown() then return; end
                 ToggleFrame(AddonList)
             end
         end
@@ -1150,32 +1194,32 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- chat
 
-    -- self.functions.spell = function(self, button, down)
-    --     -- if InCombatLockdown() then
-    --     --     return;
-    --     -- end
-    --     if button == "LeftButton" then
-    --         PlayerSpellsUtil.ToggleSpellBookFrame()
-    --     end
-    -- end; -- spell
-
-    -- self.functions.talent = function(self, button, down)
-    --     if InCombatLockdown() then
-    --         return;
-    --     end
-    --     if button == "LeftButton" then
-    --         PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
-    --     end
-    -- end; -- talent
-
-    self.functions.help = function(self, button, down)
+    self.functions.spell = function(self, button, down)
         if InCombatLockdown() then
             return;
         end
         if button == "LeftButton" then
-            ToggleHelpFrame()
+            PlayerSpellsUtil.ToggleSpellBookFrame()
         end
-    end; -- help
+    end; -- spell
+
+    self.functions.talent = function(self, button, down)
+        if InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" then
+            PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
+        end
+    end; -- talent
+
+    -- self.functions.help = function(self, button, down)
+    --     if InCombatLockdown() then
+    --         return;
+    --     end
+    --     if button == "LeftButton" then
+    --         ToggleHelpFrame()
+    --     end
+    -- end; -- help
 end
 
 function MenuModule:GetDefaultOptions()
