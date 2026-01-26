@@ -325,205 +325,207 @@ end
 function MenuModule:CreateFrames()
     parentFrame = xb:GetFrame('microMenuFrame')
     local mm = xb.db.profile.modules.microMenu
+    local buttons = {
+        {
+            key = 'menu',
+            frameName = 'XIVBar_MenuButton',
+            template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            setup = function(frame)
+                local mb = MainMenuMicroButton
+                if not mb then return end
+                local function restore(state)
+                    if not state or not state.point or not state.point[1] then return end
+                    local targetAlpha = (state.alpha and state.alpha > 0) and state.alpha or 1
+                    mb:SetParent(state.parent)
+                    mb:ClearAllPoints()
+                    mb:SetPoint(unpack(state.point))
+                    mb:SetAlpha(targetAlpha)
+                    if state.shown then mb:Show() else mb:Hide() end
+                    mb:EnableMouse(state.mouse and true or false)
+                    local p = state.parent
+                    if p and p.IsObjectType and p:IsObjectType('Frame') then
+                        if p.PositionButtons then
+                            p:PositionButtons()
+                        elseif p.UpdateButtons then
+                            p:UpdateButtons()
+                        end
+                    end
+                end
+                frame:HookScript('PreClick', function(_, button)
+                    if button ~= 'LeftButton' then return end
+                    frame._xivbarMainMenuRestore = {
+                        parent = mb:GetParent(),
+                        point = { mb:GetPoint() },
+                        alpha = mb:GetAlpha(),
+                        shown = mb:IsShown(),
+                        mouse = mb:IsMouseEnabled(),
+                    }
+                    mb:SetParent(frame)
+                    mb:ClearAllPoints()
+                    mb:SetAllPoints(frame)
+                    mb:SetAlpha(0)
+                    mb:Show()
+                    mb:EnableMouse(true)
+                end)
+                frame:HookScript('PostClick', function(_, button)
+                    if button ~= 'LeftButton' then return end
+                    if GameMenuFrame and GameMenuFrame:IsShown() then
+                        if not GameMenuFrame.XIVBarMenuRestoreHook then
+                            GameMenuFrame:HookScript('OnHide', function()
+                                restore(frame._xivbarMainMenuRestore)
+                            end)
+                            GameMenuFrame.XIVBarMenuRestoreHook = true
+                        end
+                    else
+                        C_Timer.After(0.01, function()
+                            restore(frame._xivbarMainMenuRestore)
+                        end)
+                    end
+                end)
+                frame:SetAttribute('*type1', 'click')
+                frame:SetAttribute('*clickbutton1', mb)
+                frame:SetAttribute('*shift-type2', 'macro')
+                frame:SetAttribute('*shift-macrotext2', '/reload')
+                frame:SetAttribute('useOnKeyDown', false)
+            end,
+        },
+        {
+            key = 'chat', frameName = 'XIVBar_ChatButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = ChatFrameMenuButton,
+        },
+        {
+            key = 'guild', frameName = 'XIVBar_GuildButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = GuildMicroButton,
+            extra = function(frame)
+                self.text.guild = frame:CreateFontString(nil, 'OVERLAY')
+                self.bgTexture.guild = frame:CreateTexture(nil, 'OVERLAY')
+            end
+        },
+        {
+            key = 'social', frameName = 'XIVBar_SocialButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = QuickJoinToastButton,
+            extra = function(frame)
+                self.text.social = frame:CreateFontString(nil, 'OVERLAY')
+                self.bgTexture.social = frame:CreateTexture(nil, 'OVERLAY')
+            end
+        },
+        {
+            key = 'char', frameName = 'XIVBar_CharacterButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = CharacterMicroButton,
+        },
+        {
+            key = 'spell', frameName = 'XIVBar_SpellButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = PlayerSpellsMicroButton,
+        },
+        {
+            key = 'talent', frameName = 'XIVBar_TalentButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = PlayerSpellsMicroButton,
+        },
+        {
+            key = 'ach', frameName = 'XIVBar_AchievementButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = AchievementMicroButton,
+        },
+        {
+            key = 'quest', frameName = 'XIVBar_QuestButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = QuestLogMicroButton,
+        },
+        {
+            key = 'lfg', frameName = 'XIVBar_LFGButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            macro = "/click LFDMicroButton\n/click PVEFrameTab1",
+        },
+        {
+            key = 'journal', frameName = 'XIVBar_JournalButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = EJMicroButton,
+        },
+        {
+            key = 'pvp', frameName = 'XIVBar_PVPButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            macro = "/click LFDMicroButton\n/click PVEFrameTab2",
+        },
+        {
+            key = 'pet', frameName = 'XIVBar_PetButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = CollectionsMicroButton,
+        },
+        {
+            key = 'house', frameName = 'XIVBar_HouseButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = HousingMicroButton,
+        },
+        {
+            key = 'shop', frameName = 'XIVBar_ShopButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = StoreMicroButton,
+        },
+        {
+            key = 'help', frameName = 'XIVBar_HelpButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = HelpMicroButton,
+        },
+    }
 
-    if mm.menu then
-        self.frames.menu = CreateFrame("BUTTON", "menu", parentFrame)
-        parentFrame = self.frames.menu
-    else
-        if self.frames.menu then
-            self.frames.menu = nil
+    for _, cfg in ipairs(buttons) do
+        local enabled = mm[cfg.key]
+        if enabled then
+            local frame = CreateFrame('BUTTON', cfg.frameName or cfg.key, parentFrame, cfg.template)
+            self.frames[cfg.key] = frame
+
+            local actionType = cfg.macro and 'macro' or (cfg.micro and 'click' or nil)
+
+            if cfg.macro then
+                frame:SetAttribute('*macrotext1', cfg.macro)
+            elseif cfg.micro then
+                frame:SetAttribute('*clickbutton1', cfg.micro)
+            end
+
+            frame:SetAttribute('useOnKeyDown', false)
+            if cfg.setup then cfg.setup(frame) end
+            if cfg.extra then cfg.extra(frame) end
+
+            if actionType then
+                frame:SetAttribute('*type1', actionType)
+                frame:EnableMouse(true)
+                if not mm.combatEn then
+                    RegisterStateDriver(frame, 'combatlock', '[combat] combat; nocombat')
+                    frame:SetAttribute('_onstate-combatlock', string.format([[if newstate == 'combat' then
+                            self:SetAttribute('*type1', nil)
+                            self:EnableMouse(false)
+                        else
+                            self:SetAttribute('*type1', '%s')
+                            self:EnableMouse(true)
+                        end]], actionType))
+                end
+            end
+
+            parentFrame = frame
+        else
+            if self.frames[cfg.key] then
+                self.frames[cfg.key] = nil
+            end
+            if cfg.key == 'guild' then
+                self.text.guild = nil
+                self.bgTexture.guild = nil
+            elseif cfg.key == 'social' then
+                self.text.social = nil
+                self.bgTexture.social = nil
+            end
         end
     end
 
-    if mm.chat then
-        self.frames.chat = CreateFrame("BUTTON", "chat", parentFrame)
-        parentFrame = self.frames.chat
-    else
-        if self.frames.chat then
-            self.frames.chat = nil
-        end
+    -- Sélection d'onglet sécurisée pour Spell/Talent via PlayerSpellsMicroButton
+    if self.frames.spell then
+        self.frames.spell:HookScript('PostClick', function()
+            self.playerSpellsTargetTab = 3 -- Spellbook
+        end)
     end
-
-    if mm.guild then
-        self.frames.guild = CreateFrame("BUTTON", "XIVBar_GuildButton",
-                                        parentFrame,
-                                        "SecureActionButtonTemplate")
-        self.frames.guild:SetAttribute("*type1", "click")
-        self.frames.guild:SetAttribute("*clickbutton1", GuildMicroButton)
-        self.frames.guild:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.guild
-        self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
-        self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
-    else
-        if self.frames.guild then
-            self.frames.guild = nil
-            self.text.guild = nil
-            self.bgTexture.guild = nil
-        end
+    if self.frames.talent then
+        self.frames.talent:HookScript('PostClick', function()
+            self.playerSpellsTargetTab = 1 -- Talents
+        end)
     end
-
-    if mm.social then
-        self.frames.social = CreateFrame("BUTTON", "social", parentFrame)
-        parentFrame = self.frames.social
-        self.text.social = self.frames.social:CreateFontString(nil, 'OVERLAY')
-        self.bgTexture.social = self.frames.social:CreateTexture(nil, "OVERLAY")
-    else
-        if self.frames.social then
-            self.frames.social = nil
-            self.text.social = nil
-            self.bgTexture.social = nil
-        end
-    end
-
-    if mm.char then
-        self.frames.char = CreateFrame("BUTTON", "XIVBar_CharacterButton",
-                                       parentFrame, "SecureActionButtonTemplate")
-        self.frames.char:SetAttribute("*type1", "click")
-        self.frames.char:SetAttribute("*clickbutton1", CharacterMicroButton)
-        self.frames.char:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.char
-    else
-        if self.frames.char then
-            self.frames.char = nil
-        end
-    end
-
-    if mm.spell then
-        self.frames.spell = CreateFrame("BUTTON", "spell", parentFrame)
-        parentFrame = self.frames.spell
-    else
-        if self.frames.spell then
-            self.frames.spell = nil
-        end
-    end
-
-    if mm.talent then
-        self.frames.talent = CreateFrame("BUTTON", "talent", parentFrame)
-        parentFrame = self.frames.talent
-    else
-        if self.frames.talent then
-            self.frames.talent = nil
-        end
-    end
-
-    if mm.ach then
-        self.frames.ach = CreateFrame("BUTTON", "XIVBar_AchievementButton",
-                                      parentFrame, "SecureActionButtonTemplate")
-        self.frames.ach:SetAttribute("*type1", "click")
-        self.frames.ach:SetAttribute("*clickbutton1", AchievementMicroButton)
-        self.frames.ach:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.ach
-    else
-        if self.frames.ach then
-            self.frames.ach = nil
-        end
-    end
-
-    if mm.quest then
-        self.frames.quest = CreateFrame("BUTTON", "XIVBar_QuestButton",
-                                        parentFrame,
-                                        "SecureActionButtonTemplate")
-        self.frames.quest:SetAttribute("*type1", "click")
-        self.frames.quest:SetAttribute("*clickbutton1", QuestLogMicroButton)
-        self.frames.quest:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.quest
-    else
-        if self.frames.quest then
-            self.frames.quest = nil
-        end
-    end
-
-    if mm.lfg then
-        self.frames.lfg = CreateFrame("BUTTON", "XIVBar_LFGButton", parentFrame,
-                                      "SecureActionButtonTemplate")
-        self.frames.lfg:SetAttribute("*type1", "macro")
-        self.frames.lfg:SetAttribute("*macrotext1",
-                                     "/click LFDMicroButton\n/click PVEFrameTab1")
-        self.frames.lfg:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.lfg
-    else
-        if self.frames.lfg then
-            self.frames.lfg = nil
-        end
-    end
-
-    if mm.journal then
-        self.frames.journal = CreateFrame("BUTTON", "XIVBar_JournalButton",
-                                          parentFrame,
-                                          "SecureActionButtonTemplate")
-        self.frames.journal:SetAttribute("*type1", "click")
-        self.frames.journal:SetAttribute("*clickbutton1", EJMicroButton)
-        self.frames.journal:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.journal
-    else
-        if self.frames.journal then
-            self.frames.journal = nil
-        end
-    end
-
-    if mm.pvp then
-        self.frames.pvp = CreateFrame("BUTTON", "XIVBar_PVPButton", parentFrame,
-                                      "SecureActionButtonTemplate")
-        self.frames.pvp:SetAttribute("*type1", "macro")
-        self.frames.pvp:SetAttribute("*macrotext1",
-                                     "/click LFDMicroButton\n/click PVEFrameTab2")
-        self.frames.pvp:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.pvp
-    else
-        if self.frames.pvp then
-            self.frames.pvp = nil
-        end
-    end
-
-    if mm.pet then
-        self.frames.pet = CreateFrame("BUTTON", "XIVBar_PetButton", parentFrame,
-                                      "SecureActionButtonTemplate")
-        self.frames.pet:SetAttribute("*type1", "click")
-        self.frames.pet:SetAttribute("*clickbutton1", CollectionsMicroButton)
-        self.frames.pet:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.pet
-    else
-        if self.frames.pet then
-            self.frames.pet = nil
-        end
-    end
-
-    if mm.house then
-        self.frames.house = CreateFrame("BUTTON", "XIVBar_HouseButton",
-                                        parentFrame,
-                                        "SecureActionButtonTemplate")
-        self.frames.house:SetAttribute("*type1", "click")
-        self.frames.house:SetAttribute("*clickbutton1", HousingMicroButton)
-        self.frames.house:SetAttribute("useOnKeyDown", false)
-        parentFrame = self.frames.house
-    else
-        if self.frames.house then
-            self.frames.house = nil
-        end
-    end
-
-    if mm.shop then
-        self.frames.shop = CreateFrame("BUTTON", "XIVBar_ShopButton",
-                                       parentFrame, "SecureActionButtonTemplate")
-        if StoreMicroButton then
-            self.frames.shop:SetAttribute("*type1", "click")
-            self.frames.shop:SetAttribute("*clickbutton1", StoreMicroButton)
-            self.frames.shop:SetAttribute("useOnKeyDown", false)
-        end
-        parentFrame = self.frames.shop
-    else
-        if self.frames.shop then
-            self.frames.shop = nil
-        end
-    end
-
-    if mm.help then
-        self.frames.help = CreateFrame("BUTTON", "help", parentFrame)
-        parentFrame = self.frames.help
-    else
-        if self.frames.help then
-            self.frames.help = nil
-        end
+    if not self.playerSpellsHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
+        self.playerSpellsHooked = true
+        PlayerSpellsFrame:HookScript('OnShow', function()
+            local tab = self.playerSpellsTargetTab
+            if tab and PlayerSpellsFrame.SetTab then
+                PlayerSpellsFrame:SetTab(tab)
+            end
+        end)
     end
 end
 
@@ -1148,32 +1150,23 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- chat
 
-    self.functions.social = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleFriendsFrame()
-        end
-    end; -- social
+    -- self.functions.spell = function(self, button, down)
+    --     -- if InCombatLockdown() then
+    --     --     return;
+    --     -- end
+    --     if button == "LeftButton" then
+    --         PlayerSpellsUtil.ToggleSpellBookFrame()
+    --     end
+    -- end; -- spell
 
-    self.functions.spell = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            PlayerSpellsUtil.ToggleSpellBookFrame()
-        end
-    end; -- spell
-
-    self.functions.talent = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
-        end
-    end; -- talent
+    -- self.functions.talent = function(self, button, down)
+    --     if InCombatLockdown() then
+    --         return;
+    --     end
+    --     if button == "LeftButton" then
+    --         PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
+    --     end
+    -- end; -- talent
 
     self.functions.help = function(self, button, down)
         if InCombatLockdown() then
