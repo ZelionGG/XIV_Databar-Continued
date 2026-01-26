@@ -754,6 +754,7 @@ function TravelModule:CreateTeleportButton(teleportInfo)
     button:SetText(teleportInfo.dungeonName)
     button:SetAttribute("type", "spell")
     button:SetAttribute("spell", teleportInfo.spellName)
+    button:SetAttribute("useOnKeyDown", true)
     button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
 
     -- Hide the checkboxes
