@@ -345,7 +345,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.guild then
-        self.frames.guild = CreateFrame("BUTTON", "guild", parentFrame)
+        self.frames.guild = CreateFrame("BUTTON", "XIVBar_GuildButton",
+                                        parentFrame,
+                                        "SecureActionButtonTemplate")
+        self.frames.guild:SetAttribute("*type1", "click")
+        self.frames.guild:SetAttribute("*clickbutton1", GuildMicroButton)
+        self.frames.guild:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.guild
         self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
         self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
@@ -371,7 +376,11 @@ function MenuModule:CreateFrames()
     end
 
     if mm.char then
-        self.frames.char = CreateFrame("BUTTON", "char", parentFrame)
+        self.frames.char = CreateFrame("BUTTON", "XIVBar_CharacterButton",
+                                       parentFrame, "SecureActionButtonTemplate")
+        self.frames.char:SetAttribute("*type1", "click")
+        self.frames.char:SetAttribute("*clickbutton1", CharacterMicroButton)
+        self.frames.char:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.char
     else
         if self.frames.char then
@@ -398,7 +407,11 @@ function MenuModule:CreateFrames()
     end
 
     if mm.ach then
-        self.frames.ach = CreateFrame("BUTTON", "ach", parentFrame)
+        self.frames.ach = CreateFrame("BUTTON", "XIVBar_AchievementButton",
+                                      parentFrame, "SecureActionButtonTemplate")
+        self.frames.ach:SetAttribute("*type1", "click")
+        self.frames.ach:SetAttribute("*clickbutton1", AchievementMicroButton)
+        self.frames.ach:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.ach
     else
         if self.frames.ach then
@@ -407,7 +420,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.quest then
-        self.frames.quest = CreateFrame("BUTTON", "quest", parentFrame)
+        self.frames.quest = CreateFrame("BUTTON", "XIVBar_QuestButton",
+                                        parentFrame,
+                                        "SecureActionButtonTemplate")
+        self.frames.quest:SetAttribute("*type1", "click")
+        self.frames.quest:SetAttribute("*clickbutton1", QuestLogMicroButton)
+        self.frames.quest:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.quest
     else
         if self.frames.quest then
@@ -416,7 +434,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.lfg then
-        self.frames.lfg = CreateFrame("BUTTON", "lfg", parentFrame)
+        self.frames.lfg = CreateFrame("BUTTON", "XIVBar_LFGButton", parentFrame,
+                                      "SecureActionButtonTemplate")
+        self.frames.lfg:SetAttribute("*type1", "macro")
+        self.frames.lfg:SetAttribute("*macrotext1",
+                                     "/click LFDMicroButton\n/click PVEFrameTab1")
+        self.frames.lfg:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.lfg
     else
         if self.frames.lfg then
@@ -425,7 +448,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.journal then
-        self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
+        self.frames.journal = CreateFrame("BUTTON", "XIVBar_JournalButton",
+                                          parentFrame,
+                                          "SecureActionButtonTemplate")
+        self.frames.journal:SetAttribute("*type1", "click")
+        self.frames.journal:SetAttribute("*clickbutton1", EJMicroButton)
+        self.frames.journal:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.journal
     else
         if self.frames.journal then
@@ -434,7 +462,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.pvp then
-        self.frames.pvp = CreateFrame("BUTTON", "pvp", parentFrame)
+        self.frames.pvp = CreateFrame("BUTTON", "XIVBar_PVPButton", parentFrame,
+                                      "SecureActionButtonTemplate")
+        self.frames.pvp:SetAttribute("*type1", "macro")
+        self.frames.pvp:SetAttribute("*macrotext1",
+                                     "/click LFDMicroButton\n/click PVEFrameTab2")
+        self.frames.pvp:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.pvp
     else
         if self.frames.pvp then
@@ -443,7 +476,11 @@ function MenuModule:CreateFrames()
     end
 
     if mm.pet then
-        self.frames.pet = CreateFrame("BUTTON", "pet", parentFrame)
+        self.frames.pet = CreateFrame("BUTTON", "XIVBar_PetButton", parentFrame,
+                                      "SecureActionButtonTemplate")
+        self.frames.pet:SetAttribute("*type1", "click")
+        self.frames.pet:SetAttribute("*clickbutton1", CollectionsMicroButton)
+        self.frames.pet:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.pet
     else
         if self.frames.pet then
@@ -452,7 +489,12 @@ function MenuModule:CreateFrames()
     end
 
     if mm.house then
-        self.frames.house = CreateFrame("BUTTON", "house", parentFrame)
+        self.frames.house = CreateFrame("BUTTON", "XIVBar_HouseButton",
+                                        parentFrame,
+                                        "SecureActionButtonTemplate")
+        self.frames.house:SetAttribute("*type1", "click")
+        self.frames.house:SetAttribute("*clickbutton1", HousingMicroButton)
+        self.frames.house:SetAttribute("useOnKeyDown", false)
         parentFrame = self.frames.house
     else
         if self.frames.house then
@@ -461,7 +503,13 @@ function MenuModule:CreateFrames()
     end
 
     if mm.shop then
-        self.frames.shop = CreateFrame("BUTTON", "shop", parentFrame)
+        self.frames.shop = CreateFrame("BUTTON", "XIVBar_ShopButton",
+                                       parentFrame, "SecureActionButtonTemplate")
+        if StoreMicroButton then
+            self.frames.shop:SetAttribute("*type1", "click")
+            self.frames.shop:SetAttribute("*clickbutton1", StoreMicroButton)
+            self.frames.shop:SetAttribute("useOnKeyDown", false)
+        end
         parentFrame = self.frames.shop
     else
         if self.frames.shop then
@@ -1100,15 +1148,6 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- chat
 
-    self.functions.guild = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleGuildFrame()
-        end
-    end; -- guild
-
     self.functions.social = function(self, button, down)
         if InCombatLockdown() then
             return;
@@ -1117,15 +1156,6 @@ function MenuModule:CreateClickFunctions()
             ToggleFriendsFrame()
         end
     end; -- social
-
-    self.functions.char = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleCharacter("PaperDollFrame")
-        end
-    end; -- char
 
     self.functions.spell = function(self, button, down)
         if InCombatLockdown() then
@@ -1144,93 +1174,6 @@ function MenuModule:CreateClickFunctions()
             PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
         end
     end; -- talent
-
-    self.functions.journal = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleEncounterJournal()
-        end
-    end; -- journal
-
-    self.functions.lfg = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            if compat and compat.ToggleLFG then
-                compat.ToggleLFG()
-            else
-                ToggleLFDParentFrame()
-            end
-        end
-    end; -- lfg
-
-    self.functions.pet = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleCollectionsJournal()
-        end
-    end; -- pet
-
-    self.functions.ach = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleAchievementFrame()
-        end
-    end; -- ach
-
-    self.functions.quest = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            ToggleQuestLog()
-        end
-    end; -- quest
-
-    self.functions.pvp = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            if compat and compat.TogglePVP then
-                compat.TogglePVP()
-            else
-                TogglePVPUI()
-            end
-        end
-    end; -- pvp
-
-    self.functions.shop = function(self, button, down)
-        --if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            if compat and compat.ToggleStore then
-                compat.ToggleStore()
-            else
-                ToggleStoreUI()
-            end
-        end
-    end; -- shop
-
-    self.functions.house = function(self, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            if HousingMicroButton then
-                HousingMicroButton:Click()
-            end
-        end
-    end; -- house
 
     self.functions.help = function(self, button, down)
         if InCombatLockdown() then
