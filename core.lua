@@ -670,14 +670,6 @@ function XIVBar:ResetUI()
     end
 end
 
-function OffsetUI()
-    local offset = XIVBar.frames.bar:GetHeight();
-    local buffsAreaTopOffset = offset;
-
-    BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205,
-                       0 - buffsAreaTopOffset);
-end
-
 function XIVBar:OnEnable()
     self:CreateMainBar()
     self:Refresh()
@@ -778,11 +770,7 @@ function XIVBar:HideBarEvent()
                 -- Full refresh of the bar and modules
                 XIVBar:Refresh()
                 -- Force update module positions
-                if XIVBar.db.profile.general.barPosition == 'TOP' then
-                    OffsetUI()
-                else
-                    XIVBar:ResetUI()
-                end
+                XIVBar:ResetUI()
             end)
             return
         end
@@ -846,12 +834,6 @@ function XIVBar:Refresh()
     self:HideBarEvent()
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
-        hooksecurefunc("UIParent_UpdateTopFramePositions", function(self)
-            if (XIVBar.db.profile.general.barPosition == 'TOP') then
-                OffsetUI()
-            end
-        end)
-        OffsetUI()
         self.miniTextPosition = 'BOTTOM'
     else
         self:ResetUI();
