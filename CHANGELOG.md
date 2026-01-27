@@ -1,17 +1,16 @@
 # XIV_Databar Continued
 
-## [4.1](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/4.1) (2026-01-25)
+## [4.1.1](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/4.1.1) (2026-01-28)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.0.2...v4.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.1...v4.1.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Global :_
 
-- Added **Show on mouseover** option to the general settings.
-- Added an option to show accessibility tooltips on the **Micromenu** module buttons.
-- Fixed **System** module spacing issue with Chinese characters.
+- Brought back the **Bar Color** and **Bar alpha** options in the general settings.
+- Fixed a LUA error happening with the **Clock** module.
 
 ### _Retail :_
 
-- Added the **Great Vault** module, allowing you to quickly access the vault view and see your progress in the tooltip. The tooltip also contains a reminder of which **Mythic Keystone** you have.
-- Fixed Queue Eye Icon behavior of the **Micromenu** module.
+- The **Micromenu** module went into an overhaul to fix multiple Taint (Action blocked) issues. It's now possible to use most of the buttons in combat (Spellbook and Talents are still locked in combat).
+- Fixed **M+ Teleports** not working when the **ActionButtonUseKeyDown** CVar was not in the correct state.
 
