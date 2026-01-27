@@ -225,7 +225,7 @@ function XIVBar:OnInitialize()
         local important_localized = {}
         if data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
             important_localized = data.important[GetLocale()]
-        else 
+        else
             important_localized = data.important["enUS"]
         end
 
@@ -285,7 +285,7 @@ function XIVBar:OnInitialize()
         local new_localized = {}
         if data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
             new_localized = data.new[GetLocale()]
-        else 
+        else
             new_localized = data.new["enUS"]
         end
 
@@ -315,7 +315,7 @@ function XIVBar:OnInitialize()
         local improvment_localized = {}
         if data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
             improvment_localized = data.improvment[GetLocale()]
-        else 
+        else
             improvment_localized = data.improvment["enUS"]
         end
 
@@ -499,83 +499,83 @@ function XIVBar:CreateMainBar()
         local bar = CreateFrame("FRAME", "XIV_Databar", UIParent)
         self:RegisterFrame('bar', bar)
         self.frames.bgTexture = self.frames.bgTexture or bar:CreateTexture(nil, "BACKGROUND")
-        
+
         -- Create guide lines
         local guides = CreateFrame("FRAME", nil, UIParent)
         guides:SetAllPoints()
         guides:Hide()
-        
+
         -- Vertical center line
         local centerLine = guides:CreateTexture(nil, "OVERLAY")
         centerLine:SetColorTexture(1, 1, 1, 0.3)
         centerLine:SetWidth(2)
         centerLine:SetPoint("TOP", UIParent, "TOP", 0, 0)
         centerLine:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 0)
-        
+
         -- Horizontal center line
         local hCenterLine = guides:CreateTexture(nil, "OVERLAY")
         hCenterLine:SetColorTexture(1, 1, 1, 0.3)
         hCenterLine:SetHeight(2)
         hCenterLine:SetPoint("LEFT", UIParent, "LEFT", 0, 0)
         hCenterLine:SetPoint("RIGHT", UIParent, "RIGHT", 0, 0)
-        
+
         -- Edge markers
         local edgeMarkerSize = 40
         local edgeMarkerThickness = 2
-        
+
         -- Top edge markers
         local topLeft = guides:CreateTexture(nil, "OVERLAY")
         topLeft:SetColorTexture(1, 1, 1, 0.3)
         topLeft:SetSize(edgeMarkerSize, edgeMarkerThickness)
         topLeft:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
-        
+
         local topRight = guides:CreateTexture(nil, "OVERLAY")
         topRight:SetColorTexture(1, 1, 1, 0.3)
         topRight:SetSize(edgeMarkerSize, edgeMarkerThickness)
         topRight:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0)
-        
+
         -- Bottom edge markers
         local bottomLeft = guides:CreateTexture(nil, "OVERLAY")
         bottomLeft:SetColorTexture(1, 1, 1, 0.3)
         bottomLeft:SetSize(edgeMarkerSize, edgeMarkerThickness)
         bottomLeft:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
-        
+
         local bottomRight = guides:CreateTexture(nil, "OVERLAY")
         bottomRight:SetColorTexture(1, 1, 1, 0.3)
         bottomRight:SetSize(edgeMarkerSize, edgeMarkerThickness)
         bottomRight:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
-        
+
         -- Vertical edge markers
         local leftTop = guides:CreateTexture(nil, "OVERLAY")
         leftTop:SetColorTexture(1, 1, 1, 0.3)
         leftTop:SetSize(edgeMarkerThickness, edgeMarkerSize)
         leftTop:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
-        
+
         local leftBottom = guides:CreateTexture(nil, "OVERLAY")
         leftBottom:SetColorTexture(1, 1, 1, 0.3)
         leftBottom:SetSize(edgeMarkerThickness, edgeMarkerSize)
         leftBottom:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
-        
+
         local rightTop = guides:CreateTexture(nil, "OVERLAY")
         rightTop:SetColorTexture(1, 1, 1, 0.3)
         rightTop:SetSize(edgeMarkerThickness, edgeMarkerSize)
         rightTop:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0)
-        
+
         local rightBottom = guides:CreateTexture(nil, "OVERLAY")
         rightBottom:SetColorTexture(1, 1, 1, 0.3)
         rightBottom:SetSize(edgeMarkerThickness, edgeMarkerSize)
         rightBottom:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
-        
+
         self.frames.guides = guides
-        
+
         -- Set initial frame level instead of strata
         bar:SetFrameLevel(1)
-        
+
         -- Make the bar movable
         bar:SetMovable(true)
         bar:EnableMouse(true)
         bar:RegisterForDrag("LeftButton")
-        
+
         -- Snap threshold in pixels
         local SNAP_THRESHOLD = 20
 
@@ -598,7 +598,7 @@ function XIVBar:CreateMainBar()
             local point = "CENTER"
             local xOffset, yOffset = 0, 0
             local snapped = false
-            
+
             -- Check horizontal position
             if IsWithinThreshold(centerX, screenWidth/2, SNAP_THRESHOLD) then
                 point = "CENTER"
@@ -616,7 +616,7 @@ function XIVBar:CreateMainBar()
                 point = "CENTER"
                 xOffset = centerX - screenWidth/2
             end
-            
+
             -- Check vertical position
             if IsWithinThreshold(centerY, 0, SNAP_THRESHOLD) then
                 yOffset = 0
@@ -629,10 +629,10 @@ function XIVBar:CreateMainBar()
             else
                 yOffset = centerY - screenHeight/2
             end
-            
+
             return point, point, xOffset, yOffset, snapped
         end
-        
+
         bar:SetScript("OnDragStart", function(self)
             if not XIVBar.db.profile.general.locked and not XIVBar.db.profile.general.barFullscreen then
                 self:StartMoving()
@@ -644,20 +644,20 @@ function XIVBar:CreateMainBar()
             if not XIVBar.db.profile.general.barFullscreen then
                 self:StopMovingOrSizing()
                 XIVBar.frames.guides:Hide()
-                
+
                 -- Get final position with snapping
                 local point, relativePoint, xOffset, yOffset = GetSnappedPosition(self)
-                
+
                 -- Save position
                 XIVBar.db.profile.general.point = point
                 XIVBar.db.profile.general.relativePoint = relativePoint
                 XIVBar.db.profile.general.xOffset = xOffset
                 XIVBar.db.profile.general.yOffset = yOffset
-                
+
                 -- Apply position
                 self:ClearAllPoints()
                 self:SetPoint(point, UIParent, relativePoint, xOffset, yOffset)
-                
+
                 XIVBar:Refresh()
             end
         end)
@@ -706,7 +706,7 @@ end
 function XIVBar:GetColor(name)
     local profile = self.db.profile.color
     local r, g, b, a = profile[name].r, profile[name].g, profile[name].b, profile[name].a
-    
+
     if name == 'normal' and profile.useTextCC then
         r, g, b, _ = self:GetClassColors()
     elseif name == 'barColor' and profile.useCC then
@@ -760,7 +760,7 @@ function XIVBar:HideBarEvent()
 
     bar:SetScript("OnEvent", function(_, event, ...)
         local barFrame = XIVBar:GetFrame("bar")
-        
+
         -- Handle zone changes and instance transitions
         if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
             C_Timer.After(0.5, function()
@@ -774,7 +774,7 @@ function XIVBar:HideBarEvent()
             end)
             return
         end
-        
+
         if self.db.profile.general.barFlightHide then
             if event == "VEHICLE_POWER_SHOW" then
                 if not barFrame:IsVisible() then barFrame:Show() end
@@ -843,7 +843,7 @@ function XIVBar:Refresh()
     if not InCombatLockdown() then
         self.frames.bar:ClearAllPoints()
     end
-    
+
     -- Use saved position if not in fullscreen mode
     if not self.db.profile.general.barFullscreen then
         -- If we have a saved custom position, use it
@@ -874,7 +874,7 @@ function XIVBar:Refresh()
             self.frames.bar:SetPoint("RIGHT", -self.db.profile.general.barMargin, 0)
         end
     end
-    
+
     if not InCombatLockdown() then
         self.frames.bar:SetHeight(self:GetHeight())
         self.frames.bgTexture:SetColorTexture(self:GetColor('barColor'))
