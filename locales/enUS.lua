@@ -195,6 +195,13 @@ L['Empty Hearthstones List'] = "If you see '" .. retrievingData .. "' in the lis
 L['Hearthstones Select'] = true;
 L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)";
 
+-- Tome Of Teleportation
+L['Tome Of Teleportation'] = true;
+L['Tome Of Teleportation Integration'] = true;
+L['Enable Tome Of Teleportation'] = true;
+L['Tome Of Teleportation Desc'] = "When enabled, right-clicking the hearthstone will open Tome Of Teleportation instead of the default port menu. The port options button will be hidden.";
+L['Open Tome Of Teleportation'] = true;
+
 L["Classic"] = true;
 L["Burning Crusade"] = true;
 L["Wrath of the Lich King"] = true;
