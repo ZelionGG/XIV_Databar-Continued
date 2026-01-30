@@ -114,7 +114,6 @@ function MenuModule:OnInitialize()
         { key = 'journal',binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
         { key = 'pvp',    binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
         { key = 'pet',    binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
-        { key = 'house',  binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
         { key = 'shop',   binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
         { key = 'help',   binding = 'TOGGLEHELP',             label = HELP_BUTTON },
     }
@@ -398,10 +397,6 @@ function MenuModule:CreateFrames()
             micro = CollectionsMicroButton,
         },
         {
-            key = 'house', frameName = 'XIVBar_HouseButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            micro = HousingMicroButton,
-        },
-        {
             key = 'shop', frameName = 'XIVBar_ShopButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
             micro = StoreMicroButton,
         },
@@ -521,11 +516,7 @@ function MenuModule:CreateIcons()
     for name, frame in pairs(self.frames) do
         if frame['Click'] ~= nil then -- Odd way of checking if it's a button
             self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
-            if name == 'house' then
-                self.icons[name]:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
-            else
-                self.icons[name]:SetTexture(self.mediaFolder .. name)
-            end
+            self.icons[name]:SetTexture(self.mediaFolder .. name)
         end
     end
 end
@@ -545,11 +536,7 @@ function MenuModule:IconDefaults(name)
         return;
     end
     self.icons[name]:SetPoint('CENTER')
-    if name == 'house' then
-        self.icons[name]:SetSize(self.iconSize * 0.7, self.iconSize * 0.7)
-    else
-        self.icons[name]:SetSize(self.iconSize, self.iconSize)
-    end
+    self.icons[name]:SetSize(self.iconSize, self.iconSize)
     self.icons[name]:SetVertexColor(xb:GetColor('normal'))
 end
 
@@ -1138,6 +1125,15 @@ function MenuModule:CreateClickFunctions()
             end
         end
     end; -- chat
+
+    self.functions.char = function(self, button, down)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" then
+            ToggleCharacter("PaperDollFrame")
+        end
+    end; -- char
 end
 
 function MenuModule:GetDefaultOptions()
@@ -1168,7 +1164,6 @@ function MenuModule:GetDefaultOptions()
         pvp = true,
         pet = true,
         shop = true,
-        house = true,
         help = true,
         hideAppContact = false
     }
@@ -1560,19 +1555,6 @@ function MenuModule:GetConfig()
                         end,
                         set = function(_, val)
                             xb.db.profile.modules.microMenu.pet = val;
-                            self:UpdateMenu();
-                            self:Refresh();
-                        end
-                    },
-                    house = {
-                        name = L['Show Housing Button'],
-                        order = 14,
-                        type = "toggle",
-                        get = function()
-                            return xb.db.profile.modules.microMenu.house;
-                        end,
-                        set = function(_, val)
-                            xb.db.profile.modules.microMenu.house = val;
                             self:UpdateMenu();
                             self:Refresh();
                         end
