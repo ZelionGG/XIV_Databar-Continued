@@ -7,6 +7,11 @@ local compat = xb.compat
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
 local GetItemInfo = C_Item.GetItemInfo
+local ContinueOnItemLoad = (C_Item and C_Item.ContinueOnItemLoad) or function(_, callback)
+    if callback then callback() end
+end
+
+
 local IsUsableItem = C_Item.IsUsableItem
 local GetItemCooldown = C_Container.GetItemCooldown
 
@@ -16,6 +21,56 @@ local GetSpellInfo = C_Spell.GetSpellInfo
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function TravelModule:GetName() return L['Travel']; end
+
+local function GetRetrievingText(id)
+    return L['Retrieving data'] .. " (" .. id .. ")"
+end
+
+local function GetItemName(id)
+    local name = select(1, GetItemInfo(id))
+
+    if name then
+        if TravelModule and TravelModule.portOptions and TravelModule.portOptions[id] then
+            TravelModule.portOptions[id].text = name
+        end
+        return name
+    end
+
+    local retrievingText = GetRetrievingText(id)
+
+    local function onItemReady()
+        local loadedName = GetItemName(id)
+        if loadedName and TravelModule and TravelModule.portOptions then
+            if TravelModule.portOptions[id] then
+                TravelModule.portOptions[id].text = loadedName
+            end
+        end
+        if loadedName and xb and xb.db and xb.db.char and xb.db.char.portItem and xb.db.char.portItem.portId == id then
+            xb.db.char.portItem.text = loadedName
+        end
+        if TravelModule and TravelModule.Refresh then
+            TravelModule:Refresh()
+        end
+    end
+
+    -- Prefer Item API when available (safer in modern clients)
+    if Item and Item.CreateFromItemID then
+        local item = Item:CreateFromItemID(id)
+        item:ContinueOnItemLoad(onItemReady)
+    else
+        ContinueOnItemLoad(id, onItemReady)
+    end
+
+    return retrievingText
+end
+
+local function GetPortLabel(portId)
+    if IsPlayerSpell(portId) then
+        local spellInfo = GetSpellInfo(portId)
+        if spellInfo and spellInfo.name then return spellInfo.name end
+    end
+    return GetItemName(portId)
+end
 
 function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
@@ -337,15 +392,16 @@ function TravelModule:UpdatePortOptions()
     if IsUsableItem(128353) and not self.portOptions[128353] then
         self.portOptions[128353] = {
             portId = 128353,
-            text = GetItemInfo(128353)
+            text = GetItemName(128353)
         } -- admiral's compass
     end
     if PlayerHasToy(140192) and not self.portOptions[140192] then
         self.portOptions[140192] = {
             portId = 140192,
-            text = xb.db.profile.dalaran_hs_string or GetItemInfo(140192)
+            text = GetItemName(140192)
         } -- dalaran hearthstone
     end
+
     if PlayerHasToy(self.garrisonHearth) and
         not self.portOptions[self.garrisonHearth] then
         self.portOptions[self.garrisonHearth] = {
@@ -806,7 +862,9 @@ function TravelModule:CreatePortPopup()
 
                 buttonText:SetFont(xb:GetFont(db.text.fontSize))
                 buttonText:SetTextColor(xb:GetColor('normal'))
-                buttonText:SetText(v.text)
+                local label = GetPortLabel(v.portId) or v.text
+                v.text = label
+                buttonText:SetText(label)
                 buttonText:SetPoint('LEFT')
                 local textWidth = buttonText:GetStringWidth()
 
@@ -814,6 +872,7 @@ function TravelModule:CreatePortPopup()
                 button:SetSize(textWidth, db.text.fontSize)
                 button.isSettable = true
                 button.portItem = v
+                button.textField = buttonText
 
                 button:EnableMouse(true)
                 button:RegisterForClicks('LeftButtonUp')
@@ -827,7 +886,7 @@ function TravelModule:CreatePortPopup()
                 end)
 
                 button:SetScript('OnClick', function(self)
-                    xb.db.char.portItem = self.portItem
+                    xb.db.char.portItem = { portId = self.portItem.portId }
                     TravelModule:Refresh()
                 end)
 
@@ -842,6 +901,15 @@ function TravelModule:CreatePortPopup()
             if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
                 IsUsableItem(v.portId)) then
                 self.portButtons[v.portId].isSettable = false
+            else
+                local label = GetPortLabel(v.portId) or v.text
+                v.text = label
+                local button = self.portButtons[v.portId]
+                if button and button.textField then
+                    button.textField:SetText(label)
+                    local textWidth = button.textField:GetStringWidth()
+                    button:SetSize(textWidth, db.text.fontSize)
+                end
             end
         end -- if nil
     end -- for ipairs portOptions
@@ -1108,7 +1176,9 @@ function TravelModule:Refresh()
         end
 
         self.hearthText:SetText(GetBindLocation())
-        self.portText:SetText(xb.db.char.portItem.text)
+        local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
+        local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
+        self.portText:SetText(combatPortText)
         self:SetHearthColor()
         self:SetPortColor()
         if allowMythic then
@@ -1158,7 +1228,9 @@ function TravelModule:Refresh()
     if hasPortOptions then
         self.portButton:Show()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
-        self.portText:SetText(xb.db.char.portItem.text)
+        local portItem = xb.db.char.portItem or self:FindFirstOption()
+        local portText = portItem and (portItem.text or GetPortLabel(portItem.portId)) or ''
+        self.portText:SetText(portText)
 
         self.portButton:SetSize(self.portText:GetWidth() + iconSize +
                                     db.general.barPadding, xb:GetHeight())
@@ -1277,7 +1349,8 @@ function TravelModule:ShowTooltip()
         -- Show teleport cooldowns
         if self.portOptions then
             for i, v in pairs(self.portOptions) do
-                if v and v.portId and v.text then
+                if v and v.portId then
+                    local label = v.text or GetPortLabel(v.portId)
                     if PlayerHasToy(v.portId) or (IsUsableItem(v.portId) and not IsSpellKnown(v.portId)) then
                         -- Handle items and toys
                         local remainingCooldown = 0
@@ -1286,7 +1359,7 @@ function TravelModule:ShowTooltip()
                             remainingCooldown = (startTime + duration - GetTime())
                         end
                         local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
-                        GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
+                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
                     else
                         -- Handle spells (including class-specific teleports)
                         if IsSpellKnown(v.portId) then
@@ -1302,7 +1375,7 @@ function TravelModule:ShowTooltip()
                                 end
                             end
                             local cdString = self:FormatCooldown(remainingCooldown)
-                            GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
+                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
                         end
                     end
                 end
@@ -1328,7 +1401,7 @@ function TravelModule:ShowTooltip()
 end
 
 function TravelModule:FindFirstOption()
-    local firstItem = {portId = 140192, text = GetItemInfo(140192)}
+    local firstItem = {portId = 140192, text = GetItemName(140192)}
     if self.portOptions then
         for k, v in pairs(self.portOptions) do
             if self:IsUsable(v.portId) then
@@ -1383,12 +1456,6 @@ function TravelModule:RefreshHearthstonesList()
             -- end
             xb.db.profile.hearthstonesList[i] = hearthName
         end
-    end
-
-    -- Dalaran Hearthstone
-    if xb.db.profile.dalaran_hs_string == nil then
-        local _, hearthName, _, _, _, _ = C_ToyBox.GetToyInfo(140192)
-        xb.db.profile.dalaran_hs_string = hearthName
     end
 end
 
