@@ -27,6 +27,7 @@ local function GetRetrievingText(id)
 end
 
 local function GetItemName(id)
+    if compat.isMists and not GetItemInfo then return tostring(id) end
     local name = select(1, GetItemInfo(id))
 
     if name then
@@ -37,6 +38,10 @@ local function GetItemName(id)
     end
 
     local retrievingText = GetRetrievingText(id)
+
+    if compat.isMists then
+        return retrievingText
+    end
 
     local function onItemReady()
         local loadedName = GetItemName(id)
@@ -54,7 +59,7 @@ local function GetItemName(id)
     end
 
     -- Prefer Item API when available (safer in modern clients)
-    if Item and Item.CreateFromItemID then
+    if Item and Item.CreateFromItemID and not compat.isMists then
         local item = Item:CreateFromItemID(id)
         item:ContinueOnItemLoad(onItemReady)
     else
@@ -76,51 +81,59 @@ function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.garrisonHearth = 110560
     self.hearthstones = {
-        246565, -- Cosmic Hearthstone
-        245970, -- P.O.S.T. Master's Express Hearthstone
-        236687, -- Explosive Hearthstone
-        235016, -- Redeployment Module
-        228940, -- Notorious Thread's Hearthstone
-        200630, -- Ohn'ir Windsage's Hearthstone
-        190196, -- Enlightened Hearthstone
-        212337, -- Stone of the Hearth
-        209035, -- Hearthstone of the Flame
-        208704, -- Deepdweller's Earthen Hearthstone
-        54452, -- Ethereal Portal
-        193588, -- Timewalker's Hearthstone
-        190237, -- Broker Translocation Matrix
-        188952, -- Dominated Hearthstone
-        184353, -- Kyrian Hearthstone
-        182773, -- Necrolord Hearthstone
-        180290, -- Night Fae Hearthstone
-        183716, -- Venthyr Sinstone
-        172179, -- Eternal Travaler's Hearthstone
-        6948, -- Hearthstone
-        64488, -- Innkeeper's Daughter
-        28585, -- Ruby Slippers
-        93672, -- Dark Portal
-        142542, -- Tome of Town Portal
-        163045, -- Headless Horseman's Hearthstone
-        162973, -- Greatfather Winter's Hearthstone
-        165669, -- Lunar Elder's Hearthstone
-        165670, -- Peddlefeet's Lovely Hearthstone
-        165802, -- Noble Gardener's Hearthstone
-        166746, -- Fire Eater's Hearthstone
-        166747, -- Brewfest Reveler's Hearthstone
-        40582, -- Scourgestone (Death Knight Starting Campaign)
-        172179, -- Eternal Traveler's Hearthstone
-        142543, -- Scroll of Town Portal
-        37118, -- Scroll of Recall 1
-        44314, -- Scroll of Recall 2
-        44315, -- Scroll of Recall 3
-        556, -- Astral Recall
-        168907, -- Holographic Digitalization Hearthstone
-        142298, -- Astonishingly Scarlet Slippers
-        210455, -- Draenic Hologem
+        556,       -- Astral Recall
+        6948,      -- Hearthstone
         260221, -- Naaru's Embrace (Classic)
-        263489, -- Naaru's Embrace (Retail)
         184871 -- Dark Portal (Classic)
     }
+    if compat.isMainline then
+        self.hearthstones = {
+            246565, -- Cosmic Hearthstone
+            245970, -- P.O.S.T. Master's Express Hearthstone
+            236687, -- Explosive Hearthstone
+            235016, -- Redeployment Module
+            228940, -- Notorious Thread's Hearthstone
+            200630, -- Ohn'ir Windsage's Hearthstone
+            190196, -- Enlightened Hearthstone
+            212337, -- Stone of the Hearth
+            209035, -- Hearthstone of the Flame
+            208704, -- Deepdweller's Earthen Hearthstone
+            54452, -- Ethereal Portal
+            193588, -- Timewalker's Hearthstone
+            190237, -- Broker Translocation Matrix
+            188952, -- Dominated Hearthstone
+            184353, -- Kyrian Hearthstone
+            182773, -- Necrolord Hearthstone
+            180290, -- Night Fae Hearthstone
+            183716, -- Venthyr Sinstone
+            172179, -- Eternal Travaler's Hearthstone
+            6948, -- Hearthstone
+            64488, -- Innkeeper's Daughter
+            28585, -- Ruby Slippers
+            93672, -- Dark Portal
+            142542, -- Tome of Town Portal
+            163045, -- Headless Horseman's Hearthstone
+            162973, -- Greatfather Winter's Hearthstone
+            165669, -- Lunar Elder's Hearthstone
+            165670, -- Peddlefeet's Lovely Hearthstone
+            165802, -- Noble Gardener's Hearthstone
+            166746, -- Fire Eater's Hearthstone
+            166747, -- Brewfest Reveler's Hearthstone
+            40582, -- Scourgestone (Death Knight Starting Campaign)
+            172179, -- Eternal Traveler's Hearthstone
+            142543, -- Scroll of Town Portal
+            37118, -- Scroll of Recall 1
+            44314, -- Scroll of Recall 2
+            44315, -- Scroll of Recall 3
+            556, -- Astral Recall
+            168907, -- Holographic Digitalization Hearthstone
+            142298, -- Astonishingly Scarlet Slippers
+            210455, -- Draenic Hologem
+            263489, -- Naaru's Embrace (Retail)
+            260221, -- Naaru's Embrace (Classic)
+            184871 -- Dark Portal (Classic)
+        }
+    end
 
     self.portButtons = {}
     self.extraPadding = (xb.constants.popupPadding * 3)
