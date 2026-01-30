@@ -3,13 +3,13 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 local compat = xb.compat
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
 function MenuModule:GetName()
     return L['Micromenu'];
 end
-local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 local TitleIconVersion_Small = Enum.TitleIconVersion and Enum.TitleIconVersion.Small
 
@@ -101,23 +101,31 @@ function MenuModule:OnInitialize()
     }
 
     self.buttonInfo = {
-        menu   = { binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
-        chat   = { binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
-        guild  = { binding = 'TOGGLEGUILD',            label = GUILD },
-        social = { binding = 'TOGGLESOCIAL',           label = SOCIAL_LABEL },
-        char   = { binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
-        spell  = { binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
-        talent = { binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
-        ach    = { binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
-        quest  = { binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
-        lfg    = { binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
-        journal= { binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
-        pvp    = { binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
-        pet    = { binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
-        house  = { binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
-        shop   = { binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
-        help   = { binding = 'TOGGLEHELP',             label = HELP_BUTTON },
+        { key = 'menu',   binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
+        { key = 'chat',   binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
+        { key = 'guild',  binding = 'TOGGLEGUILD',            label = GUILD },
+        { key = 'social', binding = 'TOGGLESOCIAL',           label = SOCIAL_LABEL },
+        { key = 'char',   binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
+        { key = 'spell',  binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
+        { key = 'talent', binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
+        { key = 'ach',    binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
+        { key = 'quest',  binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
+        { key = 'lfg',    binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
+        { key = 'journal',binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
+        { key = 'pvp',    binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
+        { key = 'pet',    binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
+        { key = 'house',  binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
+        { key = 'shop',   binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
+        { key = 'help',   binding = 'TOGGLEHELP',             label = HELP_BUTTON },
     }
+
+    -- Build helpers
+    self.buttonOrder = {}
+    self.buttonInfoByKey = {}
+    for _, info in ipairs(self.buttonInfo) do
+        self.buttonOrder[#self.buttonOrder+1] = info.key
+        self.buttonInfoByKey[info.key] = info
+    end
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -260,9 +268,7 @@ function MenuModule:Refresh()
 
     self:ToggleBlizzardMicroMenu()
 
-    if self.frames.menu == nil then
-        return;
-    end
+    if not next(self.frames) then return end
 
     if InCombatLockdown() then
         self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
@@ -279,19 +285,21 @@ function MenuModule:Refresh()
 
     self.iconSize = xb:GetHeight()
 
-    local colors = xb.db.profile.color
-    local totalWidth = 0;
-    for name, frame in pairs(self.frames) do
-        self:IconDefaults(name)
-        if name == 'menu' then
-            frame:SetPoint("LEFT", xb.db.profile.modules.microMenu.iconSpacing, 0)
-            totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
-        elseif frame:GetParent():GetName() == 'menu' then
-            frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.mainMenuSpacing, 0)
-            totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.mainMenuSpacing
-        else
-            frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.iconSpacing, 0)
-            totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
+    local mm = xb.db.profile.modules.microMenu
+    local totalWidth, prev = 0, nil
+    for _, key in ipairs(self.buttonOrder) do
+        local frame = self.frames[key]
+        if frame then
+            self:IconDefaults(key)
+            if not prev then
+                frame:SetPoint("LEFT", mm.iconSpacing, 0)
+                totalWidth = totalWidth + frame:GetWidth() + mm.iconSpacing
+            else
+                local spacing = (prev == self.frames.menu) and mm.mainMenuSpacing or mm.iconSpacing
+                frame:SetPoint("LEFT", prev, "RIGHT", spacing, 0)
+                totalWidth = totalWidth + frame:GetWidth() + spacing
+            end
+            prev = frame
         end
     end
     self.microMenuFrame:SetPoint("LEFT", xb.db.profile.general.barPadding, 0)
@@ -332,71 +340,6 @@ function MenuModule:CreateFrames()
         {
             key = 'menu',
             frameName = 'XIVBar_MenuButton',
-            -- template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            -- setup = function(frame)
-            --     local mb = MainMenuMicroButton
-            --     if not mb then return end
-            --     local function restore(state)
-            --         if not state or not state.point or not state.point[1] then return end
-            --         local targetAlpha = (state.alpha and state.alpha > 0) and state.alpha or 1
-            --         mb:SetParent(state.parent)
-            --         mb:ClearAllPoints()
-            --         mb:SetPoint(unpack(state.point))
-            --         mb:SetAlpha(targetAlpha)
-            --         if state.shown then mb:Show() else mb:Hide() end
-            --         mb:EnableMouse(state.mouse and true or false)
-            --         local p = state.parent
-            --         if p and p.IsObjectType and p:IsObjectType('Frame') then
-            --             if p.PositionButtons then
-            --                 p:PositionButtons()
-            --             elseif p.UpdateButtons then
-            --                 p:UpdateButtons()
-            --             end
-            --         end
-            --     end
-            --     frame:HookScript('PreClick', function(_, button)
-            --         if button ~= 'LeftButton' then return end
-            --         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
-            --             return
-            --         end
-            --         frame._xivbarMainMenuRestore = {
-            --             parent = mb:GetParent(),
-            --             point = { mb:GetPoint() },
-            --             alpha = mb:GetAlpha(),
-            --             shown = mb:IsShown(),
-            --             mouse = mb:IsMouseEnabled(),
-            --         }
-            --         mb:SetParent(frame)
-            --         mb:ClearAllPoints()
-            --         mb:SetAllPoints(frame)
-            --         mb:SetAlpha(0)
-            --         mb:Show()
-            --         mb:EnableMouse(true)
-            --     end)
-            --     frame:HookScript('PostClick', function(_, button)
-            --         if button ~= 'LeftButton' then return end
-            --         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
-            --             return
-            --         end
-            --         if GameMenuFrame and GameMenuFrame:IsShown() then
-            --             if not GameMenuFrame.XIVBarMenuRestoreHook then
-            --                 GameMenuFrame:HookScript('OnHide', function()
-            --                     restore(frame._xivbarMainMenuRestore)
-            --                 end)
-            --                 GameMenuFrame.XIVBarMenuRestoreHook = true
-            --             end
-            --         else
-            --             C_Timer.After(0, function()
-            --                 restore(frame._xivbarMainMenuRestore)
-            --             end)
-            --         end
-            --     end)
-            --     frame:SetAttribute('*type1', 'click')
-            --     frame:SetAttribute('*clickbutton1', mb)
-            --     frame:SetAttribute('*shift-type2', 'macro')
-            --     frame:SetAttribute('*shift-macrotext2', '/reload')
-            --     frame:SetAttribute('useOnKeyDown', false)
-            -- end,
         },
         {
             key = 'chat', frameName = 'XIVBar_ChatButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -747,7 +690,7 @@ function MenuModule:DefaultLeave(name)
 end
 
 function MenuModule:GetButtonTooltipText(name)
-    local info = self.buttonInfo and self.buttonInfo[name]
+    local info = (self.buttonInfoByKey and self.buttonInfoByKey[name]) or (self.buttonInfo and self.buttonInfo[name])
     if not info or not info.label then return nil end
     local label, binding = info.label, info.binding
 
@@ -1479,7 +1422,6 @@ function MenuModule:GetConfig()
                 args = {
                     menu = {
                         name = L['Show Menu Button'],
-                        disabled = true,
                         order = 1,
                         type = "toggle",
                         get = function()
@@ -1487,6 +1429,7 @@ function MenuModule:GetConfig()
                         end,
                         set = function(_, val)
                             xb.db.profile.modules.microMenu.menu = val;
+                            self:UpdateMenu();
                             self:Refresh();
                         end
                     },
