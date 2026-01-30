@@ -120,17 +120,24 @@ function CurrencyModule:Refresh()
         self.xpFrame:Show()
     elseif not compat.isClassicOrTBC then
         local iconsWidth = 0
+        local buttonIndex = 1
         if ShouldUseSelectedCurrencies() and C_CurrencyInfo then
-            for i = 1, 3 do
-                if db.modules.currency[self.intToOpt[i]] ~= '0' then
-                    iconsWidth = iconsWidth +
-                        self:StyleCurrencyFrame(tonumber(db.modules.currency[self.intToOpt[i]]), nil, i)
+            local selectedCurrencies = db.modules.currency.selectedCurrencies
+            for i, currencyId in ipairs(selectedCurrencies) do
+                if buttonIndex <= 3 then  -- Limit to 3 buttons max on the bar
+                    local width = self:StyleCurrencyFrame(tonumber(currencyId), nil, buttonIndex)
+                    if width > 0 then
+                        iconsWidth = iconsWidth + width
+                        if buttonIndex == 1 then
+                            self.curButtons[1]:SetPoint('LEFT')
+                        elseif buttonIndex == 2 then
+                            self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
+                        elseif buttonIndex == 3 then
+                            self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+                        end
+                        buttonIndex = buttonIndex + 1
+                    end
                 end
-            end
-            if self.curButtons[1]:IsShown() then
-                self.curButtons[1]:SetPoint('LEFT')
-                self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-                self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
             end
         elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
             for i = 1, GetNumWatchedTokens() do
@@ -389,20 +396,56 @@ function CurrencyModule:ShowTooltip()
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
 
-        if ShouldUseSelectedCurrencies() and C_CurrencyInfo then
-            for i = 1, 3 do
-                if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
-                    local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
-                    local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
-                    if curInfo then
-                        if curInfo.useTotalEarnedForMaxQty then
-                            GameTooltip:AddDoubleLine(curInfo.name,
-                                string.format('%d (%d/%d)', curInfo.quantity, curInfo.totalEarned,
-                                    curInfo.maxQuantity), r, g, b, 1, 1, 1)
-                        else
-                            GameTooltip:AddDoubleLine(curInfo.name, string.format('%d', curInfo.quantity), r, g, b, 1,
-                                1, 1)
+        -- Display selected currencies grouped by categories
+        local selectedCurrencies = xb.db.profile.modules.currency.selectedCurrencies
+        if #selectedCurrencies > 0 and C_CurrencyInfo then
+            -- Create a set to quickly check if a currency is selected
+            local selectedSet = {}
+            for _, currencyId in ipairs(selectedCurrencies) do
+                selectedSet[currencyId] = true
+            end
+            
+            -- Get currencies by expansion for ordering
+            local expansionCurrencies = self:GetCurrenciesByExpansion()
+            
+            for _, expansionData in ipairs(expansionCurrencies) do
+                local hasCurrencyInCategory = false
+                local currenciesToShow = {}
+                
+                -- Check if this category has selected currencies
+                for _, currencyInfo in ipairs(expansionData.currencies) do
+                    if selectedSet[currencyInfo.id] then
+                        hasCurrencyInCategory = true
+                        table.insert(currenciesToShow, currencyInfo)
+                    end
+                end
+                
+                -- Display header (except Legacy) and currencies
+                if hasCurrencyInCategory then
+                    -- Add golden header except if it's Legacy
+                    if expansionData.header ~= "Legacy" then
+                        GameTooltip:AddLine(expansionData.header, 1, 0.82, 0)  -- Golden color
+                    end
+                    
+                    -- Display currencies from this category
+                    for _, currencyInfo in ipairs(currenciesToShow) do
+                        local curInfo = C_CurrencyInfo.GetCurrencyInfo(tonumber(currencyInfo.id))
+                        if curInfo then
+                            local iconString = string.format("|T%s:16:16:0:0|t ", curInfo.iconFileID or "")
+                            if curInfo.useTotalEarnedForMaxQty then
+                                GameTooltip:AddDoubleLine(iconString .. curInfo.name,
+                                    string.format('%d (%d/%d)', curInfo.quantity, curInfo.totalEarned,
+                                        curInfo.maxQuantity), r, g, b, 1, 1, 1)
+                            else
+                                GameTooltip:AddDoubleLine(iconString .. curInfo.name, string.format('%d', curInfo.quantity), r, g, b, 1,
+                                    1, 1)
+                            end
                         end
+                    end
+                    
+                    -- Add space between categories (except after Legacy if no header)
+                    if expansionData.header ~= "Legacy" then
+                        GameTooltip:AddLine(" ")
                     end
                 end
             end
@@ -439,6 +482,41 @@ function CurrencyModule:GetCurrencyOptions()
     return curOpts
 end
 
+function CurrencyModule:GetCurrenciesByExpansion()
+    local expansionCurrencies = {}
+    if not C_CurrencyInfo or not C_CurrencyInfo.GetCurrencyListSize then
+        return expansionCurrencies
+    end
+
+    local currentHeader = nil
+    local currentHeaderIndex = nil
+    
+    for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
+        local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
+        if listInfo.isHeader then
+            currentHeader = listInfo.name
+            currentHeaderIndex = #expansionCurrencies + 1
+            table.insert(expansionCurrencies, {
+                header = currentHeader,
+                currencies = {}
+            })
+        elseif not listInfo.isTypeUnused and currentHeader and currentHeaderIndex then
+            local cL = C_CurrencyInfo.GetCurrencyListLink(i)
+            local currencyID = C_CurrencyInfo.GetCurrencyIDFromLink(cL)
+            local curInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
+            if curInfo then
+                table.insert(expansionCurrencies[currentHeaderIndex].currencies, {
+                    id = tostring(currencyID),
+                    name = curInfo.name,
+                    iconFileID = curInfo.iconFileID,
+                    index = i
+                })
+            end
+        end
+    end
+    return expansionCurrencies
+end
+
 function CurrencyModule:GetDefaultOptions()
     return 'currency', {
         enabled = true,
@@ -446,9 +524,7 @@ function CurrencyModule:GetDefaultOptions()
         xpBarCC = false,
         showTooltip = true,
         textOnRight = true,
-        currencyOne = '0',
-        currencyTwo = '0',
-        currencyThree = '0'
+        selectedCurrencies = {}  -- Array of selected currency IDs
     }
 end
 
@@ -525,62 +601,135 @@ function CurrencyModule:GetConfig()
     }
 
     if ShouldUseSelectedCurrencies() then
-        args.currency = {
+        local expansionCurrencies = self:GetCurrenciesByExpansion()
+        local order = 5
+        
+        -- Select All and Unselect All buttons
+        args['currency_buttons'] = {
             type = 'group',
-            name = L['Currency Select'],
-            order = 5,
+            name = L['Currency Selection'],
+            order = order,
             inline = true,
             args = {
-                currencyOne = {
-                    name = L['First Currency'],
-                    type = "select",
+                selectAll = {
+                    name = L['Select All'],
+                    type = "execute",
                     order = 1,
-                    values = function()
-                        return self:GetCurrencyOptions();
-                    end,
-                    style = "dropdown",
-                    get = function()
-                        return xb.db.profile.modules.currency.currencyOne;
-                    end,
-                    set = function(info, value)
-                        xb.db.profile.modules.currency.currencyOne = value;
-                        self:Refresh();
+                    func = function()
+                        local allCurrencies = {}
+                        for _, expansionData in ipairs(expansionCurrencies) do
+                            for _, currencyInfo in ipairs(expansionData.currencies) do
+                                table.insert(allCurrencies, currencyInfo.id)
+                            end
+                        end
+                        xb.db.profile.modules.currency.selectedCurrencies = allCurrencies
+                        self:Refresh()
                     end
                 },
-                currencyTwo = {
-                    name = L['Second Currency'],
-                    type = "select",
+                unselectAll = {
+                    name = L['Unselect All'],
+                    type = "execute",
                     order = 2,
-                    values = function()
-                        return self:GetCurrencyOptions();
-                    end,
-                    style = "dropdown",
-                    get = function()
-                        return xb.db.profile.modules.currency.currencyTwo;
-                    end,
-                    set = function(info, value)
-                        xb.db.profile.modules.currency.currencyTwo = value;
-                        self:Refresh();
-                    end
-                },
-                currencyThree = {
-                    name = L['Third Currency'],
-                    type = "select",
-                    order = 3,
-                    values = function()
-                        return self:GetCurrencyOptions();
-                    end,
-                    style = "dropdown",
-                    get = function()
-                        return xb.db.profile.modules.currency.currencyThree;
-                    end,
-                    set = function(info, value)
-                        xb.db.profile.modules.currency.currencyThree = value;
-                        self:Refresh();
+                    func = function()
+                        xb.db.profile.modules.currency.selectedCurrencies = {}
+                        self:Refresh()
                     end
                 }
             }
         }
+        order = order + 1
+        
+        for _, expansionData in ipairs(expansionCurrencies) do
+            -- If it's Legacy, create a header instead of a group
+            if expansionData.header == "Legacy" then
+                args['header_legacy'] = {
+                    type = 'header',
+                    name = expansionData.header,
+                    order = order
+                }
+                order = order + 1
+                
+                -- Add all Legacy currencies directly without sub-groups
+                for _, currencyInfo in ipairs(expansionData.currencies) do
+                    local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
+                    args['currency_' .. currencyInfo.id] = {
+                        name = iconString .. currencyInfo.name,
+                        type = "toggle",
+                        order = order,
+                        get = function()
+                            local selected = xb.db.profile.modules.currency.selectedCurrencies
+                            for _, id in ipairs(selected) do
+                                if id == currencyInfo.id then
+                                    return true
+                                end
+                            end
+                            return false
+                        end,
+                        set = function(_, val)
+                            local selected = xb.db.profile.modules.currency.selectedCurrencies
+                            if val then
+                                table.insert(selected, currencyInfo.id)
+                            else
+                                for i, id in ipairs(selected) do
+                                    if id == currencyInfo.id then
+                                        table.remove(selected, i)
+                                        break
+                                    end
+                                end
+                            end
+                            self:Refresh()
+                        end
+                    }
+                    order = order + 1
+                end
+            else
+                -- Normal behavior for other expansions
+                local expansionArgs = {}
+                local expansionOrder = 1
+                
+                for _, currencyInfo in ipairs(expansionData.currencies) do
+                    local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
+                    expansionArgs['currency_' .. currencyInfo.id] = {
+                        name = iconString .. currencyInfo.name,
+                        type = "toggle",
+                        order = expansionOrder,
+                        get = function()
+                            local selected = xb.db.profile.modules.currency.selectedCurrencies
+                            for _, id in ipairs(selected) do
+                                if id == currencyInfo.id then
+                                    return true
+                                end
+                            end
+                            return false
+                        end,
+                        set = function(_, val)
+                            local selected = xb.db.profile.modules.currency.selectedCurrencies
+                            if val then
+                                table.insert(selected, currencyInfo.id)
+                            else
+                                for i, id in ipairs(selected) do
+                                    if id == currencyInfo.id then
+                                        table.remove(selected, i)
+                                        break
+                                    end
+                                end
+                            end
+                            self:Refresh()
+                        end
+                    }
+                    expansionOrder = expansionOrder + 1
+                end
+                
+                args['expansion_' .. expansionData.header] = {
+                    type = 'group',
+                    name = expansionData.header,
+                    order = order,
+                    inline = true,
+                    args = expansionArgs
+                }
+                order = order + 1
+            end
+        end
     end
 
     return {
