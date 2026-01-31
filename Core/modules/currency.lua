@@ -84,6 +84,7 @@ function CurrencyModule:Refresh()
         self.curButtons[i]:Hide()
     end
     self.xpFrame:Hide()
+    self.moduleIconFrame:Hide()
 
     if xb.constants.playerLevel < maxLevel and db.modules.currency.showXPbar then
         local textHeight = floor((xb:GetHeight() - 4) / 2)
@@ -119,42 +120,56 @@ function CurrencyModule:Refresh()
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
     elseif not compat.isClassicOrTBC then
-        local iconsWidth = 0
-        local buttonIndex = 1
-        if ShouldUseSelectedCurrencies() and C_CurrencyInfo then
-            local selectedCurrencies = db.modules.currency.selectedCurrencies
-            for i, currencyId in ipairs(selectedCurrencies) do
-                if buttonIndex <= 3 then  -- Limit to 3 buttons max on the bar
-                    local width = self:StyleCurrencyFrame(tonumber(currencyId), nil, buttonIndex)
-                    if width > 0 then
-                        iconsWidth = iconsWidth + width
-                        if buttonIndex == 1 then
-                            self.curButtons[1]:SetPoint('LEFT')
-                        elseif buttonIndex == 2 then
-                            self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-                        elseif buttonIndex == 3 then
-                            self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+        -- Check if 'icon only' mode is enabled
+        if db.modules.currency.showOnlyModuleIcon then
+            -- Show only the module icon
+            self.moduleIcon:SetTexture(xb.constants.mediaPath .. 'currency\\currency')
+            self.moduleIcon:SetSize(iconSize, iconSize)
+            self.moduleIcon:SetPoint('RIGHT')
+            self.moduleIcon:SetVertexColor(xb:GetColor('normal'))
+            self.moduleIconFrame:SetSize(iconSize, xb:GetHeight())
+            self.moduleIconFrame:SetPoint('RIGHT', self.currencyFrame, 'RIGHT', 0, 0)
+            self.moduleIconFrame:Show()
+            self.currencyFrame:SetSize(iconSize, xb:GetHeight())
+        else
+            local iconsWidth = 0
+            local buttonIndex = 1
+            local maxCurrencies = db.modules.currency.numCurrenciesOnBar or 3
+            if ShouldUseSelectedCurrencies() and C_CurrencyInfo then
+                local selectedCurrencies = db.modules.currency.selectedCurrencies
+                for i, currencyId in ipairs(selectedCurrencies) do
+                    if buttonIndex <= maxCurrencies then
+                        local width = self:StyleCurrencyFrame(tonumber(currencyId), nil, buttonIndex)
+                        if width > 0 then
+                            iconsWidth = iconsWidth + width
+                            if buttonIndex == 1 then
+                                self.curButtons[1]:SetPoint('RIGHT')
+                            elseif buttonIndex == 2 then
+                                self.curButtons[2]:SetPoint('RIGHT', self.curButtons[1], 'LEFT', -5, 0)
+                            elseif buttonIndex == 3 then
+                                self.curButtons[3]:SetPoint('RIGHT', self.curButtons[2], 'LEFT', -5, 0)
+                            end
+                            buttonIndex = buttonIndex + 1
                         end
-                        buttonIndex = buttonIndex + 1
+                    end
+                end
+            elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
+                for i = 1, GetNumWatchedTokens() do
+                    local name, count, _, currencyID = GetBackpackCurrencyInfo(i)
+                    if name then
+                        iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
+                        if i == 1 then
+                            self.curButtons[1]:SetPoint('RIGHT')
+                        elseif i == 2 then
+                            self.curButtons[2]:SetPoint('RIGHT', self.curButtons[1], 'LEFT', -5, 0)
+                        elseif i == 3 then
+                            self.curButtons[3]:SetPoint('RIGHT', self.curButtons[2], 'LEFT', -5, 0)
+                        end
                     end
                 end
             end
-        elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
-            for i = 1, GetNumWatchedTokens() do
-                local name, count, _, currencyID = GetBackpackCurrencyInfo(i)
-                if name then
-                    iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
-                    if i == 1 then
-                        self.curButtons[1]:SetPoint('LEFT')
-                    elseif i == 2 then
-                        self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
-                    elseif i == 3 then
-                        self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
-                    end
-                end
-            end
+            self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
         end
-        self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
     end
 
     local relativeAnchorPoint = 'RIGHT'
@@ -240,32 +255,38 @@ function CurrencyModule:CreateFrames()
     self.xpBar = self.xpBar or CreateFrame('STATUSBAR', nil, self.xpFrame)
     self.xpBarBg = self.xpBarBg or self.xpBar:CreateTexture(nil, 'BACKGROUND')
     self.xpFrame:Hide()
+
+    -- Module icon frame for 'icon only' mode
+    self.moduleIconFrame = self.moduleIconFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
+    self.moduleIcon = self.moduleIcon or self.moduleIconFrame:CreateTexture(nil, 'OVERLAY')
+    self.moduleIconFrame:Hide()
 end
 
 function CurrencyModule:RegisterFrameEvents()
     for i = 1, 3 do
-        self.curButtons[i]:EnableMouse(true)
-        self.curButtons[i]:RegisterForClicks("AnyUp")
-        self.curButtons[i]:SetScript('OnEnter', function()
+        local buttonIndex = i  -- Capture index for closures
+        self.curButtons[buttonIndex]:EnableMouse(true)
+        self.curButtons[buttonIndex]:RegisterForClicks("AnyUp")
+        self.curButtons[buttonIndex]:SetScript('OnEnter', function()
             if InCombatLockdown() then
                 return;
             end
-            self.curText[i]:SetTextColor(unpack(xb:HoverColors()))
+            self.curText[buttonIndex]:SetTextColor(unpack(xb:HoverColors()))
             if xb.db.profile.modules.currency.showTooltip then
                 self:ShowTooltip()
             end
         end)
-        self.curButtons[i]:SetScript('OnLeave', function()
+        self.curButtons[buttonIndex]:SetScript('OnLeave', function()
             if InCombatLockdown() then
                 return;
             end
             local db = xb.db.profile
-            self.curText[i]:SetTextColor(xb:GetColor('normal'))
+            self.curText[buttonIndex]:SetTextColor(xb:GetColor('normal'))
             if db.modules.currency.showTooltip then
                 GameTooltip:Hide()
             end
         end)
-        self.curButtons[i]:SetScript('OnClick', function()
+        self.curButtons[buttonIndex]:SetScript('OnClick', function()
             if InCombatLockdown() then
                 return;
             end
@@ -278,6 +299,34 @@ function CurrencyModule:RegisterFrameEvents()
     if _G.BackpackTokenFrame_Update then
         self:SecureHook('BackpackTokenFrame_Update', 'Refresh')
     end
+
+    -- Module icon frame events for 'icon only' mode
+    self.moduleIconFrame:EnableMouse(true)
+    self.moduleIconFrame:RegisterForClicks("AnyUp")
+    self.moduleIconFrame:SetScript('OnEnter', function()
+        if InCombatLockdown() then
+            return;
+        end
+        self.moduleIcon:SetVertexColor(unpack(xb:HoverColors()))
+        if xb.db.profile.modules.currency.showTooltip then
+            self:ShowTooltip()
+        end
+    end)
+    self.moduleIconFrame:SetScript('OnLeave', function()
+        if InCombatLockdown() then
+            return;
+        end
+        self.moduleIcon:SetVertexColor(xb:GetColor('normal'))
+        if xb.db.profile.modules.currency.showTooltip then
+            GameTooltip:Hide()
+        end
+    end)
+    self.moduleIconFrame:SetScript('OnClick', function()
+        if InCombatLockdown() then
+            return;
+        end
+        ToggleCharacter('TokenFrame')
+    end)
 
     self.currencyFrame:EnableMouse(true)
     self.currencyFrame:SetScript('OnEnter', function()
@@ -432,14 +481,41 @@ function CurrencyModule:ShowTooltip()
                         local curInfo = C_CurrencyInfo.GetCurrencyInfo(tonumber(currencyInfo.id))
                         if curInfo then
                             local iconString = string.format("|T%s:16:16:0:0|t ", curInfo.iconFileID or "")
-                            if curInfo.useTotalEarnedForMaxQty then
-                                GameTooltip:AddDoubleLine(iconString .. curInfo.name,
-                                    string.format('%d (%d/%d)', curInfo.quantity, curInfo.totalEarned,
-                                        curInfo.maxQuantity), r, g, b, 1, 1, 1)
-                            else
-                                GameTooltip:AddDoubleLine(iconString .. curInfo.name, string.format('%d', curInfo.quantity), r, g, b, 1,
-                                    1, 1)
+                            local quantityText = tostring(curInfo.quantity)
+                            local isAtMax = false
+                            
+                            -- Check if currency has a max quantity (like Valorstones with 2000 cap)
+                            if curInfo.maxQuantity and curInfo.maxQuantity > 0 then
+                                -- Check if at max capacity (seasonal or possession cap)
+                                if curInfo.useTotalEarnedForMaxQty and curInfo.totalEarned then
+                                    -- For seasonal currencies: check totalEarned against max
+                                    if curInfo.totalEarned >= curInfo.maxQuantity then
+                                        isAtMax = true
+                                    end
+                                else
+                                    -- For possession cap currencies
+                                    if curInfo.quantity >= curInfo.maxQuantity then
+                                        isAtMax = true
+                                    end
+                                end
+                                
+                                -- For currencies with weekly or total caps
+                                if curInfo.useTotalEarnedForMaxQty and curInfo.totalEarned then
+                                    -- Show: quantity (earned/max)
+                                    quantityText = string.format('%d (%d/%d)', curInfo.quantity, curInfo.totalEarned, curInfo.maxQuantity)
+                                else
+                                    -- Show: quantity/max
+                                    quantityText = string.format('%d/%d', curInfo.quantity, curInfo.maxQuantity)
+                                end
                             end
+                            
+                            -- Use red color if at max, otherwise white
+                            local qtyR, qtyG, qtyB = 1, 1, 1
+                            if isAtMax then
+                                qtyR, qtyG, qtyB = 1, 0, 0  -- Red
+                            end
+                            
+                            GameTooltip:AddDoubleLine(iconString .. curInfo.name, quantityText, r, g, b, qtyR, qtyG, qtyB)
                         end
                     end
                     
@@ -524,6 +600,8 @@ function CurrencyModule:GetDefaultOptions()
         xpBarCC = false,
         showTooltip = true,
         textOnRight = true,
+        showOnlyModuleIcon = false,
+        numCurrenciesOnBar = 3,
         selectedCurrencies = {}  -- Array of selected currency IDs
     }
 end
@@ -597,12 +675,42 @@ function CurrencyModule:GetConfig()
                 xb.db.profile.modules.currency.textOnRight = val;
                 self:Refresh();
             end
+        },
+        showOnlyModuleIcon = {
+            name = L['Only Show Module Icon'],
+            order = 5,
+            type = "toggle",
+            get = function()
+                return xb.db.profile.modules.currency.showOnlyModuleIcon;
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.currency.showOnlyModuleIcon = val;
+                self:Refresh();
+            end
+        },
+        numCurrenciesOnBar = {
+            name = L['Number of Currencies on Bar'],
+            order = 6,
+            type = "range",
+            min = 1,
+            max = 10,
+            step = 1,
+            get = function()
+                return xb.db.profile.modules.currency.numCurrenciesOnBar;
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.currency.numCurrenciesOnBar = val;
+                self:Refresh();
+            end,
+            disabled = function()
+                return xb.db.profile.modules.currency.showOnlyModuleIcon
+            end
         }
     }
 
     if ShouldUseSelectedCurrencies() then
         local expansionCurrencies = self:GetCurrenciesByExpansion()
-        local order = 5
+        local order = 7
         
         -- Select All and Unselect All buttons
         args['currency_buttons'] = {
