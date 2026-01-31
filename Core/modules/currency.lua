@@ -473,7 +473,7 @@ function CurrencyModule:ShowTooltip()
                 if hasCurrencyInCategory then
                     -- Add golden header except if it's Legacy
                     if expansionData.header ~= "Legacy" then
-                        GameTooltip:AddLine(expansionData.header, 1, 0.82, 0)  -- Golden color
+                        GameTooltip:AddLine('-- ' .. expansionData.header .. ' --', 1, 0.82, 0)  -- Golden color
                     end
                     
                     -- Display currencies from this category
