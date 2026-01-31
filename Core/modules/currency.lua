@@ -453,14 +453,14 @@ function CurrencyModule:ShowTooltip()
             for _, currencyId in ipairs(selectedCurrencies) do
                 selectedSet[currencyId] = true
             end
-            
+
             -- Get currencies by expansion for ordering
             local expansionCurrencies = self:GetCurrenciesByExpansion()
-            
+
             for _, expansionData in ipairs(expansionCurrencies) do
                 local hasCurrencyInCategory = false
                 local currenciesToShow = {}
-                
+
                 -- Check if this category has selected currencies
                 for _, currencyInfo in ipairs(expansionData.currencies) do
                     if selectedSet[currencyInfo.id] then
@@ -468,14 +468,14 @@ function CurrencyModule:ShowTooltip()
                         table.insert(currenciesToShow, currencyInfo)
                     end
                 end
-                
+
                 -- Display header (except Legacy) and currencies
                 if hasCurrencyInCategory then
                     -- Add golden header except if it's Legacy
                     if expansionData.header ~= "Legacy" then
                         GameTooltip:AddLine('-- ' .. expansionData.header .. ' --', 1, 0.82, 0)  -- Golden color
                     end
-                    
+
                     -- Display currencies from this category
                     for _, currencyInfo in ipairs(currenciesToShow) do
                         local curInfo = C_CurrencyInfo.GetCurrencyInfo(tonumber(currencyInfo.id))
@@ -483,7 +483,7 @@ function CurrencyModule:ShowTooltip()
                             local iconString = string.format("|T%s:16:16:0:0|t ", curInfo.iconFileID or "")
                             local quantityText = tostring(curInfo.quantity)
                             local isAtMax = false
-                            
+
                             -- Check if currency has a max quantity (like Valorstones with 2000 cap)
                             if curInfo.maxQuantity and curInfo.maxQuantity > 0 then
                                 -- Check if at max capacity (seasonal or possession cap)
@@ -498,7 +498,7 @@ function CurrencyModule:ShowTooltip()
                                         isAtMax = true
                                     end
                                 end
-                                
+
                                 -- For currencies with weekly or total caps
                                 if curInfo.useTotalEarnedForMaxQty and curInfo.totalEarned then
                                     -- Show: quantity (earned/max)
@@ -508,17 +508,17 @@ function CurrencyModule:ShowTooltip()
                                     quantityText = string.format('%d/%d', curInfo.quantity, curInfo.maxQuantity)
                                 end
                             end
-                            
+
                             -- Use red color if at max, otherwise white
                             local qtyR, qtyG, qtyB = 1, 1, 1
                             if isAtMax then
                                 qtyR, qtyG, qtyB = 1, 0, 0  -- Red
                             end
-                            
+
                             GameTooltip:AddDoubleLine(iconString .. curInfo.name, quantityText, r, g, b, qtyR, qtyG, qtyB)
                         end
                     end
-                    
+
                     -- Add space between categories (except after Legacy if no header)
                     if expansionData.header ~= "Legacy" then
                         GameTooltip:AddLine(" ")
@@ -566,7 +566,7 @@ function CurrencyModule:GetCurrenciesByExpansion()
 
     local currentHeader = nil
     local currentHeaderIndex = nil
-    
+
     for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
         local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
         if listInfo.isHeader then
@@ -711,7 +711,7 @@ function CurrencyModule:GetConfig()
     if ShouldUseSelectedCurrencies() then
         local expansionCurrencies = self:GetCurrenciesByExpansion()
         local order = 7
-        
+
         -- Select All and Unselect All buttons
         args['currency_buttons'] = {
             type = 'group',
@@ -746,7 +746,7 @@ function CurrencyModule:GetConfig()
             }
         }
         order = order + 1
-        
+
         for _, expansionData in ipairs(expansionCurrencies) do
             -- If it's Legacy, create a header instead of a group
             if expansionData.header == "Legacy" then
@@ -756,7 +756,7 @@ function CurrencyModule:GetConfig()
                     order = order
                 }
                 order = order + 1
-                
+
                 -- Add all Legacy currencies directly without sub-groups
                 for _, currencyInfo in ipairs(expansionData.currencies) do
                     local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
@@ -794,7 +794,7 @@ function CurrencyModule:GetConfig()
                 -- Normal behavior for other expansions
                 local expansionArgs = {}
                 local expansionOrder = 1
-                
+
                 for _, currencyInfo in ipairs(expansionData.currencies) do
                     local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
                     expansionArgs['currency_' .. currencyInfo.id] = {
@@ -827,7 +827,7 @@ function CurrencyModule:GetConfig()
                     }
                     expansionOrder = expansionOrder + 1
                 end
-                
+
                 args['expansion_' .. expansionData.header] = {
                     type = 'group',
                     name = expansionData.header,
