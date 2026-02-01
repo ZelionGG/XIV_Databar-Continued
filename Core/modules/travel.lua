@@ -16,11 +16,16 @@ local GetItemInfo = C_Item.GetItemInfo
 local ContinueOnItemLoad = (C_Item and C_Item.ContinueOnItemLoad) or function(_, callback)
     if callback then callback() end
 end
-local IsUsableItem = C_Item.IsUsableItem
 local GetItemCooldown = C_Container.GetItemCooldown
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellInfo = C_Spell.GetSpellInfo
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+
+-- Safe IsUsableItem wrapper with compatibility check
+local function SafeIsUsableItem(id)
+    if compat.isMists and not IsUsableItem then return false end
+    return IsUsableItem(id)
+end
 
 --------------------------------------------------------------------------------
 -- UTILITY FUNCTIONS - Centralized logic to reduce code duplication
@@ -259,7 +264,7 @@ function TravelModule:CreateFrames()
             -- Check safely before calling to prevent errors
             local nineSlice = self.portPopup.NineSlice
             local tooltipNineSlice = GameTooltip.NineSlice
-
+            
             if nineSlice.SetCenterColor and tooltipNineSlice.GetCenterColor then
                 nineSlice:SetCenterColor(tooltipNineSlice:GetCenterColor())
             end
@@ -363,7 +368,7 @@ function TravelModule:RegisterFrameEvents()
             end
         end
     end
-
+    
     local function createLeaveHandler(colorFunc)
         return function()
             colorFunc()
@@ -379,14 +384,14 @@ function TravelModule:RegisterFrameEvents()
     self.hearthButton:SetScript('OnEnter', createHoverHandler(function() self:SetHearthColor() end, true))
     self.hearthButton:SetScript('OnLeave', createLeaveHandler(function() self:SetHearthColor() end))
 
-    -- Port button events
+    -- Port button events  
     self.portButton:SetScript('OnEnter', createHoverHandler(function() self:SetPortColor() end, true))
     self.portButton:SetScript('OnLeave', createLeaveHandler(function() self:SetPortColor() end))
 end
 
 function TravelModule:UpdatePortOptions()
     if not self.portOptions then self.portOptions = {} end
-    if IsUsableItem(128353) and not self.portOptions[128353] then
+    if SafeIsUsableItem(128353) and not self.portOptions[128353] then
         self.portOptions[128353] = {
             portId = 128353,
             text = GetItemName(128353)
@@ -460,7 +465,7 @@ function TravelModule:GetRemainingCooldown(id, isSpell)
     else
         startTime, duration = GetItemCooldown(id)
     end
-
+    
     if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
         return math.max(0, startTime + duration - GetTime())
     end
@@ -475,37 +480,37 @@ function TravelModule:GetTransportName(id)
             return spellInfo.name
         end
     end
-
+    
     -- Try toy
     if PlayerHasToy(id) then
         local _, name = C_ToyBox.GetToyInfo(id)
         if name then return name end
     end
-
+    
     -- Try item
-    if IsUsableItem(id) then
+    if SafeIsUsableItem(id) then
         local name = GetItemInfo(id)
         if name then return name end
     end
-
+    
     return nil
 end
 
 function TravelModule:FindUsableTransport(ids, preferRandom)
     local available = {}
-
+    
     for _, id in ipairs(ids) do
         if self:IsUsable(id) then
             local name = self:GetTransportName(id)
             if name then
                 -- Use global IsUsableItem with compatibility check
-                local isUsableItemFunc = (compat.isMists and not IsUsableItem) and false or IsUsableItem(id)
+                local isUsableItemFunc = SafeIsUsableItem(id)
                 local macro = isUsableItemFunc and "/use item:" .. id or "/cast " .. name
                 table.insert(available, {id = id, name = name, macro = macro})
             end
         end
     end
-
+    
     if #available == 0 then return nil end
     if preferRandom then
         return available[math.random(#available)]
@@ -515,16 +520,16 @@ end
 
 function TravelModule:SetButtonState(button, icon, text, isActive, isHover)
     local db = xb.db.profile
-
+    
     if isHover then
         text:SetTextColor(unpack(xb:HoverColors()))
     elseif isActive then
         icon:SetVertexColor(xb:GetColor('normal'))
         text:SetTextColor(xb:GetColor('normal'))
     else
-        icon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
+        icon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, 
                           db.color.inactive.b, db.color.inactive.a)
-        text:SetTextColor(db.color.inactive.r, db.color.inactive.g,
+        text:SetTextColor(db.color.inactive.r, db.color.inactive.g, 
                          db.color.inactive.b, db.color.inactive.a)
     end
 end
@@ -554,19 +559,19 @@ function TravelModule:SetHearthColor()
             if isSelected then table.insert(selectedHearthstones, hearthstoneId) end
         end
     end
-
+    
     local usableHearthstones = #selectedHearthstones > 0 and selectedHearthstones or self.hearthstones
-
+    
     -- Find usable transport
     local transport = self:FindUsableTransport(usableHearthstones, xb.db.profile.randomizeHs)
     local isActive = transport ~= nil
-
+    
     if transport then
         self.hearthButton:SetAttribute("macrotext", transport.macro)
     end
-
+    
     -- Set button appearance
-    self:SetButtonState(self.hearthButton, self.hearthIcon, self.hearthText,
+    self:SetButtonState(self.hearthButton, self.hearthIcon, self.hearthText, 
                        isActive, self.hearthButton:IsMouseOver())
 end
 
@@ -580,20 +585,20 @@ function TravelModule:SetPortColor()
             return
         end
     end
-
+    
     -- Get transport name and set macro
     local transportName = self:GetTransportName(portItem.portId)
     local isActive = transportName ~= nil
-
+    
     if transportName then
         -- Use global IsUsableItem with compatibility check
-        local isUsableItemFunc = (compat.isMists and not IsUsableItem) and false or IsUsableItem(portItem.portId)
+        local isUsableItemFunc = SafeIsUsableItem(portItem.portId)
         local macro = isUsableItemFunc and "/use item:" .. portItem.portId or "/cast " .. transportName
         self.portButton:SetAttribute("macrotext", macro)
     end
-
+    
     -- Set button appearance
-    self:SetButtonState(self.portButton, self.portIcon, self.portText,
+    self:SetButtonState(self.portButton, self.portIcon, self.portText, 
                        isActive, self.portButton:IsMouseOver())
 end
 
@@ -808,7 +813,7 @@ function TravelModule:CreatePortPopup()
     for i, v in pairs(self.portOptions) do
         if self.portButtons[v.portId] == nil then
             if PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
-                IsUsableItem(v.portId) then
+                SafeIsUsableItem(v.portId) then
                 local button = CreateFrame('BUTTON', nil, self.portPopup)
                 local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
@@ -851,7 +856,7 @@ function TravelModule:CreatePortPopup()
             end -- if usable item or spell
         else
             if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
-                IsUsableItem(v.portId)) then
+                SafeIsUsableItem(v.portId)) then
                 self.portButtons[v.portId].isSettable = false
             else
                 local label = GetPortLabel(v.portId) or v.text
@@ -1330,13 +1335,13 @@ function TravelModule:ShowTooltip()
                 if portOption and portOption.portId then
                     local label = portOption.text or GetPortLabel(portOption.portId)
                     local isSpell = IsSpellKnown(portOption.portId)
-
+                    
                     if isSpell then
                         -- Handle spells
                         local spellCooldown = self:GetRemainingCooldown(portOption.portId, true)
                         local cdString = self:FormatCooldown(spellCooldown)
                         GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
-                    elseif PlayerHasToy(portOption.portId) or IsUsableItem(portOption.portId) then
+                    elseif PlayerHasToy(portOption.portId) or SafeIsUsableItem(portOption.portId) then
                         -- Handle items and toys
                         local itemCooldown = self:GetRemainingCooldown(portOption.portId, false)
                         local cdString = self:FormatCooldown(itemCooldown)
@@ -1378,7 +1383,7 @@ function TravelModule:FindFirstOption()
 end
 
 function TravelModule:IsUsable(id)
-    return PlayerHasToy(id) or IsUsableItem(id) or IsPlayerSpell(id)
+    return PlayerHasToy(id) or SafeIsUsableItem(id) or IsPlayerSpell(id)
 end
 
 function TravelModule:RefreshHearthstonesList()
