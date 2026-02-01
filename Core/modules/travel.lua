@@ -1630,7 +1630,7 @@ function TravelModule:GetConfig()
                     xb.db.profile.enableMythicPortals = val;
                     self:Refresh();
                 end,
-                width = 1.3
+                width = 1.2
             },
             hideMythicText = {
                 name = L['Hide M+ Teleports text'],
@@ -1644,7 +1644,7 @@ function TravelModule:GetConfig()
                     xb.db.profile.hideMythicText = val;
                     self:Refresh();
                 end,
-                width = 1.3
+                width = 1.2
             },
             curSeasonOnly = {
                 name = L['Only show current season'],
