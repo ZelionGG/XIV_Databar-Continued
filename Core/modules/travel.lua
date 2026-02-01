@@ -212,24 +212,29 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
+    local db = xb.db and xb.db.profile
     -- Hearthstones Part
-    self.hearthButton = self.hearthButton or
-                            CreateFrame('BUTTON', 'hearthButton',
-                                        self.hearthFrame,
-                                        'SecureActionButtonTemplate')
-    self.hearthIcon = self.hearthIcon or
-                          self.hearthButton:CreateTexture(nil, 'OVERLAY')
-    self.hearthText = self.hearthText or
-                          self.hearthButton:CreateFontString(nil, 'OVERLAY')
+    if not db.hideHearthstoneButton then
+        self.hearthButton = self.hearthButton or
+                                CreateFrame('BUTTON', 'hearthButton',
+                                            self.hearthFrame,
+                                            'SecureActionButtonTemplate')
+        self.hearthIcon = self.hearthIcon or
+                            self.hearthButton:CreateTexture(nil, 'OVERLAY')
+        self.hearthText = self.hearthText or
+                            self.hearthButton:CreateFontString(nil, 'OVERLAY')
+    end
 
     -- Portals Part
-    self.portButton = self.portButton or
-                          CreateFrame('BUTTON', 'portButton', self.hearthFrame,
-                                      'SecureActionButtonTemplate')
-    self.portIcon = self.portIcon or
-                        self.portButton:CreateTexture(nil, 'OVERLAY')
-    self.portText = self.portText or
-                        self.portButton:CreateFontString(nil, 'OVERLAY')
+    if not hidePortButton then
+        self.portButton = self.portButton or
+                            CreateFrame('BUTTON', 'portButton', self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+        self.portIcon = self.portIcon or
+                            self.portButton:CreateTexture(nil, 'OVERLAY')
+        self.portText = self.portText or
+                            self.portButton:CreateFontString(nil, 'OVERLAY')
+    end
 
 
     local template =
@@ -1225,25 +1230,34 @@ function TravelModule:Refresh()
     local iconSize = db.text.fontSize + db.general.barPadding
 
     -- Hearthstone Part
-    self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
-    self.hearthText:SetText(GetBindLocation())
+    if not db.hideHearthstoneButton then
+        self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
+        self.hearthText:SetText(GetBindLocation())
 
-    self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize +
-                                  db.general.barPadding, xb:GetHeight())
-    self.hearthButton:SetPoint("RIGHT")
+        self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize +
+                                    db.general.barPadding, xb:GetHeight())
+        self.hearthButton:SetPoint("RIGHT")
 
-    self.hearthText:SetPoint("RIGHT")
+        self.hearthText:SetPoint("RIGHT")
 
-    self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
-    self.hearthIcon:SetSize(iconSize, iconSize)
+        self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
+        self.hearthIcon:SetSize(iconSize, iconSize)
 
-    self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT",
-                             -(db.general.barPadding), 0)
+        self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT",
+                                -(db.general.barPadding), 0)
 
-    self:SetHearthColor()
+        self:SetHearthColor()
+        if not self.hearthButton:IsVisible() then
+            self.hearthButton:Show()
+            self.hearthText:Show()
+        end
+    else
+        self.hearthButton:Hide()
+        self.hearthText:Hide()
+    end
 
     -- Portals Part
-    if hasPortOptions then
+    if hasPortOptions and not db.hidePortButton then
         self.portButton:Show()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
         local portItem = xb.db.char.portItem or self:FindFirstOption()
@@ -1252,19 +1266,24 @@ function TravelModule:Refresh()
 
         self.portButton:SetSize(self.portText:GetWidth() + iconSize +
                                     db.general.barPadding, xb:GetHeight())
-        self.portButton:SetPoint("RIGHT", self.hearthButton, "LEFT",
-                                 -(db.general.barPadding), 0)
+
+        -- Set parent to main button if hearth is hidden
+        local parent = self.hearthButton
+        local parentPoint, relPoint, xOff = "RIGHT", "LEFT", -(db.general.barPadding)
+
+        if db.hideHearthstoneButton or not (self.hearthButton and self.hearthButton:IsShown()) then
+            parent = self.hearthFrame
+            parentPoint, relPoint, xOff = "RIGHT", "RIGHT", 0  -- Stick to the right
+        end
+
+        self.portButton:SetPoint(parentPoint, parent, relPoint, xOff, 0)
 
         self.portText:SetPoint("RIGHT")
-
         self.portIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
         self.portIcon:SetSize(iconSize, iconSize)
-
-        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT",
-                               -(db.general.barPadding), 0)
+        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT", -(db.general.barPadding), 0)
 
         self:SetPortColor()
-
         self:CreatePortPopup()
     else
         self.portButton:Hide()
@@ -1277,29 +1296,44 @@ function TravelModule:Refresh()
     end
 
     if allowMythic and self.mythicButton then
+        -- Choose the parent based on visible buttons
+        local parentFrame = self.portButton
+        local parentPoint, relPoint, xOff = "RIGHT", "LEFT", -(db.general.barPadding)
+
+        local portShown = self.portButton and self.portButton:IsShown()
+        local hearthShown = self.hearthButton and self.hearthButton:IsShown()
+
+        if not portShown then
+            parentFrame = self.hearthButton
+        end
+        if (not portShown and not hearthShown) or (db.hidePortButton and db.hideHearthstoneButton) then
+            parentFrame = self.hearthFrame
+            parentPoint, relPoint, xOff = "RIGHT", "RIGHT", 0
+        end
+
         -- Only show the button if teleports are available
         if self:HasAvailableMythicTeleports() then
             local hideMythicText = db.hideMythicText
-            
+
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
             self.mythicText:SetText(hideMythicText and '' or L['M+ Teleports'])
             self.mythicText:SetShown(not hideMythicText)
-            
+
             self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
             self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
             self.mythicIcon:ClearAllPoints()
-            
+
             if hideMythicText then
                 self.mythicButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
-                self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+                self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicIcon:SetPoint("RIGHT", self.mythicButton, "RIGHT", 0, 0)
             else
                 self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
-                self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+                self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicText:SetPoint("RIGHT")
                 self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT", -(db.general.barPadding) + 5, 0)
             end
-            
+
             self:SetMythicColor()
             self:CreateMythicPopup()
             self.mythicButton:Show()
@@ -1335,15 +1369,16 @@ function TravelModule:Refresh()
         self.mythicPopup:Hide()
     end
 
-    local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
+    local totalWidth = 0
+    if self.hearthButton:IsVisible() then
+        totalWidth = totalWidth + self.hearthButton:GetWidth() + db.general.barPadding
+    end
     if self.portButton:IsVisible() then
         totalWidth = totalWidth + self.portButton:GetWidth()
     end
 
-    if allowMythic and self.mythicButton then
-        if self.mythicButton:IsVisible() then
-            totalWidth = totalWidth + self.mythicButton:GetWidth()
-        end
+    if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
+        totalWidth = totalWidth + self.mythicButton:GetWidth()
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -1486,6 +1521,7 @@ function TravelModule:GetDefaultOptions()
     xb.db.char.portItem = xb.db.char.portItem or firstItem
     return 'travel', {
         enabled = true,
+        hideHearthstoneButton = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
         curSeasonOnly = false,
@@ -1550,6 +1586,32 @@ function TravelModule:GetConfig()
                 end,
                 width = "full"
             },
+            hideHearthstoneButton = {
+                name = L['Hide Hearthstone Button'],
+                order = 12,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideHearthstoneButton;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideHearthstoneButton = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
+            hidePortButton = {
+                name = L['Hide Port Button'],
+                order = 14,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hidePortButton;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hidePortButton = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
             mythicHeader = {
                 order = 18,
                 name = L['Mythic+ Teleports'],
@@ -1568,7 +1630,7 @@ function TravelModule:GetConfig()
                     xb.db.profile.enableMythicPortals = val;
                     self:Refresh();
                 end,
-                width = "full"
+                width = 1.3
             },
             hideMythicText = {
                 name = L['Hide M+ Teleports text'],
@@ -1582,7 +1644,7 @@ function TravelModule:GetConfig()
                     xb.db.profile.hideMythicText = val;
                     self:Refresh();
                 end,
-                width = "full"
+                width = 1.3
             },
             curSeasonOnly = {
                 name = L['Only show current season'],
