@@ -214,27 +214,23 @@ end
 function TravelModule:CreateFrames()
     local db = xb.db and xb.db.profile
     -- Hearthstones Part
-    if not db.hideHearthstoneButton then
-        self.hearthButton = self.hearthButton or
-                                CreateFrame('BUTTON', 'hearthButton',
-                                            self.hearthFrame,
-                                            'SecureActionButtonTemplate')
-        self.hearthIcon = self.hearthIcon or
-                            self.hearthButton:CreateTexture(nil, 'OVERLAY')
-        self.hearthText = self.hearthText or
-                            self.hearthButton:CreateFontString(nil, 'OVERLAY')
-    end
+    self.hearthButton = self.hearthButton or
+                            CreateFrame('BUTTON', 'hearthButton',
+                                        self.hearthFrame,
+                                        'SecureActionButtonTemplate')
+    self.hearthIcon = self.hearthIcon or
+                        self.hearthButton:CreateTexture(nil, 'OVERLAY')
+    self.hearthText = self.hearthText or
+                        self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
     -- Portals Part
-    if not hidePortButton then
-        self.portButton = self.portButton or
-                            CreateFrame('BUTTON', 'portButton', self.hearthFrame,
-                                        'SecureActionButtonTemplate')
-        self.portIcon = self.portIcon or
-                            self.portButton:CreateTexture(nil, 'OVERLAY')
-        self.portText = self.portText or
-                            self.portButton:CreateFontString(nil, 'OVERLAY')
-    end
+    self.portButton = self.portButton or
+                        CreateFrame('BUTTON', 'portButton', self.hearthFrame,
+                                    'SecureActionButtonTemplate')
+    self.portIcon = self.portIcon or
+                        self.portButton:CreateTexture(nil, 'OVERLAY')
+    self.portText = self.portText or
+                        self.portButton:CreateFontString(nil, 'OVERLAY')
 
 
     local template =
