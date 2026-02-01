@@ -1,3 +1,8 @@
+--------------------------------------------------------------------------------
+-- TRAVEL MODULE
+-- Provides quick access to hearthstones, portals, and mythic+ teleports
+--------------------------------------------------------------------------------
+
 local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
@@ -6,19 +11,20 @@ local compat = xb.compat
 
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
+-- Cache frequently used API functions for performance
 local GetItemInfo = C_Item.GetItemInfo
 local ContinueOnItemLoad = (C_Item and C_Item.ContinueOnItemLoad) or function(_, callback)
     if callback then callback() end
 end
-
-
 local IsUsableItem = C_Item.IsUsableItem
 local GetItemCooldown = C_Container.GetItemCooldown
-
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellInfo = C_Spell.GetSpellInfo
-
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+
+--------------------------------------------------------------------------------
+-- UTILITY FUNCTIONS - Centralized logic to reduce code duplication
+--------------------------------------------------------------------------------
 
 function TravelModule:GetName() return L['Travel']; end
 
@@ -166,7 +172,7 @@ end
 
 -- Skin Support for ElvUI/TukUI
 -- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
--- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
+-- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI interfere with tooltips
 function TravelModule:SkinFrame(frame, name)
     if self.useElvUI then
         if frame.StripTextures then frame:StripTextures() end
@@ -178,6 +184,8 @@ function TravelModule:SkinFrame(frame, name)
                 ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
             end
 
+            -- Tukui support - may not be loaded, so check safely
+            -- Tukui is an external dependency that may not be loaded
             if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
                 Tukui[1].SkinCloseButton(close)
             end
@@ -247,10 +255,17 @@ function TravelModule:CreateFrames()
         NineSlicePanelMixin.OnLoad(self.portPopup.NineSlice)
 
         if GameTooltip.layoutType then
-            self.portPopup.NineSlice:SetCenterColor(
-                GameTooltip.NineSlice:GetCenterColor())
-            self.portPopup.NineSlice:SetBorderColor(
-                GameTooltip.NineSlice:GetBorderColor())
+            -- NineSlice color methods may not exist in all WoW client versions
+            -- Check safely before calling to prevent errors
+            local nineSlice = self.portPopup.NineSlice
+            local tooltipNineSlice = GameTooltip.NineSlice
+
+            if nineSlice.SetCenterColor and tooltipNineSlice.GetCenterColor then
+                nineSlice:SetCenterColor(tooltipNineSlice:GetCenterColor())
+            end
+            if nineSlice.SetBorderColor and tooltipNineSlice.GetBorderColor then
+                nineSlice:SetBorderColor(tooltipNineSlice:GetBorderColor())
+            end
         end
     else
         local backdrop = GameTooltip:GetBackdrop()
@@ -339,66 +354,34 @@ function TravelModule:RegisterFrameEvents()
         end)
     end
 
-    self.hearthButton:SetScript('OnEnter', function()
-        self:SetHearthColor()
-        if InCombatLockdown() then return end
-        self:ShowTooltip()
-    end)
-
-    self.hearthButton:SetScript('OnLeave', function()
-        self:SetHearthColor()
-        if self.tooltipTimer then
-            self.tooltipTimer:Cancel()
-            self.tooltipTimer = nil
+    -- Create unified hover/leave handlers to avoid duplication
+    local function createHoverHandler(colorFunc, showTooltip)
+        return function()
+            colorFunc()
+            if not InCombatLockdown() and showTooltip then
+                self:ShowTooltip()
+            end
         end
-        GameTooltip:Hide()
-    end)
+    end
 
-    self.portButton:SetScript('OnEnter', function()
-        TravelModule:SetPortColor()
-        if InCombatLockdown() then return end
-        self:ShowTooltip()
-    end)
-
-    self.portButton:SetScript('OnLeave', function()
-        TravelModule:SetPortColor()
-        if self.tooltipTimer then
-            self.tooltipTimer:Cancel()
-            self.tooltipTimer = nil
+    local function createLeaveHandler(colorFunc)
+        return function()
+            colorFunc()
+            if self.tooltipTimer then
+                self.tooltipTimer:Cancel()
+                self.tooltipTimer = nil
+            end
+            GameTooltip:Hide()
         end
-        GameTooltip:Hide()
-    end)
+    end
 
+    -- Hearthstone button events
+    self.hearthButton:SetScript('OnEnter', createHoverHandler(function() self:SetHearthColor() end, true))
+    self.hearthButton:SetScript('OnLeave', createLeaveHandler(function() self:SetHearthColor() end))
 
-    self.portButton:SetScript('OnEnter', function()
-        TravelModule:SetPortColor()
-        if InCombatLockdown() then return end
-        self:ShowTooltip()
-    end)
-
-    self.portButton:SetScript('OnLeave', function()
-        TravelModule:SetPortColor()
-        if self.tooltipTimer then
-            self.tooltipTimer:Cancel()
-            self.tooltipTimer = nil
-        end
-        GameTooltip:Hide()
-    end)
-
-    self.hearthButton:SetScript('OnEnter', function()
-        self:SetHearthColor()
-        if InCombatLockdown() then return end
-        self:ShowTooltip()
-    end)
-
-    self.hearthButton:SetScript('OnLeave', function()
-        self:SetHearthColor()
-        if self.tooltipTimer then
-            self.tooltipTimer:Cancel()
-            self.tooltipTimer = nil
-        end
-        GameTooltip:Hide()
-    end)
+    -- Port button events
+    self.portButton:SetScript('OnEnter', createHoverHandler(function() self:SetPortColor() end, true))
+    self.portButton:SetScript('OnLeave', createLeaveHandler(function() self:SetPortColor() end))
 end
 
 function TravelModule:UpdatePortOptions()
@@ -468,6 +451,84 @@ function TravelModule:UpdatePortOptions()
     end
 end
 
+function TravelModule:GetRemainingCooldown(id, isSpell)
+    local startTime, duration
+    if isSpell then
+        local spellCooldownInfo = GetSpellCooldown(id)
+        startTime = spellCooldownInfo.startTime
+        duration = spellCooldownInfo.duration
+    else
+        startTime, duration = GetItemCooldown(id)
+    end
+
+    if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
+        return math.max(0, startTime + duration - GetTime())
+    end
+    return 0
+end
+
+function TravelModule:GetTransportName(id)
+    -- Try spell first
+    if IsPlayerSpell(id) then
+        local spellInfo = GetSpellInfo(id)
+        if spellInfo and spellInfo.name then
+            return spellInfo.name
+        end
+    end
+
+    -- Try toy
+    if PlayerHasToy(id) then
+        local _, name = C_ToyBox.GetToyInfo(id)
+        if name then return name end
+    end
+
+    -- Try item
+    if IsUsableItem(id) then
+        local name = GetItemInfo(id)
+        if name then return name end
+    end
+
+    return nil
+end
+
+function TravelModule:FindUsableTransport(ids, preferRandom)
+    local available = {}
+
+    for _, id in ipairs(ids) do
+        if self:IsUsable(id) then
+            local name = self:GetTransportName(id)
+            if name then
+                -- Use global IsUsableItem with compatibility check
+                local isUsableItemFunc = (compat.isMists and not IsUsableItem) and false or IsUsableItem(id)
+                local macro = isUsableItemFunc and "/use item:" .. id or "/cast " .. name
+                table.insert(available, {id = id, name = name, macro = macro})
+            end
+        end
+    end
+
+    if #available == 0 then return nil end
+    if preferRandom then
+        return available[math.random(#available)]
+    end
+    return available[1]
+end
+
+function TravelModule:SetButtonState(button, icon, text, isActive, isHover)
+    local db = xb.db.profile
+
+    if isHover then
+        text:SetTextColor(unpack(xb:HoverColors()))
+    elseif isActive then
+        icon:SetVertexColor(xb:GetColor('normal'))
+        text:SetTextColor(xb:GetColor('normal'))
+    else
+        icon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
+                          db.color.inactive.b, db.color.inactive.a)
+        text:SetTextColor(db.color.inactive.r, db.color.inactive.g,
+                         db.color.inactive.b, db.color.inactive.a)
+    end
+end
+
 function TravelModule:FormatCooldown(cdTime)
     if cdTime <= 0 then return L['Ready'] end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
@@ -484,184 +545,56 @@ function TravelModule:FormatCooldown(cdTime)
 end
 
 function TravelModule:SetHearthColor()
-    if InCombatLockdown() then return; end
+    if InCombatLockdown() then return end
 
-    local db = xb.db.profile
-
-    self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
-
-    local hearthName = ''
-    local hearthActive = true
-    local keyset = {}
-    local random_elem
+    -- Determine which hearthstones to use
     local selectedHearthstones = {}
-    local usedHearthstones = {}
-
     if xb.db.profile.selectedHearthstones then
-        for i, v in pairs(xb.db.profile.selectedHearthstones) do
-            if v == true then table.insert(selectedHearthstones, i) end
+        for hearthstoneId, isSelected in pairs(xb.db.profile.selectedHearthstones) do
+            if isSelected then table.insert(selectedHearthstones, hearthstoneId) end
         end
     end
 
-    if #selectedHearthstones >= 1 then
-        usedHearthstones = selectedHearthstones
-    else
-        usedHearthstones = self.hearthstones
+    local usableHearthstones = #selectedHearthstones > 0 and selectedHearthstones or self.hearthstones
+
+    -- Find usable transport
+    local transport = self:FindUsableTransport(usableHearthstones, xb.db.profile.randomizeHs)
+    local isActive = transport ~= nil
+
+    if transport then
+        self.hearthButton:SetAttribute("macrotext", transport.macro)
     end
 
-    for i, v in ipairs(usedHearthstones) do
-        if IsUsableItem(v) then
-            --if GetItemCooldown(v) == 0 then
-                local name, _ = GetItemInfo(v)
-                hearthName = name
-                if hearthName ~= nil then
-                    if xb.db.profile.randomizeHs then
-                        table.insert(keyset, i)
-                        self.availableHearthstones[v] = {macro = "/use item:" .. v}
-                    else
-                        hearthActive = true
-                        self.hearthButton:SetAttribute("macrotext",
-                                                       "/use item:" .. v)
-                        break
-                    end
-                end
-            --end
-        end -- if toy/item
-        if PlayerHasToy(v) then
-            --if GetItemCooldown(v) == 0 then
-                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
-                if not name then
-                    name = GetItemInfo(v)
-                end
-                hearthName = name
-                if hearthName ~= nil then
-                    if xb.db.profile.randomizeHs then
-                        table.insert(keyset, i)
-                        self.availableHearthstones[v] = {macro = "/use item:" .. v}
-                    else
-                        hearthActive = true
-                        self.hearthButton:SetAttribute("macrotext",
-                                                       "/use item:" .. v)
-                        break
-                    end
-                end
-            --end
-        end -- if toy/item
-        if IsPlayerSpell(v) then
-            local spellCooldownInfo = GetSpellCooldown(v)
-            local start = spellCooldownInfo.startTime
-            local duration = spellCooldownInfo.duration
-            --if start == 0 then
-                local spellInfo = GetSpellInfo(v)
-                if spellInfo then
-                    hearthName = spellInfo.name
-                    if xb.db.profile.randomizeHs then
-                        table.insert(keyset, i)
-                        self.availableHearthstones[v] = {macro = "/cast " .. hearthName}
-                    else
-                        hearthActive = true
-                        self.hearthButton:SetAttribute("macrotext",
-                                                       "/cast " .. hearthName)
-                    end
-                end
-            --end
-        end -- if is spell
-    end -- for hearthstones
-
-    if xb.db.profile.randomizeHs then
-        random_elem = usedHearthstones[math.random(#usedHearthstones)]
-        for k, v in pairs(self.availableHearthstones) do
-            if k == random_elem then
-                self.hearthButton:SetAttribute("macrotext", v.macro)
-                break
-            end
-        end
-    end
-
-    if not hearthActive then
-        self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
-                                       db.color.inactive.b, db.color.inactive.a)
-        self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
-                                     db.color.inactive.b, db.color.inactive.a)
-    else
-        if self.hearthButton:IsMouseOver() then
-            self.hearthText:SetTextColor(unpack(xb:HoverColors()))
-        else
-            self.hearthText:SetTextColor(xb:GetColor('normal'))
-        end
-    end
+    -- Set button appearance
+    self:SetButtonState(self.hearthButton, self.hearthIcon, self.hearthText,
+                       isActive, self.hearthButton:IsMouseOver())
 end
 
 function TravelModule:SetPortColor()
-    if InCombatLockdown() then return; end
+    if InCombatLockdown() then return end
 
-    local db = xb.db.profile
-    local v = xb.db.char.portItem.portId
-
-    if not (self:IsUsable(v)) then
-        v = self:FindFirstOption()
-        v = v.portId
-        if not (self:IsUsable(v)) then
-            -- self.portButton:Hide()
+    local portItem = xb.db.char.portItem
+    if not portItem or not self:IsUsable(portItem.portId) then
+        portItem = self:FindFirstOption()
+        if not portItem or not self:IsUsable(portItem.portId) then
             return
         end
     end
 
-    if self.portButton:IsMouseOver() then
-        self.portText:SetTextColor(unpack(xb:HoverColors()))
-    else
-        local hearthname = ''
-        local hearthActive = false
+    -- Get transport name and set macro
+    local transportName = self:GetTransportName(portItem.portId)
+    local isActive = transportName ~= nil
 
-        if IsPlayerSpell(v) then
-            local spellCooldownInfo = GetSpellCooldown(v)
-            local start = spellCooldownInfo.startTime
-            local duration = spellCooldownInfo.duration
-            --if start == 0 then
-                local spellInfo = GetSpellInfo(v)
-                if spellInfo then
-                    hearthName = spellInfo.name
-                    hearthActive = true
-                    self.portButton:SetAttribute("macrotext",
-                                                 "/cast " .. hearthName)
-                end
-            --end
-        end -- if is spell
-        if IsUsableItem(v) then
-            --if GetItemCooldown(v) == 0 then
-                local name, _ = GetItemInfo(v)
-                hearthName = name
-                if hearthName ~= nil then
-                    hearthActive = true
-                    self.portButton:SetAttribute("macrotext",
-                                                 "/cast " .. hearthName)
-                end
-            --end
-        end -- if item
-        if PlayerHasToy(v) then
-            --if GetItemCooldown(v) == 0 then
-                local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(v)
-                hearthName = name
-                if hearthName ~= nil then
-                    hearthActive = true
-                    self.portButton:SetAttribute("macrotext",
-                                                 "/cast " .. hearthName)
-                end
-            --end
-        end -- if toy
+    if transportName then
+        -- Use global IsUsableItem with compatibility check
+        local isUsableItemFunc = (compat.isMists and not IsUsableItem) and false or IsUsableItem(portItem.portId)
+        local macro = isUsableItemFunc and "/use item:" .. portItem.portId or "/cast " .. transportName
+        self.portButton:SetAttribute("macrotext", macro)
+    end
 
-        if not hearthActive then
-            self.portIcon:SetVertexColor(db.color.inactive.r,
-                                         db.color.inactive.g,
-                                         db.color.inactive.b,
-                                         db.color.inactive.a)
-            self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
-                                       db.color.inactive.b, db.color.inactive.a)
-        else
-            self.portIcon:SetVertexColor(xb:GetColor('normal'))
-            self.portText:SetTextColor(xb:GetColor('normal'))
-        end
-    end -- else
+    -- Set button appearance
+    self:SetButtonState(self.portButton, self.portIcon, self.portText,
+                       isActive, self.portButton:IsMouseOver())
 end
 
 function TravelModule:SetMythicColor()
@@ -1216,13 +1149,9 @@ function TravelModule:Refresh()
             totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
 
-        --self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
-        --self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
-        --self.hearthFrame:Show()
         return
     end
 
-    -- local iconSize = (xb:GetHeight() / 2)
     local iconSize = db.text.fontSize + db.general.barPadding
 
     -- Hearthstone Part
@@ -1381,6 +1310,7 @@ function TravelModule:Refresh()
     self.hearthFrame:Show()
 end
 
+-- Optimized tooltip display using utility functions
 function TravelModule:ShowTooltip()
     if not self.portPopup:IsVisible() then
         GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
@@ -1388,48 +1318,29 @@ function TravelModule:ShowTooltip()
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
 
-        -- Show hearthstone cooldown
+        -- Show hearthstone cooldown using utility function
         local hearthstoneId = 6948 -- Regular Hearthstone ID
-        local remainingCooldown = 0
-        local startTime, duration = GetItemCooldown(hearthstoneId)
-        if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
-            remainingCooldown = (startTime + duration - GetTime())
-        end
+        local hearthCooldown = self:GetRemainingCooldown(hearthstoneId, false)
+        local hearthCdString = self:FormatCooldown(hearthCooldown)
+        GameTooltip:AddDoubleLine(L['Hearthstone'], hearthCdString, r, g, b, 1, 1, 1)
 
-        local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
-        GameTooltip:AddDoubleLine(L['Hearthstone'], cdString, r, g, b, 1, 1, 1)
-
-        -- Show teleport cooldowns
+        -- Show teleport cooldowns using utility functions
         if self.portOptions then
-            for i, v in pairs(self.portOptions) do
-                if v and v.portId then
-                    local label = v.text or GetPortLabel(v.portId)
-                    if PlayerHasToy(v.portId) or (IsUsableItem(v.portId) and not IsSpellKnown(v.portId)) then
-                        -- Handle items and toys
-                        local remainingCooldown = 0
-                        local startTime, duration = GetItemCooldown(v.portId)
-                        if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
-                            remainingCooldown = (startTime + duration - GetTime())
-                        end
-                        local cdString = self:FormatCooldown(math.max(0, remainingCooldown))
-                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
-                    else
-                        -- Handle spells (including class-specific teleports)
-                        if IsSpellKnown(v.portId) then
-                            local spellCooldownInfo = GetSpellCooldown(v.portId)
-                            local start = spellCooldownInfo.startTime
-                            local duration = spellCooldownInfo.duration
+            for _, portOption in pairs(self.portOptions) do
+                if portOption and portOption.portId then
+                    local label = portOption.text or GetPortLabel(portOption.portId)
+                    local isSpell = IsSpellKnown(portOption.portId)
 
-                            -- Always show cooldown info
-                            local remainingCooldown = 0
-                            if start and duration then
-                                if duration > 0 then
-                                    remainingCooldown = start + duration - GetTime()
-                                end
-                            end
-                            local cdString = self:FormatCooldown(remainingCooldown)
-                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
-                        end
+                    if isSpell then
+                        -- Handle spells
+                        local spellCooldown = self:GetRemainingCooldown(portOption.portId, true)
+                        local cdString = self:FormatCooldown(spellCooldown)
+                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
+                    elseif PlayerHasToy(portOption.portId) or IsUsableItem(portOption.portId) then
+                        -- Handle items and toys
+                        local itemCooldown = self:GetRemainingCooldown(portOption.portId, false)
+                        local cdString = self:FormatCooldown(itemCooldown)
+                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
                     end
                 end
             end
@@ -1499,14 +1410,8 @@ function TravelModule:RefreshHearthstonesList()
     for i, v in pairs(xb.db.profile.hearthstonesList) do
         if v == '' or v == nil then
             local hearthName = ''
-            -- if IsUsableItem(i) then
-            --     hearthName, _ = GetItemInfo(i)
-            -- elseif PlayerHasToy(i) then
             local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(i)
             hearthName = name
-            -- elseif IsPlayerSpell(i) then
-            --     hearthName, _ = GetSpellInfo(i)
-            -- end
             xb.db.profile.hearthstonesList[i] = hearthName
         end
     end
