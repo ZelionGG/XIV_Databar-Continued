@@ -187,6 +187,7 @@ L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
+L['Hide M+ Teleports text'] = true;
 L['Show Mythic+ Teleports'] = true;
 L['Use Random Hearthstone'] = "Use Random Hearthstone";
 local retrievingData = "Retrieving data..."

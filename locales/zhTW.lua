@@ -184,6 +184,7 @@ L['Hearthstone'] = true;
 L['M+ Teleports'] = true;
 L['Only show current season'] = true;
 L["Mythic+ Teleports"] = true;
+L['Hide M+ Teleports text'] = true; -- Needs Translate
 L['Show Mythic+ Teleports'] = true; -- Translation needed
 L['Use Random Hearthstone'] = "使用隨機爐石";
 local retrievingData = "正在讀取資料..."

@@ -183,6 +183,7 @@ L['Hearthstone'] = "Ruhestein";
 L['M+ Teleports'] = "M+ Teleporter";
 L['Only show current season'] = "Zeige nur aktuelle Season";
 L["Mythic+ Teleports"] = "Mythic+ Teleporter";
+L['Hide M+ Teleports text'] = true; -- Needs Translate
 L['Show Mythic+ Teleports'] = "Zeige Mythisch+ Teleporter";
 L['Use Random Hearthstone'] = "Nutze zufälligen Ruhestein";
 local retrievingData = "Daten werden abgerufen..."

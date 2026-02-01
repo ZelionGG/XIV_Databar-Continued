@@ -183,6 +183,7 @@ L['Hearthstone'] = "Pierre de foyer";
 L['M+ Teleports'] = "Téléportations M+";
 L['Only show current season'] = "N'afficher que les téléportations de la saison courante.";
 L["Mythic+ Teleports"] = "Téléportations Mythique+";
+L['Hide M+ Teleports text'] = "Masquer le texte des téléportations M+";
 L['Show Mythic+ Teleports'] = "Montrer les téléportations Mythique+";
 L['Use Random Hearthstone'] = "Utiliser une pierre de foyer aléatoire";
 local retrievingData = "Récupération des données..."

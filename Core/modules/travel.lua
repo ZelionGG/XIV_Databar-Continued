@@ -666,7 +666,12 @@ end
 function TravelModule:SetMythicColor()
     if InCombatLockdown() then return; end
 
+    local hideMythicText = xb.db and xb.db.profile and xb.db.profile.hideMythicText
+
     if self.mythicButton:IsMouseOver() then
+        if(hideMythicText) then
+            self.mythicIcon:SetVertexColor(unpack(xb:HoverColors()))
+        end
         self.mythicText:SetTextColor(unpack(xb:HoverColors()))
     else
         self.mythicIcon:SetVertexColor(xb:GetColor('normal'))
@@ -1274,25 +1279,29 @@ function TravelModule:Refresh()
     if allowMythic and self.mythicButton then
         -- Only show the button if teleports are available
         if self:HasAvailableMythicTeleports() then
+            local hideMythicText = db.hideMythicText
+            
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
-            self.mythicText:SetText(L['M+ Teleports'])
-
-            self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize +
-                                       db.general.barPadding, xb:GetHeight())
-            self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
-
-            self.mythicText:SetPoint("RIGHT")
-
+            self.mythicText:SetText(hideMythicText and '' or L['M+ Teleports'])
+            self.mythicText:SetShown(not hideMythicText)
+            
             self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
             self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
-
-            self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT",
-                                     -(db.general.barPadding) + 5, 0)
-
+            self.mythicIcon:ClearAllPoints()
+            
+            if hideMythicText then
+                self.mythicButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
+                self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+                self.mythicIcon:SetPoint("RIGHT", self.mythicButton, "RIGHT", 0, 0)
+            else
+                self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
+                self.mythicButton:SetPoint("RIGHT", self.portButton, "LEFT", -(db.general.barPadding), 0)
+                self.mythicText:SetPoint("RIGHT")
+                self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT", -(db.general.barPadding) + 5, 0)
+            end
+            
             self:SetMythicColor()
-
             self:CreateMythicPopup()
-
             self.mythicButton:Show()
         end
     end
@@ -1478,6 +1487,7 @@ function TravelModule:GetDefaultOptions()
     return 'travel', {
         enabled = true,
         enableMythicPortals = compat.isMainline,
+        hideMythicText = false,
         curSeasonOnly = false,
         randomizeHs = false
     }
@@ -1556,6 +1566,20 @@ function TravelModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.enableMythicPortals = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
+            hideMythicText = {
+                name = L['Hide M+ Teleports text'],
+                order = 22,
+                type = "toggle",
+                hidden = function() return not compat.isMainline end,
+                get = function()
+                    return xb.db.profile.hideMythicText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideMythicText = val;
                     self:Refresh();
                 end,
                 width = "full"

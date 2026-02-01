@@ -184,6 +184,7 @@ L['Hearthstone'] = "Pedra de Regresso";
 L['M+ Teleports'] =  "Teleportes de M+";
 L['Only show current season'] = "Mostrar Temporada Atual";
 L["Mythic+ Teleports"] = "Teleportes de Mitica+";
+L['Hide M+ Teleports text'] = true; -- Needs Translate
 L['Show Mythic+ Teleports'] = "Mostrar Teleportes de Mitica+";
 L['Use Random Hearthstone'] = "Usar Pedra de Regresso aleatória";
 local retrievingData = "Recuperando dados..."
