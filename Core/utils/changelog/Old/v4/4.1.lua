@@ -15,12 +15,12 @@ XIVBar.Changelog[4100] = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {
-            "[Retail] Added the [" .. DELVES_GREAT_VAULT_LABEL .. "] module, allowing you to quickly access the vault view and see your progress in the tooltip. The tooltip also contains a reminder of which [" .. WEEKLY_REWARDS_MYTHIC_KEYSTONE .. "] you have.",
+            "[Retail] Added the [Great Vault] module, allowing you to quickly access the vault view and see your progress in the tooltip. The tooltip also contains a reminder of which [Mythic Keystone] you have.",
             "[Global] Added [Show on mouseover] option to the general settings.",
             "[Global] Added an option to show accessibility tooltips on the [Micromenu] module buttons."
         },
         ["frFR"] = {
-            "[Retail] Ajout du module [" .. DELVES_GREAT_VAULT_LABEL .. "], permettant d'accéder rapidement à la vue du coffre et de voir votre progression dans le tooltip. L'infobulle contient également un rappel de la [" .. WEEKLY_REWARDS_MYTHIC_KEYSTONE .. "] que vous avez.",
+            "[Retail] Ajout du module [Grande chambre forte], permettant d'accéder rapidement à la vue du coffre et de voir votre progression dans l'infobulle. L'infobulle contient également un rappel de la [Clé mythique] que vous avez.",
             "[Global] Ajout de l'option [Afficher au survol] aux paramètres généraux.",
             "[Global] Ajout de l'option pour afficher les bulles d'accessibilité sur les boutons du module [Micromenu]."
         },
