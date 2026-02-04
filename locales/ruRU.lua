@@ -142,6 +142,7 @@ L['Session Total'] = "Всего за сессию";
 L['Daily Total'] = true;
 L['Gold rounded values'] = true;
 
+-- Currency
 L['Show XP Bar Below Max Level'] = "Показывать полоску опыта персонажам, не достигшим максимального уровня";
 L['Use Class Colors for XP Bar'] = "Использовать цвет класса для полоски опыта";
 L['Show Tooltips'] = "Показывать подсказки";
@@ -151,7 +152,15 @@ L['First Currency'] = "Валюта №1";
 L['Second Currency'] = "Валюта №2";
 L['Third Currency'] = "Валюта №3";
 L['Rested'] = "Отдых";
+L['Show More Currencies on Shift+Hover'] = true; -- To Translate
+L['Max currencies shown when holding Shift'] = true; -- To Translate
+L['Only Show Module Icon'] = true; -- To Translate
+L['Number of Currencies on Bar'] = true; -- To Translate
+L['Currency Selection'] = true; -- To Translate
+L['Select All'] = true; -- To Translate
+L['Unselect All'] = true; -- To Translate
 
+-- System
 L['Show World Ping'] = "Показывать задержку сервера";
 L['Number of Addons To Show'] = "Сколько аддонов показывать";
 L['Addons to Show in Tooltip'] = "Сколько аддонов показывать";

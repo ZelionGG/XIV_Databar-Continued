@@ -142,6 +142,7 @@ L['Session Total'] = "Sitzung total";
 L['Daily Total'] = "Heute total";
 L['Gold rounded values'] = "Gold runden";
 
+-- Currency
 L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
 L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
 L['Show Tooltips'] = "Tooltips anzeigen";
@@ -151,7 +152,15 @@ L['First Currency'] = "Währung #1";
 L['Second Currency'] = "Währung #2";
 L['Third Currency'] = "Währung #3";
 L['Rested'] = "Ausgeruht";
+L['Show More Currencies on Shift+Hover'] = true; -- To Translate
+L['Max currencies shown when holding Shift'] = true; -- To Translate
+L['Only Show Module Icon'] = true; -- To Translate
+L['Number of Currencies on Bar'] = true; -- To Translate
+L['Currency Selection'] = true; -- To Translate
+L['Select All'] = true; -- To Translate
+L['Unselect All'] = true; -- To Translate
 
+-- System
 L['Show World Ping'] = "Welt-Ping anzeigen";
 L['Number of Addons To Show'] = "Maximale Anzahl für Addon Anzeige";
 L['Addons to Show in Tooltip'] = "Addons die im Tooltip angezeigt werden";

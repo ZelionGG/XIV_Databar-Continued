@@ -142,6 +142,7 @@ L['Shorten Gold'] = "金額縮寫";
 L['Toggle Bags'] = "打開/關閉背包";
 L['Session Total'] = "本次登入總計";
 
+-- Currency
 L['Show XP Bar Below Max Level'] = "未滿等時顯示經驗條";
 L['Use Class Colors for XP Bar'] = "使用職業顏色";
 L['Show Tooltips'] = "顯示滑鼠提示";
@@ -151,7 +152,15 @@ L['First Currency'] = "第一種兌換通貨";
 L['Second Currency'] = "第二種兌換通貨";
 L['Third Currency'] = "第三種兌換通貨";
 L['Rested'] = "休息加成";
+L['Show More Currencies on Shift+Hover'] = true; -- To Translate
+L['Max currencies shown when holding Shift'] = true; -- To Translate
+L['Only Show Module Icon'] = true; -- To Translate
+L['Number of Currencies on Bar'] = true; -- To Translate
+L['Currency Selection'] = true; -- To Translate
+L['Select All'] = true; -- To Translate
+L['Unselect All'] = true; -- To Translate
 
+-- System
 L['Show World Ping'] = "顯示世界延遲";
 L['Number of Addons To Show'] = "顯示的插件數目";
 L['Addons to Show in Tooltip'] = "顯示插件數目";

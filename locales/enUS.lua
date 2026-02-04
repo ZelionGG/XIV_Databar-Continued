@@ -143,6 +143,7 @@ L['Session Total'] = true;
 L['Daily Total'] = true;
 L['Gold rounded values'] = true;
 
+-- Currency
 L['Show XP Bar Below Max Level'] = true;
 L['Use Class Colors for XP Bar'] = true;
 L['Show Tooltips'] = true;
@@ -152,7 +153,15 @@ L['First Currency'] = true;
 L['Second Currency'] = true;
 L['Third Currency'] = true;
 L['Rested'] = true;
+L['Show More Currencies on Shift+Hover'] = true;
+L['Max currencies shown when holding Shift'] = true;
+L['Only Show Module Icon'] = true;
+L['Number of Currencies on Bar'] = true;
+L['Currency Selection'] = true;
+L['Select All'] = true;
+L['Unselect All'] = true;
 
+-- System
 L['Show World Ping'] = true;
 L['Number of Addons To Show'] = true;
 L['Addons to Show in Tooltip'] = true;

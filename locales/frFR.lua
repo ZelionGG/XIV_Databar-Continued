@@ -142,6 +142,7 @@ L['Session Total'] = "Total sur la session";
 L['Daily Total'] = "Total quotidien";
 L['Gold rounded values'] = "Valeurs arrondies au po";
 
+-- Currency
 L['Show XP Bar Below Max Level'] = "Montrer la barre d'XP quand le niveau max n'est pas atteint";
 L['Use Class Colors for XP Bar'] = "Utiliser la couleur de classe pour la barre d'XP";
 L['Show Tooltips'] = "Montrer les bulles";
@@ -151,7 +152,15 @@ L['First Currency'] = "Première monnaie";
 L['Second Currency'] = "Seconde monnaie";
 L['Third Currency'] = "Troisième monnaie";
 L['Rested'] = "Reposé";
+L['Show More Currencies on Shift+Hover'] = "Montrer plus de monnaies avec Maj+Survol";
+L['Max currencies shown when holding Shift'] = "Nombre maximum de monnaies affichées avec Maj";
+L['Only Show Module Icon'] = "Montrer uniquement l'icône du module";
+L['Number of Currencies on Bar'] = "Nombre de monnaies dans la barre";
+L['Currency Selection'] = "Sélection des monnaies";
+L['Select All'] = "Tout sélectionner";
+L['Unselect All'] = "Tout désélectionner";
 
+-- System
 L['Show World Ping'] = "Montrer la latence monde";
 L['Number of Addons To Show'] = "Nombre d'addon à lister";
 L['Addons to Show in Tooltip'] = "Addon à lister dans la bulle";
