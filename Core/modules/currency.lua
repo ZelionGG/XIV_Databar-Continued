@@ -123,7 +123,8 @@ function CurrencyModule:Refresh()
         -- Check if 'icon only' mode is enabled
         if db.modules.currency.showOnlyModuleIcon then
             -- Show only the module icon
-            self.moduleIcon:SetTexture(xb.constants.mediaPath .. 'currency\\currency')
+            local icon = xb.constants.mediaPath .. 'datatexts\\garres'
+            self.moduleIcon:SetTexture(icon)
             self.moduleIcon:SetSize(iconSize, iconSize)
             self.moduleIcon:SetPoint('RIGHT')
             self.moduleIcon:SetVertexColor(xb:GetColor('normal'))
