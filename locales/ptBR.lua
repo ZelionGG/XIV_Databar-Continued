@@ -201,6 +201,8 @@ L['Retrieving data'] = retrievingData;
 L['Empty Hearthstones List'] = "Se você vir '" .. retrievingData .. "' na lista abaixo, basta mudar de aba ou reabrir este menu para atualizar os dados."
 L['Hearthstones Select'] = "Selecionar Pedra de Regresso";
 L['Hearthstones Select Desc'] = "Selecionar a Pedra de Regresso";
+L['Hide Hearthstone Button'] = true; -- To Translate
+L['Hide Port Button'] = true; -- To Translate
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

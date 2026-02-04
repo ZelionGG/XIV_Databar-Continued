@@ -200,6 +200,8 @@ L['Retrieving data'] = retrievingData;
 L['Empty Hearthstones List'] = "Si vous voyez '" .. retrievingData .. "' dans la liste ci-dessous, changez simplement d'onglet ou rouvrez ce menu pour rafraîchir les données."
 L['Hearthstones Select'] = "Sélection des pierres de foyers";
 L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')";
+L['Hide Hearthstone Button'] = "Masquer le bouton de la pierre de foyer";
+L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

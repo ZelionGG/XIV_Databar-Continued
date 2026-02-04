@@ -200,6 +200,8 @@ L['Retrieving data'] = retrievingData;
 L['Empty Hearthstones List'] = "Wenn du '" .. retrievingData .. "' in der Liste unten siehst, wechsle einfach den Tab oder öffne dieses Menü erneut, um die Daten zu aktualisieren.";
 L['Hearthstones Select'] = "Ruhesteine auswählen";
 L['Hearthstones Select Desc'] = "Ruhesteinauswahl Beschreibung";
+L['Hide Hearthstone Button'] = true; -- To Translate
+L['Hide Port Button'] = true; -- To Translate
 
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed
