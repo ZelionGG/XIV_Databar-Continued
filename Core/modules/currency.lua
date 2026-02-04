@@ -448,6 +448,12 @@ function CurrencyModule:ShowTooltip()
 
         -- Display selected currencies grouped by categories
         local selectedCurrencies = xb.db.profile.modules.currency.selectedCurrencies
+        local showAllOnShift = xb.db.profile.modules.currency.showMoreCurrenciesOnShift
+        local shiftIsDown = IsShiftKeyDown()
+        local showAllCurrencies = showAllOnShift and shiftIsDown
+        local maxCurrencies = xb.db.profile.modules.currency.maxCurrenciesTooltipShift or 30
+        local currencyCount = 0
+
         if #selectedCurrencies > 0 and C_CurrencyInfo then
             -- Create a set to quickly check if a currency is selected
             local selectedSet = {}
@@ -459,12 +465,23 @@ function CurrencyModule:ShowTooltip()
             local expansionCurrencies = self:GetCurrenciesByExpansion()
 
             for _, expansionData in ipairs(expansionCurrencies) do
+                -- Stop if we reached the limit (only when showing all currencies)
+                if showAllCurrencies and currencyCount >= maxCurrencies then
+                    break
+                end
+
                 local hasCurrencyInCategory = false
                 local currenciesToShow = {}
 
-                -- Check if this category has selected currencies
+                -- Check if this category has selected currencies (or show more if Shift is held)
                 for _, currencyInfo in ipairs(expansionData.currencies) do
-                    if selectedSet[currencyInfo.id] then
+                    if showAllCurrencies then
+                        -- When showing all, respect the limit
+                        if currencyCount + #currenciesToShow < maxCurrencies then
+                            hasCurrencyInCategory = true
+                            table.insert(currenciesToShow, currencyInfo)
+                        end
+                    elseif selectedSet[currencyInfo.id] then
                         hasCurrencyInCategory = true
                         table.insert(currenciesToShow, currencyInfo)
                     end
@@ -517,6 +534,7 @@ function CurrencyModule:ShowTooltip()
                             end
 
                             GameTooltip:AddDoubleLine(iconString .. curInfo.name, quantityText, r, g, b, qtyR, qtyG, qtyB)
+                            currencyCount = currencyCount + 1
                         end
                     end
 
@@ -603,7 +621,9 @@ function CurrencyModule:GetDefaultOptions()
         textOnRight = true,
         showOnlyModuleIcon = false,
         numCurrenciesOnBar = 3,
-        selectedCurrencies = {}  -- Array of selected currency IDs
+        selectedCurrencies = {},  -- Array of selected currency IDs
+        showMoreCurrenciesOnShift = false,  -- Setting to display more currencies while using Shift+Hover
+        maxCurrenciesTooltipShift = 30  -- Maximum number of currencies displayed during Shift+Hover
     }
 end
 
@@ -706,12 +726,42 @@ function CurrencyModule:GetConfig()
             disabled = function()
                 return xb.db.profile.modules.currency.showOnlyModuleIcon
             end
+        },
+        showMoreCurrenciesOnShift = {
+            name = L['Show More Currencies on Shift+Hover'],
+            order = 7,
+            type = "toggle",
+            get = function()
+                return xb.db.profile.modules.currency.showMoreCurrenciesOnShift;
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.currency.showMoreCurrenciesOnShift = val;
+                self:Refresh();
+            end
+        },
+        maxCurrenciesTooltipShift = {
+            name = L['Max currencies shown when holding Shift'],
+            order = 8,
+            type = "range",
+            min = 10,
+            max = 50,
+            step = 5,
+            get = function()
+                return xb.db.profile.modules.currency.maxCurrenciesTooltipShift;
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.currency.maxCurrenciesTooltipShift = val;
+                self:Refresh();
+            end,
+            disabled = function()
+                return not xb.db.profile.modules.currency.showMoreCurrenciesOnShift
+            end
         }
     }
 
     if ShouldUseSelectedCurrencies() then
         local expansionCurrencies = self:GetCurrenciesByExpansion()
-        local order = 7
+        local order = 9
 
         -- Select All and Unselect All buttons
         args['currency_buttons'] = {
