@@ -628,6 +628,7 @@ function CurrencyModule:GetDefaultOptions()
 end
 
 function CurrencyModule:GetConfig()
+    local hasCurrencyUI = compat.features and compat.features.currency and compat.features.currency.available
     local args = {
         enable = {
             name = ENABLE,
@@ -695,6 +696,9 @@ function CurrencyModule:GetConfig()
             set = function(_, val)
                 xb.db.profile.modules.currency.textOnRight = val;
                 self:Refresh();
+            end,
+            hidden = function()
+                return not hasCurrencyUI
             end
         },
         showOnlyModuleIcon = {
@@ -707,6 +711,9 @@ function CurrencyModule:GetConfig()
             set = function(_, val)
                 xb.db.profile.modules.currency.showOnlyModuleIcon = val;
                 self:Refresh();
+            end,
+            hidden = function()
+                return not hasCurrencyUI
             end
         },
         numCurrenciesOnBar = {
@@ -725,6 +732,9 @@ function CurrencyModule:GetConfig()
             end,
             disabled = function()
                 return xb.db.profile.modules.currency.showOnlyModuleIcon
+            end,
+            hidden = function()
+                return not hasCurrencyUI
             end
         },
         showMoreCurrenciesOnShift = {
@@ -737,6 +747,9 @@ function CurrencyModule:GetConfig()
             set = function(_, val)
                 xb.db.profile.modules.currency.showMoreCurrenciesOnShift = val;
                 self:Refresh();
+            end,
+            hidden = function()
+                return not hasCurrencyUI
             end
         },
         maxCurrenciesTooltipShift = {
@@ -755,11 +768,14 @@ function CurrencyModule:GetConfig()
             end,
             disabled = function()
                 return not xb.db.profile.modules.currency.showMoreCurrenciesOnShift
+            end,
+            hidden = function()
+                return not hasCurrencyUI
             end
         }
     }
 
-    if ShouldUseSelectedCurrencies() then
+    if ShouldUseSelectedCurrencies() and hasCurrencyUI then
         local expansionCurrencies = self:GetCurrenciesByExpansion()
         local order = 9
 
