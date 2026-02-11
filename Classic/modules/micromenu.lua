@@ -3,6 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 local compat = xb.compat
+local features = compat.features and compat.features.microMenu or {}
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
@@ -100,7 +101,7 @@ function MenuModule:OnInitialize()
         }
     }
 
-    self.buttonInfo = {
+    local buttonEntries = {
         { key = 'menu',   binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
         { key = 'chat',   binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
         { key = 'guild',  binding = 'TOGGLEGUILD',            label = GUILD },
@@ -108,15 +109,22 @@ function MenuModule:OnInitialize()
         { key = 'char',   binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
         { key = 'spell',  binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
         { key = 'talent', binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
-        { key = 'ach',    binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
+        { key = 'ach',    binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS,        feature = features.achievements },
         { key = 'quest',  binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
         { key = 'lfg',    binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
-        { key = 'journal',binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
+        { key = 'journal',binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL,   feature = features.journal },
         { key = 'pvp',    binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
-        { key = 'pet',    binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
-        { key = 'shop',   binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
+        { key = 'pet',    binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS,         feature = features.pet },
+        { key = 'shop',   binding = 'TOGGLESTORE',            label = BLIZZARD_STORE,      feature = features.shop },
         { key = 'help',   binding = 'TOGGLEHELP',             label = HELP_BUTTON },
     }
+
+    self.buttonInfo = {}
+    for _, info in ipairs(buttonEntries) do
+        if info.feature == nil or info.feature then
+            table.insert(self.buttonInfo, info)
+        end
+    end
 
     -- Build helpers
     self.buttonOrder = {}
@@ -1157,13 +1165,13 @@ function MenuModule:GetDefaultOptions()
         char = true,
         spell = true,
         talent = true,
-        ach = true,
+        ach = features.achievements and true or false,
         quest = true,
         lfg = true,
-        journal = true,
+        journal = features.journal and true or false,
         pvp = true,
-        pet = true,
-        shop = true,
+        pet = features.pet and true or false,
+        shop = features.shop and true or false,
         help = true,
         hideAppContact = false
     }
@@ -1481,7 +1489,7 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
-                    ach = {
+                    ach = features.achievements and {
                         name = L['Show Achievements Button'],
                         order = 8,
                         type = "toggle",
@@ -1493,7 +1501,7 @@ function MenuModule:GetConfig()
                             self:UpdateMenu();
                             self:Refresh();
                         end
-                    },
+                    } or nil,
                     quest = {
                         name = L['Show Quests Button'],
                         order = 9,
@@ -1520,7 +1528,7 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
-                    journal = {
+                    journal = features.journal and {
                         name = L['Show Journal Button'],
                         order = 11,
                         type = "toggle",
@@ -1532,7 +1540,7 @@ function MenuModule:GetConfig()
                             self:UpdateMenu();
                             self:Refresh();
                         end
-                    },
+                    } or nil,
                     pvp = {
                         name = L['Show PVP Button'],
                         order = 12,
@@ -1546,7 +1554,7 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
-                    pet = {
+                    pet = features.pet and {
                         name = L['Show Pets Button'],
                         order = 13,
                         type = "toggle",
@@ -1558,8 +1566,8 @@ function MenuModule:GetConfig()
                             self:UpdateMenu();
                             self:Refresh();
                         end
-                    },
-                    shop = {
+                    } or nil,
+                    shop = features.shop and {
                         name = L['Show Shop Button'],
                         order = 15,
                         type = "toggle",
@@ -1571,7 +1579,7 @@ function MenuModule:GetConfig()
                             self:UpdateMenu();
                             self:Refresh();
                         end
-                    },
+                    } or nil,
                     help = {
                         name = L['Show Help Button'],
                         order = 16,
