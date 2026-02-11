@@ -59,9 +59,9 @@ L['Text Style'] = "Style du texte";
 L["Colors"] = "Couleurs";
 L['Text Colors'] = "Couleurs du texte";
 L['Normal'] = "Normale";
+L['Inactive'] = "Inactif";
 L['Use Class Color for Text'] = "Utiliser la couleur de classe pour le texte";
 L['Only the alpha can be set with the color picker'] = "Seul l'alpha peut être réglé avec la sélection de couleur";
-L['Inactive'] = "Inactif";
 L['Use Class Colors for Hover'] = "Utiliser la couleur de classe lors du survol";
 L['Hover'] = "Survol";
 
