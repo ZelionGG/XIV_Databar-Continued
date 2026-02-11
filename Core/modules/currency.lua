@@ -721,7 +721,7 @@ function CurrencyModule:GetConfig()
             order = 6,
             type = "range",
             min = 1,
-            max = 10,
+            max = 3,
             step = 1,
             get = function()
                 return xb.db.profile.modules.currency.numCurrenciesOnBar;
