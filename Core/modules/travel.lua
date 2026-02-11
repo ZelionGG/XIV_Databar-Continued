@@ -38,6 +38,7 @@ local function GetRetrievingText(id)
 end
 
 local function GetItemName(id)
+    if not id then return "" end
     if compat.isMists and not GetItemInfo then return tostring(id) end
     local name = select(1, GetItemInfo(id))
 
@@ -51,6 +52,11 @@ local function GetItemName(id)
     local retrievingText = GetRetrievingText(id)
 
     if compat.isMists then
+        return retrievingText
+    end
+
+    -- Classic/TBC: avoid ContinueOnItemLoad which can error on missing items
+    if compat.isClassicOrTBC then
         return retrievingText
     end
 
