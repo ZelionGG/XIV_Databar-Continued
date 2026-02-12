@@ -97,6 +97,9 @@ end
 function TravelModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
     self.garrisonHearth = 110560
+    self.housingRequested = false
+    self.disableHousing = false
+
     self.hearthstones = {
         556,       -- Astral Recall
         6948,      -- Hearthstone
@@ -343,10 +346,13 @@ function TravelModule:RegisterFrameEvents()
     self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
     self:RegisterEvent('GET_ITEM_INFO_RECEIVED', 'RefreshHearthstonesList')
 
-    -- Housing events - Retail only
-    if compat.isMainline then
+    -- Housing events - Retail only (single initial request, no re-request in Update)
+    if compat.isMainline and not self.disableHousing then
         self:RegisterEvent('PLAYER_HOUSE_LIST_UPDATED', 'OnHouseListUpdated')
-        C_Housing.GetPlayerOwnedHouses()
+        if not self.housingRequested then
+            self.housingRequested = true
+            C_Housing.GetPlayerOwnedHouses()
+        end
     end
 
     self.hearthButton:EnableMouse(true)
@@ -668,10 +674,7 @@ end
 function TravelModule:UpdateHouseAttributes()
     if not compat.isMainline or not self.homeButton then return end
 
-    if not self.playerHouseList or #self.playerHouseList == 0 then
-        C_Housing.GetPlayerOwnedHouses()
-        return
-    end
+    if not self.playerHouseList or #self.playerHouseList == 0 then return end
 
     if InCombatLockdown() then return end
 
@@ -686,9 +689,12 @@ end
 
 function TravelModule:OnHouseListUpdated(_, houseInfoList)
     self.playerHouseList = houseInfoList
+    self.housingRequested = true
     if not InCombatLockdown() then
         self:UpdateHouseAttributes()
-        self:Refresh()
+        if self.playerHouseList and #self.playerHouseList > 0 then
+            self:Refresh()
+        end
     end
 end
 
