@@ -202,9 +202,6 @@ L['Hearthstones Select'] = "Sélection des pierres de foyers";
 L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')";
 L['Hide Hearthstone Button'] = "Masquer le bouton de la pierre de foyer";
 L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires";
-L['Home'] = "Logis";
-L['Teleport to Home'] = "Se téléporter au logis";
-L['Housing Dashboard'] = "Tableau de bord du logis";
 L['Hide Home Button'] = "Masquer le bouton Logis";
 
 L["Classic"] = true;

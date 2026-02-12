@@ -300,8 +300,6 @@ function TravelModule:CreateFrames()
                                           'SecureActionButtonTemplate')
         self.homeIcon = self.homeIcon or
                             self.homeButton:CreateTexture(nil, 'OVERLAY')
-        self.homeText = self.homeText or
-                            self.homeButton:CreateFontString(nil, 'OVERLAY')
     end
 end
 
@@ -422,44 +420,17 @@ function TravelModule:RegisterFrameEvents()
 
         -- Left click: teleport home (SecureAction type)
         self.homeButton:SetAttribute('type1', 'teleporthome')
-        -- Right click: open Housing Dashboard
-        self.homeButton:SetAttribute('type2', 'click')
-        self.homeButton.Click = function(_, mouseButton)
-            if mouseButton == 'RightButton' then
-                if not InCombatLockdown() then
-                    if HousingFramesUtil and
-                        HousingFramesUtil.ToggleHousingDashboard then
-                        HousingFramesUtil.ToggleHousingDashboard()
-                    end
-                end
-            end
-        end
         self.homeButton:SetAttribute('clickbutton', self.homeButton)
 
         self.homeButton:SetScript('OnEnter', function()
             self:SetHomeColor()
             if not InCombatLockdown() then
                 self:UpdateHouseAttributes()
-                GameTooltip:SetOwner(self.homeButton,
-                                     'ANCHOR_' .. xb.miniTextPosition)
-                GameTooltip:ClearLines()
-                local r, g, b, _ = unpack(xb:HoverColors())
-                GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Home'] ..
-                                        "|cFFFFFFFF]|r", r, g, b)
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
-                                          L['Teleport to Home'], r, g, b, 1, 1,
-                                          1)
-                GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>',
-                                          L['Housing Dashboard'], r, g, b, 1, 1,
-                                          1)
-                GameTooltip:Show()
             end
         end)
 
         self.homeButton:SetScript('OnLeave', function()
             self:SetHomeColor()
-            GameTooltip:Hide()
         end)
     end
 end
@@ -685,16 +656,12 @@ function TravelModule:SetHomeColor()
 
     if self.homeButton:IsMouseOver() then
         self.homeIcon:SetVertexColor(unpack(xb:HoverColors()))
-        self.homeText:SetTextColor(unpack(xb:HoverColors()))
     elseif hasHouse then
         self.homeIcon:SetVertexColor(xb:GetColor('normal'))
-        self.homeText:SetTextColor(xb:GetColor('normal'))
     else
         local db = xb.db.profile
         self.homeIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
                                      db.color.inactive.b, db.color.inactive.a)
-        self.homeText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
-                                   db.color.inactive.b, db.color.inactive.a)
     end
 end
 
