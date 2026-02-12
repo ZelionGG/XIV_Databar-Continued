@@ -49,18 +49,31 @@ function CurrencyModule:OnEnable()
     self:RegisterFrameEvents()
     self:Refresh()
 
+    -- Currency data may not have been available when GetConfig() ran during OnInitialize.
+    -- Always rebuild config args here to catch data that loaded between OnInitialize and OnEnable.
     if ShouldUseSelectedCurrencies() and C_CurrencyInfo and
         C_CurrencyInfo.GetCurrencyListSize then
-        if C_CurrencyInfo.GetCurrencyListSize() == 0 then
+        if C_CurrencyInfo.GetCurrencyListSize() > 0 then
+            -- Data is already loaded, rebuild config args now
+            self:BuildCurrencySelectionArgs()
+        else
+            -- Data still not loaded, retry periodically
             self.currencyRetryTicker = C_Timer.NewTicker(0.5, function()
                 if C_CurrencyInfo.GetCurrencyListSize() > 0 then
                     if self.currencyRetryTicker then
                         self.currencyRetryTicker:Cancel()
                         self.currencyRetryTicker = nil
                     end
+                    self:BuildCurrencySelectionArgs()
                     self:Refresh()
+                    -- Notify AceConfig to refresh the config panel if it's open
+                    local AceConfigRegistry =
+                        LibStub("AceConfigRegistry-3.0", true)
+                    if AceConfigRegistry then
+                        AceConfigRegistry:NotifyChange(AddOnName .. "_Modules")
+                    end
                 end
-            end, 20) -- Max 20 tentatives (10 secondes)
+            end, 20) -- Max 20 attempts (10 seconds)
         end
     end
 end
@@ -608,6 +621,7 @@ function CurrencyModule:GetCurrenciesByExpansion()
     for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
         local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
         if listInfo.isHeader then
+            C_CurrencyInfo.ExpandCurrencyList(i, true)
             currentHeader = listInfo.name
             currentHeaderIndex = #expansionCurrencies + 1
             table.insert(expansionCurrencies, {
@@ -786,149 +800,167 @@ function CurrencyModule:GetConfig()
                 self:Refresh();
             end,
             disabled = function()
-                return not xb.db.profile.modules.currency.showMoreCurrenciesOnShift
+                return not xb.db.profile.modules.currency
+                           .showMoreCurrenciesOnShift
             end,
-            hidden = function()
-                return not hasCurrencyUI
-            end
+            hidden = function() return not hasCurrencyUI end
         }
     }
 
     if ShouldUseSelectedCurrencies() and hasCurrencyUI then
-        local expansionCurrencies = self:GetCurrenciesByExpansion()
-        local order = 9
-
-        -- Select All and Unselect All buttons
-        args['currency_buttons'] = {
+        -- Currency selection uses a mutable args table that is rebuilt when currency data becomes available.
+        -- This fixes the "0 currency" bug: at OnInitialize time, GetCurrencyListSize() returns 0,
+        -- so we populate the args later when the data is loaded.
+        self.currencySelectionArgs = self.currencySelectionArgs or {}
+        args['currency_selection'] = {
             type = 'group',
             name = L['Currency Selection'],
-            order = order,
+            order = 9,
             inline = true,
-            args = {
-                selectAll = {
-                    name = L['Select All'],
-                    type = "execute",
-                    order = 1,
-                    func = function()
-                        local allCurrencies = {}
-                        for _, expansionData in ipairs(expansionCurrencies) do
-                            for _, currencyInfo in ipairs(expansionData.currencies) do
-                                table.insert(allCurrencies, currencyInfo.id)
-                            end
-                        end
-                        xb.db.profile.modules.currency.selectedCurrencies = allCurrencies
-                        self:Refresh()
-                    end
-                },
-                unselectAll = {
-                    name = L['Unselect All'],
-                    type = "execute",
-                    order = 2,
-                    func = function()
-                        xb.db.profile.modules.currency.selectedCurrencies = {}
-                        self:Refresh()
-                    end
-                }
-            }
+            args = self.currencySelectionArgs
         }
-        order = order + 1
+        -- Populate immediately (will be empty if data isn't loaded yet)
+        self:BuildCurrencySelectionArgs()
+    end
 
-        for _, expansionData in ipairs(expansionCurrencies) do
-            -- If it's Legacy, create a header instead of a group
-            if expansionData.header == "Legacy" then
-                args['header_legacy'] = {
-                    type = 'header',
-                    name = expansionData.header,
-                    order = order
-                }
-                order = order + 1
+    return {name = self:GetName(), type = "group", args = args}
+end
 
-                -- Add all Legacy currencies directly without sub-groups
+-- Rebuilds the currency selection toggles in the config panel.
+-- Called from GetConfig() and also from the retry ticker when data becomes available.
+function CurrencyModule:BuildCurrencySelectionArgs()
+    if not self.currencySelectionArgs then return end
+
+    -- Wipe existing entries
+    for k in pairs(self.currencySelectionArgs) do
+        self.currencySelectionArgs[k] = nil
+    end
+
+    local expansionCurrencies = self:GetCurrenciesByExpansion()
+    local order = 1
+
+    -- Select All / Unselect All buttons
+    self.currencySelectionArgs['selectAll'] = {
+        name = L['Select All'],
+        type = "execute",
+        order = order,
+        func = function()
+            local freshExpansions = self:GetCurrenciesByExpansion()
+            local allCurrencies = {}
+            for _, expansionData in ipairs(freshExpansions) do
                 for _, currencyInfo in ipairs(expansionData.currencies) do
-                    local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
-                    args['currency_' .. currencyInfo.id] = {
-                        name = iconString .. currencyInfo.name,
-                        type = "toggle",
-                        order = order,
-                        get = function()
-                            local selected = xb.db.profile.modules.currency.selectedCurrencies
-                            for _, id in ipairs(selected) do
-                                if id == currencyInfo.id then
-                                    return true
-                                end
-                            end
-                            return false
-                        end,
-                        set = function(_, val)
-                            local selected = xb.db.profile.modules.currency.selectedCurrencies
-                            if val then
-                                table.insert(selected, currencyInfo.id)
-                            else
-                                for i, id in ipairs(selected) do
-                                    if id == currencyInfo.id then
-                                        table.remove(selected, i)
-                                        break
-                                    end
-                                end
-                            end
-                            self:Refresh()
-                        end
-                    }
-                    order = order + 1
+                    table.insert(allCurrencies, currencyInfo.id)
                 end
-            else
-                -- Normal behavior for other expansions
-                local expansionArgs = {}
-                local expansionOrder = 1
+            end
+            xb.db.profile.modules.currency.selectedCurrencies = allCurrencies
+            self:Refresh()
+        end
+    }
+    order = order + 1
 
-                for _, currencyInfo in ipairs(expansionData.currencies) do
-                    local iconString = string.format("|T%s:16:16:0:0|t ", currencyInfo.iconFileID or "")
-                    expansionArgs['currency_' .. currencyInfo.id] = {
-                        name = iconString .. currencyInfo.name,
-                        type = "toggle",
-                        order = expansionOrder,
-                        get = function()
-                            local selected = xb.db.profile.modules.currency.selectedCurrencies
-                            for _, id in ipairs(selected) do
-                                if id == currencyInfo.id then
-                                    return true
-                                end
-                            end
-                            return false
-                        end,
-                        set = function(_, val)
-                            local selected = xb.db.profile.modules.currency.selectedCurrencies
-                            if val then
-                                table.insert(selected, currencyInfo.id)
-                            else
-                                for i, id in ipairs(selected) do
-                                    if id == currencyInfo.id then
-                                        table.remove(selected, i)
-                                        break
-                                    end
-                                end
-                            end
-                            self:Refresh()
-                        end
-                    }
-                    expansionOrder = expansionOrder + 1
-                end
+    self.currencySelectionArgs['unselectAll'] = {
+        name = L['Unselect All'],
+        type = "execute",
+        order = order,
+        func = function()
+            xb.db.profile.modules.currency.selectedCurrencies = {}
+            self:Refresh()
+        end
+    }
+    order = order + 1
 
-                args['expansion_' .. expansionData.header] = {
-                    type = 'group',
-                    name = expansionData.header,
+    for _, expansionData in ipairs(expansionCurrencies) do
+        if expansionData.header == "Legacy" then
+            self.currencySelectionArgs['header_legacy'] = {
+                type = 'header',
+                name = expansionData.header,
+                order = order
+            }
+            order = order + 1
+
+            for _, currencyInfo in ipairs(expansionData.currencies) do
+                local iconString = string.format("|T%s:16:16:0:0|t ",
+                                                 currencyInfo.iconFileID or "")
+                self.currencySelectionArgs['currency_' .. currencyInfo.id] = {
+                    name = iconString .. currencyInfo.name,
+                    type = "toggle",
                     order = order,
-                    inline = true,
-                    args = expansionArgs
+                    get = function()
+                        local selected =
+                            xb.db.profile.modules.currency.selectedCurrencies
+                        for _, id in ipairs(selected) do
+                            if id == currencyInfo.id then
+                                return true
+                            end
+                        end
+                        return false
+                    end,
+                    set = function(_, val)
+                        local selected =
+                            xb.db.profile.modules.currency.selectedCurrencies
+                        if val then
+                            table.insert(selected, currencyInfo.id)
+                        else
+                            for i, id in ipairs(selected) do
+                                if id == currencyInfo.id then
+                                    table.remove(selected, i)
+                                    break
+                                end
+                            end
+                        end
+                        self:Refresh()
+                    end
                 }
                 order = order + 1
             end
+        else
+            local expansionArgs = {}
+            local expansionOrder = 1
+
+            for _, currencyInfo in ipairs(expansionData.currencies) do
+                local iconString = string.format("|T%s:16:16:0:0|t ",
+                                                 currencyInfo.iconFileID or "")
+                expansionArgs['currency_' .. currencyInfo.id] = {
+                    name = iconString .. currencyInfo.name,
+                    type = "toggle",
+                    order = expansionOrder,
+                    get = function()
+                        local selected =
+                            xb.db.profile.modules.currency.selectedCurrencies
+                        for _, id in ipairs(selected) do
+                            if id == currencyInfo.id then
+                                return true
+                            end
+                        end
+                        return false
+                    end,
+                    set = function(_, val)
+                        local selected =
+                            xb.db.profile.modules.currency.selectedCurrencies
+                        if val then
+                            table.insert(selected, currencyInfo.id)
+                        else
+                            for i, id in ipairs(selected) do
+                                if id == currencyInfo.id then
+                                    table.remove(selected, i)
+                                    break
+                                end
+                            end
+                        end
+                        self:Refresh()
+                    end
+                }
+                expansionOrder = expansionOrder + 1
+            end
+
+            self.currencySelectionArgs['expansion_' .. expansionData.header] = {
+                type = 'group',
+                name = expansionData.header,
+                order = order,
+                inline = true,
+                args = expansionArgs
+            }
+            order = order + 1
         end
     end
-
-    return {
-        name = self:GetName(),
-        type = "group",
-        args = args
-    }
 end
