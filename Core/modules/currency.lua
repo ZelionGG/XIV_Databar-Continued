@@ -48,10 +48,29 @@ function CurrencyModule:OnEnable()
     self:CreateFrames()
     self:RegisterFrameEvents()
     self:Refresh()
+
+    if ShouldUseSelectedCurrencies() and C_CurrencyInfo and
+        C_CurrencyInfo.GetCurrencyListSize then
+        if C_CurrencyInfo.GetCurrencyListSize() == 0 then
+            self.currencyRetryTicker = C_Timer.NewTicker(0.5, function()
+                if C_CurrencyInfo.GetCurrencyListSize() > 0 then
+                    if self.currencyRetryTicker then
+                        self.currencyRetryTicker:Cancel()
+                        self.currencyRetryTicker = nil
+                    end
+                    self:Refresh()
+                end
+            end, 20) -- Max 20 tentatives (10 secondes)
+        end
+    end
 end
 
 function CurrencyModule:OnDisable()
     self.currencyFrame:Hide()
+    if self.currencyRetryTicker then
+        self.currencyRetryTicker:Cancel()
+        self.currencyRetryTicker = nil
+    end
     self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE')
     self:UnregisterEvent('PLAYER_XP_UPDATE')
     self:UnregisterEvent('PLAYER_LEVEL_UP')
