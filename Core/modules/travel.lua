@@ -1379,19 +1379,13 @@ function TravelModule:Refresh()
             homeParentPoint, homeRelPoint, homeXOff = "RIGHT", "RIGHT", 0
         end
 
-        self.homeText:SetFont(xb:GetFont(db.text.fontSize))
-        self.homeText:SetText(L['Home'])
-
-        self.homeButton:SetSize(self.homeText:GetWidth() + iconSize +
-                                    db.general.barPadding, xb:GetHeight())
+        self.homeButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
         self.homeButton:SetPoint(homeParentPoint, homeParentFrame, homeRelPoint,
                                  homeXOff, 0)
 
-        self.homeText:SetPoint("RIGHT")
         self.homeIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
         self.homeIcon:SetSize(iconSize, iconSize)
-        self.homeIcon:SetPoint("RIGHT", self.homeText, "LEFT",
-                               -(db.general.barPadding), 0)
+        self.homeIcon:SetPoint("RIGHT", self.homeButton, "RIGHT", 0, 0)
 
         self:SetHomeColor()
         self:UpdateHouseAttributes()
