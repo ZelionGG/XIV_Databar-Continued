@@ -203,6 +203,10 @@ L['Hearthstones Select'] = "Selecionar Pedra de Regresso";
 L['Hearthstones Select Desc'] = "Selecionar a Pedra de Regresso";
 L['Hide Hearthstone Button'] = true; -- To Translate
 L['Hide Port Button'] = true; -- To Translate
+L['Home'] = true; -- To Translate
+L['Teleport to Home'] = true; -- To Translate
+L['Housing Dashboard'] = true; -- To Translate
+L['Hide Home Button'] = true; -- To Translate
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

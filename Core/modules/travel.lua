@@ -158,6 +158,7 @@ function TravelModule:OnInitialize()
     self.availableHearthstones = {}
     self.selectedHearthstones = {}
     self.noMythicTeleport = true
+    self.playerHouseList = nil
 end
 
 local portal = C_CVar.GetCVar("portal")
@@ -228,6 +229,9 @@ function TravelModule:OnDisable()
     self:UnregisterEvent('BAG_UPDATE_DELAYED')
     self:UnregisterEvent('HEARTHSTONE_BOUND')
     self:UnregisterEvent('GET_ITEM_INFO_RECEIVED')
+    if compat.isMainline then
+        self:UnregisterEvent('PLAYER_HOUSE_LIST_UPDATED')
+    end
 end
 
 function TravelModule:CreateFrames()
@@ -288,6 +292,17 @@ function TravelModule:CreateFrames()
         end
     end
 
+    -- Home (Housing) Part - Retail only
+    if compat.isMainline then
+        self.homeButton = self.homeButton or
+                              CreateFrame('BUTTON', 'homeButton',
+                                          self.hearthFrame,
+                                          'SecureActionButtonTemplate')
+        self.homeIcon = self.homeIcon or
+                            self.homeButton:CreateTexture(nil, 'OVERLAY')
+        self.homeText = self.homeText or
+                            self.homeButton:CreateFontString(nil, 'OVERLAY')
+    end
 end
 
 function TravelModule:CreateMythicFrames()
@@ -329,6 +344,12 @@ function TravelModule:RegisterFrameEvents()
     self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
     self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
     self:RegisterEvent('GET_ITEM_INFO_RECEIVED', 'RefreshHearthstonesList')
+
+    -- Housing events - Retail only
+    if compat.isMainline then
+        self:RegisterEvent('PLAYER_HOUSE_LIST_UPDATED', 'OnHouseListUpdated')
+        C_Housing.GetPlayerOwnedHouses()
+    end
 
     self.hearthButton:EnableMouse(true)
     self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
@@ -393,6 +414,54 @@ function TravelModule:RegisterFrameEvents()
     -- Port button events  
     self.portButton:SetScript('OnEnter', createHoverHandler(function() self:SetPortColor() end, true))
     self.portButton:SetScript('OnLeave', createLeaveHandler(function() self:SetPortColor() end))
+
+    -- Home button events - Retail only
+    if compat.isMainline and self.homeButton then
+        self.homeButton:EnableMouse(true)
+        self.homeButton:RegisterForClicks('AnyUp', 'AnyDown')
+
+        -- Left click: teleport home (SecureAction type)
+        self.homeButton:SetAttribute('type1', 'teleporthome')
+        -- Right click: open Housing Dashboard
+        self.homeButton:SetAttribute('type2', 'click')
+        self.homeButton.Click = function(_, mouseButton)
+            if mouseButton == 'RightButton' then
+                if not InCombatLockdown() then
+                    if HousingFramesUtil and
+                        HousingFramesUtil.ToggleHousingDashboard then
+                        HousingFramesUtil.ToggleHousingDashboard()
+                    end
+                end
+            end
+        end
+        self.homeButton:SetAttribute('clickbutton', self.homeButton)
+
+        self.homeButton:SetScript('OnEnter', function()
+            self:SetHomeColor()
+            if not InCombatLockdown() then
+                self:UpdateHouseAttributes()
+                GameTooltip:SetOwner(self.homeButton,
+                                     'ANCHOR_' .. xb.miniTextPosition)
+                GameTooltip:ClearLines()
+                local r, g, b, _ = unpack(xb:HoverColors())
+                GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Home'] ..
+                                        "|cFFFFFFFF]|r", r, g, b)
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
+                                          L['Teleport to Home'], r, g, b, 1, 1,
+                                          1)
+                GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>',
+                                          L['Housing Dashboard'], r, g, b, 1, 1,
+                                          1)
+                GameTooltip:Show()
+            end
+        end)
+
+        self.homeButton:SetScript('OnLeave', function()
+            self:SetHomeColor()
+            GameTooltip:Hide()
+        end)
+    end
 end
 
 function TravelModule:UpdatePortOptions()
@@ -606,6 +675,54 @@ function TravelModule:SetPortColor()
     -- Set button appearance
     self:SetButtonState(self.portButton, self.portIcon, self.portText, 
                        isActive, self.portButton:IsMouseOver())
+end
+
+function TravelModule:SetHomeColor()
+    if InCombatLockdown() then return end
+    if not self.homeButton then return end
+
+    local hasHouse = self.playerHouseList and #self.playerHouseList > 0
+
+    if self.homeButton:IsMouseOver() then
+        self.homeIcon:SetVertexColor(unpack(xb:HoverColors()))
+        self.homeText:SetTextColor(unpack(xb:HoverColors()))
+    elseif hasHouse then
+        self.homeIcon:SetVertexColor(xb:GetColor('normal'))
+        self.homeText:SetTextColor(xb:GetColor('normal'))
+    else
+        local db = xb.db.profile
+        self.homeIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g,
+                                     db.color.inactive.b, db.color.inactive.a)
+        self.homeText:SetTextColor(db.color.inactive.r, db.color.inactive.g,
+                                   db.color.inactive.b, db.color.inactive.a)
+    end
+end
+
+function TravelModule:UpdateHouseAttributes()
+    if not compat.isMainline or not self.homeButton then return end
+
+    if not self.playerHouseList or #self.playerHouseList == 0 then
+        C_Housing.GetPlayerOwnedHouses()
+        return
+    end
+
+    if InCombatLockdown() then return end
+
+    local house = self.playerHouseList[1]
+    if house and house.neighborhoodGUID and house.houseGUID and house.plotID then
+        self.homeButton:SetAttribute('house-neighborhood-guid',
+                                     house.neighborhoodGUID)
+        self.homeButton:SetAttribute('house-guid', house.houseGUID)
+        self.homeButton:SetAttribute('house-plot-id', house.plotID)
+    end
+end
+
+function TravelModule:OnHouseListUpdated(_, houseInfoList)
+    self.playerHouseList = houseInfoList
+    if not InCombatLockdown() then
+        self:UpdateHouseAttributes()
+        self:Refresh()
+    end
 end
 
 function TravelModule:SetMythicColor()
@@ -1276,6 +1393,46 @@ function TravelModule:Refresh()
         end
     end
 
+    -- Home (Housing) Part - Retail only
+    if compat.isMainline and self.homeButton and not db.hideHomeButton then
+        -- Choose the parent based on visible buttons
+        local homeParentFrame = self.mythicButton and
+                                    self.mythicButton:IsShown() and
+                                    self.mythicButton or
+                                    (self.portButton and
+                                        self.portButton:IsShown() and
+                                        self.portButton) or
+                                    (self.hearthButton and
+                                        self.hearthButton:IsShown() and
+                                        self.hearthButton) or self.hearthFrame
+        local homeParentPoint, homeRelPoint, homeXOff = "RIGHT", "LEFT",
+                                                        -(db.general.barPadding)
+
+        if homeParentFrame == self.hearthFrame then
+            homeParentPoint, homeRelPoint, homeXOff = "RIGHT", "RIGHT", 0
+        end
+
+        self.homeText:SetFont(xb:GetFont(db.text.fontSize))
+        self.homeText:SetText(L['Home'])
+
+        self.homeButton:SetSize(self.homeText:GetWidth() + iconSize +
+                                    db.general.barPadding, xb:GetHeight())
+        self.homeButton:SetPoint(homeParentPoint, homeParentFrame, homeRelPoint,
+                                 homeXOff, 0)
+
+        self.homeText:SetPoint("RIGHT")
+        self.homeIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
+        self.homeIcon:SetSize(iconSize, iconSize)
+        self.homeIcon:SetPoint("RIGHT", self.homeText, "LEFT",
+                               -(db.general.barPadding), 0)
+
+        self:SetHomeColor()
+        self:UpdateHouseAttributes()
+        self.homeButton:Show()
+    elseif self.homeButton then
+        self.homeButton:Hide()
+    end
+
     local popupPadding = xb.constants.popupPadding
     local popupPoint = 'BOTTOM'
     local relPoint = 'TOP'
@@ -1315,6 +1472,10 @@ function TravelModule:Refresh()
 
     if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
         totalWidth = totalWidth + self.mythicButton:GetWidth()
+    end
+    if compat.isMainline and self.homeButton and self.homeButton:IsVisible() then
+        totalWidth = totalWidth + self.homeButton:GetWidth() +
+                         db.general.barPadding
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -1434,6 +1595,7 @@ function TravelModule:GetDefaultOptions()
     return 'travel', {
         enabled = true,
         hideHearthstoneButton = false,
+        hideHomeButton = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
         curSeasonOnly = false,
@@ -1520,6 +1682,20 @@ function TravelModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.hidePortButton = val;
+                    self:Refresh();
+                end,
+                width = "full"
+            },
+            hideHomeButton = {
+                name = L['Hide Home Button'],
+                order = 15,
+                type = "toggle",
+                hidden = function() return not compat.isMainline end,
+                get = function()
+                    return xb.db.profile.hideHomeButton;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideHomeButton = val;
                     self:Refresh();
                 end,
                 width = "full"
