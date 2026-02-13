@@ -172,7 +172,7 @@ function CurrencyModule:Refresh()
                 local selectedCurrencies = db.modules.currency.selectedCurrencies
                 for i, currencyId in ipairs(selectedCurrencies) do
                     if buttonIndex <= maxCurrencies then
-                        local width = self:StyleCurrencyFrame(tonumber(currencyId), nil, buttonIndex)
+                        local width = self:StyleCurrencyFrame(currencyId, nil, buttonIndex)
                         if width > 0 then
                             iconsWidth = iconsWidth + width
                             if buttonIndex == 1 then
@@ -236,7 +236,6 @@ function CurrencyModule:StyleCurrencyFrame(curId, curQuantity, i)
     local quantity = curQuantity
     if quantity == nil then
         local curInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(curId)
-        print(curInfo)
         if curInfo then
             quantity = curInfo.quantity
         end
