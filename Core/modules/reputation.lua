@@ -130,17 +130,19 @@ local function GetWatchedReputationDisplayData()
     end
 
     if data.kind == "normal" and factionID and C_GossipInfo_GetFriendshipReputation then
-        local friendID, friendRep, friendMaxRep, friendTextLevel
+        local friendID, friendMinRep, friendRep, friendMaxRep, friendTextLevel
         local friendshipInfo, legacyFriendRep, legacyFriendMaxRep, _, _, _,
             legacyFriendTextLevel = C_GossipInfo_GetFriendshipReputation(factionID)
 
         if type(friendshipInfo) == "table" then
             friendID = friendshipInfo.friendshipFactionID
+            friendMinRep = friendshipInfo.reactionThreshold or 0
             friendRep = friendshipInfo.standing
             friendMaxRep = friendshipInfo.nextThreshold or huge
             friendTextLevel = friendshipInfo.reaction
         else
             friendID = friendshipInfo
+            friendMinRep = 0
             friendRep = legacyFriendRep
             friendMaxRep = legacyFriendMaxRep
             friendTextLevel = legacyFriendTextLevel
@@ -156,7 +158,7 @@ local function GetWatchedReputationDisplayData()
             if hasFriendRankText then
                 data.rankText = friendTextLevel
             end
-            data.minValue = 0
+            data.minValue = friendMinRep
             data.maxValue = friendMaxRep
             data.curValue = friendRep
         end
@@ -168,10 +170,11 @@ local function GetWatchedReputationDisplayData()
                             math.max(data.curValue, 1) or 1
     end
 
-    if (data.kind == "normal" or data.kind == "friendship") and factionID and
+    if (data.kind == "normal" or data.kind == "friendship" or data.kind == "major") and factionID and
         IsFactionParagonCompat(factionID) then
         local paragonCurrent, paragonThreshold, _, rewardPending =
             C_Reputation_GetFactionParagonInfo(factionID)
+        local wasMajorFaction = data.kind == "major"
         local isNormalBarCapped = type(data.curValue) == "number" and
                                       type(data.maxValue) == "number" and
                                       data.curValue >= data.maxValue
@@ -183,6 +186,10 @@ local function GetWatchedReputationDisplayData()
             local paragonLabel = L["Paragon"] or "Paragon"
             if type(data.friendRankText) == "string" and data.friendRankText ~= "" then
                 data.rankText = string.format("%s (%s)", data.friendRankText,
+                                              paragonLabel)
+            elseif type(data.rankText) == "string" and data.rankText ~= "" and
+                wasMajorFaction then
+                data.rankText = string.format("%s (%s)", data.rankText,
                                               paragonLabel)
             else
                 data.rankText = paragonLabel
