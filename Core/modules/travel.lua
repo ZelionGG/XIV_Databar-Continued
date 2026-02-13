@@ -27,6 +27,14 @@ local function SafeIsUsableItem(id)
     return IsUsableItem(id)
 end
 
+-- Build the correct macro for a given transport ID + name.
+local function BuildMacro(id, name)
+    if PlayerHasToy(id) or SafeIsUsableItem(id) then
+        return "/use item:" .. id
+    end
+    return "/cast " .. name
+end
+
 --------------------------------------------------------------------------------
 -- UTILITY FUNCTIONS - Centralized logic to reduce code duplication
 --------------------------------------------------------------------------------
@@ -555,9 +563,7 @@ function TravelModule:FindUsableTransport(ids, preferRandom)
         if self:IsUsable(id) then
             local name = self:GetTransportName(id)
             if name then
-                -- Use global IsUsableItem with compatibility check
-                local isUsableItemFunc = SafeIsUsableItem(id)
-                local macro = isUsableItemFunc and "/use item:" .. id or "/cast " .. name
+                local macro = BuildMacro(id, name)
                 table.insert(available, {id = id, name = name, macro = macro})
             end
         end
@@ -643,9 +649,7 @@ function TravelModule:SetPortColor()
     local isActive = transportName ~= nil
     
     if transportName then
-        -- Use global IsUsableItem with compatibility check
-        local isUsableItemFunc = SafeIsUsableItem(portItem.portId)
-        local macro = isUsableItemFunc and "/use item:" .. portItem.portId or "/cast " .. transportName
+        local macro = BuildMacro(portItem.portId, transportName)
         self.portButton:SetAttribute("macrotext", macro)
     end
     
