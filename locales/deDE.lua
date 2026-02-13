@@ -169,6 +169,16 @@ L['Memory Usage'] = "Speichernutzung";
 L['Garbage Collect'] = "Speicher säubern";
 L['Cleaned'] = "Gesäubert";
 
+-- Reputation
+L['Open reputation'] = "Open " .. REPUTATION; -- To Translate
+L['Paragon Reward available'] = true; -- To translate
+L['Use Class Colors for Reputation Bar'] = true; -- To translate
+L['Use Reputation Colors for Reputation Bar'] = true; -- To translate
+L['Flash on Paragon Reward'] = true; -- To translate
+L["Progress"] = true; -- To translate
+L["Rank"] = true; -- To translate
+L["Paragon"] = true; -- To translate
+
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
 L['Toggle Profession Frame'] = "Berufsfenster anzeigen";

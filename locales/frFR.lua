@@ -169,10 +169,20 @@ L['Memory Usage'] = "Utilisation mémoire";
 L['Garbage Collect'] = "Nettoyer la mémoire";
 L['Cleaned'] = "Nettoyé";
 
+-- Reputation
+L['Open reputation'] = "Ouvrir l'interface de " .. REPUTATION;
+L['Paragon Reward available'] = "Récompense de parangon disponible";
+L['Use Class Colors for Reputation Bar'] = "Utiliser la couleur de classe pour la barre de réputation";
+L['Use Reputation Colors for Reputation Bar'] = "Utiliser la couleur de réputation pour la barre de réputation";
+L['Flash on Paragon Reward'] = "Flash lorsque la récompense de parangon est disponible";
+L["Progress"] = "Progression";
+L["Rank"] = "Rang";
+L["Paragon"] = "Parangon";
+
 L['Use Class Colors'] = "Utiliser les couleurs de classe";
 L['Cooldowns'] = "Temps de recharge";
 L['Toggle Profession Frame'] = 'Afficher le cadre de la profession';
-L['Toggle Profession Spellbook'] = 'afficher le livre de sorts de la profession';
+L['Toggle Profession Spellbook'] = 'Afficher le livre de sorts de la profession';
 
 L['Set Specialization'] = "Choix de la spécialisation";
 L['Set Loadout'] = "Choix de la configuration";

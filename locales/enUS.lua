@@ -170,6 +170,16 @@ L['Memory Usage'] = true;
 L['Garbage Collect'] = true;
 L['Cleaned'] = true;
 
+-- Reputation
+L['Open reputation'] = "Open " .. REPUTATION;
+L['Paragon Reward available'] = true;
+L['Use Class Colors for Reputation Bar'] = true;
+L['Use Reputation Colors for Reputation Bar'] = true;
+L['Flash on Paragon Reward'] = true;
+L["Progress"] = true;
+L["Rank"] = true;
+L["Paragon"] = true;
+
 L['Use Class Colors'] = true;
 L['Cooldowns'] = true;
 L['Toggle Profession Frame'] = true;

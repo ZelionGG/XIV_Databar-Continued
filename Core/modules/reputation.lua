@@ -6,7 +6,7 @@ local compat = xb.compat or {}
 local huge = math.huge
 
 local FACTION_BAR_COLORS  = FACTION_BAR_COLORS
-local RANK_LABEL = rawget(_G, "RANK") or "Rank"
+local RANK_LABEL = rawget(_G, "RANK") or L["Rank"]
 
 local LegacyGetWatchedFactionInfo = rawget(_G, "GetWatchedFactionInfo")
 local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
@@ -206,7 +206,7 @@ local function GetWatchedReputationDisplayData()
             paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or isRewardPending) then
             data.kind = "paragon"
             data.paragonRewardAvailable = isRewardPending
-            local paragonLabel = L["Paragon"] or "Paragon"
+            local paragonLabel = L["Paragon"]
             local baseRankText = data.friendRankText or data.rankText
             if type(baseRankText) == "string" and baseRankText ~= "" then
                 data.rankText = string.format("%s (%s)", baseRankText,
@@ -619,21 +619,21 @@ function ReputationModule:ShowTooltip()
             if type(percent) ~= "number" then
                 percent = floor((current / maxValueForDisplay) * 100)
             end
-            GameTooltip:AddDoubleLine("Progress:",
+            GameTooltip:AddDoubleLine(L["Progress"],
                                       string.format('%d / %d (%d%%)', current,
                                                     maxValueForDisplay, percent),
                                       r, g, b, 1, 1, 1)
         end
 
         if watchedData.paragonRewardAvailable then
-            GameTooltip:AddLine("|A:ParagonReputation_Bag:14:14|a Paragon Reward available",
+            GameTooltip:AddLine("|A:ParagonReputation_Bag:14:14|a " .. L["Paragon Reward available"],
                                 1, 0.82, 0)
         end
     end
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
-                              'Open ' .. REPUTATION, r, g, b, 1, 1, 1)
+                            L['Open reputation'], r, g, b, 1, 1, 1)
 
     GameTooltip:Show()
 end
@@ -707,7 +707,7 @@ function ReputationModule:GetConfig()
                 end
             },
             flashParagonReward = {
-                name = 'Flash on Paragon Reward',
+                name = L['Flash on Paragon Reward'],
                 order = 5,
                 type = "toggle",
                 get = function()

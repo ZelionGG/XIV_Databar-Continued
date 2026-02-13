@@ -169,6 +169,16 @@ L['Memory Usage'] = "Использование памяти";
 L['Garbage Collect'] = "Очистить память";
 L['Cleaned'] = "Очищено";
 
+-- Reputation
+L['Open reputation'] = "Open " .. REPUTATION; -- To Translate
+L['Paragon Reward available'] = true; -- To translate
+L['Use Class Colors for Reputation Bar'] = true; -- To translate
+L['Use Reputation Colors for Reputation Bar'] = true; -- To translate
+L['Flash on Paragon Reward'] = true; -- To translate
+L["Progress"] = true; -- To translate
+L["Rank"] = true; -- To translate
+L["Paragon"] = true; -- To translate
+
 L['Use Class Colors'] = "Использовать цвет класса";
 L['Cooldowns'] = "Кулдауны";
 L['Toggle Profession Frame'] = 'Показать кадр профессии';
