@@ -256,21 +256,34 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
     if barHeight < 3 then
         barHeight = 3
     end
+    local barYOffset = floor((xb:GetHeight() - iconSize) / 2)
+    if barYOffset < 0 then
+        barYOffset = 0
+    end
 
+    -- Icon
+    self[prefix .. 'Icon']:ClearAllPoints()
     self[prefix .. 'Icon']:SetTexture(icon)
     self[prefix .. 'Icon']:SetSize(iconSize, iconSize)
     self[prefix .. 'Icon']:SetPoint('LEFT')
     self[prefix .. 'Icon']:SetVertexColor(xb:GetColor('normal'))
 
+    -- Text
+    self[prefix .. 'Text']:ClearAllPoints()
     self[prefix .. 'Text']:SetFont(xb:GetFont(textHeight))
     self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
     self[prefix .. 'Text']:SetText(string.upper(self[prefix].name))
 
     if self[prefix].lvl == self[prefix].maxLvl then
+        self[prefix .. 'Bar']:Hide()
         self[prefix .. 'Text']:SetPoint('LEFT', self[prefix .. 'Icon'], 'RIGHT', 5, 0)
     else
+        self[prefix .. 'Bar']:Show()
         self[prefix .. 'Text']:SetPoint('TOPLEFT', self[prefix .. 'Icon'], 'TOPRIGHT', 5, 0)
+
+        self[prefix .. 'Bar']:ClearAllPoints()
         self[prefix .. 'Bar']:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
+        
         if db.modules.tradeskill.barCC then
             local rPerc, gPerc, bPerc = xb:GetClassColors()
             self[prefix .. 'Bar']:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
@@ -278,7 +291,7 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
             self[prefix .. 'Bar']:SetStatusBarColor(xb:GetColor('normal'))
         end
         self[prefix .. 'Bar']:SetSize(self[prefix .. 'Text']:GetStringWidth(), barHeight)
-        self[prefix .. 'Bar']:SetPoint('BOTTOMLEFT', self[prefix .. 'Icon'], 'BOTTOMRIGHT', 5, 0)
+        self[prefix .. 'Bar']:SetPoint('BOTTOMLEFT', self[prefix .. 'Frame'], 'BOTTOMLEFT', iconSize + 5, barYOffset)
 
         self[prefix .. 'BarBg']:SetAllPoints()
         self[prefix .. 'BarBg']:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b,

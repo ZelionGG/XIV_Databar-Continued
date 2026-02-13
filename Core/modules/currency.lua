@@ -124,14 +124,20 @@ function CurrencyModule:Refresh()
         if barHeight < 2 then
             barHeight = 2
         end
+        local barYOffset = floor((xb:GetHeight() - iconSize) / 2)
+        if barYOffset < 0 then
+            barYOffset = 0
+        end
         self.xpIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\exp')
         self.xpIcon:SetSize(iconSize, iconSize)
+        self.xpIcon:ClearAllPoints()
         self.xpIcon:SetPoint('LEFT')
         self.xpIcon:SetVertexColor(xb:GetColor('normal'))
 
         self.xpText:SetFont(xb:GetFont(db.text.fontSize))
         self.xpText:SetTextColor(xb:GetColor('normal'))
         self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
+        self.xpText:ClearAllPoints()
         self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
 
         self.xpBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
@@ -144,7 +150,8 @@ function CurrencyModule:Refresh()
         self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
         self.xpBar:SetValue(UnitXP('player'))
         self.xpBar:SetSize(self.xpText:GetStringWidth(), barHeight)
-        self.xpBar:SetPoint('BOTTOMLEFT', self.xpIcon, 'BOTTOMRIGHT', 5, 0)
+        self.xpBar:ClearAllPoints()
+        self.xpBar:SetPoint('BOTTOMLEFT', self.xpFrame, 'BOTTOMLEFT', iconSize + 5, barYOffset)
 
         self.xpBarBg:SetAllPoints()
         self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)

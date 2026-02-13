@@ -363,6 +363,9 @@ function ReputationModule:Refresh()
     local textHeight = floor((xb:GetHeight() - 4) / 2)
     local barHeight = (iconSize - textHeight - 2)
     if barHeight < 2 then barHeight = 2 end
+    local barYOffset = floor((xb:GetHeight() - iconSize) / 2)
+    if barYOffset < 0 then barYOffset = 0 end
+    self.reputationIcon:ClearAllPoints()
     self.reputationIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\seal')
     self.reputationIcon:SetSize(iconSize, iconSize)
     self.reputationIcon:SetPoint('LEFT')
@@ -394,12 +397,13 @@ function ReputationModule:Refresh()
         self.reputationBar:SetStatusBarColor(xb:GetColor('normal'))
     end
 
+    self.reputationBar:ClearAllPoints()
     self.reputationBar:SetMinMaxValues(minValue, maxValue)
     self.reputationBar:SetValue(curValue)
     self.reputationBar:SetSize(self.reputationText:GetStringWidth() + rewardCheckWidth,
                                barHeight)
-    self.reputationBar:SetPoint('BOTTOMLEFT', self.reputationIcon,
-                                'BOTTOMRIGHT', 5, 0)
+    self.reputationBar:SetPoint('BOTTOMLEFT', self.reputationBarFrame,
+                                'BOTTOMLEFT', iconSize + 5, barYOffset)
 
     self.reputationBarBg:SetAllPoints()
     self.reputationBarBg:SetColorTexture(db.color.inactive.r,
@@ -416,13 +420,14 @@ function ReputationModule:Refresh()
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
-    local anchorFrame = xb:GetFrame('tradeskillFrame')
+    local anchorFrame = xb:GetFrame('currencyFrame')
     -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
     if anchorFrame ~= nil and not anchorFrame:IsVisible() then
-        if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
+        if xb:GetFrame('tradeskillFrame') and xb:GetFrame('tradeskillFrame'):IsVisible() then
+            anchorFrame = xb:GetFrame('tradeskillFrame')
+        elseif xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
             anchorFrame = xb:GetFrame('clockFrame')
-        elseif xb:GetFrame('talentFrame') and
-            xb:GetFrame('talentFrame'):IsVisible() then
+        elseif xb:GetFrame('talentFrame') and xb:GetFrame('talentFrame'):IsVisible() then
             anchorFrame = xb:GetFrame('talentFrame')
         else
             relativeAnchorPoint = 'LEFT'
