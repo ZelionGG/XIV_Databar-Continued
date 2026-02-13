@@ -17,7 +17,12 @@ local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
 local C_Reputation_IsMajorFaction = C_Reputation.IsMajorFaction
 local C_GossipInfo_GetFriendshipReputation = C_GossipInfo and C_GossipInfo.GetFriendshipReputation
 
-local C_MajorFactions_GetMajorFactionData = C_MajorFactions.GetMajorFactionData
+local C_MajorFactions_GetMajorFactionData = C_MajorFactions and
+                                                C_MajorFactions.GetMajorFactionData
+local C_MajorFactions_GetCurrentRenownLevel = C_MajorFactions and
+                                                  C_MajorFactions.GetCurrentRenownLevel
+local C_MajorFactions_GetRenownLevels = C_MajorFactions and
+                                            C_MajorFactions.GetRenownLevels
 
 local function GetReactionLabel(reaction)
     if type(reaction) ~= "number" then
@@ -113,22 +118,36 @@ local function GetWatchedReputationDisplayData()
         factionID = factionID,
         rankText = GetReactionLabel(reaction),
         kind = "normal",
+        isRenownFaction = false,
         paragonRewardAvailable = false,
-        hasBonusRepGain = false
+        hasBonusRepGain = false,
+        isMajorAtMaxRenown = false,
+        hideProgressInTooltip = false
     }
 
-    if factionID and C_Reputation_IsMajorFaction and C_Reputation_IsMajorFaction(factionID) then
-        local majorFactionData = C_MajorFactions_GetMajorFactionData and
-                                     C_MajorFactions_GetMajorFactionData(factionID)
+    if factionID and C_MajorFactions_GetMajorFactionData then
+        local majorFactionData = C_MajorFactions_GetMajorFactionData(factionID)
         if majorFactionData and type(majorFactionData.renownLevelThreshold) == "number" and
             majorFactionData.renownLevelThreshold > 0 then
             data.kind = "major"
+            data.isRenownFaction = true
             data.rankText = string.format("Renown %d", majorFactionData.renownLevel or 0)
             data.reaction = 10
             data.minValue = 0
             data.maxValue = majorFactionData.renownLevelThreshold
             data.curValue = majorFactionData.renownReputationEarned or 0
             data.hasBonusRepGain = majorFactionData.hasBonusRepGain and true or false
+
+            local currentRenownLevel = C_MajorFactions_GetCurrentRenownLevel and
+                                           C_MajorFactions_GetCurrentRenownLevel(factionID)
+            local renownLevels = C_MajorFactions_GetRenownLevels and
+                                     C_MajorFactions_GetRenownLevels(factionID)
+            local maxRenownLevel = type(renownLevels) == "table" and #renownLevels or nil
+            if type(currentRenownLevel) == "number" and
+                type(maxRenownLevel) == "number" and maxRenownLevel > 0 and
+                currentRenownLevel >= maxRenownLevel then
+                data.isMajorAtMaxRenown = true
+            end
         end
     end
 
@@ -178,7 +197,6 @@ local function GetWatchedReputationDisplayData()
         local paragonCurrent, paragonThreshold, _, rewardPending =
             C_Reputation_GetFactionParagonInfo(factionID)
         local isRewardPending = rewardPending == true or rewardPending == 1
-        local wasMajorFaction = data.kind == "major"
         local isNormalBarCapped = type(data.curValue) == "number" and
                                       type(data.maxValue) == "number" and
                                       data.curValue >= data.maxValue
@@ -189,12 +207,9 @@ local function GetWatchedReputationDisplayData()
             data.kind = "paragon"
             data.paragonRewardAvailable = isRewardPending
             local paragonLabel = L["Paragon"] or "Paragon"
-            if type(data.friendRankText) == "string" and data.friendRankText ~= "" then
-                data.rankText = string.format("%s (%s)", data.friendRankText,
-                                              paragonLabel)
-            elseif type(data.rankText) == "string" and data.rankText ~= "" and
-                wasMajorFaction then
-                data.rankText = string.format("%s (%s)", data.rankText,
+            local baseRankText = data.friendRankText or data.rankText
+            if type(baseRankText) == "string" and baseRankText ~= "" then
+                data.rankText = string.format("%s (%s)", baseRankText,
                                               paragonLabel)
             else
                 data.rankText = paragonLabel
@@ -206,6 +221,11 @@ local function GetWatchedReputationDisplayData()
         end
     end
 
+    if data.kind == "major" and data.isMajorAtMaxRenown then
+        data.curValue = data.maxValue
+        data.hideProgressInTooltip = true
+    end
+
     if data.kind == "normal" and type(data.minValue) == "number" and
         type(data.maxValue) == "number" and type(data.curValue) == "number" then
         local normalizedMax = data.maxValue - data.minValue
@@ -214,6 +234,11 @@ local function GetWatchedReputationDisplayData()
             data.minValue = 0
             data.maxValue = normalizedMax
             data.curValue = normalizedCur
+        elseif data.maxValue <= data.minValue and data.curValue >= data.maxValue then
+            -- Réputation capée (ex: Exalté): éviter un fallback 0/1 (0%)
+            data.minValue = 0
+            data.maxValue = 1
+            data.curValue = 1
         end
     end
 
@@ -234,6 +259,10 @@ local function GetWatchedReputationDisplayData()
 
     data.progressCurrent, data.progressMax, data.progressPercent, data.progressCapped =
         GetProgressValues(data.curValue, data.minValue, data.maxValue)
+
+    if data.progressCapped then
+        data.hideProgressInTooltip = true
+    end
 
     return data
 end
@@ -329,8 +358,8 @@ function ReputationModule:Refresh()
         return;
     end
 
-    local reputationKind = watchedData.kind
     local name = watchedData.name
+    local isRenownFaction = watchedData.isRenownFaction
     local reaction = watchedData.reaction
     local minValue = watchedData.minValue
     local maxValue = watchedData.maxValue
@@ -397,7 +426,7 @@ function ReputationModule:Refresh()
         local rPerc, gPerc, bPerc = xb:GetClassColors()
         self.reputationBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
     elseif db.modules.reputation.reputationBarReputationCC then
-        if reputationKind == "major" then
+        if isRenownFaction then
             self.reputationBar:SetStatusBarColor(renownColor.r, renownColor.g, renownColor.b, 1)
         else
             self.reputationBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, 1)
@@ -584,7 +613,8 @@ function ReputationModule:ShowTooltip()
 
         GameTooltip:AddDoubleLine(RANK_LABEL .. ':', rankText, r, g, b, 1, 1, 1)
 
-        if type(current) == "number" and type(maxValueForDisplay) == "number" and
+        if not watchedData.hideProgressInTooltip and type(current) == "number" and
+            type(maxValueForDisplay) == "number" and
             maxValueForDisplay > 0 then
             if type(percent) ~= "number" then
                 percent = floor((current / maxValueForDisplay) * 100)
