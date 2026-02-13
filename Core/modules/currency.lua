@@ -17,7 +17,7 @@ local function GetMaxLevel()
 end
 
 local function ShouldUseSelectedCurrencies()
-    return compat.isMainline == true
+    return not compat.isClassicOrTBC
 end
 
 function CurrencyModule:GetName()
@@ -51,15 +51,15 @@ function CurrencyModule:OnEnable()
 
     -- Currency data may not have been available when GetConfig() ran during OnInitialize.
     -- Always rebuild config args here to catch data that loaded between OnInitialize and OnEnable.
-    if ShouldUseSelectedCurrencies() and C_CurrencyInfo and
-        C_CurrencyInfo.GetCurrencyListSize then
-        if C_CurrencyInfo.GetCurrencyListSize() > 0 then
+    if ShouldUseSelectedCurrencies() and
+        compat.GetCurrencyListSize() then
+        if compat.GetCurrencyListSize() > 0 then
             -- Data is already loaded, rebuild config args now
             self:BuildCurrencySelectionArgs()
         else
             -- Data still not loaded, retry periodically
             self.currencyRetryTicker = C_Timer.NewTicker(0.5, function()
-                if C_CurrencyInfo.GetCurrencyListSize() > 0 then
+                if compat.GetCurrencyListSize() > 0 then
                     if self.currencyRetryTicker then
                         self.currencyRetryTicker:Cancel()
                         self.currencyRetryTicker = nil
@@ -168,7 +168,7 @@ function CurrencyModule:Refresh()
             local iconsWidth = 0
             local buttonIndex = 1
             local maxCurrencies = db.modules.currency.numCurrenciesOnBar or 3
-            if ShouldUseSelectedCurrencies() and C_CurrencyInfo then
+            if ShouldUseSelectedCurrencies() then
                 local selectedCurrencies = db.modules.currency.selectedCurrencies
                 for i, currencyId in ipairs(selectedCurrencies) do
                     if buttonIndex <= maxCurrencies then
@@ -234,8 +234,9 @@ function CurrencyModule:StyleCurrencyFrame(curId, curQuantity, i)
     end
 
     local quantity = curQuantity
-    if quantity == nil and C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo then
-        local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
+    if quantity == nil then
+        local curInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(curId)
+        print(curInfo)
         if curInfo then
             quantity = curInfo.quantity
         end
@@ -486,7 +487,7 @@ function CurrencyModule:ShowTooltip()
         local maxCurrencies = xb.db.profile.modules.currency.maxCurrenciesTooltipShift or 30
         local currencyCount = 0
 
-        if #selectedCurrencies > 0 and C_CurrencyInfo then
+        if #selectedCurrencies > 0 then
             -- Create a set to quickly check if a currency is selected
             local selectedSet = {}
             for _, currencyId in ipairs(selectedCurrencies) do
@@ -528,7 +529,7 @@ function CurrencyModule:ShowTooltip()
 
                     -- Display currencies from this category
                     for _, currencyInfo in ipairs(currenciesToShow) do
-                        local curInfo = C_CurrencyInfo.GetCurrencyInfo(tonumber(currencyInfo.id))
+                        local curInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(currencyInfo.id)
                         if curInfo then
                             local iconString = string.format("|T%s:16:16:0:0|t ", curInfo.iconFileID or "")
                             local quantityText = tostring(curInfo.quantity)
@@ -583,7 +584,6 @@ function CurrencyModule:ShowTooltip()
             end
         end
 
-        GameTooltip:AddLine(" ")
         GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
     end
 
@@ -594,16 +594,16 @@ function CurrencyModule:GetCurrencyOptions()
     local curOpts = {
         ['0'] = ''
     }
-    if not C_CurrencyInfo or not C_CurrencyInfo.GetCurrencyListSize then
+    if not compat.GetCurrencyListSize then
         return curOpts
     end
 
-    for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
-        local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
+    for i = 1, compat.GetCurrencyListSize() do
+        local listInfo = compat.GetCurrencyListInfo(i)
         if not listInfo.isHeader and not listInfo.isTypeUnused then
-            local cL = C_CurrencyInfo.GetCurrencyListLink(i)
-            curOpts[tostring(C_CurrencyInfo.GetCurrencyIDFromLink(cL))] =
-                C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetCurrencyIDFromLink(cL)).name
+            local cL = compat.GetCurrencyListLink(i)
+            curOpts[tostring(compat.GetCurrencyIDFromLink(cL))] =
+                compat.GetBasicCurrencyInfo(compat.GetCurrencyIDFromLink(cL)).name
         end
     end
     return curOpts
@@ -611,17 +611,17 @@ end
 
 function CurrencyModule:GetCurrenciesByExpansion()
     local expansionCurrencies = {}
-    if not C_CurrencyInfo or not C_CurrencyInfo.GetCurrencyListSize then
+    if not compat.GetCurrencyListSize then
         return expansionCurrencies
     end
 
     local currentHeader = nil
     local currentHeaderIndex = nil
 
-    for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
-        local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
+    for i = 1, compat.GetCurrencyListSize() do
+        local listInfo = compat.GetCurrencyListInfo(i)
         if listInfo.isHeader then
-            C_CurrencyInfo.ExpandCurrencyList(i, true)
+            compat.ExpandCurrencyList(i, true)
             currentHeader = listInfo.name
             currentHeaderIndex = #expansionCurrencies + 1
             table.insert(expansionCurrencies, {
@@ -629,12 +629,11 @@ function CurrencyModule:GetCurrenciesByExpansion()
                 currencies = {}
             })
         elseif not listInfo.isTypeUnused and currentHeader and currentHeaderIndex then
-            local cL = C_CurrencyInfo.GetCurrencyListLink(i)
-            local currencyID = C_CurrencyInfo.GetCurrencyIDFromLink(cL)
-            local curInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
+            local cL = compat.GetCurrencyListLink(i)
+            local curInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(cL)
             if curInfo then
                 table.insert(expansionCurrencies[currentHeaderIndex].currencies, {
-                    id = tostring(currencyID),
+                    id = cL,
                     name = curInfo.name,
                     iconFileID = curInfo.iconFileID,
                     index = i

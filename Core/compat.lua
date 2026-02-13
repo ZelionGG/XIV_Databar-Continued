@@ -25,6 +25,113 @@ local fallbackIsAddOnLoaded = _G.IsAddOnLoaded or function()
 end
 compat.IsAddOnLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or fallbackIsAddOnLoaded
 
+-- Currency API helpers
+local function GetCurrencyListSize()
+    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyListSize then
+        return C_CurrencyInfo.GetCurrencyListSize()
+    elseif _G.GetCurrencyListSize then
+        return _G.GetCurrencyListSize()
+    end
+    return 0
+end
+
+compat.GetCurrencyListSize = GetCurrencyListSize
+
+local function GetCurrencyListInfo(index)
+    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyListInfo then
+        return C_CurrencyInfo.GetCurrencyListInfo(index)
+    elseif _G.GetCurrencyListInfo then
+        -- Legacy API returns multiple values:
+        -- name, isHeader, isExpanded, isUnused, isWatched, count, icon,
+        -- maximum, hasWeeklyLimit, currentWeeklyAmount, unknown, itemID
+        local name, isHeader, isExpanded, isUnused, isWatched, count, icon,
+              maximum, hasWeeklyLimit, currentWeeklyAmount, _, itemID =
+              _G.GetCurrencyListInfo(index)
+        if name then
+            return {
+                name = name,
+                isHeader = isHeader,
+                isExpanded = isExpanded,
+                isTypeUnused = isUnused,
+                isWatched = isWatched,
+                quantity = count,
+                iconFileID = icon,
+                maxQuantity = maximum or 0,
+                hasWeeklyLimit = hasWeeklyLimit,
+                currentWeeklyAmount = currentWeeklyAmount,
+                itemID = itemID,
+            }
+        end
+    end
+    return nil
+end
+
+compat.GetCurrencyListInfo = GetCurrencyListInfo
+
+local function GetCurrencyListLink(index)
+    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyListLink then
+        return C_CurrencyInfo.GetCurrencyListLink(index)
+    elseif _G.GetCurrencyListLink then
+        return _G.GetCurrencyListLink(index)
+    end
+    return nil
+end
+
+compat.GetCurrencyListLink = GetCurrencyListLink
+
+local function ExpandCurrencyList(index, expand)
+    if C_CurrencyInfo and C_CurrencyInfo.ExpandCurrencyList then
+        return C_CurrencyInfo.ExpandCurrencyList(index, expand)
+    elseif _G.ExpandCurrencyList then
+        -- Legacy API expects a number (1/0), not a boolean
+        local flag = expand and 1 or 0
+        return _G.ExpandCurrencyList(index, flag)
+    end
+    return nil
+end
+
+compat.ExpandCurrencyList = ExpandCurrencyList
+
+local function GetCurrencyIDFromLink(link)
+    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyIDFromLink then
+        return C_CurrencyInfo.GetCurrencyIDFromLink(link)
+    elseif _G.GetCurrencyIDFromLink then
+        return _G.GetCurrencyIDFromLink(link)
+    end
+    return nil
+end
+
+compat.GetCurrencyIDFromLink = GetCurrencyIDFromLink
+
+local function GetBasicCurrencyInfo(currencyID)
+    if C_CurrencyInfo and C_CurrencyInfo.GetBasicCurrencyInfo then
+        return C_CurrencyInfo.GetBasicCurrencyInfo(currencyID)
+    elseif _G.GetCurrencyInfo then
+        -- No GetBasicCurrencyInfo on legacy; build from GetCurrencyInfo
+        local name, currentAmount, texture = _G.GetCurrencyInfo(currencyID)
+        if name then
+            return {
+                name = name,
+                quantity = currentAmount,
+                icon = texture,
+                iconFileID = texture,
+            }
+        end
+    end
+    return nil
+end
+
+compat.GetBasicCurrencyInfo = GetBasicCurrencyInfo
+
+local function GetCurrencyInfo(currencyID)
+    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo then
+        return C_CurrencyInfo.GetCurrencyInfo(currencyID)
+    end
+    return nil
+end
+
+compat.GetCurrencyInfo = GetCurrencyInfo
+
 -- Battle.net whisper helper: APIs differ by version/patch.
 -- Try multiple functions in a safe order.
 local ChatFrameUtil = _G.ChatFrameUtil
