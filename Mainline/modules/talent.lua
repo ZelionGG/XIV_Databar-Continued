@@ -177,14 +177,16 @@ function TalentModule:Refresh()
 
         self.loadoutText:Show()
 
-        self.loadoutFrame:SetSize(iconSize + self.loadoutText:GetWidth() + 5, xb:GetHeight())
-        self.loadoutFrame:SetPoint('LEFT')
+        if not InCombatLockdown() then
+            self.loadoutFrame:SetSize(iconSize + self.loadoutText:GetWidth() + 5, xb:GetHeight())
+            self.loadoutFrame:SetPoint('LEFT')
 
-        if self.loadoutFrame:GetWidth() < db.modules.talent.minWidth then
-            self.loadoutFrame:SetWidth(db.modules.talent.minWidth)
+            if self.loadoutFrame:GetWidth() < db.modules.talent.minWidth then
+                self.loadoutFrame:SetWidth(db.modules.talent.minWidth)
+            end
+
+            self.loadoutFrame:SetSize(self.loadoutFrame:GetWidth(), xb:GetHeight())
         end
-
-        self.loadoutFrame:SetSize(self.loadoutFrame:GetWidth(), xb:GetHeight())
     end
 
     -- TALENTS
