@@ -791,7 +791,7 @@ function CurrencyModule:GetConfig()
             type = "range",
             min = 10,
             max = 50,
-            step = 5,
+            step = 1,
             get = function()
                 return xb.db.profile.modules.currency.maxCurrenciesTooltipShift;
             end,
