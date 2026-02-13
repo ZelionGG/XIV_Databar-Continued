@@ -10,26 +10,10 @@ local RANK_LABEL = rawget(_G, "RANK") or "Rank"
 local LegacyGetWatchedFactionInfo = rawget(_G, "GetWatchedFactionInfo")
 local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
 
-local function GetWatchedFactionInfoCompat()
-    if LegacyGetWatchedFactionInfo then
-        return LegacyGetWatchedFactionInfo()
-    end
-
-    if C_Reputation_GetWatchedFactionData then
-        local data = C_Reputation_GetWatchedFactionData()
-        if data then
-            return data.name, data.reaction, data.currentReactionThreshold,
-                   data.nextReactionThreshold, data.currentStanding,
-                   data.factionID
-        end
-    end
-
-    return nil
-end
-
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
 local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
 local C_Reputation_IsMajorFaction = C_Reputation.IsMajorFaction
+local C_GossipInfo_GetFriendshipReputation = C_GossipInfo and C_GossipInfo.GetFriendshipReputation
 
 local C_MajorFactions_GetMajorFactionData = C_MajorFactions.GetMajorFactionData
 
@@ -49,6 +33,117 @@ local function OpenReputationPanel()
     elseif _G.ToggleCharacter then
         _G.ToggleCharacter('TokenFrame')
     end
+end
+
+local function GetWatchedFactionInfoCompat()
+    if LegacyGetWatchedFactionInfo then
+        return LegacyGetWatchedFactionInfo()
+    end
+
+    if C_Reputation_GetWatchedFactionData then
+        local data = C_Reputation_GetWatchedFactionData()
+        if data then
+            return data.name, data.reaction, data.currentReactionThreshold,
+                   data.nextReactionThreshold, data.currentStanding,
+                   data.factionID
+        end
+    end
+
+    return nil
+end
+
+local function GetWatchedReputationDisplayData()
+    local name, reaction, minValue, maxValue, curValue, factionID =
+        GetWatchedFactionInfoCompat()
+    if not name then
+        return nil
+    end
+
+    local data = {
+        name = name,
+        reaction = reaction,
+        minValue = minValue,
+        maxValue = maxValue,
+        curValue = curValue,
+        factionID = factionID,
+        rankText = GetReactionLabel(reaction),
+        kind = "normal"
+    }
+
+    if factionID and C_Reputation_IsMajorFaction and C_Reputation_IsMajorFaction(factionID) then
+        local majorFactionData = C_MajorFactions_GetMajorFactionData and
+                                     C_MajorFactions_GetMajorFactionData(factionID)
+        if majorFactionData and type(majorFactionData.renownLevelThreshold) == "number" and
+            majorFactionData.renownLevelThreshold > 0 then
+            data.kind = "major"
+            data.rankText = string.format("Renown %d", majorFactionData.renownLevel or 0)
+            data.reaction = 10
+            data.minValue = 0
+            data.maxValue = majorFactionData.renownLevelThreshold
+            data.curValue = majorFactionData.renownReputationEarned or 0
+        end
+    end
+
+    if data.kind == "normal" and factionID and C_GossipInfo_GetFriendshipReputation then
+        local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel =
+            C_GossipInfo_GetFriendshipReputation(factionID)
+        if friendID and type(friendRep) == "number" and type(friendMaxRep) == "number" and
+            friendMaxRep > 0 then
+            data.kind = "friendship"
+            data.rankText = friendTextLevel or data.rankText
+            data.minValue = 0
+            data.maxValue = friendMaxRep
+            data.curValue = friendRep
+        end
+    end
+
+    if data.kind == "normal" and factionID and C_Reputation_IsFactionParagon and
+        C_Reputation_IsFactionParagon(factionID) then
+        local paragonCurrent, paragonThreshold, _, rewardPending =
+            C_Reputation_GetFactionParagonInfo(factionID)
+        local isNormalBarCapped = type(data.curValue) == "number" and
+                                      type(data.maxValue) == "number" and
+                                      data.curValue >= data.maxValue
+        local hasParagonProgress = type(paragonCurrent) == "number" and
+                                       paragonCurrent > 0
+        if type(paragonCurrent) == "number" and type(paragonThreshold) == "number" and
+            paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or rewardPending) then
+            data.kind = "paragon"
+            data.rankText = L["Paragon"] or "Paragon"
+            data.reaction = 9
+            data.minValue = 0
+            data.maxValue = paragonThreshold
+            data.curValue = paragonCurrent % paragonThreshold
+        end
+    end
+
+    if data.kind == "normal" and type(data.minValue) == "number" and
+        type(data.maxValue) == "number" and type(data.curValue) == "number" then
+        local normalizedMax = data.maxValue - data.minValue
+        local normalizedCur = data.curValue - data.minValue
+        if normalizedMax > 0 then
+            data.minValue = 0
+            data.maxValue = normalizedMax
+            data.curValue = normalizedCur
+        end
+    end
+
+    if type(data.minValue) ~= "number" then
+        data.minValue = 0
+    end
+    if type(data.maxValue) ~= "number" or data.maxValue <= data.minValue then
+        data.maxValue = data.minValue + 1
+    end
+    if type(data.curValue) ~= "number" then
+        data.curValue = data.minValue
+    end
+    if data.curValue < data.minValue then
+        data.curValue = data.minValue
+    elseif data.curValue > data.maxValue then
+        data.curValue = data.maxValue
+    end
+
+    return data
 end
 
 local ReputationModule = xb:NewModule("ReputationModule", 'AceEvent-3.0',
@@ -88,10 +183,9 @@ function ReputationModule:Refresh()
         return;
     end
 
-    local name, reaction, minValue, maxValue, curValue, factionID =
-        GetWatchedFactionInfoCompat()
+    local watchedData = GetWatchedReputationDisplayData()
 
-    if not name then
+    if not watchedData then
         if self.reputationBarFrame then
             self.reputationBarFrame:Hide()
         end
@@ -101,6 +195,12 @@ function ReputationModule:Refresh()
         return;
     end
 
+    local name = watchedData.name
+    local reaction = watchedData.reaction
+    local minValue = watchedData.minValue
+    local maxValue = watchedData.maxValue
+    local curValue = watchedData.curValue
+
     if self.reputationFrame and not self.reputationFrame:IsShown() then
         self.reputationFrame:Show()
     end
@@ -108,21 +208,6 @@ function ReputationModule:Refresh()
     if string.len(name) > 20 then
         name = string.sub(name, 1, 20) .. "..."
     end
-
-    if factionID and C_Reputation_IsFactionParagon(factionID) then
-        local current, threshold, _, rewardPending = C_Reputation_GetFactionParagonInfo(factionID)
-
-        if current and threshold then
-            local _, minVal, maxVal, curVal, reactVal = L["Paragon"], 0, threshold, current % threshold, 9
-            reaction, minValue, maxValue, curValue = reactVal, minVal, maxVal, curVal
-        end
-    end
-
-    if factionID and C_Reputation_IsMajorFaction(factionID) then
-		local majorFactionData = C_MajorFactions_GetMajorFactionData(factionID)
-
-		reaction, minValue, maxValue = 10, 0, majorFactionData.renownLevelThreshold
-	end
 
     if InCombatLockdown() then
         self.reputationBar:SetMinMaxValues(minValue, maxValue)
@@ -151,7 +236,6 @@ function ReputationModule:Refresh()
                                  0)
 
     local color = FACTION_BAR_COLORS[reaction] or {r=1,g=0,b=1}
-    print(color)
     self.reputationBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
     if db.modules.reputation.reputationBarClassCC then
         local rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
@@ -162,7 +246,6 @@ function ReputationModule:Refresh()
         self.reputationBar:SetStatusBarColor(xb:GetColor('normal'))
     end
 
-    print(name .. " " .. minValue .. " " .. curValue .. " " .. maxValue)
     self.reputationBar:SetMinMaxValues(minValue, maxValue)
     self.reputationBar:SetValue(curValue)
     self.reputationBar:SetSize(self.reputationText:GetStringWidth(), barHeight)
@@ -310,44 +393,17 @@ function ReputationModule:ShowTooltip()
                         g, b)
     GameTooltip:AddLine(" ")
 
-    local name, reaction, minValue, maxValue, curValue, factionID =
-        GetWatchedFactionInfoCompat()
+    local watchedData = GetWatchedReputationDisplayData()
 
-    if not name then
+    if not watchedData then
         GameTooltip:AddLine("No Watched Faction", 1, 1, 1)
     else
+        local name = watchedData.name
+        local rankText = watchedData.rankText
+        local current = watchedData.curValue
+        local maxValueForDisplay = watchedData.maxValue
+
         GameTooltip:AddDoubleLine(REPUTATION .. ':', name, r, g, b, 1, 1, 1)
-
-        local rankText = GetReactionLabel(reaction)
-        local current = curValue
-        local maxValueForDisplay = maxValue
-
-        if type(minValue) == "number" and type(curValue) == "number" and
-            type(maxValue) == "number" then
-            current = curValue - minValue
-            maxValueForDisplay = maxValue - minValue
-        end
-
-        if factionID and C_Reputation_IsMajorFaction and
-            C_Reputation_IsMajorFaction(factionID) then
-            local majorFactionData = C_MajorFactions_GetMajorFactionData and
-                                         C_MajorFactions_GetMajorFactionData(factionID)
-            if majorFactionData then
-                rankText = string.format("Renown %d", majorFactionData.renownLevel or 0)
-                current = majorFactionData.renownReputationEarned
-                maxValueForDisplay = majorFactionData.renownLevelThreshold
-            end
-        elseif factionID and C_Reputation_IsFactionParagon and
-            C_Reputation_IsFactionParagon(factionID) then
-            local paragonCurrent, paragonThreshold =
-                C_Reputation_GetFactionParagonInfo(factionID)
-            if type(paragonCurrent) == "number" and
-                type(paragonThreshold) == "number" and paragonThreshold > 0 then
-                rankText = L["Paragon"] or "Paragon"
-                current = paragonCurrent % paragonThreshold
-                maxValueForDisplay = paragonThreshold
-            end
-        end
 
         GameTooltip:AddDoubleLine(RANK_LABEL .. ':', rankText, r, g, b, 1, 1, 1)
 
