@@ -177,6 +177,7 @@ local function GetWatchedReputationDisplayData()
         IsFactionParagonCompat(factionID) then
         local paragonCurrent, paragonThreshold, _, rewardPending =
             C_Reputation_GetFactionParagonInfo(factionID)
+        local isRewardPending = rewardPending == true or rewardPending == 1
         local wasMajorFaction = data.kind == "major"
         local isNormalBarCapped = type(data.curValue) == "number" and
                                       type(data.maxValue) == "number" and
@@ -184,10 +185,9 @@ local function GetWatchedReputationDisplayData()
         local hasParagonProgress = type(paragonCurrent) == "number" and
                                        paragonCurrent > 0
         if type(paragonCurrent) == "number" and type(paragonThreshold) == "number" and
-            paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or rewardPending) then
+            paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or isRewardPending) then
             data.kind = "paragon"
-            data.paragonRewardAvailable = (rewardPending and true) or
-                                              (data.hasBonusRepGain and true) or false
+            data.paragonRewardAvailable = isRewardPending
             local paragonLabel = L["Paragon"] or "Paragon"
             if type(data.friendRankText) == "string" and data.friendRankText ~= "" then
                 data.rankText = string.format("%s (%s)", data.friendRankText,
@@ -267,6 +267,8 @@ function ReputationModule:OnDisable()
     self:UnregisterEvent('UPDATE_FACTION', 'Refresh')
     self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
     self:UnregisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
+    self:UnregisterEvent('QUEST_TURNED_IN', 'Refresh')
 end
 
 function ReputationModule:SetParagonRewardFlash(enabled)
@@ -495,6 +497,8 @@ function ReputationModule:RegisterFrameEvents()
     self:RegisterEvent('UPDATE_FACTION', 'Refresh')
     self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
     self:RegisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
+    self:RegisterEvent('QUEST_TURNED_IN', 'Refresh')
     -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
     self.reputationFrame:EnableMouse(true)
