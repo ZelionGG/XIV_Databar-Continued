@@ -3,6 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 local compat = xb.compat or {}
+local huge = math.huge
 
 local FACTION_BAR_COLORS  = FACTION_BAR_COLORS
 local RANK_LABEL = rawget(_G, "RANK") or "Rank"
@@ -11,6 +12,7 @@ local LegacyGetWatchedFactionInfo = rawget(_G, "GetWatchedFactionInfo")
 local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
 
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
+local C_Reputation_IsFactionParagonForCurrentPlayer = C_Reputation.IsFactionParagonForCurrentPlayer
 local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
 local C_Reputation_IsMajorFaction = C_Reputation.IsMajorFaction
 local C_GossipInfo_GetFriendshipReputation = C_GossipInfo and C_GossipInfo.GetFriendshipReputation
@@ -33,6 +35,49 @@ local function OpenReputationPanel()
     elseif _G.ToggleCharacter then
         _G.ToggleCharacter('TokenFrame')
     end
+end
+
+local function IsFactionParagonCompat(factionID)
+    if not factionID then
+        return false
+    end
+
+    if C_Reputation_IsFactionParagonForCurrentPlayer then
+        return C_Reputation_IsFactionParagonForCurrentPlayer(factionID)
+    end
+
+    if C_Reputation_IsFactionParagon then
+        return C_Reputation_IsFactionParagon(factionID)
+    end
+
+    return false
+end
+
+local function GetProgressValues(currentStanding, minValue, maxValue)
+    local minThreshold = type(minValue) == "number" and minValue or 0
+    local maxThreshold = type(maxValue) == "number" and maxValue or minThreshold + 1
+    local current = type(currentStanding) == "number" and currentStanding or minThreshold
+
+    local progressCurrent = current - minThreshold
+    local progressMax = maxThreshold - minThreshold
+
+    if progressMax < 0 then
+        progressMax = progressCurrent
+    end
+
+    if progressMax <= 0 then
+        local normalized = progressCurrent > 0 and progressCurrent or 1
+        return normalized, normalized, 100, true
+    end
+
+    local percent = floor((progressCurrent / progressMax) * 100)
+    if percent < 0 then
+        percent = 0
+    elseif percent > 100 then
+        percent = 100
+    end
+
+    return progressCurrent, progressMax, percent, progressCurrent >= progressMax
 end
 
 local function GetWatchedFactionInfoCompat()
@@ -85,20 +130,46 @@ local function GetWatchedReputationDisplayData()
     end
 
     if data.kind == "normal" and factionID and C_GossipInfo_GetFriendshipReputation then
-        local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel =
-            C_GossipInfo_GetFriendshipReputation(factionID)
-        if friendID and type(friendRep) == "number" and type(friendMaxRep) == "number" and
-            friendMaxRep > 0 then
+        local friendID, friendRep, friendMaxRep, friendTextLevel
+        local friendshipInfo, legacyFriendRep, legacyFriendMaxRep, _, _, _,
+            legacyFriendTextLevel = C_GossipInfo_GetFriendshipReputation(factionID)
+
+        if type(friendshipInfo) == "table" then
+            friendID = friendshipInfo.friendshipFactionID
+            friendRep = friendshipInfo.standing
+            friendMaxRep = friendshipInfo.nextThreshold or huge
+            friendTextLevel = friendshipInfo.reaction
+        else
+            friendID = friendshipInfo
+            friendRep = legacyFriendRep
+            friendMaxRep = legacyFriendMaxRep
+            friendTextLevel = legacyFriendTextLevel
+        end
+
+        local isValidFriendID = type(friendID) == "number" and friendID > 0
+        local hasFriendRankText = type(friendTextLevel) == "string" and
+                                    friendTextLevel ~= ""
+        if isValidFriendID and type(friendRep) == "number" and
+            type(friendMaxRep) == "number" and friendMaxRep > 0 then
             data.kind = "friendship"
-            data.rankText = friendTextLevel or data.rankText
+            data.friendRankText = hasFriendRankText and friendTextLevel or nil
+            if hasFriendRankText then
+                data.rankText = friendTextLevel
+            end
             data.minValue = 0
             data.maxValue = friendMaxRep
             data.curValue = friendRep
         end
     end
 
-    if data.kind == "normal" and factionID and C_Reputation_IsFactionParagon and
-        C_Reputation_IsFactionParagon(factionID) then
+    if data.kind == "friendship" and data.maxValue == huge then
+        data.minValue = 0
+        data.maxValue = type(data.curValue) == "number" and
+                            math.max(data.curValue, 1) or 1
+    end
+
+    if (data.kind == "normal" or data.kind == "friendship") and factionID and
+        IsFactionParagonCompat(factionID) then
         local paragonCurrent, paragonThreshold, _, rewardPending =
             C_Reputation_GetFactionParagonInfo(factionID)
         local isNormalBarCapped = type(data.curValue) == "number" and
@@ -109,7 +180,13 @@ local function GetWatchedReputationDisplayData()
         if type(paragonCurrent) == "number" and type(paragonThreshold) == "number" and
             paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or rewardPending) then
             data.kind = "paragon"
-            data.rankText = L["Paragon"] or "Paragon"
+            local paragonLabel = L["Paragon"] or "Paragon"
+            if type(data.friendRankText) == "string" and data.friendRankText ~= "" then
+                data.rankText = string.format("%s (%s)", data.friendRankText,
+                                              paragonLabel)
+            else
+                data.rankText = paragonLabel
+            end
             data.reaction = 9
             data.minValue = 0
             data.maxValue = paragonThreshold
@@ -142,6 +219,9 @@ local function GetWatchedReputationDisplayData()
     elseif data.curValue > data.maxValue then
         data.curValue = data.maxValue
     end
+
+    data.progressCurrent, data.progressMax, data.progressPercent, data.progressCapped =
+        GetProgressValues(data.curValue, data.minValue, data.maxValue)
 
     return data
 end
@@ -400,8 +480,9 @@ function ReputationModule:ShowTooltip()
     else
         local name = watchedData.name
         local rankText = watchedData.rankText
-        local current = watchedData.curValue
-        local maxValueForDisplay = watchedData.maxValue
+        local current = watchedData.progressCurrent
+        local maxValueForDisplay = watchedData.progressMax
+        local percent = watchedData.progressPercent
 
         GameTooltip:AddDoubleLine(REPUTATION .. ':', name, r, g, b, 1, 1, 1)
 
@@ -409,7 +490,9 @@ function ReputationModule:ShowTooltip()
 
         if type(current) == "number" and type(maxValueForDisplay) == "number" and
             maxValueForDisplay > 0 then
-            local percent = floor((current / maxValueForDisplay) * 100)
+            if type(percent) ~= "number" then
+                percent = floor((current / maxValueForDisplay) * 100)
+            end
             GameTooltip:AddDoubleLine("Progress:",
                                       string.format('%d / %d (%d%%)', current,
                                                     maxValueForDisplay, percent),
