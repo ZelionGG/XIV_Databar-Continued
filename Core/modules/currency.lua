@@ -600,7 +600,7 @@ function CurrencyModule:GetCurrencyOptions()
 
     for i = 1, compat.GetCurrencyListSize() do
         local listInfo = compat.GetCurrencyListInfo(i)
-        if not listInfo.isHeader and not listInfo.isTypeUnused then
+        if listInfo and not listInfo.isHeader and not listInfo.isTypeUnused then
             local cL = compat.GetCurrencyListLink(i)
             curOpts[tostring(compat.GetCurrencyIDFromLink(cL))] =
                 compat.GetBasicCurrencyInfo(compat.GetCurrencyIDFromLink(cL)).name
@@ -620,7 +620,9 @@ function CurrencyModule:GetCurrenciesByExpansion()
 
     for i = 1, compat.GetCurrencyListSize() do
         local listInfo = compat.GetCurrencyListInfo(i)
-        if listInfo.isHeader then
+        if not listInfo then
+            -- Skip nil entries (can happen when switching characters)
+        elseif listInfo.isHeader then
             compat.ExpandCurrencyList(i, true)
             currentHeader = listInfo.name
             currentHeaderIndex = #expansionCurrencies + 1
