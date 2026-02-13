@@ -29,9 +29,11 @@ XIVBar.Changelog[4300] = {
         ["zhTW"] = {},
         ["enUS"] = {
             "[Global] Making the hearthstone button in the [Travel] module more reliable (some toys weren't working as expected, Dark Portal on Mists of Pandaria Classic for example).",
+            "[Global] German translation updated, thank you [DlargeX]."
         },
         ["frFR"] = {
             "[Global] Le bouton de la pierre de foyer dans le module [Voyage] est désormais plus fiable (certains jouets ne fonctionnaient pas comme prévu, le Portail des Ténèbres sur Mists of Pandaria Classic par exemple).",
+            "[Global] Traduction allemande mise à jour, merci à [DlargeX]."
         },
         ["koKR"] = {},
         ["ruRU"] = {}

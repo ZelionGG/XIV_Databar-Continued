@@ -7,6 +7,7 @@
 ### _Global :_
 
 - 🛠️ _**IMPROVEMENT** -_ Making the hearthstone button in the **Travel** module more reliable (some toys weren't working as expected, Dark Portal on Mists of Pandaria Classic for example).
+- 🛠️ _**IMPROVEMENT** -_ German translation updated, thank you **DlargeX**.
 - 🐞 _**BUGFIX** -_ Fixed **Currencies** list loading in the **Currency** module settings.
 - 🐞 _**BUGFIX** -_ Fixed a LUA error with the **Master volume** module.
 

@@ -27,10 +27,10 @@ XIVBar.Changelog[4020] = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {
-            "German translation updated, thank you [DlargeX]."
+            "[Global] German translation updated, thank you [DlargeX]."
         },
         ["frFR"] = {
-            "Traduction allemande mise à jour, merci [DlargeX]."
+            "[Global] Traduction allemande mise à jour, merci [DlargeX]."
         },
         ["koKR"] = {},
         ["ruRU"] = {}
