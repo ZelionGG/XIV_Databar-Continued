@@ -397,7 +397,7 @@ function ReputationModule:Refresh()
         local rPerc, gPerc, bPerc = xb:GetClassColors()
         self.reputationBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
     elseif db.modules.reputation.reputationBarReputationCC then
-        if reputationKind == "major" or reputationKind == "paragon" then
+        if reputationKind == "major" then
             self.reputationBar:SetStatusBarColor(renownColor.r, renownColor.g, renownColor.b, 1)
         else
             self.reputationBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, 1)
