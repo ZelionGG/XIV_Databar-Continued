@@ -2,16 +2,54 @@ local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
+local compat = xb.compat or {}
 
 local FACTION_BAR_COLORS  = FACTION_BAR_COLORS
+local RANK_LABEL = rawget(_G, "RANK") or "Rank"
 
-local GetWatchedFactionInfo = GetWatchedFactionInfo
+local LegacyGetWatchedFactionInfo = rawget(_G, "GetWatchedFactionInfo")
+local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
+
+local function GetWatchedFactionInfoCompat()
+    if LegacyGetWatchedFactionInfo then
+        return LegacyGetWatchedFactionInfo()
+    end
+
+    if C_Reputation_GetWatchedFactionData then
+        local data = C_Reputation_GetWatchedFactionData()
+        if data then
+            return data.name, data.reaction, data.currentReactionThreshold,
+                   data.nextReactionThreshold, data.currentStanding,
+                   data.factionID
+        end
+    end
+
+    return nil
+end
 
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
 local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
 local C_Reputation_IsMajorFaction = C_Reputation.IsMajorFaction
 
 local C_MajorFactions_GetMajorFactionData = C_MajorFactions.GetMajorFactionData
+
+local function GetReactionLabel(reaction)
+    if type(reaction) ~= "number" then
+        return tostring(reaction or "?")
+    end
+
+    return _G["FACTION_STANDING_LABEL" .. reaction] or
+               _G["FACTION_STANDING_LABEL" .. reaction .. "_FEMALE"] or
+               tostring(reaction)
+end
+
+local function OpenReputationPanel()
+    if _G.ReputationFrame and _G.ToggleCharacter then
+        _G.ToggleCharacter('ReputationFrame')
+    elseif _G.ToggleCharacter then
+        _G.ToggleCharacter('TokenFrame')
+    end
+end
 
 local ReputationModule = xb:NewModule("ReputationModule", 'AceEvent-3.0',
                                       'AceHook-3.0')
@@ -45,8 +83,27 @@ end
 
 function ReputationModule:Refresh()
     local db = xb.db.profile
+    if not db.modules.reputation.enabled then
+        self:Disable();
+        return;
+    end
+
     local name, reaction, minValue, maxValue, curValue, factionID =
-        GetWatchedFactionInfo()
+        GetWatchedFactionInfoCompat()
+
+    if not name then
+        if self.reputationBarFrame then
+            self.reputationBarFrame:Hide()
+        end
+        if self.reputationFrame then
+            self.reputationFrame:Hide()
+        end
+        return;
+    end
+
+    if self.reputationFrame and not self.reputationFrame:IsShown() then
+        self.reputationFrame:Show()
+    end
 
     if string.len(name) > 20 then
         name = string.sub(name, 1, 20) .. "..."
@@ -74,10 +131,6 @@ function ReputationModule:Refresh()
         return
     end
     if self.reputationFrame == nil then return; end
-    if not db.modules.reputation.enabled or not GetWatchedFactionInfo() then
-        self:Disable();
-        return;
-    end
 
     local iconSize = db.text.fontSize + db.general.barPadding
     for i = 1, 3 do self.curButtons[i]:Hide() end
@@ -192,7 +245,7 @@ function ReputationModule:RegisterFrameEvents()
         end)
         self.curButtons[i]:SetScript('OnClick', function()
             if InCombatLockdown() then return; end
-            ToggleCharacter('TokenFrame')
+            OpenReputationPanel()
         end)
     end
     self:RegisterEvent('UPDATE_FACTION', 'Refresh')
@@ -211,6 +264,10 @@ function ReputationModule:RegisterFrameEvents()
             GameTooltip:Hide()
         end
     end)
+    self.reputationFrame:SetScript('OnMouseUp', function()
+        if InCombatLockdown() then return; end
+        OpenReputationPanel()
+    end)
 
     self.reputationBarFrame:SetScript('OnEnter', function()
         if InCombatLockdown() then return; end
@@ -227,6 +284,10 @@ function ReputationModule:RegisterFrameEvents()
         if xb.db.profile.modules.reputation.showTooltip then
             GameTooltip:Hide()
         end
+    end)
+    self.reputationBarFrame:SetScript('OnClick', function()
+        if InCombatLockdown() then return; end
+        OpenReputationPanel()
     end)
 
     self:RegisterMessage('XIVBar_FrameHide', function(_, name)
@@ -245,55 +306,64 @@ function ReputationModule:ShowTooltip()
 
     GameTooltip:SetOwner(self.reputationFrame, 'ANCHOR_' .. xb.miniTextPosition)
 
-    if xb.constants.playerLevel < MAX_PLAYER_LEVEL and
-        xb.db.profile.modules.reputation.showXPbar then
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE ..
-                                "|cFFFFFFFF]|r", r, g, b)
-        GameTooltip:AddLine(" ")
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. REPUTATION .. "|cFFFFFFFF]|r", r,
+                        g, b)
+    GameTooltip:AddLine(" ")
 
-        local curXp = UnitXP('player')
-        local maxXp = UnitXPMax('player')
-        local rested = GetXPExhaustion()
-        -- XP
-        GameTooltip:AddDoubleLine(XP .. ':', string.format('%d / %d (%d%%)',
-                                                           curXp, maxXp, floor(
-                                                               (curXp / maxXp) *
-                                                                   100)), r, g,
-                                  b, 1, 1, 1)
-        -- Remaining
-        GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
-                                  string.format('%d (%d%%)', (maxXp - curXp),
-                                                floor(
-                                                    ((maxXp - curXp) / maxXp) *
-                                                        100)), r, g, b, 1, 1, 1)
-        -- Rested
-        if rested then
-            GameTooltip:AddDoubleLine(L['Rested'] .. ':', string.format(
-                                          '+%d (%d%%)', rested,
-                                          floor((rested / maxXp) * 100)), r, g,
-                                      b, 1, 1, 1)
-        end
+    local name, reaction, minValue, maxValue, curValue, factionID =
+        GetWatchedFactionInfoCompat()
+
+    if not name then
+        GameTooltip:AddLine("No Watched Faction", 1, 1, 1)
     else
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. CURRENCY .. "|cFFFFFFFF]|r", r,
-                            g, b)
-        GameTooltip:AddLine(" ")
+        GameTooltip:AddDoubleLine(REPUTATION .. ':', name, r, g, b, 1, 1, 1)
 
-        for i = 1, 3 do
-            if xb.db.profile.modules.reputation[self.intToOpt[i]] ~= '0' then
-                local curId = tonumber(
-                                  xb.db.profile.modules.reputation[self.intToOpt[i]])
-                local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
-                GameTooltip:AddDoubleLine(curInfo.name, string.format('%d/%d',
-                                                                      curInfo.quantity,
-                                                                      curInfo.maxQuantity),
-                                          r, g, b, 1, 1, 1)
+        local rankText = GetReactionLabel(reaction)
+        local current = curValue
+        local maxValueForDisplay = maxValue
+
+        if type(minValue) == "number" and type(curValue) == "number" and
+            type(maxValue) == "number" then
+            current = curValue - minValue
+            maxValueForDisplay = maxValue - minValue
+        end
+
+        if factionID and C_Reputation_IsMajorFaction and
+            C_Reputation_IsMajorFaction(factionID) then
+            local majorFactionData = C_MajorFactions_GetMajorFactionData and
+                                         C_MajorFactions_GetMajorFactionData(factionID)
+            if majorFactionData then
+                rankText = string.format("Renown %d", majorFactionData.renownLevel or 0)
+                current = majorFactionData.renownReputationEarned
+                maxValueForDisplay = majorFactionData.renownLevelThreshold
+            end
+        elseif factionID and C_Reputation_IsFactionParagon and
+            C_Reputation_IsFactionParagon(factionID) then
+            local paragonCurrent, paragonThreshold =
+                C_Reputation_GetFactionParagonInfo(factionID)
+            if type(paragonCurrent) == "number" and
+                type(paragonThreshold) == "number" and paragonThreshold > 0 then
+                rankText = L["Paragon"] or "Paragon"
+                current = paragonCurrent % paragonThreshold
+                maxValueForDisplay = paragonThreshold
             end
         end
 
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
-                                  BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(RANK_LABEL .. ':', rankText, r, g, b, 1, 1, 1)
+
+        if type(current) == "number" and type(maxValueForDisplay) == "number" and
+            maxValueForDisplay > 0 then
+            local percent = floor((current / maxValueForDisplay) * 100)
+            GameTooltip:AddDoubleLine("Progress:",
+                                      string.format('%d / %d (%d%%)', current,
+                                                    maxValueForDisplay, percent),
+                                      r, g, b, 1, 1, 1)
+        end
     end
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
+                              'Open ' .. REPUTATION, r, g, b, 1, 1, 1)
 
     GameTooltip:Show()
 end
