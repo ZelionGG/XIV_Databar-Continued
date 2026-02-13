@@ -534,11 +534,15 @@ function ReputationModule:RegisterFrameEvents()
     end)
 
     self:RegisterMessage('XIVBar_FrameHide', function(_, name)
-        if name == 'tradeskillFrame' then self:Refresh() end
+        if name == 'currencyFrame' or name == 'tradeskillFrame' then
+            self:Refresh()
+        end
     end)
 
     self:RegisterMessage('XIVBar_FrameShow', function(_, name)
-        if name == 'tradeskillFrame' then self:Refresh() end
+        if name == 'currencyFrame' or name == 'tradeskillFrame' then
+            self:Refresh()
+        end
     end)
 end
 
