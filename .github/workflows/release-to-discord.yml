@@ -17,7 +17,7 @@ jobs:
           color: "197379"
           username: "XIV_Databar Continued"
           avatar_url: "https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png"
-          content: "||@ping-updates||"
+          content: "||<@&1471583615145083099>||"
           footer_title: "XIV_Databar Continued Changelog"
           footer_icon_url: "https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png"
           footer_timestamp: true
