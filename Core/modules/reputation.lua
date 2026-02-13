@@ -112,7 +112,9 @@ local function GetWatchedReputationDisplayData()
         curValue = curValue,
         factionID = factionID,
         rankText = GetReactionLabel(reaction),
-        kind = "normal"
+        kind = "normal",
+        paragonRewardAvailable = false,
+        hasBonusRepGain = false
     }
 
     if factionID and C_Reputation_IsMajorFaction and C_Reputation_IsMajorFaction(factionID) then
@@ -126,6 +128,7 @@ local function GetWatchedReputationDisplayData()
             data.minValue = 0
             data.maxValue = majorFactionData.renownLevelThreshold
             data.curValue = majorFactionData.renownReputationEarned or 0
+            data.hasBonusRepGain = majorFactionData.hasBonusRepGain and true or false
         end
     end
 
@@ -183,6 +186,8 @@ local function GetWatchedReputationDisplayData()
         if type(paragonCurrent) == "number" and type(paragonThreshold) == "number" and
             paragonThreshold > 0 and (isNormalBarCapped or hasParagonProgress or rewardPending) then
             data.kind = "paragon"
+            data.paragonRewardAvailable = (rewardPending and true) or
+                                              (data.hasBonusRepGain and true) or false
             local paragonLabel = L["Paragon"] or "Paragon"
             if type(data.friendRankText) == "string" and data.friendRankText ~= "" then
                 data.rankText = string.format("%s (%s)", data.friendRankText,
@@ -257,10 +262,46 @@ function ReputationModule:OnEnable()
 end
 
 function ReputationModule:OnDisable()
+    self:SetParagonRewardFlash(false)
     self.reputationFrame:Hide()
     self:UnregisterEvent('UPDATE_FACTION', 'Refresh')
     self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
     self:UnregisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+end
+
+function ReputationModule:SetParagonRewardFlash(enabled)
+    if not self.reputationBarFrame then
+        return
+    end
+
+    if not self.reputationFlashAnim then
+        local anim = self.reputationBarFrame:CreateAnimationGroup()
+        local fadeOut = anim:CreateAnimation('Alpha')
+        fadeOut:SetFromAlpha(1)
+        fadeOut:SetToAlpha(0.45)
+        fadeOut:SetDuration(0.5)
+        fadeOut:SetOrder(1)
+
+        local fadeIn = anim:CreateAnimation('Alpha')
+        fadeIn:SetFromAlpha(0.45)
+        fadeIn:SetToAlpha(1)
+        fadeIn:SetDuration(0.5)
+        fadeIn:SetOrder(2)
+
+        anim:SetLooping('REPEAT')
+        self.reputationFlashAnim = anim
+    end
+
+    if enabled then
+        if not self.reputationFlashAnim:IsPlaying() then
+            self.reputationFlashAnim:Play()
+        end
+    else
+        if self.reputationFlashAnim:IsPlaying() then
+            self.reputationFlashAnim:Stop()
+        end
+        self.reputationBarFrame:SetAlpha(1)
+    end
 end
 
 function ReputationModule:Refresh()
@@ -279,6 +320,10 @@ function ReputationModule:Refresh()
         if self.reputationFrame then
             self.reputationFrame:Hide()
         end
+        if self.reputationRewardCheck then
+            self.reputationRewardCheck:Hide()
+        end
+        self:SetParagonRewardFlash(false)
         return;
     end
 
@@ -287,6 +332,9 @@ function ReputationModule:Refresh()
     local minValue = watchedData.minValue
     local maxValue = watchedData.maxValue
     local curValue = watchedData.curValue
+    local paragonRewardAvailable = watchedData.paragonRewardAvailable
+    local shouldFlashParagonReward = db.modules.reputation.flashParagonReward and
+                                         paragonRewardAvailable
 
     if self.reputationFrame and not self.reputationFrame:IsShown() then
         self.reputationFrame:Show()
@@ -300,6 +348,10 @@ function ReputationModule:Refresh()
         self.reputationBar:SetMinMaxValues(minValue, maxValue)
         self.reputationBar:SetValue(curValue)
         self.reputationText:SetText(string.upper(name))
+        if self.reputationRewardCheck then
+            self.reputationRewardCheck:Hide()
+        end
+        self:SetParagonRewardFlash(shouldFlashParagonReward)
         return
     end
     if self.reputationFrame == nil then return; end
@@ -319,8 +371,17 @@ function ReputationModule:Refresh()
     self.reputationText:SetFont(xb:GetFont(textHeight))
     self.reputationText:SetTextColor(xb:GetColor('normal'))
     self.reputationText:SetText(string.upper(name))
-    self.reputationText:SetPoint('TOPLEFT', self.reputationIcon, 'TOPRIGHT', 5,
-                                 0)
+    self.reputationText:ClearAllPoints()
+
+    local rewardCheckWidth = 0
+    if self.reputationRewardCheck then
+        self.reputationRewardCheck:Hide()
+        self.reputationText:SetPoint('TOPLEFT', self.reputationIcon, 'TOPRIGHT',
+                                     5, 0)
+    else
+        self.reputationText:SetPoint('TOPLEFT', self.reputationIcon, 'TOPRIGHT',
+                                     5, 0)
+    end
 
     local color = FACTION_BAR_COLORS[reaction] or {r=1,g=0,b=1}
     self.reputationBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
@@ -335,7 +396,8 @@ function ReputationModule:Refresh()
 
     self.reputationBar:SetMinMaxValues(minValue, maxValue)
     self.reputationBar:SetValue(curValue)
-    self.reputationBar:SetSize(self.reputationText:GetStringWidth(), barHeight)
+    self.reputationBar:SetSize(self.reputationText:GetStringWidth() + rewardCheckWidth,
+                               barHeight)
     self.reputationBar:SetPoint('BOTTOMLEFT', self.reputationIcon,
                                 'BOTTOMRIGHT', 5, 0)
 
@@ -345,9 +407,11 @@ function ReputationModule:Refresh()
                                          db.color.inactive.b,
                                          db.color.inactive.a)
     self.reputationFrame:SetSize(
-        iconSize + self.reputationText:GetStringWidth() + 5, xb:GetHeight())
+        iconSize + self.reputationText:GetStringWidth() + rewardCheckWidth + 5,
+        xb:GetHeight())
     self.reputationBarFrame:SetAllPoints()
     self.reputationBarFrame:Show()
+    self:SetParagonRewardFlash(shouldFlashParagonReward)
 
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
@@ -390,6 +454,10 @@ function ReputationModule:CreateFrames()
     self.reputationBarBg = self.reputationBarBg or
                                self.reputationBar:CreateTexture(nil,
                                                                 'BACKGROUND')
+    self.reputationRewardCheck = self.reputationRewardCheck or
+                                     self.reputationBarFrame:CreateTexture(nil,
+                                                                          'OVERLAY')
+    self.reputationRewardCheck:Hide()
     self.reputationBarFrame:Hide()
 end
 
@@ -505,6 +573,11 @@ function ReputationModule:ShowTooltip()
                                                     maxValueForDisplay, percent),
                                       r, g, b, 1, 1, 1)
         end
+
+        if watchedData.paragonRewardAvailable then
+            GameTooltip:AddLine("|A:ParagonReputation_Bag:14:14|a Paragon Reward available",
+                                1, 0.82, 0)
+        end
     end
 
     GameTooltip:AddLine(" ")
@@ -516,7 +589,12 @@ end
 
 function ReputationModule:GetDefaultOptions()
     return 'reputation',
-           {enabled = false, reputationBarClassCC = false, showTooltip = true}
+           {
+        enabled = false,
+        reputationBarClassCC = false,
+        showTooltip = true,
+        flashParagonReward = true
+    }
 end
 
 function ReputationModule:GetConfig()
@@ -574,6 +652,18 @@ function ReputationModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.reputation.showTooltip = val;
+                    self:Refresh();
+                end
+            },
+            flashParagonReward = {
+                name = 'Flash on Paragon Reward',
+                order = 5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.reputation.flashParagonReward;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.reputation.flashParagonReward = val;
                     self:Refresh();
                 end
             }
