@@ -5,6 +5,17 @@ local L = XIVBar.L;
 
 local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
+local function SnapToEvenPixel(value)
+    local snapped = floor((value or 0) + 0.5)
+    if snapped < 1 then
+        snapped = 1
+    end
+    if snapped % 2 ~= 0 then
+        snapped = snapped + 1
+    end
+    return snapped
+end
+
 local function GetServerTimeString(optFormat)
     local hour, minute = GetGameTime()
     local constructedServerTime = time({
@@ -128,15 +139,25 @@ function ClockModule:Refresh()
         return
     end
 
-    self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
+    local clockTextWidth = SnapToEvenPixel(self.clockText:GetStringWidth())
+    local clockTextHeight = floor((self.clockText:GetStringHeight() or 0) + 0.5)
+    if clockTextHeight < 1 then
+        clockTextHeight = 1
+    end
+
+    self.clockFrame:SetSize(clockTextWidth, clockTextHeight)
+    self.clockFrame:ClearAllPoints()
     self.clockFrame:SetPoint('CENTER')
-        
-    self.clockTextFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
+
+    self.clockTextFrame:SetSize(clockTextWidth, clockTextHeight)
+    self.clockTextFrame:ClearAllPoints()
     self.clockTextFrame:SetPoint('CENTER')
 
+    self.clockText:ClearAllPoints()
     self.clockText:SetPoint('CENTER')
 
     self.eventText:SetFont(xb:GetFont(db.text.smallFontSize))
+    self.eventText:ClearAllPoints()
     self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
     if xb.db.profile.modules.clock.hideEventText then
         self.eventText:Hide()
