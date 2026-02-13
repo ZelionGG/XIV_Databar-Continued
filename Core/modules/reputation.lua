@@ -329,6 +329,7 @@ function ReputationModule:Refresh()
         return;
     end
 
+    local reputationKind = watchedData.kind
     local name = watchedData.name
     local reaction = watchedData.reaction
     local minValue = watchedData.minValue
@@ -388,13 +389,19 @@ function ReputationModule:Refresh()
                                      5, 0)
     end
 
-    local color = FACTION_BAR_COLORS[reaction] or {r=1,g=0,b=1}
+    local color = FACTION_BAR_COLORS[reaction] or { r = 1, g = 0, b = 1 }
+    local renownColor = { r = 0.00, g = 0.76, b = 1.00 } -- blue/cyan style Renown UI
+    
     self.reputationBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
     if db.modules.reputation.reputationBarClassCC then
-        local rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
+        local rPerc, gPerc, bPerc = xb:GetClassColors()
         self.reputationBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
     elseif db.modules.reputation.reputationBarReputationCC then
-        self.reputationBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, 1)
+        if reputationKind == "major" or reputationKind == "paragon" then
+            self.reputationBar:SetStatusBarColor(renownColor.r, renownColor.g, renownColor.b, 1)
+        else
+            self.reputationBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, 1)
+        end
     else
         self.reputationBar:SetStatusBarColor(xb:GetColor('normal'))
     end
