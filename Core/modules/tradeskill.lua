@@ -224,11 +224,13 @@ function TradeskillModule:Refresh()
 
     self:StyleTradeskillFrame('firstProf')
     totalWidth = totalWidth + self.firstProfFrame:GetWidth()
+    self.firstProfFrame:ClearAllPoints()
     self.firstProfFrame:SetPoint('LEFT')
 
     if self.secondProf.idx then
         self:StyleTradeskillFrame('secondProf')
         totalWidth = totalWidth + self.secondProfFrame:GetWidth()
+        self.secondProfFrame:ClearAllPoints()
         self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
     end
 
@@ -239,6 +241,7 @@ function TradeskillModule:Refresh()
         relativeAnchorPoint = 'LEFT'
         xOffset = 0
     end
+    self.tradeskillFrame:ClearAllPoints()
     self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
 end
 

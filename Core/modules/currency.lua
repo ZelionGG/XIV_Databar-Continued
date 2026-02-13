@@ -225,6 +225,7 @@ function CurrencyModule:Refresh()
             xOffset = 0
         end
     end
+    self.currencyFrame:ClearAllPoints()
     self.currencyFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint, xOffset, 0)
 end
 

@@ -434,6 +434,7 @@ function ReputationModule:Refresh()
             xOffset = 0
         end
     end
+    self.reputationFrame:ClearAllPoints()
     self.reputationFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint,
                                   xOffset, 0)
 end
