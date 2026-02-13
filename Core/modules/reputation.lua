@@ -379,7 +379,7 @@ function ReputationModule:Refresh()
     if InCombatLockdown() then
         self.reputationBar:SetMinMaxValues(minValue, maxValue)
         self.reputationBar:SetValue(curValue)
-        self.reputationText:SetText(string.upper(name))
+        self.reputationText:SetText(name)
         if self.reputationRewardCheck then
             self.reputationRewardCheck:Hide()
         end
@@ -405,7 +405,7 @@ function ReputationModule:Refresh()
 
     self.reputationText:SetFont(xb:GetFont(textHeight))
     self.reputationText:SetTextColor(xb:GetColor('normal'))
-    self.reputationText:SetText(string.upper(name))
+    self.reputationText:SetText(name)
     self.reputationText:ClearAllPoints()
 
     local rewardCheckWidth = 0
