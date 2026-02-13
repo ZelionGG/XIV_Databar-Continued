@@ -1,4 +1,4 @@
-local AddOnName, Engine = ...;
+﻿local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
 if not L then return end
@@ -114,17 +114,17 @@ L['Durability Warning Threshold'] = "Haltbarkeitswarnschwelle";
 L['Show Item Level'] = "Gegenstandsstufe anzeigen";
 L['Show Coordinates'] = "Koordinaten anzeigen";
 
-L['Master Volume'] = "Haupt-Lautstärke";
+L['Master Volume'] = "Hauptlautstärke";
 L["Volume step"] = "Lautstärken Schritte";
 
 L['Time Format'] = "Uhrzeit Format";
-L['Use Server Time'] = "Server Zeit benutzen";
+L['Use Server Time'] = "Serverzeit benutzen";
 L['New Event!'] = "Neue Veranstaltung!";
 L['Local Time'] = "Lokale Zeit";
 L['Realm Time'] = "Realm Zeit";
 L['Open Calendar'] = "Kalendar öffnen";
 L['Open Clock'] = "Stoppuhr öffnen";
-L['Hide Event Text'] = "Event Text verstecken";
+L['Hide Event Text'] = "Eventtext verstecken";
 
 L['Travel'] = "Reise";
 L['Port Options'] = "Teleport Einstellungen";
@@ -171,8 +171,8 @@ L['Cleaned'] = "Gesäubert";
 
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
-L['Toggle Profession Frame'] = 'Berufsfenster anzeigen';
-L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
+L['Toggle Profession Frame'] = "Berufsfenster anzeigen";
+L['Toggle Profession Spellbook'] = "Zauberbuch für Berufe anzeigen";
 
 L['Set Specialization'] = "Spezialisierung auswählen";
 L['Set Loadout'] = "Konfiguration auswählen";
@@ -191,8 +191,8 @@ L['Show Button Text'] = "Zeige Tastentext";
 L['Hearthstone'] = "Ruhestein";
 L['M+ Teleports'] = "M+ Teleporter";
 L['Only show current season'] = "Zeige nur aktuelle Season";
-L["Mythic+ Teleports"] = "Mythic+ Teleporter";
-L['Hide M+ Teleports text'] = "M+ Teleports-Text ausblenden";
+L["Mythic+ Teleports"] = "Mythisch+ Teleporter";
+L['Hide M+ Teleports text'] = "M+ Teleportertext ausblenden";
 L['Show Mythic+ Teleports'] = "Zeige Mythisch+ Teleporter";
 L['Use Random Hearthstone'] = "Nutze zufälligen Ruhestein";
 local retrievingData = "Daten werden abgerufen..."
@@ -202,7 +202,7 @@ L['Hearthstones Select'] = "Ruhesteine auswählen";
 L['Hearthstones Select Desc'] = "Ruhesteinauswahl Beschreibung";
 L['Hide Hearthstone Button'] = "Ruhestein Taste ausblenden";
 L['Hide Port Button'] = "Port Taste ausblenden";
-L['Hide Home Button'] = true; -- To Translate
+L['Hide Home Button'] = "Home Taste ausblenden"; 
 
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed
