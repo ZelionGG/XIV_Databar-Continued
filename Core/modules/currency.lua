@@ -93,13 +93,18 @@ function CurrencyModule:Refresh()
     local db = xb.db.profile
     xb.constants.playerLevel = UnitLevel("player")
     local maxLevel = GetMaxLevel()
+    local effectiveMaxLevel = (_G.GetMaxLevelForPlayerExpansion and GetMaxLevelForPlayerExpansion()) or maxLevel
+    local xpLocked = IsXPUserDisabled() or (UnitXPMax('player') or 0) <= 0
     if InCombatLockdown() then
-        if xb.constants.playerLevel < maxLevel and db.modules.currency.showXPbar then
+        if xb.constants.playerLevel < effectiveMaxLevel and db.modules.currency.showXPbar and not xpLocked then
             self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
             self.xpBar:SetValue(UnitXP('player'))
             self.xpText:SetFont(xb:GetFont(db.text.fontSize))
             self.xpText:SetTextColor(xb:GetColor('normal'))
             self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
+        else
+            self.xpFrame:Hide()
+            self.moduleIconFrame:Hide()
         end
         return
     end
@@ -118,7 +123,7 @@ function CurrencyModule:Refresh()
     self.xpFrame:Hide()
     self.moduleIconFrame:Hide()
 
-    if xb.constants.playerLevel < maxLevel and db.modules.currency.showXPbar then
+    if xb.constants.playerLevel < effectiveMaxLevel and db.modules.currency.showXPbar and not xpLocked then
         local textHeight = floor((xb:GetHeight() - 4) / 2)
         local barHeight = (iconSize - textHeight - 2)
         if barHeight < 2 then
@@ -210,6 +215,8 @@ function CurrencyModule:Refresh()
             end
             self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
         end
+        -- Hide XP frame explicitly when XP is locked or not shown
+        self.xpFrame:Hide()
     end
 
     local relativeAnchorPoint = 'RIGHT'
@@ -459,7 +466,10 @@ function CurrencyModule:ShowTooltip()
     GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_' .. xb.miniTextPosition)
 
     local maxLevel = GetMaxLevel()
-    if xb.constants.playerLevel < maxLevel and xb.db.profile.modules.currency.showXPbar then
+    local effectiveMaxLevel = (_G.GetMaxLevelForPlayerExpansion and GetMaxLevelForPlayerExpansion()) or maxLevel
+    local xpLocked = IsXPUserDisabled() or (UnitXPMax('player') or 0) <= 0
+
+    if xb.constants.playerLevel < effectiveMaxLevel and xb.db.profile.modules.currency.showXPbar and not xpLocked then
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. POWER_TYPE_EXPERIENCE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
 
