@@ -947,6 +947,37 @@ SetBarMouseoverScripts = function()
         return false
     end
 
+    local function EnsureMouseoverAnimations()
+        if bar._xivFadeInGroup and bar._xivFadeOutGroup then
+            return
+        end
+
+        bar._xivFadeInGroup = bar:CreateAnimationGroup()
+        bar._xivFadeIn = bar._xivFadeInGroup:CreateAnimation("Alpha")
+        bar._xivFadeIn:SetOrder(1)
+        bar._xivFadeIn:SetDuration(0.15)
+        bar._xivFadeInGroup:SetScript("OnFinished", function()
+            bar:SetAlpha(1)
+        end)
+
+        bar._xivFadeOutGroup = bar:CreateAnimationGroup()
+        bar._xivFadeOut = bar._xivFadeOutGroup:CreateAnimation("Alpha")
+        bar._xivFadeOut:SetOrder(1)
+        bar._xivFadeOut:SetDuration(0.15)
+        bar._xivFadeOutGroup:SetScript("OnFinished", function()
+            bar:SetAlpha(0)
+        end)
+    end
+
+    local function PlayAlpha(group, anim, fromAlpha, toAlpha)
+        if group:IsPlaying() then
+            group:Stop()
+        end
+        anim:SetFromAlpha(fromAlpha)
+        anim:SetToAlpha(toAlpha)
+        group:Play()
+    end
+
     local function showBar()
         bar._xivHidePending = false
         if not bar._xivMouseoverEnabled then
@@ -955,12 +986,14 @@ SetBarMouseoverScripts = function()
         if bar._xivMouseoverVisible then
             return
         end
-        bar._xivMouseoverVisible = true
-        if UIFrameFadeIn then
-            UIFrameFadeIn(bar, 0.15, bar:GetAlpha(), 1)
-        else
-            bar:SetAlpha(1)
+
+        EnsureMouseoverAnimations()
+        if bar._xivFadeOutGroup and bar._xivFadeOutGroup:IsPlaying() then
+            bar._xivFadeOutGroup:Stop()
         end
+
+        bar._xivMouseoverVisible = true
+        PlayAlpha(bar._xivFadeInGroup, bar._xivFadeIn, bar:GetAlpha(), 1)
     end
 
     local function hideBarIfOut()
@@ -978,12 +1011,13 @@ SetBarMouseoverScripts = function()
                 return
             end
             if not IsMouseOverBar() then
-                bar._xivMouseoverVisible = false
-                if UIFrameFadeOut then
-                    UIFrameFadeOut(bar, 0.15, bar:GetAlpha(), 0)
-                else
-                    bar:SetAlpha(0)
+                EnsureMouseoverAnimations()
+                if bar._xivFadeInGroup and bar._xivFadeInGroup:IsPlaying() then
+                    bar._xivFadeInGroup:Stop()
                 end
+
+                bar._xivMouseoverVisible = false
+                PlayAlpha(bar._xivFadeOutGroup, bar._xivFadeOut, bar:GetAlpha(), 0)
             end
         end)
     end
@@ -1021,8 +1055,11 @@ SetBarMouseoverScripts = function()
     else
         bar._xivMouseoverEnabled = false
         bar._xivHideToken = (bar._xivHideToken or 0) + 1
-        if UIFrameFadeRemoveFrame then
-            UIFrameFadeRemoveFrame(bar)
+        if bar._xivFadeInGroup and bar._xivFadeInGroup:IsPlaying() then
+            bar._xivFadeInGroup:Stop()
+        end
+        if bar._xivFadeOutGroup and bar._xivFadeOutGroup:IsPlaying() then
+            bar._xivFadeOutGroup:Stop()
         end
         bar._xivHidePending = false
         bar:SetAlpha(1)
