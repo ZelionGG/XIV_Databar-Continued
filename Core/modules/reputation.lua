@@ -294,8 +294,10 @@ function ReputationModule:OnDisable()
     self:SetParagonRewardFlash(false)
     self.reputationFrame:Hide()
     self:UnregisterEvent('UPDATE_FACTION', 'Refresh')
-    self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
-    self:UnregisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    if compat.isMainline then
+        self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
+        self:UnregisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    end
     self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:UnregisterEvent('QUEST_TURNED_IN', 'Refresh')
 end
@@ -531,8 +533,10 @@ function ReputationModule:RegisterFrameEvents()
         end)
     end
     self:RegisterEvent('UPDATE_FACTION', 'Refresh')
-    self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
-    self:RegisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    if compat.isMainline then
+        self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
+        self:RegisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
+    end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:RegisterEvent('QUEST_TURNED_IN', 'Refresh')
     -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
@@ -716,6 +720,9 @@ function ReputationModule:GetConfig()
                 set = function(_, val)
                     xb.db.profile.modules.reputation.flashParagonReward = val;
                     self:Refresh();
+                end,
+                hidden = function()
+                    return not compat.isMainline;
                 end
             }
         }
