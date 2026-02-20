@@ -1393,7 +1393,7 @@ function TravelModule:Refresh()
         self.homeButton:SetPoint(homeParentPoint, homeParentFrame, homeRelPoint,
                                  homeXOff, 0)
 
-        self.homeIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
+        self.homeIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house_tp')
         self.homeIcon:SetSize(iconSize, iconSize)
         self.homeIcon:SetPoint("RIGHT", self.homeButton, "RIGHT", 0, 0)
 
