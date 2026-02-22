@@ -41,6 +41,7 @@
     <li><a href="#localization">Localization</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
+    <li><a href="#stars">Stars</a></li>
   </ol>
 </details>
 
@@ -138,6 +139,13 @@ If you have a suggestion that would make this better, please fork the repo and c
 ## License
 
 Distributed under the GPL-3.0 License. See `LICENSE` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- STARS -->
+## Stars
+
+[![Stars over time](https://starchart.cc/ZelionGG/XIV_Databar-Continued.svg?variant=adaptive)](https://starchart.cc/ZelionGG/XIV_Databar-Continued)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
