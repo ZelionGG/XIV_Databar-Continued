@@ -1449,6 +1449,12 @@ function TravelModule:Refresh()
                          db.general.barPadding
     end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('travel', self.hearthFrame) then
+        self.hearthFrame:Show()
+        return
+    end
+
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
     self.hearthFrame:Show()
 end
@@ -1473,7 +1479,7 @@ function TravelModule:ShowTooltip()
                 if portOption and portOption.portId then
                     local label = portOption.text or GetPortLabel(portOption.portId)
                     local isSpell = IsSpellKnown(portOption.portId)
-                    
+
                     if isSpell then
                         -- Handle spells
                         local spellCooldown = self:GetRemainingCooldown(portOption.portId, true)

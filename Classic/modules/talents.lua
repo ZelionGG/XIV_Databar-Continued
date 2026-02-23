@@ -244,6 +244,14 @@ function TalentModule:Refresh()
 
     self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
 
+    if xb:ApplyModuleFreePlacement('talent', self.talentFrame) then
+        self:CreateSpecPopup()
+        if not isVanilla then
+            self:CreateLootSpecPopup()
+        end
+        return
+    end
+
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
     local anchorFrame = xb:GetFrame('clockFrame')

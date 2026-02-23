@@ -280,6 +280,10 @@ function VaultModule:Refresh()
     self.vaultFrame:SetSize(width, xb:GetHeight())
     self.text:SetPoint('LEFT', self.icon, 'RIGHT', 5, 0)
 
+    if xb:ApplyModuleFreePlacement('vault', self.vaultFrame) then
+        return
+    end
+
     local anchor = getAnchorFrame()
     local spacing = db.general.moduleSpacing - 5
     if anchor and anchor ~= xb:GetFrame('bar') then

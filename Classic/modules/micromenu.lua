@@ -309,7 +309,12 @@ function MenuModule:Refresh()
             prev = frame
         end
     end
-    self.microMenuFrame:SetPoint("LEFT", xb.db.profile.general.barPadding, 0)
+
+    if not xb:ApplyModuleFreePlacement('microMenu', self.microMenuFrame) then
+        self.microMenuFrame:ClearAllPoints()
+        self.microMenuFrame:SetPoint("LEFT", xb.db.profile.general.barPadding, 0)
+    end
+
     self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
 
     for name, frame in pairs(self.text) do

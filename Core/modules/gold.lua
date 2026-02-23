@@ -278,6 +278,10 @@ function GoldModule:Refresh()
 
     self.goldFrame:SetSize(self.goldButton:GetSize())
 
+    if xb:ApplyModuleFreePlacement('gold', self.goldFrame) then
+        return
+    end
+
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
     local parentFrame = xb:GetFrame('travelFrame')

@@ -164,6 +164,8 @@ function ClockModule:Refresh()
     else
         self.eventText:Show()
     end
+
+    xb:ApplyModuleFreePlacement('clock', self.clockFrame)
 end
 
 function ClockModule:CreateFrames()

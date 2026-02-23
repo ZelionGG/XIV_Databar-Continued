@@ -235,6 +235,11 @@ function TradeskillModule:Refresh()
     end
 
     self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('tradeskill', self.tradeskillFrame) then
+        return
+    end
+
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
     if not xb:GetFrame('clockFrame') or not xb:GetFrame('clockFrame'):IsVisible() then

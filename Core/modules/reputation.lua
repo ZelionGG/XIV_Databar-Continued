@@ -457,6 +457,10 @@ function ReputationModule:Refresh()
     self.reputationBarFrame:Show()
     self:SetParagonRewardFlash(shouldFlashParagonReward)
 
+    if xb:ApplyModuleFreePlacement('reputation', self.reputationFrame) then
+        return
+    end
+
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing

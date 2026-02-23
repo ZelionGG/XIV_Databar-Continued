@@ -240,6 +240,13 @@ function TalentModule:Refresh()
             self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
         end
 
+        if xb:ApplyModuleFreePlacement('talent', self.talentFrame) then
+            self:CreateLoadoutPopup()
+            self:CreateSpecPopup()
+            self:CreateLootSpecPopup()
+            return
+        end
+
         self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
     end
 
