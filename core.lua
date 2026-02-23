@@ -1081,9 +1081,9 @@ function XIVBar:GetModulesPositionningOptions()
                 order = order + 1,
                 inline = true,
                 disabled = function()
-                    local moduleDisabled = self.db.profile.modules[currentModuleKey] ~= nil
-                        and self.db.profile.modules[currentModuleKey].enabled == false
-                    return not self.db.profile.general.enableFreePlacement or moduleDisabled
+                    if not self.db.profile.general.enableFreePlacement then return true end
+                    local mod = self.db.profile.modules[currentModuleKey]
+                    return mod ~= nil and mod.enabled == false
                 end,
                 args = {
                     anchorPoint = {
