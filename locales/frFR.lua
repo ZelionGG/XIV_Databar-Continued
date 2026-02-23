@@ -213,6 +213,7 @@ L['Hearthstones Select Desc'] = "Sélectionner les pierres de foyers à utiliser
 L['Hide Hearthstone Button'] = "Masquer le bouton de la pierre de foyer";
 L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires";
 L['Hide Home Button'] = "Masquer le bouton Logis";
+L['Hide button names'] = true; -- To Translate
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

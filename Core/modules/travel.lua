@@ -576,11 +576,14 @@ function TravelModule:FindUsableTransport(ids, preferRandom)
     return available[1]
 end
 
-function TravelModule:SetButtonState(button, icon, text, isActive, isHover)
+function TravelModule:SetButtonState(button, icon, text, isActive, isHover, isChangeIconColorOnHover)
     local db = xb.db.profile
     
     if isHover then
         text:SetTextColor(unpack(xb:HoverColors()))
+        if isChangeIconColorOnHover then 
+            icon:SetVertexColor(unpack(xb:HoverColors()))
+        end
     elseif isActive then
         icon:SetVertexColor(xb:GetColor('normal'))
         text:SetTextColor(xb:GetColor('normal'))
@@ -627,10 +630,12 @@ function TravelModule:SetHearthColor()
     if transport then
         self.hearthButton:SetAttribute("macrotext", transport.macro)
     end
+
+    local hideButtonNames = xb.db and xb.db.profile and xb.db.profile.hideButtonNames
     
     -- Set button appearance
     self:SetButtonState(self.hearthButton, self.hearthIcon, self.hearthText, 
-                       isActive, self.hearthButton:IsMouseOver())
+                       isActive, self.hearthButton:IsMouseOver(), hideButtonNames)
 end
 
 function TravelModule:SetPortColor()
@@ -652,10 +657,12 @@ function TravelModule:SetPortColor()
         local macro = BuildMacro(portItem.portId, transportName)
         self.portButton:SetAttribute("macrotext", macro)
     end
+
+    local hideButtonNames = xb.db and xb.db.profile and xb.db.profile.hideButtonNames
     
     -- Set button appearance
     self:SetButtonState(self.portButton, self.portIcon, self.portText, 
-                       isActive, self.portButton:IsMouseOver())
+                       isActive, self.portButton:IsMouseOver(), hideButtonNames)
 end
 
 function TravelModule:SetHomeColor()
@@ -1262,7 +1269,7 @@ function TravelModule:Refresh()
     -- Hearthstone Part
     if not db.hideHearthstoneButton then
         self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
-        self.hearthText:SetText(GetBindLocation())
+        self.hearthText:SetText(not db.hideButtonNames and GetBindLocation() or '')
 
         self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize +
                                     db.general.barPadding, xb:GetHeight())
@@ -1291,7 +1298,7 @@ function TravelModule:Refresh()
         self.portButton:Show()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
         local portItem = xb.db.char.portItem or self:FindFirstOption()
-        local portText = portItem and (portItem.text or GetPortLabel(portItem.portId)) or ''
+        local portText = not db.hideButtonNames and portItem and (portItem.text or GetPortLabel(portItem.portId)) or ''
         self.portText:SetText(portText)
 
         self.portButton:SetSize(self.portText:GetWidth() + iconSize +
@@ -1567,6 +1574,7 @@ function TravelModule:GetDefaultOptions()
         enabled = true,
         hideHearthstoneButton = false,
         hideHomeButton = false,
+        hideButtonNames = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
         curSeasonOnly = false,
@@ -1670,6 +1678,20 @@ function TravelModule:GetConfig()
                     self:Refresh();
                 end,
                 width = "full"
+            },
+            hideButtonNames = {
+                name = L['Hide button names'],
+                order = 16,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideButtonNames;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideButtonNames = val;
+                    self:Refresh();
+                end,
+                width = "full"
+
             },
             mythicHeader = {
                 order = 18,
