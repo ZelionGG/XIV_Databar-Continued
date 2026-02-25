@@ -6,6 +6,8 @@ local compat = xb.compat or {}
 
 local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
 
+local GetBackpackCurrencyInfo = C_CurrencyInfo.GetBackpackCurrencyInfo or GetBackpackCurrencyInfo
+
 local function GetMaxLevel()
     if _G.GetMaxPlayerLevel then
         return _G.GetMaxPlayerLevel()
@@ -594,11 +596,10 @@ function CurrencyModule:ShowTooltip()
                     end
                 end
             end
-        elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
-            for i = 1, GetNumWatchedTokens() do
-                local name, count = GetBackpackCurrencyInfo(i)
-                GameTooltip:AddDoubleLine(name, string.format('%d', count), r, g, b, 1, 1, 1)
-            end
+        else
+            local qtyR, qtyG, qtyB = 1, 1, 1
+            GameTooltip:AddLine('No currencies selected in the module settings.', qtyR, qtyG, qtyB)
+            GameTooltip:AddLine(" ")
         end
 
         GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
