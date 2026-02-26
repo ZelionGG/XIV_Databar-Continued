@@ -547,6 +547,9 @@ function ReputationModule:RegisterFrameEvents()
     self:RegisterEvent('QUEST_TURNED_IN', 'Refresh')
     -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
+    -- Refresh when currency frame visibility/width changes so we can re-anchor cleanly
+    self:RegisterMessage('XIVBar_CurrencyFrameUpdated', 'Refresh')
+
     self.reputationFrame:EnableMouse(true)
     self.reputationFrame:SetScript('OnEnter', function()
         if xb.db.profile.modules.reputation.showTooltip then

@@ -165,6 +165,7 @@ function CurrencyModule:Refresh()
         self.xpBarBg:SetAllPoints()
         self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
         self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
+        self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
     elseif not compat.isClassicOrTBC then
@@ -180,6 +181,7 @@ function CurrencyModule:Refresh()
             self.moduleIconFrame:SetPoint('RIGHT', self.currencyFrame, 'RIGHT', 0, 0)
             self.moduleIconFrame:Show()
             self.currencyFrame:SetSize(iconSize, xb:GetHeight())
+            self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         else
             local iconsWidth = 0
             local buttonIndex = 1
@@ -218,6 +220,7 @@ function CurrencyModule:Refresh()
                 end
             end
             self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
+            self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         end
         -- Hide XP frame explicitly when XP is locked or not shown
         self.xpFrame:Hide()
