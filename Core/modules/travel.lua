@@ -1498,7 +1498,11 @@ function TravelModule:ShowTooltip()
         local hearthstoneId = 6948 -- Regular Hearthstone ID
         local hearthCooldown = self:GetRemainingCooldown(hearthstoneId, false)
         local hearthCdString = self:FormatCooldown(hearthCooldown)
-        GameTooltip:AddDoubleLine(L['Hearthstone'], hearthCdString, r, g, b, 1, 1, 1)
+        if(not xb.db.profile.hideAdditionalTooltipText) then
+            GameTooltip:AddDoubleLine(L['Hearthstone'] .. " |cffffffff(" .. GetBindLocation() .. ")|r", hearthCdString, r, g, b, 1, 1, 1)
+        else 
+            GameTooltip:AddDoubleLine(L['Hearthstone'], hearthCdString, r, g, b, 1, 1, 1)
+        end
 
         -- Show teleport cooldowns using utility functions
         if self.portOptions then
@@ -1506,17 +1510,28 @@ function TravelModule:ShowTooltip()
                 if portOption and portOption.portId then
                     local label = portOption.text or GetPortLabel(portOption.portId)
                     local isSpell = IsSpellKnown(portOption.portId)
+
+                    local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
+                    local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
                     
                     if isSpell then
                         -- Handle spells
                         local spellCooldown = self:GetRemainingCooldown(portOption.portId, true)
                         local cdString = self:FormatCooldown(spellCooldown)
-                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
+                        if label == combatPortText and not xb.db.profile.hideAdditionalTooltipText then
+                            GameTooltip:AddDoubleLine(label .. " |cffffffff(Selected)|r", cdString, r, g, b, 1, 1, 1)
+                        else
+                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
+                        end
                     elseif PlayerHasToy(portOption.portId) or SafeIsUsableItem(portOption.portId) then
                         -- Handle items and toys
                         local itemCooldown = self:GetRemainingCooldown(portOption.portId, false)
                         local cdString = self:FormatCooldown(itemCooldown)
-                        GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
+                        if label == combatPortText and not xb.db.profile.hideAdditionalTooltipText then
+                            GameTooltip:AddDoubleLine(label .. " |cffffffff(Selected)|r", cdString, r, g, b, 1, 1, 1)
+                        else
+                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
+                        end
                     end
                 end
             end
@@ -1602,6 +1617,7 @@ function TravelModule:GetDefaultOptions()
         hideHearthstoneText = false,
         hidePortButton = false,
         hidePortText = false,
+        hideAdditionalTooltipText = true,
         hideHomeButton = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
@@ -1721,9 +1737,23 @@ function TravelModule:GetConfig()
                 disabled = function() return xb.db.profile.hidePortButton end,
                 width = "1"
             },
+            hideAdditionalTooltipText = {
+                name = L['Hide Additional Tooltip Text'],
+                desc = L['Hide Additional Tooltip Text Description'],
+                order = 15,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideAdditionalTooltipText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideAdditionalTooltipText = val;
+                    self:Refresh();
+                end,
+                width = "1"
+            },
             hideHomeButton = {
                 name = L['Hide Home Button'],
-                order = 15,
+                order = 16,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
                 get = function()
