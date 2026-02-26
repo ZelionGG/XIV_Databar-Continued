@@ -217,6 +217,8 @@ L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if
 L['Hide Hearthstone Button'] = true;
 L['Hide Port Button'] = true;
 L['Hide Home Button'] = true;
+L['Hide Hearthstone Text'] = true;
+L['Hide Port Text'] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

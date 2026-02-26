@@ -212,7 +212,9 @@ L['Hearthstones Select'] = "Ruhesteine auswählen";
 L['Hearthstones Select Desc'] = "Ruhesteinauswahl Beschreibung";
 L['Hide Hearthstone Button'] = "Ruhestein Taste ausblenden";
 L['Hide Port Button'] = "Port Taste ausblenden";
-L['Hide Home Button'] = "Home Taste ausblenden"; 
+L['Hide Home Button'] = "Home Taste ausblenden";
+L['Hide Hearthstone Text'] = true; -- To Translate
+L['Hide Port Text'] = true; -- To Translate
 
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed

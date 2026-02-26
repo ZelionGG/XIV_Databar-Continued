@@ -1225,6 +1225,9 @@ function TravelModule:Refresh()
     end
 
     if InCombatLockdown() then
+        local hideHearthText = db.hideHearthstoneText
+        local hidePortText = db.hidePortText
+
         if not select(1, self.hearthText:GetFont()) then
             self.hearthText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
         end
@@ -1232,10 +1235,13 @@ function TravelModule:Refresh()
             self.portText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
         end
 
-        self.hearthText:SetText(GetBindLocation())
+        self.hearthText:SetText(hideHearthText and '' or GetBindLocation())
+        self.hearthText:SetShown(not hideHearthText)
+
         local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
         local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
-        self.portText:SetText(combatPortText)
+        self.portText:SetText(hidePortText and '' or combatPortText)
+        self.portText:SetShown(not hidePortText)
         self:SetHearthColor()
         self:SetPortColor()
         if allowMythic then
@@ -1261,25 +1267,34 @@ function TravelModule:Refresh()
 
     -- Hearthstone Part
     if not db.hideHearthstoneButton then
-        self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
-        self.hearthText:SetText(GetBindLocation())
+        local hideHearthText = db.hideHearthstoneText
 
-        self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize +
-                                    db.general.barPadding, xb:GetHeight())
+        self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
+        self.hearthText:SetText(hideHearthText and '' or GetBindLocation())
+        self.hearthText:SetShown(not hideHearthText)
+
+        local hearthTextWidth = hideHearthText and 0 or self.hearthText:GetWidth()
+
+        local hearthButtonWidth = hideHearthText and iconSize or (hearthTextWidth + iconSize + db.general.barPadding)
+
+        self.hearthButton:SetSize(hearthButtonWidth, xb:GetHeight())
         self.hearthButton:SetPoint("RIGHT")
 
         self.hearthText:SetPoint("RIGHT")
 
         self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
         self.hearthIcon:SetSize(iconSize, iconSize)
+        self.hearthIcon:ClearAllPoints()
 
-        self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT",
-                                -(db.general.barPadding), 0)
+        if hideHearthText then
+            self.hearthIcon:SetPoint("RIGHT", self.hearthButton, "RIGHT", 0, 0)
+        else
+            self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT", -(db.general.barPadding), 0)
+        end
 
         self:SetHearthColor()
         if not self.hearthButton:IsVisible() then
             self.hearthButton:Show()
-            self.hearthText:Show()
         end
     else
         self.hearthButton:Hide()
@@ -1288,14 +1303,20 @@ function TravelModule:Refresh()
 
     -- Portals Part
     if hasPortOptions and not db.hidePortButton then
+        local hidePortText = db.hidePortText
+
         self.portButton:Show()
         self.portText:SetFont(xb:GetFont(db.text.fontSize))
         local portItem = xb.db.char.portItem or self:FindFirstOption()
         local portText = portItem and (portItem.text or GetPortLabel(portItem.portId)) or ''
-        self.portText:SetText(portText)
+        self.portText:SetText(hidePortText and '' or portText)
+        self.portText:SetShown(not hidePortText)
 
-        self.portButton:SetSize(self.portText:GetWidth() + iconSize +
-                                    db.general.barPadding, xb:GetHeight())
+        local portTextWidth = hidePortText and 0 or self.portText:GetWidth()
+
+        local portButtonWidth = hidePortText and iconSize or (portTextWidth + iconSize + db.general.barPadding)
+
+        self.portButton:SetSize(portButtonWidth, xb:GetHeight())
 
         -- Set parent to main button if hearth is hidden
         local parent = self.hearthButton
@@ -1311,7 +1332,13 @@ function TravelModule:Refresh()
         self.portText:SetPoint("RIGHT")
         self.portIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\garr')
         self.portIcon:SetSize(iconSize, iconSize)
-        self.portIcon:SetPoint("RIGHT", self.portText, "LEFT", -(db.general.barPadding), 0)
+        self.portIcon:ClearAllPoints()
+
+        if hidePortText then
+            self.portIcon:SetPoint("RIGHT", self.portButton, "RIGHT", 0, 0)
+        else
+            self.portIcon:SetPoint("RIGHT", self.portText, "LEFT", -(db.general.barPadding), 0)
+        end
 
         self:SetPortColor()
         self:CreatePortPopup()
@@ -1433,21 +1460,27 @@ function TravelModule:Refresh()
         self.mythicPopup:Hide()
     end
 
-    local totalWidth = 0
+    local totalWidth, hasPrev = 0, false
     if self.hearthButton:IsVisible() then
-        totalWidth = totalWidth + self.hearthButton:GetWidth() + db.general.barPadding
+        totalWidth = totalWidth + self.hearthButton:GetWidth()
+        hasPrev = true
     end
     if self.portButton:IsVisible() then
+        if hasPrev then totalWidth = totalWidth + db.general.barPadding end
         totalWidth = totalWidth + self.portButton:GetWidth()
+        hasPrev = true
     end
 
     if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
+        if hasPrev then totalWidth = totalWidth + db.general.barPadding end
         totalWidth = totalWidth + self.mythicButton:GetWidth()
+        hasPrev = true
     end
     if compat.isMainline and self.homeButton and self.homeButton:IsVisible() then
-        totalWidth = totalWidth + self.homeButton:GetWidth() +
-                         db.general.barPadding
+        if hasPrev then totalWidth = totalWidth + db.general.barPadding end
+        totalWidth = totalWidth + self.homeButton:GetWidth()
     end
+
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
     self.hearthFrame:Show()
@@ -1566,6 +1599,9 @@ function TravelModule:GetDefaultOptions()
     return 'travel', {
         enabled = true,
         hideHearthstoneButton = false,
+        hideHearthstoneText = false,
+        hidePortButton = false,
+        hidePortText = false,
         hideHomeButton = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
@@ -1642,7 +1678,21 @@ function TravelModule:GetConfig()
                     xb.db.profile.hideHearthstoneButton = val;
                     self:Refresh();
                 end,
-                width = "full"
+                width = "2"
+            },
+            hideHearthstoneText = {
+                name = L['Hide Hearthstone Text'],
+                order = 12.5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideHearthstoneText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideHearthstoneText = val;
+                    self:Refresh();
+                end,
+                disabled = function() return xb.db.profile.hideHearthstoneButton end,
+                width = "1"
             },
             hidePortButton = {
                 name = L['Hide Port Button'],
@@ -1655,7 +1705,21 @@ function TravelModule:GetConfig()
                     xb.db.profile.hidePortButton = val;
                     self:Refresh();
                 end,
-                width = "full"
+                width = "2"
+            },
+            hidePortText = {
+                name = L['Hide Port Text'],
+                order = 14.5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hidePortText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hidePortText = val;
+                    self:Refresh();
+                end,
+                disabled = function() return xb.db.profile.hidePortButton end,
+                width = "1"
             },
             hideHomeButton = {
                 name = L['Hide Home Button'],

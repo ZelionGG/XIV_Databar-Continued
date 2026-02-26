@@ -214,6 +214,8 @@ L['Hearthstones Select Desc'] = "選擇要使用哪個爐石 (如果選擇了多
 L['Hide Hearthstone Button'] = true; -- To Translate
 L['Hide Port Button'] = true; -- To Translate
 L['Hide Home Button'] = true; -- To Translate
+L['Hide Hearthstone Text'] = true; -- To Translate
+L['Hide Port Text'] = true; -- To Translate
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
