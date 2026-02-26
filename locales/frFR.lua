@@ -215,6 +215,8 @@ L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires";
 L['Hide Home Button'] = "Masquer le bouton Logis";
 L['Hide Hearthstone Text'] = "Masquer le texte de la pierre de foyer";
 L['Hide Port Text'] = "Masquer le texte des téléportations secondaires";
+L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle"; -- To Translate
+L['Hide Additional Tooltip Text Description'] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné."; -- To Translate
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

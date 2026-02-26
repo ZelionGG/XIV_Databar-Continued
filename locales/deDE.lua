@@ -215,6 +215,8 @@ L['Hide Port Button'] = "Port Taste ausblenden";
 L['Hide Home Button'] = "Home Taste ausblenden";
 L['Hide Hearthstone Text'] = true; -- To Translate
 L['Hide Port Text'] = true; -- To Translate
+L['Hide Additional Tooltip Text'] = true; -- To Translate
+L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip."; -- To Translate
 
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed
