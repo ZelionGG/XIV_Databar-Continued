@@ -108,6 +108,12 @@ function TravelModule:OnInitialize()
     self.housingRequested = false
     self.disableHousing = false
 
+    -- Backfill new profile flag so it defaults to enabled when absent
+    local profile = xb.db and xb.db.profile
+    if profile and profile.hideAdditionalTooltipText == nil then
+        profile.hideAdditionalTooltipText = true
+    end
+
     self.hearthstones = {
         556,       -- Astral Recall
         6948,      -- Hearthstone
