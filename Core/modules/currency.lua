@@ -48,6 +48,7 @@ function CurrencyModule:OnEnable()
 
     self.currencyFrame:Show()
     self:CreateFrames()
+    self.lastCurrencyListSize = compat.GetCurrencyListSize and compat.GetCurrencyListSize() or 0
     self:RegisterFrameEvents()
     self:Refresh()
 
@@ -66,6 +67,7 @@ function CurrencyModule:OnEnable()
                         self.currencyRetryTicker:Cancel()
                         self.currencyRetryTicker = nil
                     end
+                    self.lastCurrencyListSize = compat.GetCurrencyListSize()
                     self:BuildCurrencySelectionArgs()
                     self:Refresh()
                     -- Notify AceConfig to refresh the config panel if it's open
@@ -75,7 +77,7 @@ function CurrencyModule:OnEnable()
                         AceConfigRegistry:NotifyChange(AddOnName .. "_Modules")
                     end
                 end
-            end, 20) -- Max 20 attempts (10 seconds)
+            end, 60) -- Max 60 attempts (30 seconds)
         end
     end
 end
@@ -343,7 +345,7 @@ function CurrencyModule:RegisterFrameEvents()
             ToggleCharacter('TokenFrame')
         end)
     end
-    self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
+    self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'OnCurrencyDisplayUpdate')
     self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
     self:RegisterEvent('PLAYER_LEVEL_UP', 'XpUpdate')
     if _G.BackpackTokenFrame_Update then
@@ -421,6 +423,22 @@ function CurrencyModule:RegisterFrameEvents()
             self:Refresh()
         end
     end)
+end
+
+-- Called when currency display updates; rebuild selection when new currencies arrive
+function CurrencyModule:OnCurrencyDisplayUpdate()
+    if not compat.GetCurrencyListSize or not ShouldUseSelectedCurrencies() then
+        self:Refresh()
+        return
+    end
+
+    local size = compat.GetCurrencyListSize() or 0
+    if size > (self.lastCurrencyListSize or 0) then
+        self.lastCurrencyListSize = size
+        self:BuildCurrencySelectionArgs()
+    end
+
+    self:Refresh()
 end
 
 function CurrencyModule:ExperienceGains()
