@@ -224,6 +224,10 @@ L['Hearthstones Select Desc'] = "Select which hearthstones to use (be careful if
 L['Hide Hearthstone Button'] = true;
 L['Hide Port Button'] = true;
 L['Hide Home Button'] = true;
+L['Hide Hearthstone Text'] = true;
+L['Hide Port Text'] = true;
+L['Hide Additional Tooltip Text'] = true;
+L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip.";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

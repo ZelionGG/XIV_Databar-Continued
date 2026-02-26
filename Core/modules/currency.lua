@@ -6,6 +6,8 @@ local compat = xb.compat or {}
 
 local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
 
+local GetBackpackCurrencyInfo = C_CurrencyInfo.GetBackpackCurrencyInfo or GetBackpackCurrencyInfo
+
 local function GetMaxLevel()
     if _G.GetMaxPlayerLevel then
         return _G.GetMaxPlayerLevel()
@@ -46,6 +48,7 @@ function CurrencyModule:OnEnable()
 
     self.currencyFrame:Show()
     self:CreateFrames()
+    self.lastCurrencyListSize = compat.GetCurrencyListSize and compat.GetCurrencyListSize() or 0
     self:RegisterFrameEvents()
     self:Refresh()
 
@@ -64,6 +67,7 @@ function CurrencyModule:OnEnable()
                         self.currencyRetryTicker:Cancel()
                         self.currencyRetryTicker = nil
                     end
+                    self.lastCurrencyListSize = compat.GetCurrencyListSize()
                     self:BuildCurrencySelectionArgs()
                     self:Refresh()
                     -- Notify AceConfig to refresh the config panel if it's open
@@ -73,7 +77,7 @@ function CurrencyModule:OnEnable()
                         AceConfigRegistry:NotifyChange(AddOnName .. "_Modules")
                     end
                 end
-            end, 20) -- Max 20 attempts (10 seconds)
+            end, 60) -- Max 60 attempts (30 seconds)
         end
     end
 end
@@ -161,6 +165,7 @@ function CurrencyModule:Refresh()
         self.xpBarBg:SetAllPoints()
         self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
         self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
+        self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
     elseif not compat.isClassicOrTBC then
@@ -176,6 +181,7 @@ function CurrencyModule:Refresh()
             self.moduleIconFrame:SetPoint('RIGHT', self.currencyFrame, 'RIGHT', 0, 0)
             self.moduleIconFrame:Show()
             self.currencyFrame:SetSize(iconSize, xb:GetHeight())
+            self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         else
             local iconsWidth = 0
             local buttonIndex = 1
@@ -214,6 +220,7 @@ function CurrencyModule:Refresh()
                 end
             end
             self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
+            self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         end
         -- Hide XP frame explicitly when XP is locked or not shown
         self.xpFrame:Hide()
@@ -345,7 +352,7 @@ function CurrencyModule:RegisterFrameEvents()
             ToggleCharacter('TokenFrame')
         end)
     end
-    self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
+    self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'OnCurrencyDisplayUpdate')
     self:RegisterEvent('PLAYER_XP_UPDATE', 'XpUpdate')
     self:RegisterEvent('PLAYER_LEVEL_UP', 'XpUpdate')
     if _G.BackpackTokenFrame_Update then
@@ -423,6 +430,22 @@ function CurrencyModule:RegisterFrameEvents()
             self:Refresh()
         end
     end)
+end
+
+-- Called when currency display updates; rebuild selection when new currencies arrive
+function CurrencyModule:OnCurrencyDisplayUpdate()
+    if not compat.GetCurrencyListSize or not ShouldUseSelectedCurrencies() then
+        self:Refresh()
+        return
+    end
+
+    local size = compat.GetCurrencyListSize() or 0
+    if size > (self.lastCurrencyListSize or 0) then
+        self.lastCurrencyListSize = size
+        self:BuildCurrencySelectionArgs()
+    end
+
+    self:Refresh()
 end
 
 function CurrencyModule:ExperienceGains()
@@ -598,11 +621,10 @@ function CurrencyModule:ShowTooltip()
                     end
                 end
             end
-        elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
-            for i = 1, GetNumWatchedTokens() do
-                local name, count = GetBackpackCurrencyInfo(i)
-                GameTooltip:AddDoubleLine(name, string.format('%d', count), r, g, b, 1, 1, 1)
-            end
+        else
+            local qtyR, qtyG, qtyB = 1, 1, 1
+            GameTooltip:AddLine('No currencies selected in the module settings.', qtyR, qtyG, qtyB)
+            GameTooltip:AddLine(" ")
         end
 
         GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)

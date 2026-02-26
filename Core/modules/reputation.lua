@@ -462,22 +462,28 @@ function ReputationModule:Refresh()
     end
 
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
+    local anchorFrame = xb:GetFrame('currencyFrame')
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
-    local anchorFrame = xb:GetFrame('currencyFrame')
-    -- For some reason anchorFrame can happen to be nil, in this case, skip this until value gets different from nil
-    if anchorFrame ~= nil and not anchorFrame:IsVisible() then
-        if xb:GetFrame('tradeskillFrame') and xb:GetFrame('tradeskillFrame'):IsVisible() then
+
+    local function isUsable(frame)
+        return frame and frame:IsVisible() and frame:GetWidth() > 0
+    end
+
+    if not isUsable(anchorFrame) then
+        if isUsable(xb:GetFrame('tradeskillFrame')) then
             anchorFrame = xb:GetFrame('tradeskillFrame')
-        elseif xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
+        elseif isUsable(xb:GetFrame('clockFrame')) then
             anchorFrame = xb:GetFrame('clockFrame')
-        elseif xb:GetFrame('talentFrame') and xb:GetFrame('talentFrame'):IsVisible() then
+        elseif isUsable(xb:GetFrame('talentFrame')) then
             anchorFrame = xb:GetFrame('talentFrame')
         else
+            anchorFrame = xb:GetFrame('bar') -- final fallback
             relativeAnchorPoint = 'LEFT'
             xOffset = 0
         end
     end
+
     self.reputationFrame:ClearAllPoints()
     self.reputationFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint,
                                   xOffset, 0)
@@ -544,6 +550,9 @@ function ReputationModule:RegisterFrameEvents()
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:RegisterEvent('QUEST_TURNED_IN', 'Refresh')
     -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
+
+    -- Refresh when currency frame visibility/width changes so we can re-anchor cleanly
+    self:RegisterMessage('XIVBar_CurrencyFrameUpdated', 'Refresh')
 
     self.reputationFrame:EnableMouse(true)
     self.reputationFrame:SetScript('OnEnter', function()
