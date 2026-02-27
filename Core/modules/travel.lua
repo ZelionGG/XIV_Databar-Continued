@@ -27,6 +27,17 @@ local function SafeIsUsableItem(id)
     return IsUsableItem(id)
 end
 
+local function GetOwnedItemCount(id)
+    if not id then return 0 end
+    if C_Item and C_Item.GetItemCount then
+        return C_Item.GetItemCount(id) or 0
+    end
+    if GetItemCount then
+        return GetItemCount(id, true) or 0
+    end
+    return 0
+end
+
 -- Build the correct macro for a given transport ID + name.
 local function BuildMacro(id, name)
     if PlayerHasToy(id) or SafeIsUsableItem(id) then
@@ -252,7 +263,7 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
-    local db = xb.db and xb.db.profile
+    local db = xb.db.profile
     -- Hearthstones Part
     self.hearthButton = self.hearthButton or
                             CreateFrame('BUTTON', 'hearthButton',
@@ -918,8 +929,7 @@ function TravelModule:CreatePortPopup()
     local changedWidth = false
     for i, v in pairs(self.portOptions) do
         if self.portButtons[v.portId] == nil then
-            if PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
-                SafeIsUsableItem(v.portId) then
+            if self:IsUsable(v.portId) then
                 local button = CreateFrame('BUTTON', nil, self.portPopup)
                 local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
@@ -961,8 +971,7 @@ function TravelModule:CreatePortPopup()
                 end
             end -- if usable item or spell
         else
-            if not (PlayerHasToy(v.portId) or IsPlayerSpell(v.portId) or
-                SafeIsUsableItem(v.portId)) then
+            if not self:IsUsable(v.portId) then
                 self.portButtons[v.portId].isSettable = false
             else
                 local label = GetPortLabel(v.portId) or v.text
@@ -1575,7 +1584,14 @@ function TravelModule:FindFirstOption()
 end
 
 function TravelModule:IsUsable(id)
-    return PlayerHasToy(id) or SafeIsUsableItem(id) or IsPlayerSpell(id)
+    if not id then return false end
+
+    -- Stable checks first to avoid transient false negatives during zone transitions.
+    if PlayerHasToy(id) or IsPlayerSpell(id) then return true end
+    if GetOwnedItemCount(id) > 0 then return true end
+
+    -- Keep runtime usability as a fallback.
+    return SafeIsUsableItem(id)
 end
 
 function TravelModule:RefreshHearthstonesList()
