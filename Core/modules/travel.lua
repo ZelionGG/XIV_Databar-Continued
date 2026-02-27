@@ -1447,12 +1447,12 @@ function TravelModule:Refresh()
     end
 
     local popupPadding = xb.constants.popupPadding
-    local popupPoint = 'BOTTOM'
-    local relPoint = 'TOP'
+    local popupPoint = 'BOTTOMRIGHT'
+    local relPoint = 'TOPRIGHT'
     if db.general.barPosition == 'TOP' then
         popupPadding = -(popupPadding)
-        popupPoint = 'TOP'
-        relPoint = 'BOTTOM'
+        popupPoint = 'TOPRIGHT'
+        relPoint = 'BOTTOMRIGHT'
     end
 
     self.portPopup:ClearAllPoints()
