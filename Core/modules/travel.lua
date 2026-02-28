@@ -480,6 +480,14 @@ function TravelModule:UpdatePortOptions()
             text = GetItemName(140192)
         } -- dalaran hearthstone
     end
+    
+    if PlayerHasToy(253629) and not self.portOptions[253629] then
+        local mapInfo = C_Map.GetMapInfo(2541)
+        self.portOptions[253629] = {
+            portId = 253629,
+            text = mapInfo and mapInfo.name or GetItemName(253629)
+        } -- Arcantina's key
+    end
 
     if PlayerHasToy(self.garrisonHearth) and
         not self.portOptions[self.garrisonHearth] then
