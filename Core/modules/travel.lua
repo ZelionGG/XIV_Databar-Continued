@@ -1869,24 +1869,19 @@ function TravelModule:ShowTooltip()
                     local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
                     local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
 
+                    local isSelectedPort = label == combatPortText
+                    local selectedLabel = isSelectedPort and (label .. " |cffffffff(Selected)|r") or label
+
                     if isSpell then
                         -- Handle spells
                         local spellCooldown = self:GetRemainingCooldown(portOption.portId, true)
                         local cdString = self:FormatCooldown(spellCooldown)
-                        if label == combatPortText and not xb.db.profile.hideAdditionalTooltipText then
-                            GameTooltip:AddDoubleLine(label .. " |cffffffff(Selected)|r", cdString, r, g, b, 1, 1, 1)
-                        else
-                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
-                        end
+                        GameTooltip:AddDoubleLine(selectedLabel, cdString, r, g, b, 1, 1, 1)
                     elseif PlayerHasToy(portOption.portId) or SafeIsUsableItem(portOption.portId) then
                         -- Handle items and toys
                         local itemCooldown = self:GetRemainingCooldown(portOption.portId, false)
                         local cdString = self:FormatCooldown(itemCooldown)
-                        if label == combatPortText and not xb.db.profile.hideAdditionalTooltipText then
-                            GameTooltip:AddDoubleLine(label .. " |cffffffff(Selected)|r", cdString, r, g, b, 1, 1, 1)
-                        else
-                            GameTooltip:AddDoubleLine(label, cdString, r, g, b, 1, 1, 1)
-                        end
+                        GameTooltip:AddDoubleLine(selectedLabel, cdString, r, g, b, 1, 1, 1)
                     end
                 end
             end
