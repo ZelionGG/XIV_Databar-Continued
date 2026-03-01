@@ -1,17 +1,15 @@
 # XIV_Databar Continued
 
-## [4.5](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/4.5) (2026-02-26)
+## [4.6](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/4.6) (2026-03-01)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.4...v4.5) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.5...v4.6) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Global :_
 
-- 🆕 _**NEW** -_ Added options to disable each of the **Travel** module buttons text.
-- 🆕 _**NEW** -_ Added an option to hide the additional tooltip text in the **Travel** module (Hearthstone binding point and selected secondary port).
-- 🛠️ _**IMPROVEMENT** -_ Added a "No currencies selected" message to the **Currency** module tooltip when no currencies are selected in the module options.
-- 🐞 _**BUGFIX** -_ (#120) Fixed the **Reputation** module not showing up in some **Currency** module display conditions.
+- 🔥 _**IMPORTANT** -_ Migrated all **LibQTip-1.0** tooltips to use the new **LibQTip-2.0** library (should fix some tooltips like **Friends** and **Guild** being transparent).
+- 🛠️ _**IMPROVEMENT** -_ Updated the secondary teleport part in the **Travel** module to make it show the destination instead of the toy name, which makes the tooltip less wide (e.g., **Arcantina** instead of **Personal Key to the Arcantina**).
 
 ### _Retail :_
 
-- 🛠️ _**IMPROVEMENT** -_ Housing teleport button has it's own icon based off the default Blizzard icon in the **Travel** module.
-- 🐞 _**BUGFIX** -_ Fixed Trader's Tender not showing up in the **Currency** module list.
+- 🆕 _**NEW** -_ Added the **Personal Key to the Arcantina** to secondary teleports menu in the **Travel** module.
+- 🆕 _**NEW** -_ Added Midnight's new Hearthstones to the **Travel** module (**Preyseeker's Hearthstone**, **Corewarden's Hearthstone** and **Lightcalled Hearthstone**).
