@@ -19,10 +19,6 @@ function TradeskillModule:OnInitialize()
         LibAddonCompat = LibStub("LibAddonCompat-1.0")
     end
 
-    if compat.isMainline and LibStub then
-        self.LTip = LibStub('LibQTip-1.0')
-    end
-
     self.profIcons = {
         [164] = 'blacksmithing',
         [165] = 'leatherworking',
@@ -400,33 +396,6 @@ function TradeskillModule:RegisterFrameEvents()
             self:Refresh()
         end
     end)
-end
-
-function TradeskillModule:SkinFrame(frame, name)
-    if not compat.isMainline then
-        return
-    end
-
-    if xb.db.profile.general.useElvUI and IsAddOnLoaded and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
-        if frame.StripTextures then
-            frame:StripTextures()
-        end
-        if frame.SetTemplate then
-            frame:SetTemplate("Transparent")
-        end
-
-        local close = _G[name .. "CloseButton"] or frame.CloseButton
-        if close and close.SetAlpha then
-            if ElvUI then
-                ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
-            end
-
-            if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
-                Tukui[1].SkinCloseButton(close)
-            end
-            close:SetAlpha(1)
-        end
-    end
 end
 
 function TradeskillModule:ShowTooltip()
