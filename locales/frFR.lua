@@ -218,6 +218,15 @@ L['Hide Port Text'] = "Masquer le texte des téléportations secondaires";
 L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle"; -- To Translate
 L['Hide Additional Tooltip Text Description'] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné."; -- To Translate
 
+-- House/Home Selection
+L['Home Options'] = "Options de Logis";
+L['Unknown House'] = "Maison Inconnue";
+L['House'] = "Maison";
+L['Plot'] = "Parcelle";
+L['(Selected)'] = "(Sélectionné)";
+L['Change Home'] = "Changer de Logis";
+L['No houses owned'] = "Aucune maison possédée";
+
 L["Classic"] = true;
 L["Burning Crusade"] = true;
 L["Wrath of the Lich King"] = true;
