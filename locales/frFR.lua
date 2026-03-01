@@ -226,6 +226,8 @@ L['Plot'] = "Parcelle";
 L['(Selected)'] = "(Sélectionné)";
 L['Change Home'] = "Changer de Logis";
 L['No houses owned'] = "Aucune maison possédée";
+L['Return to previous location'] = "Retourner à la position précédente";
+L['Visit selected home'] = "Visiter le logis sélectionné";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

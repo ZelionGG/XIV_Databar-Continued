@@ -503,8 +503,8 @@ function TravelModule:RegisterFrameEvents()
         self.homeButton:RegisterForClicks('AnyUp', 'AnyDown')
 
         -- Left click: teleport home (SecureAction type)
-        self.homeButton:SetAttribute('type1', 'teleporthome')
         self.homeButton:SetAttribute('clickbutton', self.homeButton)
+        self:UpdateHomeClickAction()
         
         -- Right click: open house selection popup
         self.homeButton:SetAttribute('type2', 'homeFunction')
@@ -523,6 +523,7 @@ function TravelModule:RegisterFrameEvents()
         self.homeButton:SetScript('OnEnter', function()
             self:SetHomeColor()
             if not InCombatLockdown() then
+                self:UpdateHomeClickAction()
                 self:UpdateHouseAttributes()
                 self:ShowHomeTooltip()
             end
@@ -794,6 +795,73 @@ function TravelModule:GetHousingCooldown()
     return math.max(0, startTime + duration - GetTime())
 end
 
+function TravelModule:CanReturnAfterVisitingHouse()
+    if not compat.isMainline then
+        return false
+    end
+
+    local checker = nil
+    if C_HousingNeighborhood and
+        type(C_HousingNeighborhood.CanReturnAfterVisitingHouse) == "function" then
+        checker = C_HousingNeighborhood.CanReturnAfterVisitingHouse
+    elseif C_Housing then
+        checker = C_Housing.CanReturnAfterVisitingHouse or
+                      C_Housing.CanReturnFromVisitingHouse
+    end
+
+    if type(checker) ~= "function" then
+        return false
+    end
+
+    local ok, canReturn = pcall(checker)
+    return ok and canReturn == true
+end
+
+function TravelModule:GetEffectiveHomeAction()
+    local canReturn = self:CanReturnAfterVisitingHouse()
+
+    -- Reset to default Return action each time Return availability starts,
+    -- and reset to House when Return is no longer available.
+    if canReturn and not self.wasReturnHomeAvailable then
+        self.homeActionOverride = nil
+    elseif not canReturn then
+        self.homeActionOverride = nil
+    end
+    self.wasReturnHomeAvailable = canReturn
+
+    if not canReturn then
+        return 'house'
+    end
+
+    if self.homeActionOverride == 'house' then
+        return 'house'
+    end
+
+    return 'return'
+end
+
+function TravelModule:SetHomeActionOverride(action)
+    if action == 'house' then
+        self.homeActionOverride = 'house'
+    else
+        self.homeActionOverride = nil
+    end
+end
+
+function TravelModule:UpdateHomeClickAction()
+    if not compat.isMainline or not self.homeButton or InCombatLockdown() then
+        return
+    end
+
+    if self:GetEffectiveHomeAction() == 'return' then
+        self.homeButton:SetAttribute('macrotext1', nil)
+        self.homeButton:SetAttribute('type1', 'returnhome')
+    else
+        self.homeButton:SetAttribute('macrotext1', nil)
+        self.homeButton:SetAttribute('type1', 'teleporthome')
+    end
+end
+
 -- House selection utility functions
 function TravelModule:GetHouseDisplayName(house)
     if not house then return L['Unknown House'] end
@@ -895,6 +963,8 @@ function TravelModule:UpdateHouseAttributes()
         self.homeButton:SetAttribute('house-guid', house.houseGUID)
         self.homeButton:SetAttribute('house-plot-id', house.plotID)
     end
+
+    self:UpdateHomeClickAction()
 end
 
 function TravelModule:OnHouseListUpdated(_, houseInfoList)
@@ -1220,15 +1290,31 @@ function TravelModule:CreateHomePopup()
     local popupWidth = self.homePopup:GetWidth()
     local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
     local changedWidth = false
+    local activeAction = self:GetEffectiveHomeAction()
 
-    -- Create/update buttons for each house
-    for i, house in ipairs(self.playerHouseList) do
+    local popupEntries = {}
+    if self:CanReturnAfterVisitingHouse() then
+        table.insert(popupEntries, {
+            kind = 'return',
+            text = L['Return to previous location']
+        })
+    end
+    for _, house in ipairs(self.playerHouseList) do
+        table.insert(popupEntries, {
+            kind = 'house',
+            house = house
+        })
+    end
+
+    -- Create/update buttons for each popup entry
+    for i, entry in ipairs(popupEntries) do
         local button = self.homeButtons[i]
         if button == nil then
             button = CreateFrame('BUTTON', nil, self.homePopup)
+
             local buttonText = button:CreateFontString(nil, 'OVERLAY')
             local statusText = button:CreateFontString(nil, 'OVERLAY')
-            
+
             buttonText:SetFont(xb:GetFont(db.text.fontSize))
             buttonText:SetTextColor(xb:GetColor('normal'))
             buttonText:SetPoint('LEFT')
@@ -1239,40 +1325,57 @@ function TravelModule:CreateHomePopup()
 
             button.textField = buttonText
             button.statusField = statusText
-            
+
             button:EnableMouse(true)
             button:RegisterForClicks('LeftButtonUp')
-            
+
             button:SetScript('OnEnter', function()
                 buttonText:SetTextColor(unpack(xb:HoverColors()))
             end)
-            
+
             button:SetScript('OnLeave', function()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
-            
+
             button:SetScript('OnClick', function(self)
-                TravelModule:SetSelectedHouseGuid(self.houseGUID)
+                if self.entryKind == 'return' then
+                    TravelModule:SetHomeActionOverride('return')
+                    TravelModule:Refresh()
+                elseif self.houseGUID then
+                    TravelModule:SetHomeActionOverride('house')
+                    TravelModule:SetSelectedHouseGuid(self.houseGUID)
+                end
                 TravelModule.homePopup:Hide()
             end)
-            
+
             self.homeButtons[i] = button
         end
-        
+
         -- Update button text
-        local displayName = self:GetHouseDisplayName(house)
-        local isSelected = house.houseGUID == xb.db.profile.selectedHouseGuid
+        local displayName
+        local isSelected = false
+
+        if entry.kind == 'return' then
+            displayName = entry.text
+            isSelected = activeAction == 'return'
+            button.houseGUID = nil
+        else
+            displayName = self:GetHouseDisplayName(entry.house)
+            isSelected = activeAction == 'house' and
+                             entry.house.houseGUID == xb.db.profile.selectedHouseGuid
+            button.houseGUID = entry.house.houseGUID
+        end
 
         if not displayName or displayName == "" then
             displayName = L['Unknown House']
         end
-        
+
         button.textField:SetText(displayName)
         button.statusField:SetText("")
-        button.houseGUID = house.houseGUID
+        button.entryKind = entry.kind
         local textWidth = button.textField:GetStringWidth()
         button:SetSize(textWidth, db.text.fontSize)
-        
+
         if textWidth > popupWidth then
             popupWidth = textWidth
             changedWidth = true
@@ -1281,7 +1384,7 @@ function TravelModule:CreateHomePopup()
 
     -- Position buttons
     for i, button in ipairs(self.homeButtons) do
-        if i <= #self.playerHouseList then
+        if i <= #popupEntries then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
             button:SetPoint('RIGHT')
@@ -1307,7 +1410,7 @@ end
 
 function TravelModule:ShowHomeTooltip()
     if not self.homePopup or self.homePopup:IsVisible() then return end
-    
+
     GameTooltip:SetOwner(self.homeButton, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     local r, g, b, _ = unpack(xb:HoverColors())
@@ -1315,7 +1418,7 @@ function TravelModule:ShowHomeTooltip()
     -- Cooldown display (similar to hearth/port tooltip)
     local visitCd = self:GetHousingCooldown()
     local cdText = self:FormatCooldown(visitCd)
-    
+
     if self.playerHouseList and #self.playerHouseList > 0 then
         for _, house in ipairs(self.playerHouseList) do
             local displayName = self:GetHouseDisplayName(house)
@@ -1326,13 +1429,18 @@ function TravelModule:ShowHomeTooltip()
                 GameTooltip:AddDoubleLine(displayName, cdText, r, g, b, 1, 1, 1)
             end
         end
-        
+
         GameTooltip:AddLine(" ")
+        if self:GetEffectiveHomeAction() == 'return' then
+            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Return to previous location'], r, g, b, 1, 1, 1)
+        else
+            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Visit selected home'], r, g, b, 1, 1, 1)
+        end
         GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Home'], r, g, b, 1, 1, 1)
     else
         GameTooltip:AddLine(L['No houses owned'], r, g, b)
     end
-    
+
     GameTooltip:Show()
 end
 

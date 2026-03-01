@@ -230,6 +230,8 @@ L['Plot'] = true;
 L['(Selected)'] = true;
 L['Change Home'] = true;
 L['No houses owned'] = true;
+L['Return to previous location'] = true;
+L['Visit selected home'] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
