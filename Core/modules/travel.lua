@@ -147,6 +147,9 @@ function TravelModule:OnInitialize()
     }
     if compat.isMainline then
         self.hearthstones = {
+            263933, -- Preyseeker's Hearthstone
+            265100, -- Corewarden's Hearthstone
+            257736, -- Lightcalled Hearthstone
             246565, -- Cosmic Hearthstone
             245970, -- P.O.S.T. Master's Express Hearthstone
             236687, -- Explosive Hearthstone
