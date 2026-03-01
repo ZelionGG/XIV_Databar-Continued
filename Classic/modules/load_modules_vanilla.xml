@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-    <Script file="talents.lua" />
+    <Script file="talent.lua" />
 
     <Script file="Vanilla/travel.lua" />
     <Script file="micromenu.lua" />
