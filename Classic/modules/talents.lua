@@ -58,7 +58,6 @@ function TalentModule:SkinFrame(frame, name)
 end
 
 function TalentModule:OnInitialize()
-    self.LTip = LibStub('LibQTip-1.0')
     self.currentSpecID = 0
     self.currentLootSpecID = 0
     self.specCoords = {
@@ -351,17 +350,11 @@ function TalentModule:RegisterFrameEvents()
         end
         self.specText:SetTextColor(xb:GetColor('normal'))
         if xb.db.profile.modules.talent.showTooltip then
-            if self.LTip:IsAcquired("TalentTooltip") then
-                self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
-            end
+            GameTooltip:Hide()
         end
     end)
 
     self.specFrame:SetScript('OnClick', function(_, button)
-        if self.LTip:IsAcquired("TalentTooltip") then
-            self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
-        end
-
         if InCombatLockdown() then
             return
         end
@@ -777,38 +770,34 @@ function TalentModule:CreateLootSpecPopup()
 end
 
 function TalentModule:ShowTooltip()
-    if self.LTip:IsAcquired("TalentTooltip") then
-        self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+    if not xb.db.profile.modules.talent.showTooltip then
+        return
     end
-    local tooltip = self.LTip:Acquire("TalentTooltip", 2, "LEFT", "RIGHT")
-    tooltip:SmartAnchorTo(self.talentFrame)
+
     local r, g, b, _ = unpack(xb:HoverColors())
-    tooltip:AddHeader("|cFFFFFFFF[|r" .. SPECIALIZATION .. "|cFFFFFFFF]|r")
-    tooltip:SetCellTextColor(1, 1, r, g, b, 1)
-    tooltip:AddLine(" ")
+    local name = ''
 
-    if not isVanilla then
-        local name = ''
-        if self.currentLootSpecID == 0 then
-            local _, specName = GetSpecializationInfo(self.currentSpecID)
-            name = specName
-        else
-            local _, specName = GetSpecializationInfoByID(self.currentLootSpecID)
-            name = specName
-        end
-        tooltip:AddLine(L['Current Loot Specialization'], "|cFFFFFFFF" .. name .. "|r")
-        tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
-        tooltip:AddLine(" ")
+    if self.currentLootSpecID == 0 then
+        local _, specName = GetSpecializationInfo(self.currentSpecID)
+        name = specName or ''
+    else
+        local _, specName = GetSpecializationInfoByID(self.currentLootSpecID)
+        name = specName or ''
     end
 
-    tooltip:AddLine('<' .. L['Left-Click'] .. '>', "|cFFFFFFFF" .. L['Set Specialization'] .. "|r")
-    tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+    GameTooltip:SetOwner(self.talentFrame, 'ANCHOR_' .. xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. SPECIALIZATION .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
     if not isVanilla then
-        tooltip:AddLine('<' .. L['Right-Click'] .. '>', "|cFFFFFFFF" .. L['Set Loot Specialization'] .. "|r")
-        tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+        GameTooltip:AddDoubleLine(L['Current Loot Specialization'], "|cFFFFFFFF" .. name .. "|r", r, g, b, 1, 1, 1)
+        GameTooltip:AddLine(" ")
     end
-    self:SkinFrame(tooltip, "TalentTooltip")
-    tooltip:Show()
+    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Set Specialization'], r, g, b, 1, 1, 1)
+    if not isVanilla then
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Set Loot Specialization'], r, g, b, 1, 1, 1)
+    end
+    GameTooltip:Show()
 end
 
 function TalentModule:GetDefaultOptions()
