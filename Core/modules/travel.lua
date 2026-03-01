@@ -63,7 +63,11 @@ local function GetItemName(id)
 
     if name then
         if TravelModule and TravelModule.portOptions and TravelModule.portOptions[id] then
-            TravelModule.portOptions[id].text = name
+            local existing = TravelModule.portOptions[id].text
+            -- Keep custom labels (e.g., map names) and only fill missing/placeholder values
+            if not existing or existing == GetRetrievingText(id) then
+                TravelModule.portOptions[id].text = name
+            end
         end
         return name
     end
@@ -83,9 +87,13 @@ local function GetItemName(id)
         local loadedName = GetItemName(id)
         if loadedName and TravelModule and TravelModule.portOptions then
             if TravelModule.portOptions[id] then
-                TravelModule.portOptions[id].text = loadedName
+                local existing = TravelModule.portOptions[id].text
+                if not existing or existing == GetRetrievingText(id) then
+                    TravelModule.portOptions[id].text = loadedName
+                end
             end
         end
+
         if loadedName and xb and xb.db and xb.db.char and xb.db.char.portItem and xb.db.char.portItem.portId == id then
             xb.db.char.portItem.text = loadedName
         end
@@ -106,6 +114,12 @@ local function GetItemName(id)
 end
 
 local function GetPortLabel(portId)
+    -- Prefer any text override already stored on the port option (e.g., map names)
+    if TravelModule and TravelModule.portOptions and TravelModule.portOptions[portId] then
+        local override = TravelModule.portOptions[portId].text
+        if override then return override end
+    end
+
     if IsPlayerSpell(portId) then
         local spellInfo = GetSpellInfo(portId)
         if spellInfo and spellInfo.name then return spellInfo.name end
@@ -477,8 +491,16 @@ function TravelModule:UpdatePortOptions()
     if PlayerHasToy(140192) and not self.portOptions[140192] then
         self.portOptions[140192] = {
             portId = 140192,
-            text = GetItemName(140192)
+            text = DUNGEON_FLOOR_DALARANCITY1 or GetItemName(140192)
         } -- dalaran hearthstone
+    end
+    
+    if PlayerHasToy(253629) and not self.portOptions[253629] then
+        local mapInfo = C_Map.GetMapInfo(2541)
+        self.portOptions[253629] = {
+            portId = 253629,
+            text = mapInfo and mapInfo.name or GetItemName(253629)
+        } -- Arcantina's key
     end
 
     if PlayerHasToy(self.garrisonHearth) and
@@ -935,9 +957,11 @@ function TravelModule:CreatePortPopup()
 
                 buttonText:SetFont(xb:GetFont(db.text.fontSize))
                 buttonText:SetTextColor(xb:GetColor('normal'))
-                local label = GetPortLabel(v.portId) or v.text
-                v.text = label
+                -- Use precomputed text first (e.g., map names) before falling back
+                local label = v.text or GetPortLabel(v.portId)
+                v.text = label or v.text
                 buttonText:SetText(label)
+
                 buttonText:SetPoint('LEFT')
                 local textWidth = buttonText:GetStringWidth()
 
@@ -974,8 +998,7 @@ function TravelModule:CreatePortPopup()
             if not self:IsUsable(v.portId) then
                 self.portButtons[v.portId].isSettable = false
             else
-                local label = GetPortLabel(v.portId) or v.text
-                v.text = label
+                local label = v.text and v.text or GetPortLabel(v.portId)
                 local button = self.portButtons[v.portId]
                 if button and button.textField then
                     button.textField:SetText(label)
