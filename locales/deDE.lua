@@ -218,6 +218,17 @@ L['Hide Port Text'] = "Versteckt Porttext";
 L['Hide Additional Tooltip Text'] = "Zusätzlichen Tooltiptext ausblenden";
 L['Hide Additional Tooltip Text Description'] = "Blende den Hearthstone-Bindungsort und die Taste zur Portauswahl im Tooltip aus.";
 
+-- House/Home Selection
+L['Home'] = true; -- To Translate
+L['Unknown House'] = true; -- To Translate
+L['House'] = true; -- To Translate
+L['Plot'] = true; -- To Translate
+L['Selected'] = true; -- To Translate
+L['Change Home'] = true; -- To Translate
+L['No Houses Owned'] = true; -- To Translate
+L['Return to Previous Location'] = true; -- To Translate
+L['Visit Selected Home'] = true; -- To Translate
+
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed
 L["Wrath of the Lich King"] = true; -- No Translate needed

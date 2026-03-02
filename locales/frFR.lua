@@ -219,15 +219,15 @@ L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobu
 L['Hide Additional Tooltip Text Description'] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné."; -- To Translate
 
 -- House/Home Selection
-L['Home Options'] = "Options de Logis";
+L['Home'] = "Logis";
 L['Unknown House'] = "Maison Inconnue";
-L['House'] = "Maison";
+L['House'] = "Logis";
 L['Plot'] = "Parcelle";
-L['(Selected)'] = "(Sélectionné)";
+L['Selected'] = "Sélectionné";
 L['Change Home'] = "Changer de Logis";
-L['No houses owned'] = "Aucune maison possédée";
-L['Return to previous location'] = "Retourner à la position précédente";
-L['Visit selected home'] = "Visiter le logis sélectionné";
+L['No Houses Owned'] = "Aucun logis possédé";
+L['Return to Previous Location'] = "Retourner à la position précédente";
+L['Visit Selected Home'] = "Visiter le logis sélectionné";
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;

@@ -882,7 +882,6 @@ function TravelModule:GetHouseDisplayName(house)
     end
 
     -- Compatibility fallbacks depending on client/build.
-
     if IsReadable(house.plotName) then
         return house.plotName
     end
@@ -1287,7 +1286,7 @@ function TravelModule:CreateHomePopup()
     self.homeOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.homeOptionString:SetTextColor(r, g, b, 1)
-    self.homeOptionString:SetText(L['Home Options'])
+    self.homeOptionString:SetText(L['Home'])
     self.homeOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.homeOptionString:SetPoint('CENTER')
 
@@ -1300,7 +1299,7 @@ function TravelModule:CreateHomePopup()
     if self:CanReturnAfterVisitingHouse() then
         table.insert(popupEntries, {
             kind = 'return',
-            text = L['Return to previous location']
+            text = L['Return to Previous Location']
         })
     end
     for _, house in ipairs(self.playerHouseList) do
@@ -1418,7 +1417,7 @@ function TravelModule:ShowHomeTooltip()
     GameTooltip:SetOwner(self.homeButton, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Home Options'] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Home'] .. "|cFFFFFFFF]|r", r, g, b)
     -- Cooldown display (similar to hearth/port tooltip)
     local visitCd = self:GetHousingCooldown()
     local cdText = self:FormatCooldown(visitCd)
@@ -1428,7 +1427,7 @@ function TravelModule:ShowHomeTooltip()
             local displayName = self:GetHouseDisplayName(house)
             local isSelected = house.houseGUID == xb.db.profile.selectedHouseGuid
             if isSelected then
-                GameTooltip:AddDoubleLine(displayName .. " |cFFFFFFFF" .. L['(Selected)'] .. "|r", cdText, r, g, b, 1, 1, 1)
+                GameTooltip:AddDoubleLine(displayName .. " |cFFFFFFFF(" .. L['Selected'] .. ")|r", cdText, r, g, b, 1, 1, 1)
             else
                 GameTooltip:AddDoubleLine(displayName, cdText, r, g, b, 1, 1, 1)
             end
@@ -1436,13 +1435,13 @@ function TravelModule:ShowHomeTooltip()
 
         GameTooltip:AddLine(" ")
         if self:GetEffectiveHomeAction() == 'return' then
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Return to previous location'], r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Return to Previous Location'], r, g, b, 1, 1, 1)
         else
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Visit selected home'], r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Visit Selected Home'], r, g, b, 1, 1, 1)
         end
         GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Home'], r, g, b, 1, 1, 1)
     else
-        GameTooltip:AddLine(L['No houses owned'], r, g, b)
+        GameTooltip:AddLine(L['No Houses Owned'], r, g, b)
     end
 
     GameTooltip:Show()
@@ -1995,7 +1994,7 @@ function TravelModule:ShowTooltip()
                     local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
 
                     local isSelectedPort = label == combatPortText
-                    local selectedLabel = isSelectedPort and (label .. " |cffffffff(Selected)|r") or label
+                    local selectedLabel = isSelectedPort and (label .. " |cffffffff(" .. L['Selected'] .. ")|r") or label
 
                     if isSpell then
                         -- Handle spells

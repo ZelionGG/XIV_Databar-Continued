@@ -223,15 +223,15 @@ L['Hide Additional Tooltip Text'] = true;
 L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip.";
 
 -- House/Home Selection
-L['Home Options'] = true;
+L['Home'] = true;
 L['Unknown House'] = true;
 L['House'] = true;
 L['Plot'] = true;
-L['(Selected)'] = true;
+L['Selected'] = true;
 L['Change Home'] = true;
-L['No houses owned'] = true;
-L['Return to previous location'] = true;
-L['Visit selected home'] = true;
+L['No Houses Owned'] = true;
+L['Return to Previous Location'] = true;
+L['Visit Selected Home'] = true;
 
 L["Classic"] = true;
 L["Burning Crusade"] = true;
