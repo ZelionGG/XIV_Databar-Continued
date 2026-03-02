@@ -219,14 +219,14 @@ L['Hide Additional Tooltip Text'] = "Zusätzlichen Tooltiptext ausblenden";
 L['Hide Additional Tooltip Text Description'] = "Blende den Hearthstone-Bindungsort und die Taste zur Portauswahl im Tooltip aus.";
 
 -- House/Home Selection
-L['Home'] = true; -- To Translate
-L['Unknown House'] = true; -- To Translate
-L['House'] = true; -- To Translate
-L['Plot'] = true; -- To Translate
-L['Selected'] = true; -- To Translate
-L['Change Home'] = true; -- To Translate
-L['No Houses Owned'] = true; -- To Translate
-L['Visit Selected Home'] = true; -- To Translate
+L['Home'] = "Zuhause";
+L['Unknown House'] = "Unbekanntes Haus";
+L['House'] = "Haus";
+L['Plot'] = true; -- No Translate needed
+L['Selected'] = "Ausgewählt";
+L['Change Home'] = "Ändere Zuhause";
+L['No Houses Owned'] = "Kein eigenenes Haus";
+L['Visit Selected Home'] = "Besuche ausgewähltes Haus";
 
 L["Classic"] = true; -- No Translate needed
 L["Burning Crusade"] = true; -- No Translate needed
