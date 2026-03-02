@@ -226,7 +226,6 @@ L['Plot'] = "Parcelle";
 L['Selected'] = "Sélectionné";
 L['Change Home'] = "Changer de Logis";
 L['No Houses Owned'] = "Aucun logis possédé";
-L['Return to Previous Location'] = "Retourner à la position précédente";
 L['Visit Selected Home'] = "Visiter le logis sélectionné";
 
 L["Classic"] = true;

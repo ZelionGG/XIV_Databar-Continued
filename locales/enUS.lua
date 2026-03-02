@@ -230,7 +230,6 @@ L['Plot'] = true;
 L['Selected'] = true;
 L['Change Home'] = true;
 L['No Houses Owned'] = true;
-L['Return to Previous Location'] = true;
 L['Visit Selected Home'] = true;
 
 L["Classic"] = true;

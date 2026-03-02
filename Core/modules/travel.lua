@@ -1299,7 +1299,7 @@ function TravelModule:CreateHomePopup()
     if self:CanReturnAfterVisitingHouse() then
         table.insert(popupEntries, {
             kind = 'return',
-            text = L['Return to Previous Location']
+            text = HOUSING_DASHBOARD_RETURN
         })
     end
     for _, house in ipairs(self.playerHouseList) do
@@ -1435,7 +1435,7 @@ function TravelModule:ShowHomeTooltip()
 
         GameTooltip:AddLine(" ")
         if self:GetEffectiveHomeAction() == 'return' then
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Return to Previous Location'], r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', HOUSING_DASHBOARD_RETURN, r, g, b, 1, 1, 1)
         else
             GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Visit Selected Home'], r, g, b, 1, 1, 1)
         end

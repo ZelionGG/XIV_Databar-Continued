@@ -226,7 +226,6 @@ L['Plot'] = true; -- To Translate
 L['Selected'] = true; -- To Translate
 L['Change Home'] = true; -- To Translate
 L['No Houses Owned'] = true; -- To Translate
-L['Return to Previous Location'] = true; -- To Translate
 L['Visit Selected Home'] = true; -- To Translate
 
 L["Classic"] = true;
