@@ -531,6 +531,10 @@ function TravelModule:RegisterFrameEvents()
 
         self.homeButton:SetScript('OnLeave', function()
             self:SetHomeColor()
+            if self.homeTooltipTimer then
+                self.homeTooltipTimer:Cancel()
+                self.homeTooltipTimer = nil
+            end
             GameTooltip:Hide()
         end)
         
@@ -1442,6 +1446,19 @@ function TravelModule:ShowHomeTooltip()
     end
 
     GameTooltip:Show()
+
+    if not self.homeTooltipTimer then
+        self.homeTooltipTimer = C_Timer.NewTicker(1, function()
+            if GameTooltip:IsOwned(self.homeButton) and not (self.homePopup and self.homePopup:IsVisible()) then
+                self:ShowHomeTooltip()
+            else
+                if self.homeTooltipTimer then
+                    self.homeTooltipTimer:Cancel()
+                    self.homeTooltipTimer = nil
+                end
+            end
+        end)
+    end
 end
 
 function TravelModule:CreateMythicPopup()
