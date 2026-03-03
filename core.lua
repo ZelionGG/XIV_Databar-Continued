@@ -1,5 +1,5 @@
 local AddOnName = ...;
----@class XIVBar
+---@class XIVBar : AceAddon-3.0, AceConsole-3.0, AceEvent-3.0
 local XIVBar = select(2, ...);
 local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
@@ -16,11 +16,12 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
     icon = "Interface\\Icons\\Spell_Nature_StormReach",
     OnClick = function(clickedframe, button) XIVBar:ToggleConfig() end
 })
+---@type AceConfigOptionsTable
 local options
 
 XIVBar.Changelog = {}
 
-XIVBar.L = L
+XIVBar.L = L ---@type XIV_DatabarLocale
 
 _G.XIV_Databar_Continued_OnAddonCompartmentClick = function()
     XIVBar:ToggleConfig()
