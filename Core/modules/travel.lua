@@ -1995,7 +1995,9 @@ function TravelModule:ShowTooltip()
                     local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
 
                     local isSelectedPort = label == combatPortText
-                    local selectedLabel = isSelectedPort and (label .. " |cffffffff(" .. L['Selected'] .. ")|r") or label
+                    local selectedLabel = (isSelectedPort and not xb.db.profile.hideAdditionalTooltipText)
+                        and (label .. " |cffffffff(" .. L['Selected'] .. ")|r")
+                        or label
 
                     if isSpell then
                         -- Handle spells
