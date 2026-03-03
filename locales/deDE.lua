@@ -1,5 +1,6 @@
 ﻿local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
+---@type XIV_DatabarLocale
 local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
 if not L then return end
 

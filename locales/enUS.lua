@@ -2,7 +2,8 @@ local AddonName, Engine = ...;
 
 local LibStub = LibStub;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
-local L = AceLocale:NewLocale(AddonName, "enUS", true, false); ---@class XIV_DatabarLocale
+---@class XIV_DatabarLocale
+local L = AceLocale:NewLocale(AddonName, "enUS", true, false);
 
 L['Modules'] = true;
 L['Left-Click'] = true;
