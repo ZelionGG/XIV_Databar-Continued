@@ -1,4 +1,6 @@
-local AddOnName, XIVBar = ...;
+local AddOnName = ...;
+---@class XIVBar
+local XIVBar = select(2, ...);
 local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
 local floor = math.floor

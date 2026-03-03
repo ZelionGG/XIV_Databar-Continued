@@ -1,5 +1,6 @@
-local AddOnName, XIVBar = ...
-
+local AddOnName = ...
+---@class XIVBar
+local XIVBar = select(2, ...)
 local compat = {}
 local C_AddOns = _G.C_AddOns
 local WOW_PROJECT_CATACLYSM_CLASSIC = _G.WOW_PROJECT_CATACLYSM_CLASSIC
