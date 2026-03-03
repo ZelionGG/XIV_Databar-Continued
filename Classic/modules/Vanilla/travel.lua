@@ -443,6 +443,12 @@ function TravelModule:Refresh()
     --     totalWidth = totalWidth + self.portButton:GetWidth()
     -- end
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('travel', self.hearthFrame) then
+        self.hearthFrame:Show()
+        return
+    end
+
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
     self.hearthFrame:Show()
 end

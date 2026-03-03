@@ -210,6 +210,11 @@ function ArmorModule:Refresh()
 
     self.armorButton:SetAllPoints()
 
+    if xb:ApplyModuleFreePlacement('armor', self.armorFrame) then
+        self:SetArmorColor()
+        return
+    end
+
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = xb.db.profile.general.moduleSpacing
 

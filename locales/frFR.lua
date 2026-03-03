@@ -42,6 +42,13 @@ L["Horizontal position of the bar"] = "Position horizontale de la barre";
 L["Vertical position of the bar"] = "Position verticale de la barre";
 L["Behavior"] = "Comportement";
 L["Spacing"] = "Espacement";
+L["Modules positionning"] = "Positionnement des modules";
+L["Enable free placement"] = "Activer le placement libre";
+L["Enable independent X positioning for each module and disable inter-module anchors"] = "Activer un positionnement X indépendant pour chaque module et désactiver les ancres inter-modules";
+L["Anchor Point"] = "Point d'ancrage";
+L["X Position"] = "Position X";
+L["Reset Position"] = "Réinitialiser la position";
+L["Reset to the anchored position"] = "Remet le module à sa position en mode ancré";
 
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement";

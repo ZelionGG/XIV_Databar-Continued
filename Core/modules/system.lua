@@ -119,6 +119,10 @@ function SystemModule:Refresh()
     self.fpsFrame:ClearAllPoints()
     self.fpsFrame:SetPoint('RIGHT', self.pingFrame, 'LEFT', -gapIconToText, 0)
 
+    if xb:ApplyModuleFreePlacement('system', self.systemFrame) then
+        return
+    end
+
     -- self.systemFrame:SetSize()
     local relativeAnchorPoint = 'LEFT'
     -- spacing toward gold: use configured module spacing
@@ -245,7 +249,7 @@ function SystemModule:RegisterFrameEvents()
     self.fpsFrame:SetScript('OnUpdate', function(self, elapsed)
         SystemModule.elapsed = SystemModule.elapsed + elapsed
         if SystemModule.elapsed >= 1 then
-            if InCombatLockdown() then
+            if InCombatLockdown() or xb:IsFreePlacementEnabled() then
                 SystemModule:UpdateTexts()
             else
                 SystemModule:Refresh()

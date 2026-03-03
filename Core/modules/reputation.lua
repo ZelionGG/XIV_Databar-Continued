@@ -458,6 +458,10 @@ function ReputationModule:Refresh()
     self.reputationBarFrame:Show()
     self:SetParagonRewardFlash(shouldFlashParagonReward)
 
+    if xb:ApplyModuleFreePlacement('reputation', self.reputationFrame) then
+        return
+    end
+
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
     local anchorFrame = xb:GetFrame('currencyFrame')
     local relativeAnchorPoint = 'RIGHT'

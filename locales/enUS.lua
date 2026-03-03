@@ -43,6 +43,13 @@ L["Horizontal position of the bar"] = true;
 L["Vertical position of the bar"] = true;
 L["Behavior"] = true;
 L["Spacing"] = true;
+L["Modules positionning"] = true;
+L["Enable free placement"] = true;
+L["Enable independent X positioning for each module and disable inter-module anchors"] = true;
+L["Anchor Point"] = true;
+L["X Position"] = true;
+L["Reset Position"] = true;
+L["Reset to the anchored position"] = true;
 
 -- Positioning Options
 L['Positioning Options'] = true;
