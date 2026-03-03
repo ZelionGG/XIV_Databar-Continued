@@ -114,7 +114,7 @@ function XIVBar:SetupOptions()
     local moduleOptions = {
         name = L['Modules'],
         type = "group",
-        args = self:GetModulesPositionningOptions()
+        args = {}
     }
 
     local changelogOptions = {
@@ -926,6 +926,9 @@ function XIVBar:GetPositioningOptions()
                 min = 10,
                 max = 80,
                 step = 1,
+                disabled = function()
+                    return self.db.profile.general.enableFreePlacement
+                end,
                 get = function()
                     return self.db.profile.general.moduleSpacing
                 end,
@@ -1279,7 +1282,7 @@ function XIVBar:GetModulesPositionningOptions()
     end
 
     return {
-        name = L["Modules positionning"],
+        name = L["Modules Positioning"],
         type = "group",
         args = args
     }
