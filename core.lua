@@ -2,19 +2,19 @@ local AddOnName = ...;
 ---@class XIVBar : AceAddon-3.0, AceConsole-3.0, AceEvent-3.0
 local XIVBar = select(2, ...);
 local _G = _G;
-local pairs, unpack, select = pairs, unpack, select
+local pairs, select = pairs, select
 local floor = math.floor
-local AceAddon, AceAddonMinor = _G.LibStub('AceAddon-3.0')
+local AceAddon = _G.LibStub('AceAddon-3.0')
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local SetBarMouseoverScripts
 
 AceAddon:NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
+LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
     type = "launcher",
     icon = "Interface\\Icons\\Spell_Nature_StormReach",
-    OnClick = function(clickedframe, button) XIVBar:ToggleConfig() end
+    OnClick = function(_, button) XIVBar:ToggleConfig() end
 })
 ---@type AceConfigOptionsTable
 local options

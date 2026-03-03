@@ -3,7 +3,6 @@
 -- Provides quick access to hearthstones, portals, and mythic+ teleports
 --------------------------------------------------------------------------------
 
-local AddOnName = ...;
 ---@class XIVBar
 local XIVBar = select(2, ...);
 local _G = _G;

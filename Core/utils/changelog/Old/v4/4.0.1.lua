@@ -1,4 +1,3 @@
-local AddOnName = ...;
 ---@class XIVBar
 local XIVBar = select(2, ...);
 XIVBar.Changelog[4010] = {
