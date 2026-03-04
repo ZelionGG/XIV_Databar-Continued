@@ -178,7 +178,8 @@ function CurrencyModule:Refresh()
             self.moduleIcon:SetTexture(icon)
             self.moduleIcon:SetSize(iconSize, iconSize)
             self.moduleIcon:SetPoint('RIGHT')
-            self.moduleIcon:SetVertexColor(xb:GetColor('normal'))
+            local mr, mg, mb = xb:GetColor('normal')
+            self.moduleIcon:SetVertexColor(mr, mg, mb, 1)
             self.moduleIconFrame:SetSize(iconSize, xb:GetHeight())
             self.moduleIconFrame:SetPoint('RIGHT', self.currencyFrame, 'RIGHT', 0, 0)
             self.moduleIconFrame:Show()
@@ -285,7 +286,8 @@ function CurrencyModule:StyleCurrencyFrame(curId, curQuantity, i)
     self.curIcons[i]:SetTexture(icon)
     self.curIcons[i]:SetSize(iconSize, iconSize)
     self.curIcons[i]:SetPoint(iconPoint)
-    self.curIcons[i]:SetVertexColor(xb:GetColor('normal'))
+    local r, g, b = xb:GetColor('normal')
+    self.curIcons[i]:SetVertexColor(r, g, b, 1)
 
     self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
     self.curText[i]:SetTextColor(xb:GetColor('normal'))
@@ -364,7 +366,8 @@ function CurrencyModule:RegisterFrameEvents()
         if InCombatLockdown() then
             return;
         end
-        self.moduleIcon:SetVertexColor(unpack(xb:HoverColors()))
+        local hr, hg, hb = unpack(xb:HoverColors())
+        self.moduleIcon:SetVertexColor(hr, hg, hb, 1)
         if xb.db.profile.modules.currency.showTooltip then
             self:ShowTooltip()
         end
@@ -373,7 +376,8 @@ function CurrencyModule:RegisterFrameEvents()
         if InCombatLockdown() then
             return;
         end
-        self.moduleIcon:SetVertexColor(xb:GetColor('normal'))
+        local lr, lg, lb = xb:GetColor('normal')
+        self.moduleIcon:SetVertexColor(lr, lg, lb, 1)
         if xb.db.profile.modules.currency.showTooltip then
             GameTooltip:Hide()
         end
