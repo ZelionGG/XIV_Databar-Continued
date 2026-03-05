@@ -1,4 +1,5 @@
-local AddOnName, Engine = ...;
+local AddOnName, _ = ...;
+
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 ---@type XIV_DatabarLocale
 local L = AceLocale:NewLocale(AddOnName, "zhTW", false, false);
@@ -197,7 +198,7 @@ L['Remaining'] = "還需要";
 L['Available Ranks'] = "神兵武器等級";
 L['Artifact Knowledge'] = "神兵知識等級";
 
-L['Show Button Text'] = true; -- Needs Translation 
+L['Show Button Text'] = true; -- Needs Translation
 
 -- Travel
 L['Hearthstone'] = true;
@@ -265,7 +266,7 @@ L['Call of Duty: MW2'] = "決勝時刻: 現代戰爭2"
 L['Call of Duty: BOCW'] = "決勝時刻: 黑色行動冷戰"
 L['Call of Duty: Vanguard'] = "決勝時刻: 先鋒"
 L["Hide when in flight"] = "使用鳥點飛行時隱藏"
-L["Show on mouseover"] = true; -- Needs translation 
+L["Show on mouseover"] = true; -- Needs translation
 L["Show the bar only when you mouseover it"] = true; -- Needs translation
 L["Classic"] = "《經典版》"
 L['Warcraft 3 Reforged'] = "魔獸爭霸III: 淬鍊重生"

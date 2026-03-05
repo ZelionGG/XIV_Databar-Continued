@@ -1,6 +1,5 @@
 ---@class XIVBar
 local XIVBar = select(2, ...);
-local L = XIVBar.L;
 
 XIVBar.Changelog[4200] = {
     version_string = "4.2",

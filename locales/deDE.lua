@@ -1,4 +1,5 @@
-﻿local AddOnName, Engine = ...;
+﻿local AddOnName, _ = ...;
+
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 ---@type XIV_DatabarLocale
 local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
@@ -153,7 +154,7 @@ L['First Currency'] = "Währung #1";
 L['Second Currency'] = "Währung #2";
 L['Third Currency'] = "Währung #3";
 L['Rested'] = "Ausgeruht";
-L['Show More Currencies on Shift+Hover'] = "Weitere Währungen bei Shift+Mouseover anzeigen"; 
+L['Show More Currencies on Shift+Hover'] = "Weitere Währungen bei Shift+Mouseover anzeigen";
 L['Max currencies shown when holding Shift'] = "Maximal angezeigte Währungen bei gedrückter Umschalttaste";
 L['Only Show Module Icon'] = "Nur Modulsymbol anzeigen";
 L['Number of Currencies on Bar'] = "Anzahl der Währungen auf der Leiste";

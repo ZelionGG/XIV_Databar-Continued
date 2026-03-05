@@ -137,7 +137,7 @@ function MenuModule:OnInitialize()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function MenuModule:SkinFrame(frame, name)
     if xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
@@ -341,7 +341,7 @@ function MenuModule:UpdateMenu()
 end
 
 function MenuModule:CreateFrames()
-    parentFrame = xb:GetFrame('microMenuFrame')
+    local parentFrame = xb:GetFrame('microMenuFrame')
     local mm = xb.db.profile.modules.microMenu
     self.actionTypes = {}
     local buttons = {
@@ -531,7 +531,6 @@ function MenuModule:CreateIcons()
 end
 
 function MenuModule:IconDefaults(name)
-    local colors = xb.db.profile.color
     if self.frames[name] == nil then
         return;
     end
@@ -797,14 +796,14 @@ function MenuModule:SocialHover(hoverFunc)
 
                         local clientIcon = ''
                         if C_Texture.GetTitleIconTexture then
-				    		C_Texture.GetTitleIconTexture(gameAccount.clientProgram, TitleIconVersion_Small, function(success, texture)
-				    			if success then
-				    				local fullText = _G.BNet_GetValidatedCharacterNameWithClientEmbeddedTexture(gameAccount.characterName, friendAccInfo.battleTag, texture, 32, 32, 16)
+                            C_Texture.GetTitleIconTexture(gameAccount.clientProgram, TitleIconVersion_Small, function(success, texture)
+                                if success then
+                                    local fullText = _G.BNet_GetValidatedCharacterNameWithClientEmbeddedTexture(gameAccount.characterName, friendAccInfo.battleTag, texture, 32, 32, 16)
                                     -- Hacky Trick : Extract only the icon part (first part before any character name)
                                     clientIcon = fullText:match("(|T.-|t)")
                                 end
-				    		end)
-				    	end
+                            end)
+                        end
 
                         local charName = gameAccount.characterName -- gets the friend's character name
                         local gameClient = gameAccount.clientProgram -- the application that the friend is online with - can be any game or 'App'/'Mobile'
@@ -837,7 +836,7 @@ function MenuModule:SocialHover(hoverFunc)
                         if gameClient == BNET_CLIENT_WOW then
                             isWoW = true
                             -- checks if the friend is logged into classic or retail
-                            if richPresence:find(L['Classic']) then
+                            if richPresence and richPresence:find(L['Classic']) then
                                 isClassic = true
                                 -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
                             elseif (not faction) or (faction == playerFaction) then
@@ -865,7 +864,7 @@ function MenuModule:SocialHover(hoverFunc)
                             -- lineLeft displays status icon, bnet name and the friend's note
                             local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon,
                                 friendAccInfo.accountName, note)
-                            local lineRight = ''
+                            local lineRight
 
                             -- friend is not playing wow, format is "GameName [Icon]"
                             if not isWoW then
@@ -887,7 +886,7 @@ function MenuModule:SocialHover(hoverFunc)
                             lineRow:SetScript("OnLeave", function()
                                 self.lineHover = false
                             end)
-                            lineRow:SetScript("OnMouseUp", function(self, _, button)
+                            lineRow:SetScript("OnMouseUp", function(_, _, button)
                                 -- player left clicks on the friend, checks whether a modifier was used or not after
                                 if button == "LeftButton" then
                                     -- player pressed SHIFT/ALT/CTRL when left clicking the friend
@@ -950,7 +949,7 @@ function MenuModule:SocialHover(hoverFunc)
                     lineRow:SetScript("OnLeave", function()
                         self.lineHover = false
                     end)
-                    lineRow:SetScript("OnMouseUp", function(self, _, button)
+                    lineRow:SetScript("OnMouseUp", function(_, _, button)
                         -- if there is no realm name in the friend's name, the friend is playing on the same realm as the player
                         if not name:find('%u%U*-%u%U') then
                             local homeRealm = GetRealmName()
@@ -1080,7 +1079,7 @@ function MenuModule:GuildHover(hoverFunc)
                 lineRow:SetScript('OnLeave', function()
                     self.glineHover = false
                 end)
-                lineRow:SetScript('OnMouseUp', function(self, _, button)
+                lineRow:SetScript('OnMouseUp', function(_, _, button)
                     if button == 'LeftButton' then
                         if modifierFunc() then
                             C_PartyInfo.InviteUnit(name)
@@ -1107,7 +1106,7 @@ function MenuModule:CreateClickFunctions()
         return;
     end
 
-    self.functions.menu = function(self, button, down)
+    self.functions.menu = function(_, button, down)
         if InCombatLockdown() and not xb.db.profile.modules.microMenu.combatEn then
             return;
         end
@@ -1123,7 +1122,7 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- menu
 
-    self.functions.chat = function(self, button, down)
+    self.functions.chat = function(_, button, down)
         if InCombatLockdown() then
             return;
         end
@@ -1136,7 +1135,7 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- chat
 
-    self.functions.char = function(self, button, down)
+    self.functions.char = function(_, button, down)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
             return;
         end

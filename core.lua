@@ -141,18 +141,19 @@ function XIVBar:CreateMainBar()
         end
 
         -- Helper function to get the center coordinates of the bar
-        local function GetBarCenter(bar)
-            local width, height = bar:GetSize()
-            local x, y = bar:GetCenter()
+        local function GetBarCenter(frame)
+            local width, height = frame:GetSize()
+            local x, y = frame:GetCenter()
             return x, y, width, height
         end
 
         -- Helper function to snap to nearest point if within threshold
-        local function GetSnappedPosition(bar)
+        local function GetSnappedPosition(frame)
             local screenWidth, screenHeight = UIParent:GetWidth(), UIParent:GetHeight()
-            local centerX, centerY, barWidth, barHeight = GetBarCenter(bar)
-            local point = "CENTER"
-            local xOffset, yOffset = 0, 0
+            local centerX, centerY, barWidth = GetBarCenter(frame)
+            local point
+            local xOffset
+            local yOffset
             local snapped = false
 
             -- Check horizontal position
@@ -189,20 +190,20 @@ function XIVBar:CreateMainBar()
             return point, point, xOffset, yOffset, snapped
         end
 
-        bar:SetScript("OnDragStart", function(self)
+        bar:SetScript("OnDragStart", function(frame)
             if not XIVBar.db.profile.general.locked and not XIVBar.db.profile.general.barFullscreen then
-                self:StartMoving()
+                frame:StartMoving()
                 XIVBar.frames.guides:Show()
             end
         end)
 
-        bar:SetScript("OnDragStop", function(self)
+        bar:SetScript("OnDragStop", function(frame)
             if not XIVBar.db.profile.general.barFullscreen then
-                self:StopMovingOrSizing()
+                frame:StopMovingOrSizing()
                 XIVBar.frames.guides:Hide()
 
                 -- Get final position with snapping
-                local point, relativePoint, xOffset, yOffset = GetSnappedPosition(self)
+                local point, relativePoint, xOffset, yOffset = GetSnappedPosition(frame)
 
                 -- Save position
                 XIVBar.db.profile.general.point = point
@@ -211,8 +212,8 @@ function XIVBar:CreateMainBar()
                 XIVBar.db.profile.general.yOffset = yOffset
 
                 -- Apply position
-                self:ClearAllPoints()
-                self:SetPoint(point, UIParent, relativePoint, xOffset, yOffset)
+                frame:ClearAllPoints()
+                frame:SetPoint(point, UIParent, relativePoint, xOffset, yOffset)
 
                 XIVBar:Refresh()
             end
@@ -243,10 +244,20 @@ function XIVBar:OnEnable()
 end
 
 function XIVBar:ToggleConfig()
-    if self.optionsCategory then
-        Settings.OpenToCategory(self.optionsCategory)
+    local settings = _G["Settings"]
+    local openLegacyCategory = _G["InterfaceOptionsFrame_OpenToCategory"]
+
+    if settings and settings.OpenToCategory then
+        if self.optionsCategory then
+            settings.OpenToCategory(self.optionsCategory)
+        else
+            settings.OpenToCategory("XIV Bar Continued")
+        end
+    elseif openLegacyCategory then
+        local category = self.optionsCategory or "XIV Bar Continued"
+        openLegacyCategory(category)
     else
-        Settings.OpenToCategory("XIV Bar Continued")
+        self:Print("Impossible d'ouvrir les options sur cette version du client.")
     end
 end
 
@@ -264,9 +275,9 @@ function XIVBar:GetColor(name)
     local r, g, b, a = profile[name].r, profile[name].g, profile[name].b, profile[name].a
 
     if name == 'normal' and profile.useTextCC then
-        r, g, b, _ = self:GetClassColors()
+        r, g, b = self:GetClassColors()
     elseif name == 'barColor' and profile.useCC then
-        r, g, b, _ = self:GetClassColors()
+        r, g, b = self:GetClassColors()
     end
 
     return r, g, b, a
@@ -395,7 +406,6 @@ function XIVBar:Refresh()
         self:ResetUI();
     end
 
-    local barColor = self.db.profile.color.barColor
     if not InCombatLockdown() then
         self.frames.bar:ClearAllPoints()
     end
@@ -437,7 +447,7 @@ function XIVBar:Refresh()
         self.frames.bgTexture:SetAllPoints()
     end
 
-    for name, module in self:IterateModules() do
+    for _, module in self:IterateModules() do
         if module['Refresh'] == nil then return; end
         module:Refresh()
     end
@@ -558,10 +568,10 @@ function XIVBar:UpdateMouseoverScripts()
         bar:SetAlpha(0)
         bar:SetScript('OnEnter', showBar)
         bar:SetScript('OnLeave', hideBarIfOut)
-        bar:SetScript('OnUpdate', function(self, elapsed)
-            self._xivMouseoverElapsed = (self._xivMouseoverElapsed or 0) + elapsed
-            if self._xivMouseoverElapsed < 0.05 then return end
-            self._xivMouseoverElapsed = 0
+        bar:SetScript('OnUpdate', function(frame, elapsed)
+            frame._xivMouseoverElapsed = (frame._xivMouseoverElapsed or 0) + elapsed
+            if frame._xivMouseoverElapsed < 0.05 then return end
+            frame._xivMouseoverElapsed = 0
             if not bar._xivMouseoverEnabled then
                 return
             end
@@ -573,7 +583,7 @@ function XIVBar:UpdateMouseoverScripts()
         end)
         -- Apply the same handlers to all registered module frames so the bar stays visible when hovering them
         if XIVBar.frames then
-            for name, frame in pairs(XIVBar.frames) do
+            for _, frame in pairs(XIVBar.frames) do
                 if frame and frame ~= bar and frame.EnableMouse and frame.HookScript and IsBarChild(frame) then
                     frame:EnableMouse(true)
                     frame:HookScript('OnEnter', showBar)
