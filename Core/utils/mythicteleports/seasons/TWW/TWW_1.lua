@@ -1,5 +1,4 @@
-local AddOnName, xb = ...
-local L = xb.L
+local _, xb = ...
 
 -- The War Within Season 1 mythic teleports data
 xb.MythicTeleports = xb.MythicTeleports or {}
@@ -10,7 +9,7 @@ xb.MythicTeleports.TWW_1 = {
         "TWW.CoT",
         "TWW.TDB",
         "TWW.TSV",
-        
+
         -- SL dungeons
         "SL.MoTS",
         "SL.NW",

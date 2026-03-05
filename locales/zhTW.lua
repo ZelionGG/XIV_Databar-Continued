@@ -1,4 +1,5 @@
-local AddOnName, Engine = ...;
+local AddOnName, _ = ...;
+
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 ---@type XIV_DatabarLocale
 local L = AceLocale:NewLocale(AddOnName, "zhTW", false, false);

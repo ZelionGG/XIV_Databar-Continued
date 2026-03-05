@@ -128,7 +128,7 @@ function TalentModule:DisableTalentLoadout()
 end
 
 function TalentModule:GetCurrentLoadoutName()
-    local curSpecID, name, _ = GetSpecializationInfo(self.currentSpecID)
+    local curSpecID = select(1, GetSpecializationInfo(self.currentSpecID))
 
     local configs = C_ClassTalents.GetConfigIDsBySpecID(curSpecID);
     local total = #configs;
@@ -158,11 +158,11 @@ function TalentModule:Refresh()
         return
     end
 
-    self.currentSpecID = GetSpecialization()
-    self.currentLootSpecID = GetLootSpecialization()
+    self.currentSpecID = GetSpecialization() or 1
+    self.currentLootSpecID = GetLootSpecialization() or 0
 
     local iconSize = db.text.fontSize + db.general.barPadding
-    local curSpecID, name, _ = GetSpecializationInfo(self.currentSpecID)
+    local _, name = GetSpecializationInfo(self.currentSpecID)
     local textHeight = db.text.fontSize
 
     if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
@@ -302,16 +302,6 @@ function TalentModule:CreateTalentFrames()
             self.lootSpecPopup.NineSlice:SetCenterColor(GameTooltip.NineSlice:GetCenterColor())
             self.lootSpecPopup.NineSlice:SetBorderColor(GameTooltip.NineSlice:GetBorderColor())
         end
-    else
-        --[[ local backdrop = GameTooltip:GetBackdrop()
-        if backdrop and (not self.useElvUI) then
-            self.specPopup:SetBackdrop(backdrop)
-            self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-            self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-            self.lootSpecPopup:SetBackdrop(backdrop)
-            self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-            self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-        end ]]
     end
 
     self:CreateSpecPopup()
@@ -353,7 +343,6 @@ function TalentModule:RegisterFrameEvents()
             if InCombatLockdown() then
                 return
             end
-            local db = xb.db.profile
             self.loadoutText:SetTextColor(xb:GetColor('normal'))
             if xb.db.profile.modules.talent.showTooltip then
                 GameTooltip:Hide()
@@ -400,7 +389,6 @@ function TalentModule:RegisterFrameEvents()
         if InCombatLockdown() then
             return
         end
-        local db = xb.db.profile
         self.specText:SetTextColor(xb:GetColor('normal'))
         if xb.db.profile.modules.talent.showTooltip then
             GameTooltip:Hide()
@@ -463,12 +451,10 @@ function TalentModule:CreateLoadoutPopup()
         return;
     end
 
-    local curSpecID, name, _ = GetSpecializationInfo(self.currentSpecID)
+    local curSpecID = select(1, GetSpecializationInfo(self.currentSpecID))
 
     local configs = C_ClassTalents.GetConfigIDsBySpecID(curSpecID);
     local total = #configs;
-    local loadoutName;
-
     local db = xb.db.profile
     local iconSize = db.text.fontSize + db.general.barPadding
     self.loadoutOptionString = self.loadoutOptionString or self.loadoutPopup:CreateFontString(nil, 'OVERLAY')
@@ -486,14 +472,14 @@ function TalentModule:CreateLoadoutPopup()
         if self.loadoutButtons[i] == nil then
             local configInfo = C_Traits.GetConfigInfo(configs[i])
             local loadoutID = configInfo.ID
-            local loadoutName = configInfo.name
+            local configName = configInfo.name
 
             local button = CreateFrame('BUTTON', nil, self.loadoutPopup)
             local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
             buttonText:SetFont(xb:GetFont(db.text.fontSize))
             buttonText:SetTextColor(xb:GetColor('normal'))
-            buttonText:SetText(loadoutName)
+            buttonText:SetText(configName)
             buttonText:SetPoint('LEFT')
             local textWidth = iconSize + 5 + buttonText:GetStringWidth()
 
@@ -512,15 +498,15 @@ function TalentModule:CreateLoadoutPopup()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self, button)
+            button:SetScript('OnClick', function(clickedButton, mouseButton)
                 if InCombatLockdown() then
                     return;
                 end
-                if button == 'LeftButton' then
+                if mouseButton == 'LeftButton' then
                     local autoApply = true;
-                    local result = C_ClassTalents.LoadConfig(self:GetID(), autoApply)
+                    local result = C_ClassTalents.LoadConfig(clickedButton:GetID(), autoApply)
                     if result ~= 0 then
-                        C_ClassTalents.UpdateLastSelectedSavedConfigID(curSpecID, self:GetID());
+                        C_ClassTalents.UpdateLastSelectedSavedConfigID(curSpecID, clickedButton:GetID());
                     end
                 end
                 TalentModule.loadoutPopup:Hide()
@@ -534,7 +520,7 @@ function TalentModule:CreateLoadoutPopup()
             end
         end -- if nil
     end -- for ipairs portOptions
-    for portId, button in pairs(self.loadoutButtons) do
+    for _, button in pairs(self.loadoutButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
@@ -556,11 +542,6 @@ function TalentModule:CreateLoadoutPopup()
         popupWidth = (self.loadoutOptionString:GetStringWidth() + self.extraPadding)
     end
     self.loadoutPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
-
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
 
     self.loadoutPopup:ClearAllPoints()
     self.loadoutPopup:SetPoint(db.general.barPosition, self.loadoutFrame, xb.miniTextPosition, 0, 0)
@@ -621,12 +602,12 @@ function TalentModule:CreateSpecPopup()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self, button)
+            button:SetScript('OnClick', function(clickedButton, mouseButton)
                 if InCombatLockdown() then
                     return;
                 end
-                if button == 'LeftButton' then
-                    C_SpecializationInfo.SetSpecialization(self:GetID())
+                if mouseButton == 'LeftButton' then
+                    SetSpecialization(clickedButton:GetID())
                 end
                 TalentModule.specPopup:Hide()
             end)
@@ -639,7 +620,7 @@ function TalentModule:CreateSpecPopup()
             end
         end -- if nil
     end -- for ipairs portOptions
-    for portId, button in pairs(self.specButtons) do
+    for _, button in pairs(self.specButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
@@ -662,11 +643,6 @@ function TalentModule:CreateSpecPopup()
     end
     self.specPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
-
     self.specPopup:ClearAllPoints()
     self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
     self:SkinFrame(self.specPopup, "SpecToolTip")
@@ -684,7 +660,7 @@ function TalentModule:CreateLootSpecPopup()
     self.lootSpecOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.lootSpecOptionString:SetTextColor(r, g, b, 1)
-    self.lootSpecOptionString:SetText(L['Set Loot Specialization'])
+    self.lootSpecOptionString:SetText(tostring(L['Set Loot Specialization']))
     self.lootSpecOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.lootSpecOptionString:SetPoint('CENTER')
 
@@ -694,14 +670,13 @@ function TalentModule:CreateLootSpecPopup()
     for i = 0, GetNumSpecializations() do
         if self.lootSpecButtons[i] == nil then
             local specId = i
-            local name = ''
+            local name
             if i == 0 then
                 name = L['Current Specialization'];
                 specId = self.currentSpecID
             else
                 local _, specName, _ = GetSpecializationInfo(i)
                 name = specName
-                
             end
             local button = CreateFrame('BUTTON', nil, self.lootSpecPopup)
             local buttonText = button:CreateFontString(nil, 'OVERLAY')
@@ -737,19 +712,18 @@ function TalentModule:CreateLootSpecPopup()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self, button)
+            button:SetScript('OnClick', function(clickedButton, mouseButton)
                 if InCombatLockdown() then
                     return;
                 end
-                if button == 'LeftButton' then
+                if mouseButton == 'LeftButton' then
                     local id = 0
-                    local name = ''
-                    if self:GetID() ~= 0 then
-                        id, name = GetSpecializationInfo(self:GetID())
+                    if clickedButton:GetID() ~= 0 then
+                        id = select(1, GetSpecializationInfo(clickedButton:GetID()))
                     else
                         local currentSpecIndex = GetSpecialization()
                         if currentSpecIndex then
-                            id, name = GetSpecializationInfo(currentSpecIndex)
+                            id = select(1, GetSpecializationInfo(currentSpecIndex))
                         end
                     end
                     SetLootSpecialization(id or 0)
@@ -765,7 +739,7 @@ function TalentModule:CreateLootSpecPopup()
             end
         end -- if nil
     end -- for ipairs portOptions
-    for portId, button in pairs(self.lootSpecButtons) do
+    for _, button in pairs(self.lootSpecButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
@@ -788,11 +762,6 @@ function TalentModule:CreateLootSpecPopup()
     end
     self.lootSpecPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
-
     self.lootSpecPopup:ClearAllPoints()
     self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
     self:SkinFrame(self.lootSpecPopup, "LootSpecToolTip")
@@ -801,7 +770,7 @@ end
 
 function TalentModule:ShowTooltip()
     local r, g, b, _ = unpack(xb:HoverColors())
-    local name = ''
+    local name
 
     if self.currentLootSpecID == 0 then
         local _, specName = GetSpecializationInfo(self.currentSpecID)
