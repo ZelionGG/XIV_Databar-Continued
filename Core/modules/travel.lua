@@ -1714,10 +1714,7 @@ function TravelModule:Refresh()
         end
 
         local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
-        if hasPortOptions and self.portButton and not self.portButton:IsVisible() then
-            self.portButton:Show()
-        end
-        if self.portButton:IsVisible() then
+        if hasPortOptions and self.portButton and self.portButton:IsVisible() then
             totalWidth = totalWidth + self.portButton:GetWidth()
         end
 
