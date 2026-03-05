@@ -3,8 +3,15 @@ max_line_length = false
 exclude_files = {'**Libs/', '**libs/', '**.history/', '**Classic/Libs/'}
 ignore = {
     '212', -- Unused argument
+    '143', -- Setting read-only field on Blizzard globals/tables
+    '113', -- Accessing undefined fields on dynamic WoW API tables
 }
-globals = {}
+globals = {
+    'GetItemCount',
+    'IsAddOnLoaded',
+    'Item',
+    'StaticPopupDialogs',
+}
 read_globals = {
     -- XIV Databar compatibility additions (kept explicit to avoid masking real globals)
     'AceGUIWidgetLSMlists',
@@ -82,7 +89,6 @@ read_globals = {
     'WOW_PROJECT_MAINLINE',
     'WOW_PROJECT_WRATH_CLASSIC',
     'Settings',
-    'StaticPopupDialogs',
     'C_Housing',
     'C_HousingNeighborhood',
     '101_CutsceneName_Ref',

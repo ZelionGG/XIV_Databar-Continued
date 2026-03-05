@@ -1,5 +1,4 @@
-local addon, xb = ...
-local _G = _G;
+local _, xb = ...
 local L = xb.L;
 
 local VolumeModule = xb:NewModule("VolumeModule", 'AceEvent-3.0')
@@ -39,101 +38,99 @@ function VolumeModule:CreateModuleFrame()
 	self.frame:EnableMouse(true)
 	self.frame:RegisterForClicks("AnyDown")
 
-	local relativeAnchorPoint = 'RIGHT'
-	local xOffset = xb.db.profile.general.moduleSpacing
-	local parentFrame = xb:GetFrame('armorFrame')
-	if not xb.db.profile.modules.armor.enabled then
-		parentFrame=xb:GetFrame('microMenuFrame')
-		if not xb.db.profile.modules.microMenu.enabled then
-			parentFrame=xb:GetFrame('bar')
-			relativeAnchorPoint = 'LEFT'
-			xOffset = 0
-		end
-	end
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = xb.db.profile.general.moduleSpacing
+  local parentFrame = xb:GetFrame('armorFrame')
+  if not xb.db.profile.modules.armor.enabled then
+    parentFrame = xb:GetFrame('microMenuFrame')
+    if not xb.db.profile.modules.microMenu.enabled then
+      parentFrame = xb:GetFrame('bar')
+      relativeAnchorPoint = 'LEFT'
+      xOffset = 0
+    end
+  end
 
-	self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
-	
-	self.icon = self.frame:CreateTexture(nil,"OVERLAY",nil,7)
-	self.icon:SetPoint("LEFT")
-	self.icon:SetTexture(xb.constants.mediaPath.."datatexts\\sound")
-	self.icon:SetVertexColor(xb:GetColor('normal'))
-	
-	self.text = self.frame:CreateFontString(nil, "OVERLAY")
-	self.text:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
-	self.text:SetPoint("RIGHT", self.frame,2,0)
-	self.text:SetTextColor(xb:GetColor('inactive'))
+  self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+
+  self.icon = self.frame:CreateTexture(nil, "OVERLAY", nil, 7)
+  self.icon:SetPoint("LEFT")
+  self.icon:SetTexture(xb.constants.mediaPath .. "datatexts\\sound")
+  self.icon:SetVertexColor(xb:GetColor('normal'))
+
+  self.text = self.frame:CreateFontString(nil, "OVERLAY")
+  self.text:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
+  self.text:SetPoint("RIGHT", self.frame, 2, 0)
+  self.text:SetTextColor(xb:GetColor('inactive'))
 end
 
 function VolumeModule:RegisterEvents()
-	self.frame:SetScript("OnEnter", function()
-		if InCombatLockdown() then return end
-		self.icon:SetVertexColor(xb:GetColor('hover'))
-		self.text:SetTextColor(xb:GetColor('hover'))
-		
-		if xb.db.profile.general.barPosition == "TOP" then
-			GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
-		else
-			GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
-		end
-		GameTooltip:AddLine("[|cff6699FF"..MASTER_VOLUME.."|r]")
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddDoubleLine("<"..L['Left-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEUP.."|r")
-		GameTooltip:AddDoubleLine("<"..L['Right-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEDOWN.."|r")
-		GameTooltip:Show()
-	end)
-	
-	self.frame:SetScript("OnClick", function(self, button, down)
-		local volume = tonumber(GetCVar("Sound_MasterVolume"));
-		
-		if button == "LeftButton" then
-		
-		SetCVar( "Sound_MasterVolume", volume + xb.db.profile.modules.MasterVolume.step);
+  self.frame:SetScript("OnEnter", function()
+    if InCombatLockdown() then return end
+    self.icon:SetVertexColor(xb:GetColor('hover'))
+    self.text:SetTextColor(xb:GetColor('hover'))
 
-		elseif button == "RightButton" then
-		SetCVar( "Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
-		end
-		volume = tonumber(GetCVar("Sound_MasterVolume"));
-		if volume <=0 then SetCVar( "Sound_MasterVolume", 0); end
-		if volume >=1 then SetCVar( "Sound_MasterVolume", 1); end
-	end)
-	
-	self.frame:SetScript("OnLeave", function()
-		self.icon:SetVertexColor(xb:GetColor('normal'))
-		self.text:SetTextColor(xb:GetColor('inactive'))
-		GameTooltip:Hide();
-	end)
-	
-	self.frame:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self.frame:RegisterEvent("CVAR_UPDATE");
-	self.frame:SetScript("OnEvent", function(self,event, ...)
-		VolumeModule:MasterVolume_Update_Value();
-	end)
+    if xb.db.profile.general.barPosition == "TOP" then
+      GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
+    else
+      GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
+    end
+
+    GameTooltip:AddLine("[|cff6699FF" .. MASTER_VOLUME .. "|r]")
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine("<" .. L['Left-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEUP .. "|r")
+    GameTooltip:AddDoubleLine("<" .. L['Right-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEDOWN .. "|r")
+    GameTooltip:Show()
+  end)
+
+  self.frame:SetScript("OnClick", function(_, button)
+    local volume = tonumber(GetCVar("Sound_MasterVolume"));
+
+    if button == "LeftButton" then
+      SetCVar("Sound_MasterVolume", volume + xb.db.profile.modules.MasterVolume.step);
+
+    elseif button == "RightButton" then
+      SetCVar("Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
+    end
+    volume = tonumber(GetCVar("Sound_MasterVolume"));
+    if volume <= 0 then SetCVar("Sound_MasterVolume", 0); end
+    if volume >= 1 then SetCVar("Sound_MasterVolume", 1); end
+  end)
+
+  self.frame:SetScript("OnLeave", function()
+    self.icon:SetVertexColor(xb:GetColor('normal'))
+    self.text:SetTextColor(xb:GetColor('inactive'))
+    GameTooltip:Hide();
+  end)
+
+  self.frame:RegisterEvent("PLAYER_ENTERING_WORLD");
+  self.frame:RegisterEvent("CVAR_UPDATE");
+  self.frame:SetScript("OnEvent", function()
+    VolumeModule:MasterVolume_Update_Value();
+  end)
 end
 
 function VolumeModule:Refresh()
-	if not xb.db.profile.modules.MasterVolume.enabled then self:Disable(); return; end
-
-	if not self.frame and xb.db.profile.modules.MasterVolume.enabled then
-		self:Enable()
-		return;
-	end
-
-	if self.frame then
-		self.frame:Hide()
-		local relativeAnchorPoint = 'RIGHT'
-		local xOffset = xb.db.profile.general.moduleSpacing
-		local parentFrame = xb:GetFrame('armorFrame')
-		if not xb.db.profile.modules.armor.enabled then
-			parentFrame=xb:GetFrame('microMenuFrame')
-			if not xb.db.profile.modules.microMenu.enabled then
-				parentFrame=xb:GetFrame('bar')
-				relativeAnchorPoint = 'LEFT'
-				xOffset = 0
-			end
-		end
-		self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
-		self.frame:Show()
-	end
+  if not xb.db.profile.modules.MasterVolume.enabled then self:Disable(); return; end
+  if not self.frame and xb.db.profile.modules.MasterVolume.enabled then
+    self:Enable()
+    return;
+  end
+  if self.frame then
+    self.frame:Hide()
+    local relativeAnchorPoint = 'RIGHT'
+    local xOffset = xb.db.profile.general.moduleSpacing
+    local parentFrame = xb:GetFrame('armorFrame')
+    if not xb.db.profile.modules.armor.enabled then
+      parentFrame = xb:GetFrame('microMenuFrame')
+      if not xb.db.profile.modules.microMenu.enabled then
+        parentFrame = xb:GetFrame('bar')
+        relativeAnchorPoint = 'LEFT'
+        xOffset = 0
+      end
+    end
+    self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+    self.frame:Show()
+  end
 end
 
 function VolumeModule:MasterVolume_Update_Value()

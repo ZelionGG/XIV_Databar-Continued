@@ -1,6 +1,5 @@
 ---@class XIVBar
 local XIVBar = select(2, ...);
-local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
@@ -183,7 +182,6 @@ function SystemModule:LeaveFunction()
     if InCombatLockdown() then
         return
     end
-    local db = xb.db.profile
     self.fpsText:SetTextColor(xb:GetColor('normal'))
     self.pingText:SetTextColor(xb:GetColor('normal'))
     if xb.db.profile.modules.system.showWorld then
@@ -205,7 +203,7 @@ function SystemModule:SetOnClickScript(prefix)
             collectgarbage()
             local after = collectgarbage('count')
             local memDiff = before - after
-            local memString = ''
+            local memString
             if memDiff > 1024 then
                 memString = string.format("%.2f MB", (memDiff / 1024))
             else
@@ -242,7 +240,7 @@ function SystemModule:RegisterFrameEvents()
     self:SetOnClickScript('fps')
     self:SetOnClickScript('ping')
 
-    self.fpsFrame:SetScript('OnUpdate', function(self, elapsed)
+    self.fpsFrame:SetScript('OnUpdate', function(_, elapsed)
         SystemModule.elapsed = SystemModule.elapsed + elapsed
         if SystemModule.elapsed >= 1 then
             if InCombatLockdown() then
@@ -269,7 +267,6 @@ end
 
 function SystemModule:ShowTooltip()
     local totalAddons = GetNumAddOns()
-    local totalUsage = 0
     local memTable = {}
 
     UpdateAddOnMemoryUsage()
@@ -299,9 +296,9 @@ function SystemModule:ShowTooltip()
     end
 
     for i = 1, toLoop do
-        local memString = ''
         if memTable[i] then
             if memTable[i].memory > 0 then
+                local memString
                 if memTable[i].memory > 1024 then
                     memString = string.format("%.2f MB", (memTable[i].memory / 1024))
                 else
