@@ -217,6 +217,9 @@ function TradeskillModule:Refresh()
         return
     end
 
+    self:ConfigureSecureRightClick('firstProf')
+    self:ConfigureSecureRightClick('secondProf')
+
     local totalWidth = 0
 
     self:StyleTradeskillFrame('firstProf')
@@ -307,17 +310,45 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
 end
 
 function TradeskillModule:CreateFrames()
-    self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame)
+    local buttonTemplate = nil
+    if compat.isMainline then
+        buttonTemplate = 'SecureActionButtonTemplate,SecureHandlerStateTemplate'
+    end
+
+    self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, buttonTemplate)
     self.firstProfIcon = self.firstProfIcon or self.firstProfFrame:CreateTexture(nil, 'OVERLAY')
     self.firstProfText = self.firstProfText or self.firstProfFrame:CreateFontString(nil, 'OVERLAY')
     self.firstProfBar = self.firstProfBar or CreateFrame('STATUSBAR', nil, self.firstProfFrame)
     self.firstProfBarBg = self.firstProfBarBg or self.firstProfBar:CreateTexture(nil, 'BACKGROUND')
 
-    self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame)
+    self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, buttonTemplate)
     self.secondProfIcon = self.secondProfIcon or self.secondProfFrame:CreateTexture(nil, 'OVERLAY')
     self.secondProfText = self.secondProfText or self.secondProfFrame:CreateFontString(nil, 'OVERLAY')
     self.secondProfBar = self.secondProfBar or CreateFrame('STATUSBAR', nil, self.secondProfFrame)
     self.secondProfBarBg = self.secondProfBarBg or self.secondProfBar:CreateTexture(nil, 'BACKGROUND')
+end
+
+function TradeskillModule:ConfigureSecureRightClick(prefix)
+    if not compat.isMainline or InCombatLockdown() then
+        return
+    end
+
+    local frame = self[prefix .. 'Frame']
+    if not frame then
+        return
+    end
+
+    frame:RegisterForClicks("AnyUp")
+    frame:SetAttribute('useOnKeyDown', false)
+
+    local professionMicroButton = _G.ProfessionMicroButton
+    if professionMicroButton then
+        frame:SetAttribute('*type2', 'click')
+        frame:SetAttribute('*clickbutton2', professionMicroButton)
+    else
+        frame:SetAttribute('*type2', nil)
+        frame:SetAttribute('*clickbutton2', nil)
+    end
 end
 
 function TradeskillModule:SetProfScripts(prefix)
@@ -335,16 +366,10 @@ function TradeskillModule:SetProfScripts(prefix)
                     CastSpell(self[prefix].offset + 1, "Spell")
                 end
             end
-        elseif button == 'RightButton' then
-            if compat.isMainline then
-                ToggleProfessionsBook()
-            else
-                if IsCataClassic() then
-                    ToggleSpellBook(BOOKTYPE_PROFESSION)
-                end
-            end
         end
     end)
+
+    self:ConfigureSecureRightClick(prefix)
 
     self[prefix .. 'Frame']:SetScript('OnEnter', function()
         if InCombatLockdown() then
