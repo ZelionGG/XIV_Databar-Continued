@@ -23,6 +23,7 @@ function MenuModule:OnInitialize()
     self.text = {}
     self.bgTexture = {}
     self.functions = {}
+    self.guildMotd = nil
     self.menuWidth = 0
     self.iconSize = xb:GetHeight();
     self:CreateClickFunctions()
@@ -594,9 +595,19 @@ function MenuModule:UnregisterFrameEvents()
     self:UnregisterEvent('FRIENDLIST_UPDATE')
 end
 
+function MenuModule:UpdateGuildMOTD(_, motd)
+    if type(motd) == 'string' and motd ~= '' then
+        self.guildMotd = motd
+    end
+end
+
 -- called on refresh, guild related events and profile changes to social text
-function MenuModule:UpdateGuildText()
+function MenuModule:UpdateGuildText(event)
     local db = xb.db.profile.modules.microMenu -- shortcut to access profile variables
+
+    if not self.text.guild or not self.bgTexture.guild then
+        return
+    end
 
     -- if the guild icon is disabled, don't do anything
     if not db.guild then
@@ -613,7 +624,15 @@ function MenuModule:UpdateGuildText()
     if db.hideSocialText or not db.guild then
         return
     end -- don't do anything if social text or the guild icon are not displayed
-    C_GuildInfo.GuildRoster() -- requests an update to guild roster information from blizzbois
+
+    if event == 'GUILD_ROSTER_UPDATE' and not InCombatLockdown() then
+        local motd = GetGuildRosterMOTD()
+        self.guildMotd = type(motd) == 'string' and motd or nil
+    end
+
+    if not InCombatLockdown() then
+        C_GuildInfo.GuildRoster() -- requests an update to guild roster information from blizzbois
+    end
 
     -- get the number of online guild members and set social text to that number
     local _, onlineMembers = GetNumGuildMembers()
@@ -1031,7 +1050,9 @@ function MenuModule:GuildHover(hoverFunc)
         end)
         MenuModule:SkinFrame(tooltip, "GuildToolTip")
 
-        C_GuildInfo.GuildRoster() -- requests an update to guild roster information from blizzbois
+        if not InCombatLockdown() then
+            C_GuildInfo.GuildRoster() -- requests an update to guild roster information from blizzbois
+        end
         tooltip:SmartAnchorTo(MenuModule.frames.guild)
 
         -- ties the 'Guild' and '<Left-Click>' etc. in the tooltip to the addon's hovercolors
@@ -1044,8 +1065,8 @@ function MenuModule:GuildHover(hoverFunc)
         tooltip:AddRow(' ', ' ')
 
         if xb.db.profile.modules.microMenu.showGMOTD then
-            local motd = GetGuildRosterMOTD()
-            if motd ~= '' then
+            local motd = self.guildMotd
+            if type(motd) == 'string' and motd ~= '' then
                 tooltip:AddRow('|cff00ff00' .. motd .. '|r', ' ') -- REVISION LATER: shorten guild motd if too long
             end
         end
@@ -1072,8 +1093,8 @@ function MenuModule:GuildHover(hoverFunc)
                     note = '|cffffffff(|r' .. note .. '|cffffffff)|r'
                 end
                 local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex,
-                    charName or name or L['No Info'], status, note)
-                local lineRight = string.format("%s |cffffffff%s|r %s", level, zone, statusText)
+                    charName or name or L['No Info'], statusText, note)
+                local lineRight = string.format("|cffffffff%s|r", zone)
                 local lineRow = tooltip:AddRow(lineLeft, lineRight)
                 lineRow:SetScript('OnEnter', function()
                     self.glineHover = true
