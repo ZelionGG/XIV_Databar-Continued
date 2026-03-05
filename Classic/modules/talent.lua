@@ -6,16 +6,15 @@ local L = XIVBar.L
 local compat = XIVBar.compat or {}
 
 local TalentModule = xb:NewModule("TalentModule", 'AceEvent-3.0')
-local GetSpecializationInfo = GetSpecializationInfo or GetTalentTabInfo
-local GetSpecialization = GetSpecialization or GetPrimaryTalentTree
+  local GetSpecializationInfo = GetSpecializationInfo or GetTalentTabInfo
+  local GetSpecialization = GetSpecialization or GetPrimaryTalentTree
 
-local IsAddOnLoaded = (compat and compat.IsAddOnLoaded) or (C_AddOns and C_AddOns.IsAddOnLoaded) or _G.IsAddOnLoaded
-local isVanilla = compat.isClassicOrTBC
-local isProgression = compat.isClassicProgression
+  local IsAddOnLoaded = (compat and compat.IsAddOnLoaded) or (C_AddOns and C_AddOns.IsAddOnLoaded) or _G.IsAddOnLoaded
+  local isVanilla = compat.isClassicOrTBC
 
-function TalentModule:GetName()
-    return TALENTS
-end
+  function TalentModule:GetName()
+      return TALENTS
+  end
 
 function TalentModule:dump(o)
     if type(o) == 'table' then
@@ -468,12 +467,12 @@ function TalentModule:CreateSpecPopupProgression()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self, button)
+            button:SetScript('OnClick', function(clickedButton, mouseButton)
                 if InCombatLockdown() then
                     return
                 end
-                if button == 'LeftButton' then
-                    SetSpecialization(self:GetID())
+                if mouseButton == 'LeftButton' then
+                    SetSpecialization(clickedButton:GetID())
                 end
                 TalentModule.specPopup:Hide()
             end)
@@ -509,11 +508,6 @@ function TalentModule:CreateSpecPopupProgression()
         popupWidth = (self.specOptionString:GetStringWidth() + self.extraPadding)
     end
     self.specPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
-
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
 
     self.specPopup:ClearAllPoints()
     self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
@@ -646,11 +640,6 @@ function TalentModule:CreateSpecPopupVanilla()
 
     self.specPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
-
     self.specPopup:ClearAllPoints()
     self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
     self:SkinFrame(self.specPopup, "SpecToolTip")
@@ -678,7 +667,7 @@ function TalentModule:CreateLootSpecPopup()
     for i = 0, GetNumSpecializations() do
         if self.lootSpecButtons[i] == nil then
             local specId = i
-            local name = ''
+            local name
             if i == 0 then
                 name = L['Current Specialization']
                 specId = self.currentSpecID
@@ -719,14 +708,14 @@ function TalentModule:CreateLootSpecPopup()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self, clickButton)
+            button:SetScript('OnClick', function(clickedButton, clickButton)
                 if InCombatLockdown() then
                     return
                 end
                 if clickButton == 'LeftButton' then
-                    local id = 0
-                    if self:GetID() ~= 0 then
-                        id = GetSpecializationInfo(self:GetID())
+                    local id
+                    if clickedButton:GetID() ~= 0 then
+                        id = GetSpecializationInfo(clickedButton:GetID())
                     else
                         id = GetSpecializationInfo(GetSpecialization())
                     end
@@ -767,11 +756,6 @@ function TalentModule:CreateLootSpecPopup()
     end
     self.lootSpecPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 
-    local popupPadding = xb.constants.popupPadding
-    if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
-    end
-
     self.lootSpecPopup:ClearAllPoints()
     self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
     self:SkinFrame(self.lootSpecPopup, "LootSpecToolTip")
@@ -784,7 +768,7 @@ function TalentModule:ShowTooltip()
     end
 
     local r, g, b, _ = unpack(xb:HoverColors())
-    local name = ''
+    local name
 
     if self.currentLootSpecID == 0 then
         local _, specName = GetSpecializationInfo(self.currentSpecID)

@@ -245,7 +245,7 @@ function XIVBar:SetupOptions()
         local page = changelogOptions.args[tostring(version)].args
 
         -- Checking localized "Important" category
-        local important_localized = {}
+        local important_localized
         if data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
             important_localized = data.important[GetLocale()]
         else
@@ -305,7 +305,7 @@ function XIVBar:SetupOptions()
         end
 
         -- Checking localized "New" category
-        local new_localized = {}
+        local new_localized
         if data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
             new_localized = data.new[GetLocale()]
         else
@@ -335,7 +335,7 @@ function XIVBar:SetupOptions()
         end
 
         -- Checking localized "Improvment" category
-        local improvment_localized = {}
+        local improvment_localized
         if data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
             improvment_localized = data.improvment[GetLocale()]
         else
@@ -1039,7 +1039,7 @@ function XIVBar:CaptureModulePlacement(moduleKey, frame, isInitial)
                 anchor = "RIGHT"
             end
 
-            local x = 0
+            local x
             if anchor == "LEFT" then
                 x = RoundNearest(frameLeft - barLeft)
             elseif anchor == "RIGHT" then

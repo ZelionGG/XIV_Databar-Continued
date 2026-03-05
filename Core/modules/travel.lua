@@ -283,7 +283,6 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
-    local db = xb.db.profile
     -- Hearthstones Part
     self.hearthButton = self.hearthButton or
                             CreateFrame('BUTTON', 'hearthButton',
@@ -303,14 +302,10 @@ function TravelModule:CreateFrames()
     self.portText = self.portText or
                         self.portButton:CreateFontString(nil, 'OVERLAY')
 
-
-    local template =
-        (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or
-            (BackdropTemplateMixin and "BackdropTemplate")
     -- Portals popup
     self.portPopup = self.portPopup or
                          CreateFrame('BUTTON', 'portPopup', self.portButton,
-                                     template)
+                                     "TooltipBackdropTemplate")
     self.portPopup:SetFrameStrata("TOOLTIP")
 
     if TooltipBackdropTemplateMixin then
@@ -352,7 +347,7 @@ function TravelModule:CreateFrames()
         -- Home popup for house selection (similar to portPopup)
         self.homePopup = self.homePopup or
                              CreateFrame('BUTTON', 'homePopup', self.homeButton,
-                                         template)
+                                         "TooltipBackdropTemplate")
         self.homePopup:SetFrameStrata("TOOLTIP")
 
         if TooltipBackdropTemplateMixin then
@@ -457,10 +452,9 @@ function TravelModule:RegisterFrameEvents()
         end
     end
 
-    self.portPopup:SetScript('OnClick', function(self, button)
-        if button == 'RightButton' then self:Hide() end
+    self.portPopup:SetScript('OnClick', function(popupFrame, button)
+        if button == 'RightButton' then popupFrame:Hide() end
     end)
-
 
     -- Heartstone Randomizer
     if xb.db.profile.randomizeHs then
@@ -506,7 +500,7 @@ function TravelModule:RegisterFrameEvents()
         -- Left click: teleport home (SecureAction type)
         self.homeButton:SetAttribute('clickbutton', self.homeButton)
         self:UpdateHomeClickAction()
-        
+
         -- Right click: open house selection popup
         self.homeButton:SetAttribute('type2', 'homeFunction')
         self.homeButton.homeFunction = function()
@@ -538,10 +532,10 @@ function TravelModule:RegisterFrameEvents()
             end
             GameTooltip:Hide()
         end)
-        
+
         -- Close popup on right-click
-        self.homePopup:SetScript('OnClick', function(self, button)
-            if button == 'RightButton' then self:Hide() end
+        self.homePopup:SetScript('OnClick', function(popupFrame, button)
+            if button == 'RightButton' then popupFrame:Hide() end
         end)
     end
 end
@@ -560,7 +554,7 @@ function TravelModule:UpdatePortOptions()
             text = DUNGEON_FLOOR_DALARANCITY1 or GetItemName(140192)
         } -- dalaran hearthstone
     end
-    
+
     if PlayerHasToy(253629) and not self.portOptions[253629] then
         local mapInfo = C_Map.GetMapInfo(2541)
         self.portOptions[253629] = {
@@ -1153,7 +1147,7 @@ function TravelModule:CreateTeleportButton(teleportInfo)
     button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
 
     -- Hide the checkboxes
-    for i, region in pairs {button:GetRegions()} do
+    for _, region in pairs {button:GetRegions()} do
         if region:GetObjectType() == "Texture" then region:Hide() end
     end
 
@@ -1167,7 +1161,7 @@ function TravelModule:CreateTeleportButton(teleportInfo)
     button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
 
     button:HookScript("PostClick",
-                  function(self, button, down)
+                  function()
         CloseDropDownMenus()
     end)
 
@@ -1192,7 +1186,7 @@ function TravelModule:CreatePortPopup()
     local popupHeight = xb.constants.popupPadding + db.text.fontSize +
                             self.optionTextExtra
     local changedWidth = false
-    for i, v in pairs(self.portOptions) do
+    for _, v in pairs(self.portOptions) do
         if self.portButtons[v.portId] == nil then
             if self:IsUsable(v.portId) then
                 local button = CreateFrame('BUTTON', nil, self.portPopup)
@@ -1225,8 +1219,8 @@ function TravelModule:CreatePortPopup()
                     buttonText:SetTextColor(xb:GetColor('normal'))
                 end)
 
-                button:SetScript('OnClick', function(self)
-                    xb.db.char.portItem = { portId = self.portItem.portId }
+                button:SetScript('OnClick', function(clickedButton)
+                    xb.db.char.portItem = { portId = clickedButton.portItem.portId }
                     TravelModule:Refresh()
                 end)
 
@@ -1252,7 +1246,7 @@ function TravelModule:CreatePortPopup()
         end -- if nil
     end -- for ipairs portOptions
 
-    for portId, button in pairs(self.portButtons) do
+    for _, button in pairs(self.portButtons) do
         if button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
@@ -1294,7 +1288,6 @@ function TravelModule:CreateHomePopup()
     local popupWidth = self.homePopup:GetWidth()
     local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
     local changedWidth = false
-    local activeAction = self:GetEffectiveHomeAction()
 
     local popupEntries = {}
     if self:CanReturnAfterVisitingHouse() then
@@ -1341,13 +1334,13 @@ function TravelModule:CreateHomePopup()
                 buttonText:SetTextColor(xb:GetColor('normal'))
             end)
 
-            button:SetScript('OnClick', function(self)
-                if self.entryKind == 'return' then
+            button:SetScript('OnClick', function(clickedButton)
+                if clickedButton.entryKind == 'return' then
                     TravelModule:SetHomeActionOverride('return')
                     TravelModule:Refresh()
-                elseif self.houseGUID then
+                elseif clickedButton.houseGUID then
                     TravelModule:SetHomeActionOverride('house')
-                    TravelModule:SetSelectedHouseGuid(self.houseGUID)
+                    TravelModule:SetSelectedHouseGuid(clickedButton.houseGUID)
                 end
                 TravelModule.homePopup:Hide()
             end)
@@ -1357,16 +1350,12 @@ function TravelModule:CreateHomePopup()
 
         -- Update button text
         local displayName
-        local isSelected = false
 
         if entry.kind == 'return' then
             displayName = entry.text
-            isSelected = activeAction == 'return'
             button.houseGUID = nil
         else
             displayName = self:GetHouseDisplayName(entry.house)
-            isSelected = activeAction == 'house' and
-                             entry.house.houseGUID == xb.db.profile.selectedHouseGuid
             button.houseGUID = entry.house.houseGUID
         end
 
@@ -1428,7 +1417,7 @@ function TravelModule:ShowHomeTooltip()
             local displayName = self:GetHouseDisplayName(house)
             local isSelected = house.houseGUID == xb.db.profile.selectedHouseGuid
             if isSelected then
-                GameTooltip:AddDoubleLine(displayName .. " |cFFFFFFFF(" .. L['Selected'] .. ")|r", cdText, r, g, b, 1, 1, 1)
+                GameTooltip:AddDoubleLine(displayName .. " |cffffffff(" .. L['Selected'] .. ")|r", cdText, r, g, b, 1, 1, 1)
             else
                 GameTooltip:AddDoubleLine(displayName, cdText, r, g, b, 1, 1, 1)
             end
@@ -1578,7 +1567,7 @@ function TravelModule:CreateMythicPopup()
     end
 
     if not xb.db.profile.curSeasonOnly then -- Two-level menu
-        UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
+        UIDropDownMenu_Initialize(self.mythicPopup, function(_, level, menuList)
             if (level or 1) == 1 then
                 AddMenuHeader(level)
 
@@ -1603,7 +1592,7 @@ function TravelModule:CreateMythicPopup()
             end
         end, 'MENU')
     else -- Single-level menu
-        UIDropDownMenu_Initialize(self.mythicPopup, function(self, level, menuList)
+        UIDropDownMenu_Initialize(self.mythicPopup, function(_, level, menuList)
             AddMenuHeader(level)
 
             -- Add all teleports to the menu
@@ -1711,15 +1700,6 @@ function TravelModule:Refresh()
         self:SetPortColor()
         if allowMythic then
             self:SetMythicColor()
-        end
-
-        local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
-        if hasPortOptions and self.portButton and self.portButton:IsVisible() then
-            totalWidth = totalWidth + self.portButton:GetWidth()
-        end
-
-        if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
-            totalWidth = totalWidth + self.mythicButton:GetWidth()
         end
 
         return
@@ -1908,11 +1888,9 @@ function TravelModule:Refresh()
         self.homePopup:Hide()
     end
 
-    local popupPadding = xb.constants.popupPadding
     local popupPoint = 'BOTTOMRIGHT'
     local relPoint = 'TOPRIGHT'
     if db.general.barPosition == 'TOP' then
-        popupPadding = -(popupPadding)
         popupPoint = 'TOPRIGHT'
         relPoint = 'BOTTOMRIGHT'
     end
@@ -1981,6 +1959,7 @@ function TravelModule:ShowTooltip()
         local hearthstoneId = 6948 -- Regular Hearthstone ID
         local hearthCooldown = self:GetRemainingCooldown(hearthstoneId, false)
         local hearthCdString = self:FormatCooldown(hearthCooldown)
+
         if(not xb.db.profile.hideAdditionalTooltipText) then
             GameTooltip:AddDoubleLine(L['Hearthstone'] .. " |cffffffff(" .. GetBindLocation() .. ")|r", hearthCdString, r, g, b, 1, 1, 1)
         else
@@ -2027,8 +2006,10 @@ function TravelModule:ShowTooltip()
                 if GameTooltip:IsOwned(self.portButton) then
                     self:ShowTooltip()
                 else
-                    self.tooltipTimer:Cancel()
-                    self.tooltipTimer = nil
+                    if self.tooltipTimer then
+                        self.tooltipTimer:Cancel()
+                        self.tooltipTimer = nil
+                    end
                 end
             end)
         end
@@ -2038,7 +2019,7 @@ end
 function TravelModule:FindFirstOption()
     local firstItem = {portId = 140192, text = GetItemName(140192)}
     if self.portOptions then
-        for k, v in pairs(self.portOptions) do
+        for _, v in pairs(self.portOptions) do
             if self:IsUsable(v.portId) then
                 firstItem = v
                 break
@@ -2061,7 +2042,7 @@ end
 
 function TravelModule:RefreshHearthstonesList()
     local function has_index(tab, ind)
-        for index, value in pairs(tab) do
+        for index in pairs(tab) do
             if index == ind then return true end
         end
 
@@ -2070,13 +2051,13 @@ function TravelModule:RefreshHearthstonesList()
 
     if xb.db.profile.hearthstonesList == nil then
         xb.db.profile.hearthstonesList = {}
-        for i, v in ipairs(self.hearthstones) do
+        for _, v in ipairs(self.hearthstones) do
             if self:IsUsable(v) then
                 table.insert(xb.db.profile.hearthstonesList, v, "")
             end
         end
     else
-        for i, v in ipairs(self.hearthstones) do
+        for _, v in ipairs(self.hearthstones) do
             if not has_index(xb.db.profile.hearthstonesList, v) then
                 if self:IsUsable(v) then
                     table.insert(xb.db.profile.hearthstonesList, v, "")
@@ -2085,12 +2066,10 @@ function TravelModule:RefreshHearthstonesList()
         end
     end
 
-    for i, v in pairs(xb.db.profile.hearthstonesList) do
+    for index, v in pairs(xb.db.profile.hearthstonesList) do
         if v == '' or v == nil then
-            local hearthName = ''
-            local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(i)
-            hearthName = name
-            xb.db.profile.hearthstonesList[i] = hearthName
+            local _, name, _, _, _, _ = C_ToyBox.GetToyInfo(index)
+            xb.db.profile.hearthstonesList[index] = name
         end
     end
 end
@@ -2119,7 +2098,7 @@ function TravelModule:GetHearthstoneValues()
     end
 
     local values = {}
-    for i, v in ipairs(self.hearthstones) do
+    for _, v in ipairs(self.hearthstones) do
         if self:IsUsable(v) then
             local name = GetItemInfo(v)
 

@@ -7,8 +7,7 @@ local compat = XIVBar.compat or {}
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
-local isSessionNegative, isDailyNegative = false, false
-local positiveSign = "|cff00ff00+ "
+local isSessionNegative = false
 local negativeSign = "|cffff0000- "
 
 local function shortenNumber(num)
@@ -24,10 +23,9 @@ local function shortenNumber(num)
 end
 
 local function moneyWithTexture(amount, session)
-    local copper, silver = 0, 0
+    local copper, silver
     local showSC = xb.db.profile.modules.gold.showSmallCoins
     local shortThousands = xb.db.profile.modules.gold.shortThousands
-    local shortGold = ""
 
     amount, copper = math.modf(amount / 100.0)
     amount, silver = math.modf(amount / 100.0)
@@ -49,7 +47,7 @@ local function moneyWithTexture(amount, session)
     local amountStringTexture = C_CurrencyInfo.GetCoinTextureString(totalCopper)
 
     if shortThousands then
-        shortGold = shortenNumber(tonumber(amount))
+        local shortGold = shortenNumber(tonumber(amount))
         amountStringTexture = amountStringTexture:gsub(amount .. "|T", shortGold .. "|T")
     end
 
@@ -92,7 +90,7 @@ end
 local function getPlayerData()
     local store = getGoldStore()
     local key = getCharacterKey()
-    return store[key], store, key
+    return store[key], store
 end
 
 function GoldModule:ToggleBlizzardBagsBar(force)
@@ -203,7 +201,7 @@ function GoldModule:OnEnable()
 
     self:ToggleBlizzardBagsBar()
 
-    local playerData, _, _ = getPlayerData()
+    local playerData, _ = getPlayerData()
     if playerData then
         playerData.sessionMoney = 0
         playerData.currentMoney = GetMoney()
@@ -357,7 +355,7 @@ function GoldModule:ShowTooltipClassic()
     end
     GameTooltip:AddLine(" ")
 
-    local playerData, store, key = getPlayerData()
+    local playerData, store = getPlayerData()
     if playerData then
         GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(playerData.sessionMoney), true), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(math.abs(playerData.dailyMoney), true), r, g, b, 1, 1, 1)
@@ -429,23 +427,23 @@ function GoldModule:ShowTooltipMainline()
     for realm in pairs(realmCharacters) do
         table.insert(sortedRealms, realm)
     end
-    table.sort(sortedRealms, function(a, b)
+    table.sort(sortedRealms, function(a, realmB)
         if a == currentRealm then
             return true
         end
-        if b == currentRealm then
+        if realmB == currentRealm then
             return false
         end
-        return string.lower(a) < string.lower(b)
+        return string.lower(a) < string.lower(realmB)
     end)
 
     for _, realm in ipairs(sortedRealms) do
         if xb.db.profile.modules.gold.showOtherRealms or realm == currentRealm then
-            table.sort(realmCharacters[realm], function(a, b)
-                if a.isCurrent ~= b.isCurrent then
+            table.sort(realmCharacters[realm], function(a, realmCharacterB)
+                if a.isCurrent ~= realmCharacterB.isCurrent then
                     return a.isCurrent
                 end
-                return string.lower(a.name) < string.lower(b.name)
+                return string.lower(a.name) < string.lower(realmCharacterB.name)
             end)
 
             local realmTotal = 0
@@ -513,7 +511,6 @@ function GoldModule:PLAYER_MONEY()
     playerData.dailyMoney = playerData.dailyMoney + moneyDiff
 
     isSessionNegative = playerData.sessionMoney < 0
-    isDailyNegative = playerData.dailyMoney < 0
     playerData.currentMoney = tmpMoney
     self:Refresh()
 end
@@ -560,7 +557,7 @@ function GoldModule:BuildClassicCharacterOptions()
     }
 
     local store = getGoldStore()
-    for k, v in pairs(store) do
+    for k in pairs(store) do
         optTable[k] = {
             name = k,
             width = "full",

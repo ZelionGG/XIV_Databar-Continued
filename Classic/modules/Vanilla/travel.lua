@@ -26,7 +26,7 @@ function TravelModule:OnInitialize()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TravelModule:SkinFrame(frame, name)
     if self.useElvUI then
@@ -84,9 +84,6 @@ function TravelModule:CreateFrames()
     -- self.portPopup = self.portPopup or
     --                      CreateFrame('BUTTON', 'portPopup', self.portButton,
     --         BackdropTemplateMixin and 'BackdropTemplate')
-
-    if not self.useElvUI then
-    end
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -191,13 +188,11 @@ function TravelModule:SetHearthColor()
         self.hearthText:SetTextColor(unpack(xb:HoverColors()))
     else
         self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
-        local hearthName = ''
         local hearthActive = true
-        for i, v in ipairs(self.hearthstones) do
+        for _, v in ipairs(self.hearthstones) do
             if IsUsableItem(v) then
                 if C_Container.GetItemCooldown(v) == 0 then
-                    local name, _ = GetItemInfo(v)
-                    hearthName = name
+                    local hearthName = GetItemInfo(v)
                     if hearthName ~= nil then
                         hearthActive = true
                         self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
@@ -207,8 +202,8 @@ function TravelModule:SetHearthColor()
             end -- if toy/item
             if IsPlayerSpell(v) then
                 if GetSpellCooldown(v) == 0 then
-                    local name, _ = GetSpellInfo(v)
-                    hearthName = name
+                    local spellInfo = GetSpellInfo(v)
+                    local hearthName = spellInfo and spellInfo.name
                     hearthActive = true
                     self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
                 end

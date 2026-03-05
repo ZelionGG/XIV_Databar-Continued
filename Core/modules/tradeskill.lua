@@ -9,7 +9,6 @@ local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
 
 local LibStub = _G.LibStub
 local LibAddonCompat = nil
-local IsAddOnLoaded = compat.IsAddOnLoaded or (C_AddOns and C_AddOns.IsAddOnLoaded)
 
 function TradeskillModule:GetName()
     return TRADESKILLS
@@ -291,7 +290,6 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
 
         self[prefix .. 'Bar']:ClearAllPoints()
         self[prefix .. 'Bar']:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
-        
         if db.modules.tradeskill.barCC then
             local rPerc, gPerc, bPerc = xb:GetClassColors()
             self[prefix .. 'Bar']:SetStatusBarColor(rPerc, gPerc, bPerc, 1)

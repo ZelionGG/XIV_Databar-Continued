@@ -15,11 +15,10 @@ local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
 local C_Reputation_IsFactionParagonForCurrentPlayer = C_Reputation.IsFactionParagonForCurrentPlayer
 local C_Reputation_GetFactionParagonInfo = C_Reputation.GetFactionParagonInfo
-local C_Reputation_IsMajorFaction = C_Reputation.IsMajorFaction
 local C_GossipInfo_GetFriendshipReputation = C_GossipInfo and C_GossipInfo.GetFriendshipReputation
 
 local C_MajorFactions_GetMajorFactionData = C_MajorFactions and
-                                                C_MajorFactions.GetMajorFactionData
+                                                  C_MajorFactions.GetMajorFactionData
 local C_MajorFactions_GetCurrentRenownLevel = C_MajorFactions and
                                                   C_MajorFactions.GetCurrentRenownLevel
 local C_MajorFactions_GetRenownLevels = C_MajorFactions and
@@ -423,12 +422,12 @@ function ReputationModule:Refresh()
 
     local color = FACTION_BAR_COLORS[reaction] or { r = 1, g = 0, b = 1 }
     local renownColor = { r = 0.00, g = 0.76, b = 1.00 } -- blue/cyan style Renown UI
-    
+
     self.reputationBar:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
-    if db.modules.reputation.reputationBarClassCC then
+    if xb.db.profile.modules.reputation.reputationBarClassCC then
         local rPerc, gPerc, bPerc = xb:GetClassColors()
         self.reputationBar:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
-    elseif db.modules.reputation.reputationBarReputationCC then
+    elseif xb.db.profile.modules.reputation.reputationBarReputationCC then
         if isRenownFaction then
             self.reputationBar:SetStatusBarColor(renownColor.r, renownColor.g, renownColor.b, 1)
         else
@@ -447,10 +446,10 @@ function ReputationModule:Refresh()
                                 'BOTTOMLEFT', iconSize + 5, barYOffset)
 
     self.reputationBarBg:SetAllPoints()
-    self.reputationBarBg:SetColorTexture(db.color.inactive.r,
-                                         db.color.inactive.g,
-                                         db.color.inactive.b,
-                                         db.color.inactive.a)
+    self.reputationBarBg:SetColorTexture(xb.db.profile.color.inactive.r,
+                                         xb.db.profile.color.inactive.g,
+                                         xb.db.profile.color.inactive.b,
+                                         xb.db.profile.color.inactive.a)
     self.reputationFrame:SetSize(
         iconSize + self.reputationText:GetStringWidth() + rewardCheckWidth + 5,
         xb:GetHeight())
@@ -465,7 +464,7 @@ function ReputationModule:Refresh()
     -- self.reputationFrame:SetSize(self.goldButton:GetSize())
     local anchorFrame = xb:GetFrame('currencyFrame')
     local relativeAnchorPoint = 'RIGHT'
-    local xOffset = db.general.moduleSpacing
+    local xOffset = xb.db.profile.general.moduleSpacing
 
     local function isUsable(frame)
         return frame and frame:IsVisible() and frame:GetWidth() > 0
@@ -532,9 +531,8 @@ function ReputationModule:RegisterFrameEvents()
         end)
         self.curButtons[i]:SetScript('OnLeave', function()
             if InCombatLockdown() then return; end
-            local db = xb.db.profile
             self.curText[i]:SetTextColor(xb:GetColor('normal'))
-            if db.modules.reputation.showTooltip then
+            if xb.db.profile.modules.reputation.showTooltip then
                 GameTooltip:Hide()
             end
         end)
@@ -581,7 +579,6 @@ function ReputationModule:RegisterFrameEvents()
 
     self.reputationBarFrame:SetScript('OnLeave', function()
         if InCombatLockdown() then return; end
-        local db = xb.db.profile
         self.reputationText:SetTextColor(xb:GetColor('normal'))
         if xb.db.profile.modules.reputation.showTooltip then
             GameTooltip:Hide()

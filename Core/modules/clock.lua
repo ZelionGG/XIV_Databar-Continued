@@ -124,8 +124,8 @@ function ClockModule:Refresh()
         return
     end ]]
 
-    self.clockText:SetFont(xb:GetFont(db.modules.clock.fontSize))
-    local dateString = nil
+    self.clockText:SetFont(xb:GetFont(xb.db.profile.modules.clock.fontSize))
+    local dateString
     if xb.db.profile.modules.clock.serverTime then
         dateString = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
     else
@@ -157,7 +157,7 @@ function ClockModule:Refresh()
     self.clockText:ClearAllPoints()
     self.clockText:SetPoint('CENTER')
 
-    self.eventText:SetFont(xb:GetFont(db.text.smallFontSize))
+    self.eventText:SetFont(xb:GetFont(xb.db.profile.text.smallFontSize))
     self.eventText:ClearAllPoints()
     self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
     if xb.db.profile.modules.clock.hideEventText then
@@ -180,10 +180,10 @@ function ClockModule:RegisterFrameEvents()
     self.clockTextFrame:EnableMouse(true)
     self.clockTextFrame:RegisterForClicks("AnyUp")
 
-    self.clockFrame:SetScript("OnUpdate", function(self, elapsed)
+    self.clockFrame:SetScript("OnUpdate", function(_, elapsed)
         ClockModule.elapsed = ClockModule.elapsed + elapsed
         if ClockModule.elapsed >= 1 then
-            local dateString = nil
+            local dateString
             if xb.db.profile.modules.clock.serverTime then
                 dateString = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
             else
@@ -214,7 +214,7 @@ function ClockModule:RegisterFrameEvents()
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. TIMEMANAGER_TITLE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
-        local clockTime = nil
+        local clockTime
         if xb.db.profile.modules.clock.serverTime then
             clockTime = time()
         else
@@ -236,7 +236,7 @@ function ClockModule:RegisterFrameEvents()
 
     self.clockTextFrame:SetScript('OnLeave', function()
         if InCombatLockdown() then
-            return;
+            return
         end
         ClockModule:SetClockColor()
         GameTooltip:Hide()
@@ -244,7 +244,7 @@ function ClockModule:RegisterFrameEvents()
 
     self.clockTextFrame:SetScript('OnClick', function(_, button)
         if InCombatLockdown() then
-            return;
+            return
         end
         if button == 'LeftButton' then
             if ToggleCalendar and type(ToggleCalendar) == "function" then
@@ -261,7 +261,6 @@ function ClockModule:RegisterFrameEvents()
 end
 
 function ClockModule:SetClockColor()
-    local db = xb.db.profile
     if self.clockTextFrame:IsMouseOver() then
         self.clockText:SetTextColor(unpack(xb:HoverColors()))
     else
@@ -286,7 +285,6 @@ function ClockModule:GetDefaultOptions()
 end
 
 function ClockModule:GetConfig()
-    local timeFormatOptions = self.exampleTimeFormats
     return {
         name = self:GetName(),
         type = "group",
@@ -296,7 +294,7 @@ function ClockModule:GetConfig()
                 order = 0,
                 type = "toggle",
                 get = function()
-                    return xb.db.profile.modules.clock.enabled;
+                    return xb.db.profile.modules.clock.enabled
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.clock.enabled = val

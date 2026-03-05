@@ -1,4 +1,5 @@
-local AddOnName, Engine = ...;
+local AddOnName, _ = ...;
+
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 ---@type XIV_DatabarLocale
 local L = AceLocale:NewLocale(AddOnName, "ptBR", false, false);
@@ -23,7 +24,7 @@ L['Use Class Color for Bar'] = "Cor da classe na barra";
 L["Miscellaneous"] = "Outros";
 L['Hide Bar in combat'] = "Ocultar barra em combate";
 L["Hide when in flight"] = "Ocultar durante voo";
-L["Show on mouseover"] = true; -- Needs translation 
+L["Show on mouseover"] = true; -- Needs translation
 L["Show the bar only when you mouseover it"] = true; -- Needs translation
 L['Bar Padding'] = "Preenchimento da Barra";
 L['Module Spacing'] = "Espaçamento entre Módulos";
@@ -197,7 +198,7 @@ L['Remaining'] = "Restante";
 L['Available Ranks'] = "Ranks Disponíveis";
 L['Artifact Knowledge'] = "Conhecimento de Artefato";
 
-L['Show Button Text'] = true; -- Needs Translation 
+L['Show Button Text'] = true; -- Needs Translation
 
 -- Travel (Translation needed)
 L['Hearthstone'] = "Pedra de Regresso";
