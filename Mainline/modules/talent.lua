@@ -173,12 +173,14 @@ function TalentModule:Refresh()
         self.loadoutText:SetTextColor(xb:GetColor('normal'))
         self.loadoutText:SetText(self.loadoutName or "")
 
+        self.loadoutText:ClearAllPoints()
         self.loadoutText:SetPoint('LEFT')
 
         self.loadoutText:Show()
 
         if not InCombatLockdown() then
             self.loadoutFrame:SetSize(iconSize + self.loadoutText:GetWidth() + 5, xb:GetHeight())
+            self.loadoutFrame:ClearAllPoints()
             self.loadoutFrame:SetPoint('LEFT')
 
             if self.loadoutFrame:GetWidth() < db.modules.talent.minWidth then
@@ -194,6 +196,7 @@ function TalentModule:Refresh()
     self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
     self.specIcon:SetSize(iconSize, iconSize)
+    self.specIcon:ClearAllPoints()
     self.specIcon:SetPoint('LEFT')
     self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
@@ -201,6 +204,7 @@ function TalentModule:Refresh()
     self.specText:SetTextColor(xb:GetColor('normal'))
     self.specText:SetText(string.upper(name or ""))
 
+    self.specText:ClearAllPoints()
     self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
 
     self.lootSpecButtons[0].icon:SetTexture(self.classIcon)
@@ -225,8 +229,10 @@ function TalentModule:Refresh()
     if not InCombatLockdown() then
         self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
         if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
+            self.specFrame:ClearAllPoints()
             self.specFrame:SetPoint('LEFT', self.loadoutFrame, 'RIGHT', 0, 0)
         else
+            self.specFrame:ClearAllPoints()
             self.specFrame:SetPoint('LEFT')
         end
 
@@ -247,6 +253,7 @@ function TalentModule:Refresh()
             return
         end
 
+        self.talentFrame:ClearAllPoints()
         self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
     end
 

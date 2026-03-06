@@ -1041,11 +1041,11 @@ function XIVBar:CaptureModulePlacement(moduleKey, frame, isInitial)
 
             local x
             if anchor == "LEFT" then
-                x = RoundNearest(frameLeft - barLeft)
+                x = frameLeft - barLeft
             elseif anchor == "RIGHT" then
-                x = RoundNearest(frameRight - barRight)
+                x = frameRight - barRight
             else
-                x = RoundNearest(frameCenter - barCenter)
+                x = frameCenter - barCenter
             end
 
             placement.anchorPoint = anchor
@@ -1065,7 +1065,7 @@ function XIVBar:CaptureModulePlacement(moduleKey, frame, isInitial)
             end
 
             placement.anchorPoint = anchor
-            placement.x = RoundNearest(xOffset)
+            placement.x = xOffset
             captured = true
         end
     end
@@ -1084,7 +1084,7 @@ function XIVBar:CaptureModulePlacement(moduleKey, frame, isInitial)
     return captured
 end
 
-function XIVBar:CaptureAllModulePlacements()
+function XIVBar:CaptureAllModulePlacements(forceInitial)
     if not self.freePlacementModuleOrder then
         return
     end
@@ -1093,12 +1093,27 @@ function XIVBar:CaptureAllModulePlacements()
         local meta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
         local frameName = meta and meta.frameName or self.freePlacementFrameMap[moduleKey]
         local frame = frameName and self:GetFrame(frameName) or nil
-        self:CaptureModulePlacement(moduleKey, frame, true)
+        local placement = self:GetModulePlacement(moduleKey, true)
+        if forceInitial == true
+            or not placement
+            or placement.initialX == nil
+            or placement.initialAnchorPoint == nil then
+            self:CaptureModulePlacement(moduleKey, frame, true)
+        end
     end
 
     if self.db and self.db.profile and self.db.profile.general then
         self.db.profile.general.freePlacementInitialized = true
     end
+end
+
+function XIVBar:RecaptureAllInitialModulePlacements()
+    if self:IsFreePlacementEnabled() then
+        return false
+    end
+
+    self:CaptureAllModulePlacements(true)
+    return true
 end
 
 function XIVBar:ApplyModuleFreePlacement(moduleKey, frame)
@@ -1129,13 +1144,11 @@ function XIVBar:ApplyModuleFreePlacement(moduleKey, frame)
     end
 
     local anchor = NormalizeAnchor(placement.anchorPoint)
-    local xOffset = RoundNearest(placement.x)
+    local xOffset = placement.x
 
     frame:ClearAllPoints()
     frame:SetPoint(anchor, bar, anchor, xOffset, 0)
 
-    placement.anchorPoint = anchor
-    placement.x = xOffset
     placement.captured = true
     return true
 end
@@ -1158,6 +1171,19 @@ function XIVBar:ResetModulePlacement(moduleKey)
     self:ApplySingleModuleFreePlacement(moduleKey)
 end
 
+function XIVBar:ResetAllModulePlacements()
+    if not self.freePlacementModuleOrder then
+        return
+    end
+
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder) do
+        local mod = self.db and self.db.profile and self.db.profile.modules and self.db.profile.modules[moduleKey]
+        if mod == nil or mod.enabled ~= false then
+            self:ResetModulePlacement(moduleKey)
+        end
+    end
+end
+
 function XIVBar:GetModulesPositionningOptions()
     local args = {
         enableFreePlacement = {
@@ -1170,18 +1196,64 @@ function XIVBar:GetModulesPositionningOptions()
                 return self.db.profile.general.enableFreePlacement
             end,
             set = function(_, val)
+                if self.freePlacementToggleInProgress then
+                    return
+                end
+
                 local wasEnabled = self.db.profile.general.enableFreePlacement
+                if val == wasEnabled then
+                    return
+                end
+
+                self.freePlacementToggleInProgress = true
                 self.db.profile.general.enableFreePlacement = val
 
                 if val and not wasEnabled and not self.db.profile.general.freePlacementInitialized then
                     self:CaptureAllModulePlacements()
                 end
 
+
                 self:Refresh()
 
                 local registry = LibStub("AceConfigRegistry-3.0", true)
                 if registry then
                     registry:NotifyChange(AddOnName)
+                    registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                end
+
+                self.freePlacementToggleInProgress = false
+            end,
+        },
+        resetAllPositions = {
+            name = L["Reset All Positions"],
+            desc = L["Reset all modules to their initial free placement positions"],
+            type = "execute",
+            order = 1.5,
+            width = "full",
+            disabled = function()
+                return not self.db.profile.general.enableFreePlacement
+            end,
+            func = function()
+                self:ResetAllModulePlacements()
+                local registry = LibStub("AceConfigRegistry-3.0", true)
+                if registry then
+                    registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                end
+            end,
+        },
+        recaptureAllInitialPositions = {
+            name = L["Re-capture initial positions"],
+            desc = L["Capture the current anchored positions as the new initial free placement positions"],
+            type = "execute",
+            order = 1.6,
+            width = "full",
+            disabled = function()
+                return self.db.profile.general.enableFreePlacement
+            end,
+            func = function()
+                self:RecaptureAllInitialModulePlacements()
+                local registry = LibStub("AceConfigRegistry-3.0", true)
+                if registry then
                     registry:NotifyChange(AddOnName .. "_ModulesPositioning")
                 end
             end,

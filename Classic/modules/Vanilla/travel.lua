@@ -444,6 +444,7 @@ function TravelModule:Refresh()
         return
     end
 
+    self.hearthFrame:ClearAllPoints()
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
     self.hearthFrame:Show()
 end
