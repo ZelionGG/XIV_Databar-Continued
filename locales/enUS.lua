@@ -162,6 +162,7 @@ L['Number of Currencies on Bar'] = true
 L['Currency Selection'] = true
 L['Select All'] = true
 L['Unselect All'] = true
+L['Open XIV Currency Options'] = "Open XIV's Currency Options"
 
 -- System
 L['Show World Ping'] = true

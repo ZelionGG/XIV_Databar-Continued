@@ -162,6 +162,7 @@ L['Number of Currencies on Bar'] = true -- To Translate
 L['Currency Selection'] = true -- To Translate
 L['Select All'] = true -- To Translate
 L['Unselect All'] = true -- To Translate
+L['Open XIV Currency Options'] = true -- To Translate
 
 -- System
 L['Show World Ping'] = "显示世界延迟"

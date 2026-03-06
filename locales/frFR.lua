@@ -162,6 +162,7 @@ L['Number of Currencies on Bar'] = "Nombre de monnaies dans la barre"
 L['Currency Selection'] = "Sélection des monnaies"
 L['Select All'] = "Tout sélectionner"
 L['Unselect All'] = "Tout désélectionner"
+L['Open XIV Currency Options'] = "Ouvrir les options de monnaie de XIV"
 
 -- System
 L['Show World Ping'] = "Montrer la latence monde"

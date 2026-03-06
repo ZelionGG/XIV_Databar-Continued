@@ -7,6 +7,7 @@ local L = XIVBar.L;
 local compat = xb.compat or {}
 
 local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
+local AceConfigDialog = LibStub("AceConfigDialog-3.0", true)
 
 local GetBackpackCurrencyInfo = C_CurrencyInfo.GetBackpackCurrencyInfo or GetBackpackCurrencyInfo
 
@@ -86,6 +87,21 @@ function CurrencyModule:OnEnable()
             end, 60) -- Max 60 attempts (30 seconds)
         end
     end
+end
+
+function CurrencyModule:ToggleCurrencyOptions()
+    if not AceConfigDialog then
+        return
+    end
+    local name = AddOnName .. "_Modules"
+    -- Si déjà ouverte, on ferme
+    if AceConfigDialog.OpenFrames and AceConfigDialog.OpenFrames[name] then
+        AceConfigDialog:Close(name)
+        return
+    end
+    -- Sinon on ouvre et on sélectionne le groupe CurrencyModule
+    AceConfigDialog:Open(name)
+    AceConfigDialog:SelectGroup(name, "CurrencyModule")
 end
 
 function CurrencyModule:OnDisable()
@@ -349,11 +365,15 @@ function CurrencyModule:RegisterFrameEvents()
                 GameTooltip:Hide()
             end
         end)
-        self.curButtons[buttonIndex]:SetScript('OnClick', function()
+        self.curButtons[buttonIndex]:SetScript('OnClick', function(_, button)
             if InCombatLockdown() then
                 return;
             end
-            ToggleCharacter('TokenFrame')
+            if button == "RightButton" then
+                self:ToggleCurrencyOptions()
+            else
+                ToggleCharacter('TokenFrame')
+            end
         end)
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'OnCurrencyDisplayUpdate')
@@ -386,14 +406,19 @@ function CurrencyModule:RegisterFrameEvents()
             GameTooltip:Hide()
         end
     end)
-    self.moduleIconFrame:SetScript('OnClick', function()
+    self.moduleIconFrame:SetScript('OnClick', function(_, button)
         if InCombatLockdown() then
             return;
         end
-        ToggleCharacter('TokenFrame')
+        if button == "RightButton" then
+            self:ToggleCurrencyOptions()
+        else
+            ToggleCharacter('TokenFrame')
+        end
     end)
 
     self.currencyFrame:EnableMouse(true)
+    self.currencyFrame:RegisterForClicks("AnyUp")
     self.currencyFrame:SetScript('OnEnter', function()
         if xb.db.profile.modules.currency.showTooltip then
             self:ShowTooltip()
@@ -402,6 +427,11 @@ function CurrencyModule:RegisterFrameEvents()
     self.currencyFrame:SetScript('OnLeave', function()
         if xb.db.profile.modules.currency.showTooltip then
             GameTooltip:Hide()
+        end
+    end)
+    self.currencyFrame:SetScript('OnClick', function(_, button)
+        if button == "RightButton" then
+            self:ToggleCurrencyOptions()
         end
     end)
 
@@ -634,6 +664,7 @@ function CurrencyModule:ShowTooltip()
         end
 
         GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Open XIV Currency Options'], r, g, b, 1, 1, 1)
     end
 
     GameTooltip:Show()

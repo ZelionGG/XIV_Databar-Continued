@@ -162,6 +162,7 @@ L['Number of Currencies on Bar'] = "Anzahl der Währungen auf der Leiste"
 L['Currency Selection'] = "Währungsauswahl"
 L['Select All'] = "Alle auswählen"
 L['Unselect All'] = "Alles abwählen"
+L['Open XIV Currency Options'] = true -- To Translate
 
 -- System
 L['Show World Ping'] = "Welt-Ping anzeigen"
