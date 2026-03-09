@@ -26,6 +26,10 @@ xb.MythicTeleports.LEGION = {
         NL = {
             teleportId = 410078, -- Neltharion's Lair Teleport
             dungeonId = 1206 -- Neltharion's Lair
+        },
+        SotT = {
+            teleportId = 1254551, -- Seat of the Triumvirate Teleport
+            dungeonId = 3118 -- Seat of the Triumvirate
         }
     }
 }

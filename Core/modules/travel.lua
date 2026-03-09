@@ -207,25 +207,35 @@ function TravelModule:OnInitialize()
     self.playerHouseList = nil
 end
 
-local portal = C_CVar.GetCVar("portal")
-if portal == "US" then
-    XIVBar.SEASON_START_DATES = {
-        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
-        ["2025-03-04"] = "TWW_2",  -- TWW Season 2 start date
-        ["2025-08-12"] = "TWW_3" -- TWW Season 3 start date
-    }
-elseif portal == "EU" then
-    XIVBar.SEASON_START_DATES = {
-        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
-        ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
-        ["2025-08-13"] = "TWW_3" -- TWW Season 3 start date
-    }
-else
-    XIVBar.SEASON_START_DATES = {
-        ["2024-09-10"] = "TWW_1",  -- TWW Season 1 start date
-        ["2025-03-05"] = "TWW_2",  -- TWW Season 2 start date
-        ["2025-08-13"] = "TWW_3" -- TWW Season 3 start date
-    }
+function TravelModule:GetCurrentSeason()
+    local currentDate = date("%Y-%m-%d")
+    local currentSeason = nil
+    local latestDate = nil
+
+    local portal = C_CVar.GetCVar("portal")
+    if portal ~= "US" and portal ~= "EU" then
+        portal = "default"
+    end
+
+    xb.MythicTeleports = xb.MythicTeleports or {}
+    local seasons = xb.MythicTeleports
+
+    -- Find the most recent season that is active (start <= today <= end if end exists)
+    for seasonKey, seasonData in pairs(seasons) do
+        if type(seasonData) == "table" and seasonData.start_date then
+            local startDate = seasonData.start_date[portal] or seasonData.start_date.default
+            local endDate = seasonData.end_date and (seasonData.end_date[portal] or seasonData.end_date.default) or nil
+
+            if startDate and startDate <= currentDate and (not endDate or currentDate <= endDate) then
+                if latestDate == nil or startDate > latestDate then
+                    latestDate = startDate
+                    currentSeason = seasonKey
+                end
+            end
+        end
+    end
+
+    return currentSeason
 end
 
 -- Skin Support for ElvUI/TukUI
@@ -994,22 +1004,6 @@ function TravelModule:SetMythicColor()
     end -- else
 end
 
-function TravelModule:GetCurrentSeason()
-    local currentDate = date("%Y-%m-%d")
-    local currentSeason = nil
-    local latestDate = nil
-
-    -- Find the most recent season start date that is before or equal to today
-    for startDate, seasonKey in pairs(XIVBar.SEASON_START_DATES) do
-        if startDate <= currentDate and (latestDate == nil or startDate > latestDate) then
-            latestDate = startDate
-            currentSeason = seasonKey
-        end
-    end
-
-    return currentSeason
-end
-
 -- Utility function to resolve teleport references
 function TravelModule:ResolveTeleportReference(teleportRef)
     if type(teleportRef) == "string" then
@@ -1043,23 +1037,10 @@ function TravelModule:HasAvailableMythicTeleports()
     end
     local currentSeason = self:GetCurrentSeason()
 
-    if xb.db.profile.curSeasonOnly then
+    if xb.db.profile.curSeasonOnly and currentSeason then
         -- Check current season teleports
         if currentSeason and xb.MythicTeleports[currentSeason] then
             for _, teleportRef in ipairs(xb.MythicTeleports[currentSeason].teleports) do
-                local value = self:ResolveTeleportReference(teleportRef)
-                if value and value.teleportId then
-                    local knownId = self:IsKnownTeleportSpell(value.teleportId)
-                    if knownId then
-                        return true
-                    end
-                end
-            end
-        end
-
-        -- If no teleports in current season, check CURRENT
-        if xb.MythicTeleports.CURRENT then
-            for _, teleportRef in ipairs(xb.MythicTeleports.CURRENT.teleports) do
                 local value = self:ResolveTeleportReference(teleportRef)
                 if value and value.teleportId then
                     local knownId = self:IsKnownTeleportSpell(value.teleportId)
@@ -1456,11 +1437,12 @@ function TravelModule:CreateMythicPopup()
     end
     -- Get the current season
     local currentSeason = self:GetCurrentSeason()
+    local showCurrentSeasonOnly = xb.db.profile.curSeasonOnly and currentSeason ~= nil
 
     -- Create popup menu
     local filteredTeleports = {}
 
-    if xb.db.profile.curSeasonOnly then
+    if showCurrentSeasonOnly then
         -- Use current season if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
@@ -1472,20 +1454,8 @@ function TravelModule:CreateMythicPopup()
                 })
             end
         end
-
-        -- If no teleports for current season, use CURRENT
-        if #filteredTeleports == 0 and xb.MythicTeleports.CURRENT then
-            local teleports = self:CollectTeleports(xb.MythicTeleports.CURRENT.teleports)
-
-            if #teleports > 0 then
-                table.insert(filteredTeleports, {
-                    name = L["Current season"],
-                    teleports = teleports
-                })
-            end
-        end
     else
-        -- If not curSeasonOnly, show all expansions
+        -- If no current season, show all expansions
         local expansions = {}
         for key, expansion in pairs(xb.MythicTeleports) do
             if key ~= "CURRENT" and not string.match(key, "TWW_%d") then
@@ -1566,7 +1536,7 @@ function TravelModule:CreateMythicPopup()
         UIDropDownMenu_AddButton(separator, level)
     end
 
-    if not xb.db.profile.curSeasonOnly then -- Two-level menu
+    if not showCurrentSeasonOnly then -- Two-level menu
         UIDropDownMenu_Initialize(self.mythicPopup, function(_, level, menuList)
             if (level or 1) == 1 then
                 AddMenuHeader(level)
