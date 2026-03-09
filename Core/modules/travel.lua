@@ -1172,7 +1172,7 @@ function TravelModule:CreateTeleportButton(teleportInfo)
         button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
         button:EnableMouse(true)
     else
-        button:SetText(teleportInfo.dungeonName .. " (" .. L["Not known"] .. ")")
+        button:SetText(teleportInfo.dungeonName .. " (" .. L["Not learned"] .. ")")
         button:SetAttribute("type", nil)
         button:SetAttribute("spell", nil)
         button:SetAttribute("useOnKeyDown", nil)
@@ -2303,7 +2303,7 @@ function TravelModule:GetConfig()
                 width = 1.2
             },
             showUnknownTeleports = {
-                name = "Show unknown teleports",
+                name = L["Show unlearned teleports"],
                 order = 26,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,

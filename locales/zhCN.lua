@@ -220,6 +220,8 @@ L['Hide Hearthstone Text'] = true -- To Translate
 L['Hide Port Text'] = true -- To Translate
 L['Hide Additional Tooltip Text'] = true -- To Translate
 L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip." -- To Translate
+L["Not learned"] = true -- To Translate
+L["Show unlearned teleports"] = true -- To Translate
 
 -- House/Home Selection
 L['Home'] = true -- To Translate
@@ -242,6 +244,7 @@ L["Battle for Azeroth"] = true
 L["Shadowlands"] = true
 L["Dragonflight"] = true
 L["The War Within"] = true
+L["Midnight"] = true
 L["Current season"] = true
 
 -- Profile Import/Export

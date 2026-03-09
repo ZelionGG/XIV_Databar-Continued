@@ -218,8 +218,10 @@ L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires"
 L['Hide Home Button'] = "Masquer le bouton Logis"
 L['Hide Hearthstone Text'] = "Masquer le texte de la pierre de foyer"
 L['Hide Port Text'] = "Masquer le texte des téléportations secondaires"
-L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle" -- To Translate
+L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle"
 L['Hide Additional Tooltip Text Description'] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné." -- To Translate
+L["Not learned"] = "Non appris"
+L["Show unlearned teleports"] = "Afficher les sorts de téléportation non appris"
 
 -- House/Home Selection
 L['Home'] = "Logis"
@@ -242,6 +244,7 @@ L["Battle for Azeroth"] = true
 L["Shadowlands"] = true
 L["Dragonflight"] = true
 L["The War Within"] = true
+L["Midnight"] = true
 L["Current season"] = "Saison courante"
 
 -- Profile Import/Export
