@@ -1018,15 +1018,32 @@ end
 
 -- Utility function to check if a teleport spell is known
 function TravelModule:IsKnownTeleportSpell(teleportId)
+    local function NormalizeSpellId(id)
+        if type(id) == "number" then
+            return id > 0 and id or nil
+        end
+
+        if type(id) == "string" then
+            local numericId = tonumber(id)
+            if numericId and numericId > 0 then
+                return numericId
+            end
+        end
+
+        return nil
+    end
+
     if type(teleportId) == "table" then
         for _, id in ipairs(teleportId) do
-            if IsSpellKnown(id) then
-                return id
+            local spellId = NormalizeSpellId(id)
+            if spellId and IsSpellKnown(spellId) then
+                return spellId
             end
         end
         return nil
     else
-        return IsSpellKnown(teleportId) and teleportId or nil
+        local spellId = NormalizeSpellId(teleportId)
+        return spellId and IsSpellKnown(spellId) and spellId or nil
     end
 end
 
@@ -1074,33 +1091,59 @@ end
 function TravelModule:GetTeleportInfo(teleportData)
     local teleportId = teleportData.teleportId
     local knownId = self:IsKnownTeleportSpell(teleportId)
+    local dungeonId = teleportData.dungeonId
+    local dungeonName = nil
+
+    if type(dungeonId) == "number" and dungeonId > 0 then
+        dungeonName = GetLFGDungeonInfo(dungeonId)
+    elseif type(dungeonId) == "string" then
+        local numericDungeonId = tonumber(dungeonId)
+        if numericDungeonId and numericDungeonId > 0 then
+            dungeonId = numericDungeonId
+            dungeonName = GetLFGDungeonInfo(dungeonId)
+        end
+    end
+
+    if not dungeonName then
+        dungeonName = type(dungeonId) == "number" and ("Dungeon " .. tostring(dungeonId)) or "Unknown dungeon"
+    end
 
     if knownId then
         local spellName = C_Spell.GetSpellName(knownId)
-        local dungeonName = GetLFGDungeonInfo(teleportData.dungeonId)
 
         if spellName and dungeonName then
             return {
                 teleportData = teleportData,
                 spellName = spellName,
                 dungeonName = dungeonName,
-                knownId = knownId
+                knownId = knownId,
+                isKnown = true,
+                buttonId = tostring(knownId)
             }
         end
+    end
+
+    if dungeonName then
+        return {
+            teleportData = teleportData,
+            dungeonName = dungeonName,
+            isKnown = false,
+            buttonId = tostring(dungeonId or dungeonName)
+        }
     end
 
     return nil
 end
 
 -- Utility function to collect teleports from a season or expansion
-function TravelModule:CollectTeleports(teleportsList)
+function TravelModule:CollectTeleports(teleportsList, includeUnknown)
     local result = {}
 
     for _, teleportRef in ipairs(teleportsList) do
         local teleportData = self:ResolveTeleportReference(teleportRef)
         if teleportData then
             local teleportInfo = self:GetTeleportInfo(teleportData)
-            if teleportInfo then
+            if teleportInfo and (includeUnknown or teleportInfo.isKnown) then
                 table.insert(result, teleportInfo)
             end
         end
@@ -1117,15 +1160,24 @@ end
 -- Utility function to create a teleport button
 function TravelModule:CreateTeleportButton(teleportInfo)
     local button = CreateFrame("Button",
-                           "TravelMenuTeleportButton" .. teleportInfo.spellName,
+                           "TravelMenuTeleportButton" .. teleportInfo.buttonId,
                            UIParent,
                            "UIDropDownMenuButtonTemplate, UIDropDownCustomMenuEntryTemplate, InsecureActionButtonTemplate")
 
-    button:SetText(teleportInfo.dungeonName)
-    button:SetAttribute("type", "spell")
-    button:SetAttribute("spell", teleportInfo.spellName)
-    button:SetAttribute("useOnKeyDown", true)
-    button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+    if teleportInfo.isKnown then
+        button:SetText(teleportInfo.dungeonName)
+        button:SetAttribute("type", "spell")
+        button:SetAttribute("spell", teleportInfo.spellName)
+        button:SetAttribute("useOnKeyDown", true)
+        button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+        button:EnableMouse(true)
+    else
+        button:SetText(teleportInfo.dungeonName .. " (" .. L["Not known"] .. ")")
+        button:SetAttribute("type", nil)
+        button:SetAttribute("spell", nil)
+        button:SetAttribute("useOnKeyDown", nil)
+        button:EnableMouse(false)
+    end
 
     -- Hide the checkboxes
     for _, region in pairs {button:GetRegions()} do
@@ -1137,14 +1189,19 @@ function TravelModule:CreateTeleportButton(teleportInfo)
     text:SetPoint('LEFT', 5, 0)
     local font, _, flags = text:GetFont()
     text:SetFont(font, 12, flags)
+    if not teleportInfo.isKnown then
+        text:SetTextColor(0.65, 0.65, 0.65, 1)
+    end
 
     local textWidth = text:GetStringWidth()
     button:SetSize(textWidth + xb.db.profile.general.barPadding + 5, 16)
 
-    button:HookScript("PostClick",
-                  function()
-        CloseDropDownMenus()
-    end)
+    if teleportInfo.isKnown then
+        button:HookScript("PostClick",
+                      function()
+            CloseDropDownMenus()
+        end)
+    end
 
     return button
 end
@@ -1438,6 +1495,7 @@ function TravelModule:CreateMythicPopup()
     -- Get the current season
     local currentSeason = self:GetCurrentSeason()
     local showCurrentSeasonOnly = xb.db.profile.curSeasonOnly and currentSeason ~= nil
+    local showUnknownTeleports = xb.db.profile.showUnknownTeleports ~= false
 
     -- Create popup menu
     local filteredTeleports = {}
@@ -1445,7 +1503,7 @@ function TravelModule:CreateMythicPopup()
     if showCurrentSeasonOnly then
         -- Use current season if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
-            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
+            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
 
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
@@ -1480,7 +1538,7 @@ function TravelModule:CreateMythicPopup()
 
                 for _, value in pairs(expansion.data.teleports) do
                     local teleportInfo = self:GetTeleportInfo(value)
-                    if teleportInfo then
+                    if teleportInfo and (showUnknownTeleports or teleportInfo.isKnown) then
                         table.insert(teleports, teleportInfo)
                     end
                 end
@@ -1501,7 +1559,7 @@ function TravelModule:CreateMythicPopup()
 
         -- Add current season at the bottom if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
-            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports)
+            local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
 
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
@@ -2052,6 +2110,7 @@ function TravelModule:GetDefaultOptions()
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
         curSeasonOnly = false,
+        showUnknownTeleports = true,
         randomizeHs = false
     }
 end
@@ -2241,7 +2300,21 @@ function TravelModule:GetConfig()
                     xb.db.profile.curSeasonOnly = val;
                     self:Refresh();
                 end,
-                width = "full"
+                width = 1.2
+            },
+            showUnknownTeleports = {
+                name = "Show unknown teleports",
+                order = 26,
+                type = "toggle",
+                hidden = function() return not compat.isMainline end,
+                get = function()
+                    return xb.db.profile.showUnknownTeleports;
+                end,
+                set = function(_, val)
+                    xb.db.profile.showUnknownTeleports = val;
+                    self:Refresh();
+                end,
+                width = 1.2
             },
             hearthstoneHeader = {
                 order = 28,
