@@ -1516,11 +1516,9 @@ function TravelModule:CreateMythicPopup()
         -- If no current season, show all expansions
         local expansions = {}
         for key, expansion in pairs(xb.MythicTeleports) do
-            if key ~= "CURRENT" and not string.match(key, "TWW_%d") then
-                table.insert(expansions, {
-                    key = key,
-                    data = expansion
-                })
+            local isSeason = type(expansion) == "table" and expansion.start_date ~= nil
+            if not isSeason and key ~= "CURRENT" and not string.match(key, "TWW_%d") then
+                table.insert(expansions, { key = key, data = expansion })
             end
         end
 
@@ -1559,6 +1557,9 @@ function TravelModule:CreateMythicPopup()
 
         -- Add current season at the bottom if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
+            -- Insert a separator before the current season group for spacing
+            table.insert(filteredTeleports, { teleports = "SEPARATOR" })
+
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
 
             if #teleports > 0 then
@@ -1601,7 +1602,17 @@ function TravelModule:CreateMythicPopup()
 
                 -- Add expansions with teleports as menu items
                 for _, expData in ipairs(filteredTeleports) do
-                    if expData.teleports and next(expData.teleports) then
+                    if expData.teleports == "SEPARATOR" then
+                        local sep = UIDropDownMenu_CreateInfo()
+                        sep.text = ""
+                        sep.disabled = true
+                        sep.notClickable = true
+                        sep.isTitle = true
+                        sep.leftPadding = 10
+                        sep.textHeight = 1
+                        sep.notCheckable = true
+                        UIDropDownMenu_AddButton(sep, level)
+                    elseif expData.teleports and next(expData.teleports) then
                         local info = UIDropDownMenu_CreateInfo()
                         info.text, info.checked = expData.name, false
                         info.menuList, info.hasArrow = expData.teleports, true
