@@ -727,20 +727,54 @@ function MenuModule:GetButtonTooltipText(name)
 end
 
 function MenuModule:ShowButtonTooltip(name)
-    if not xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+    if (name == "social" or name == "guild") then
         return
     end
-    if name == 'social' or name == 'guild' then
-        return
-    end
-    local text = self:GetButtonTooltipText(name)
-    if not text then
-        return
-    end
+
     local frame = self.frames[name]
     if not frame then
         return
     end
+
+    -- Specific tooltip for the Menu item
+    if name == 'menu' then
+        local r, g, b = unpack(xb:HoverColors())
+        local info = self.buttonInfoByKey and self.buttonInfoByKey[name]
+        local keyText
+        if info and info.binding and xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+            local k1, k2 = GetBindingKey(info.binding)
+            local keys = {}
+            if k1 and k1 ~= '' then keys[#keys+1] = GetBindingText(k1, nil, false) end
+            if k2 and k2 ~= '' then keys[#keys+1] = GetBindingText(k2, nil, false) end
+            if #keys > 0 then
+                keyText = table.concat(keys, ' / ')
+            end
+        end
+
+        GameTooltip:SetOwner(frame, 'ANCHOR_' .. xb.miniTextPosition)
+        GameTooltip:ClearLines()
+        local header = '|cFFFFFFFF[|r' .. MAINMENU_BUTTON .. '|cFFFFFFFF]|r'
+        if keyText then
+            header = header .. ' |cFFFFD200(' .. keyText .. ')|r'
+        end
+        GameTooltip:AddLine(header, r, g, b)
+        GameTooltip:AddLine(' ')
+        GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', '|cFFFFFFFF' .. MAINMENU_BUTTON .. '|r', r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', '|cFFFFFFFF' .. ADDONS .. '|r', r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. SHIFT_KEY_TEXT .. '+' .. L['Right-Click'] .. '>', '|cFFFFFFFF' .. RELOADUI .. '|r', r, g, b, 1, 1, 1)
+        GameTooltip:Show()
+        return
+    end
+
+    if not xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+        return
+    end
+
+    local text = self:GetButtonTooltipText(name)
+    if not text then
+        return
+    end
+
     GameTooltip:SetOwner(frame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     GameTooltip:AddLine(text)
@@ -792,11 +826,28 @@ function MenuModule:SocialHover(hoverFunc)
 
         -- ties the 'Social' and '<Left-Click>' etc. in the tooltip to the addon's hovercolors
         local r, g, b = unpack(xb:HoverColors())
+        local socialKey
+        if xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+            local info = self.buttonInfoByKey and self.buttonInfoByKey.social
+            if info and info.binding then
+                local k1, k2 = GetBindingKey(info.binding)
+                local keys = {}
+                if k1 and k1 ~= '' then keys[#keys+1] = GetBindingText(k1, nil, false) end
+                if k2 and k2 ~= '' then keys[#keys+1] = GetBindingText(k2, nil, false) end
+                if #keys > 0 then
+                    socialKey = '|cFFFFD200(' .. table.concat(keys, ' / ') .. ')|r'
+                end
+            end
+        end
 
         -- if any friends are online add the [Social] section and an empty line to the tooltip
         if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
             tooltip:SmartAnchorTo(MenuModule.frames.social)
-            local headerRow = tooltip:AddHeadingRow('|cFFFFFFFF[|r' .. SOCIAL_LABEL .. '|cFFFFFFFF]|r')
+            local headerText = '|cFFFFFFFF[|r' .. SOCIAL_LABEL .. '|cFFFFFFFF]|r'
+            if socialKey then
+                headerText = headerText .. ' ' .. socialKey
+            end
+            local headerRow = tooltip:AddHeadingRow(headerText)
             headerRow:SetTextColor(r, g, b, 1)
             tooltip:AddRow(' ', ' ')
         end
@@ -1057,10 +1108,27 @@ function MenuModule:GuildHover(hoverFunc)
 
         -- ties the 'Guild' and '<Left-Click>' etc. in the tooltip to the addon's hovercolors
         local r, g, b = unpack(xb:HoverColors())
+        local guildKey
+        if xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+            local info = self.buttonInfoByKey and self.buttonInfoByKey.guild
+            if info and info.binding then
+                local k1, k2 = GetBindingKey(info.binding)
+                local keys = {}
+                if k1 and k1 ~= '' then keys[#keys+1] = GetBindingText(k1, nil, false) end
+                if k2 and k2 ~= '' then keys[#keys+1] = GetBindingText(k2, nil, false) end
+                if #keys > 0 then
+                    guildKey = '|cFFFFD200(' .. table.concat(keys, ' / ') .. ')|r'
+                end
+            end
+        end
 
         -- get guild info and create first tooltip line, left is [Guild], right is GuildName
         local gName = GetGuildInfo('player')
-        local headerRow = tooltip:AddRow('|cFFFFFFFF[|r' .. GUILD .. '|cFFFFFFFF]|r', '|cff00ff00' .. gName .. '|r')
+        local headerLeft = '|cFFFFFFFF[|r' .. GUILD .. '|cFFFFFFFF]|r'
+        if guildKey then
+            headerLeft = headerLeft .. ' ' .. guildKey
+        end
+        local headerRow = tooltip:AddRow(headerLeft, '|cff00ff00' .. gName .. '|r')
         headerRow:SetTextColor(r, g, b, 1)
         tooltip:AddRow(' ', ' ')
 
