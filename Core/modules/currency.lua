@@ -49,7 +49,8 @@ end
 
 function CurrencyModule:OnEnable()
     if self.currencyFrame == nil then
-        self.currencyFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+        -- Use a Button frame so RegisterForClicks is available (RegisterFrameEvents)
+        self.currencyFrame = CreateFrame("BUTTON", nil, xb:GetFrame('bar'))
         xb:RegisterFrame('currencyFrame', self.currencyFrame)
     end
 
