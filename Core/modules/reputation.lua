@@ -648,7 +648,7 @@ function ReputationModule:ShowTooltip()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>',
-                            L['Open reputation'], r, g, b, 1, 1, 1)
+                            BINDING_NAME_TOGGLECHARACTER2, r, g, b, 1, 1, 1)
 
     GameTooltip:Show()
 end

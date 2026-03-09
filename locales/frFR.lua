@@ -2,7 +2,8 @@ local AddOnName, _ = ...
 
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 ---@class XIV_DatabarLocale : table<string, boolean|string>
-local L = AceLocale:NewLocale(AddOnName, "frFR", false, false)
+local L ---@type XIV_DatabarLocale
+L = AceLocale:NewLocale(AddOnName, "frFR", false, false)
 if not L then return end
 
 L['Modules'] = "Modules"
@@ -176,6 +177,7 @@ L['Number of Currencies on Bar'] = "Nombre de monnaies dans la barre"
 L['Currency Selection'] = "Sélection des monnaies"
 L['Select All'] = "Tout sélectionner"
 L['Unselect All'] = "Tout désélectionner"
+L['Open XIV Currency Options'] = "Ouvrir les options de monnaie de XIV"
 
 -- System
 L['Show World Ping'] = "Montrer la latence monde"
@@ -232,8 +234,11 @@ L['Hide Port Button'] = "Masquer le bouton des téléportations secondaires"
 L['Hide Home Button'] = "Masquer le bouton Logis"
 L['Hide Hearthstone Text'] = "Masquer le texte de la pierre de foyer"
 L['Hide Port Text'] = "Masquer le texte des téléportations secondaires"
-L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle" -- To Translate
+L['Hide Additional Tooltip Text'] = "Masquer les textes additionnels de l'infobulle"
 L['Hide Additional Tooltip Text Description'] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné." -- To Translate
+L["Not learned"] = "Non appris"
+L["Show unlearned teleports"] = "Afficher les sorts de téléportation non appris"
+L["Hide button during off-season"] = "Masquer le bouton pendant l’entre-saison"
 
 -- House/Home Selection
 L['Home'] = "Logis"
@@ -256,6 +261,7 @@ L["Battle for Azeroth"] = true
 L["Shadowlands"] = true
 L["Dragonflight"] = true
 L["The War Within"] = true
+L["Midnight"] = true
 L["Current season"] = "Saison courante"
 
 -- Profile Import/Export

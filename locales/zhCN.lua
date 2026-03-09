@@ -2,7 +2,8 @@ local AddOnName, _ = ...
 
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 ---@class XIV_DatabarLocale : table<string, boolean|string>
-local L = AceLocale:NewLocale(AddOnName, "zhCN", false, false)
+local L ---@type XIV_DatabarLocale
+L = AceLocale:NewLocale(AddOnName, "zhCN", false, false)
 if not L then return end
 
 L['Modules'] = "模块"
@@ -176,6 +177,7 @@ L['Number of Currencies on Bar'] = true -- To Translate
 L['Currency Selection'] = true -- To Translate
 L['Select All'] = true -- To Translate
 L['Unselect All'] = true -- To Translate
+L['Open XIV Currency Options'] = true -- To Translate
 
 -- System
 L['Show World Ping'] = "显示世界延迟"
@@ -234,6 +236,9 @@ L['Hide Hearthstone Text'] = true -- To Translate
 L['Hide Port Text'] = true -- To Translate
 L['Hide Additional Tooltip Text'] = true -- To Translate
 L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip." -- To Translate
+L["Not learned"] = true -- To Translate
+L["Show unlearned teleports"] = true -- To Translate
+L["Hide button during off-season"] = true -- To Translate
 
 -- House/Home Selection
 L['Home'] = true -- To Translate
@@ -256,6 +261,7 @@ L["Battle for Azeroth"] = true
 L["Shadowlands"] = true
 L["Dragonflight"] = true
 L["The War Within"] = true
+L["Midnight"] = true
 L["Current season"] = true
 
 -- Profile Import/Export

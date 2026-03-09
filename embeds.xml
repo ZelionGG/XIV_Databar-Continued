@@ -14,5 +14,4 @@
   <Include file="Libs\LibQTip-2.0\LibQTip-2.0.xml"/>
   <Include file="Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
   <Include file="Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
-  <Include file="Libs\TaintLess\TaintLess.xml"/>
 </Ui>

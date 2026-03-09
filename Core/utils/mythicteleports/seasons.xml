@@ -2,4 +2,5 @@
   <Script file="seasons/TWW/TWW_1.lua"/>
   <Script file="seasons/TWW/TWW_2.lua"/>
   <Script file="seasons/TWW/TWW_3.lua"/>
+  <Script file="seasons/Midnight/Midnight_1.lua"/>
 </Ui>

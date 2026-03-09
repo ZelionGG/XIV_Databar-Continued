@@ -2,7 +2,8 @@
 
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 ---@class XIV_DatabarLocale : table<string, boolean|string>
-local L = AceLocale:NewLocale(AddOnName, "deDE", false, false)
+local L ---@type XIV_DatabarLocale
+L = AceLocale:NewLocale(AddOnName, "deDE", false, false)
 if not L then return end
 
 L['Modules'] = "Module"
@@ -176,6 +177,7 @@ L['Number of Currencies on Bar'] = "Anzahl der Währungen auf der Leiste"
 L['Currency Selection'] = "Währungsauswahl"
 L['Select All'] = "Alle auswählen"
 L['Unselect All'] = "Alles abwählen"
+L['Open XIV Currency Options'] = true -- To Translate
 
 -- System
 L['Show World Ping'] = "Welt-Ping anzeigen"
@@ -234,6 +236,9 @@ L['Hide Hearthstone Text'] = "Versteckt Ruhesteintext"
 L['Hide Port Text'] = "Versteckt Porttext"
 L['Hide Additional Tooltip Text'] = "Zusätzlichen Tooltiptext ausblenden"
 L['Hide Additional Tooltip Text Description'] = "Blende den Hearthstone-Bindungsort und die Taste zur Portauswahl im Tooltip aus."
+L["Not learned"] = true -- To Translate
+L["Show unlearned teleports"] = true -- To Translate
+L["Hide button during off-season"] = true -- To Translate
 
 -- House/Home Selection
 L['Home'] = "Zuhause"
@@ -256,6 +261,7 @@ L["Battle for Azeroth"] = true
 L["Shadowlands"] = true -- No Translate needed
 L["Dragonflight"] = true -- No Translate needed
 L["The War Within"] = true -- No Translate needed
+L["Midnight"] = true -- No Translate needed
 L["Current season"] = "Aktuelle Season"
 
 -- Profile Import/Export

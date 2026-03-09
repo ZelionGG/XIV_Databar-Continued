@@ -10,4 +10,5 @@
   <Script file="expansions/shadowlands.lua"/>
   <Script file="expansions/dragonflight.lua"/>
   <Script file="expansions/tww.lua"/>
+  <Script file="expansions/midnight.lua"/>
 </Ui>
