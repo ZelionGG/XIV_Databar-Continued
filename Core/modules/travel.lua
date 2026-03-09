@@ -1689,6 +1689,10 @@ function TravelModule:Refresh()
 
     local db = xb.db.profile
     local allowMythic = compat.isMainline and db.enableMythicPortals
+    local currentSeason = self:GetCurrentSeason()
+    if db.hideMythicInOffSeason and not currentSeason then
+        allowMythic = false
+    end
 
     self:UpdatePortOptions()
     local hasPortOptions = false
@@ -2120,6 +2124,7 @@ function TravelModule:GetDefaultOptions()
         hideHomeButton = false,
         enableMythicPortals = compat.isMainline,
         hideMythicText = false,
+        hideMythicInOffSeason = false,
         curSeasonOnly = false,
         showUnknownTeleports = true,
         randomizeHs = false
@@ -2295,6 +2300,20 @@ function TravelModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.hideMythicText = val;
+                    self:Refresh();
+                end,
+                width = 1.2
+            },
+            hideMythicInOffSeason = {
+                name = L["Hide button during off-season"],
+                order = 23,
+                type = "toggle",
+                hidden = function() return not compat.isMainline end,
+                get = function()
+                    return xb.db.profile.hideMythicInOffSeason;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideMythicInOffSeason = val;
                     self:Refresh();
                 end,
                 width = 1.2

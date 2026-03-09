@@ -223,6 +223,7 @@ L['Hide Additional Tooltip Text'] = true -- To Translate
 L['Hide Additional Tooltip Text Description'] = "Hide the hearthstone bind location and the select port button in the tooltip." -- To Translate
 L["Not learned"] = true -- To Translate
 L["Show unlearned teleports"] = true -- To Translate
+L["Hide button during off-season"] = true -- To Translate
 
 -- House/Home Selection
 L['Home'] = true -- To Translate
