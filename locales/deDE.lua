@@ -73,7 +73,7 @@ L['Hover'] = "Mouseover"
 L['Micromenu'] = "Mikromenü"
 L['Show Social Tooltips'] = "Social Tooltips anzeigen"
 L['Show Accessibility Tooltips'] = "Barrierefreiheits Tooltips anzeigen"
-L['Blizzard Micromenu'] = true -- No Translate needed
+L['Blizzard Micromenu'] = "Blizzard Mikromenü"
 L['Disable Blizzard Micromenu'] = "Deaktiviert Blizzard Micromenu"
 L["Keep Queue Status Icon"] = "Zeigt Wartenschlangen Statussymbol"
 L['Blizzard Micromenu Disclaimer'] = "Wenn Du ein anderes UI-Addon verwendest (z. B. ElvUI), blende dessen Mikroleiste in den Einstellungen dieses Addons aus."
@@ -162,7 +162,7 @@ L['Number of Currencies on Bar'] = "Anzahl der Währungen auf der Leiste"
 L['Currency Selection'] = "Währungsauswahl"
 L['Select All'] = "Alle auswählen"
 L['Unselect All'] = "Alles abwählen"
-L['Open XIV Currency Options'] = true -- To Translate
+L['Open XIV Currency Options'] = "Äffne XIV Währungseinstellungen"
 
 -- System
 L['Show World Ping'] = "Welt-Ping anzeigen"
@@ -220,9 +220,9 @@ L['Hide Hearthstone Text'] = "Versteckt Ruhesteintext"
 L['Hide Port Text'] = "Versteckt Porttext"
 L['Hide Additional Tooltip Text'] = "Zusätzlichen Tooltiptext ausblenden"
 L['Hide Additional Tooltip Text Description'] = "Blende den Hearthstone-Bindungsort und die Taste zur Portauswahl im Tooltip aus."
-L["Not learned"] = true -- To Translate
-L["Show unlearned teleports"] = true -- To Translate
-L["Hide button during off-season"] = true -- To Translate
+L["Not learned"] = "Nicht erlernt"
+L["Show unlearned teleports"] = "Zeigt ungelernte Teleports"
+L["Hide button during off-season"] = "Versteckt Taste ausserhalb der Saeson"
 
 -- House/Home Selection
 L['Home'] = "Zuhause"
@@ -260,7 +260,7 @@ L["Profile imported successfully as"] = "Profil erfolgreich importiert als"
 
 L["Copy the export string below:"] = "Kopiere die unten stehende Exportzeichenfolge:"
 L["Paste the import string below:"] = "Füge die Importzeichenfolge unten ein:"
-L["Import or export your profiles to share them with other players."] = "Importiere oder exportiere Deine Profile, um sie mit anderen Spielern zu teilen."
+L["Import or export your profiles to share them with other players."] = "Importiere oder Exportiere Deine Profile, um sie mit anderen Spielern zu teilen."
 L["Profile Import/Export"] = true -- No Translate needed
 L["Export Profile"] = "Profil Exportieren"
 L["Export your current profile settings"] = "Exportiere Ihre aktuellen Profileinstellungen"
