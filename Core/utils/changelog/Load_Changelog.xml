@@ -73,5 +73,5 @@
     <Script file='Old/v4/4.7.1.lua'/>
     <Script file='Old/v4/4.8.lua'/>
     <!-- LIVE -->
-    <Script file='4.8.lua'/>
+    <Script file='4.8.1.lua'/>
 </Ui>
