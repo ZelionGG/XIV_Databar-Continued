@@ -607,7 +607,7 @@ function TalentModule:CreateSpecPopup()
                     return;
                 end
                 if mouseButton == 'LeftButton' then
-                    SetSpecialization(clickedButton:GetID())
+                    C_SpecializationInfo.SetSpecialization(clickedButton:GetID())
                 end
                 TalentModule.specPopup:Hide()
             end)
