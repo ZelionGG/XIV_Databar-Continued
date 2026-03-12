@@ -162,17 +162,11 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
         hide = force
     end
 
-    -- In combat, we don't touch protected Blizzard frames: defer and deduplicate the regen hook.
     if InCombatLockdown() then
-        self.pendingMicroMenuHide = hide
-        if not self:IsEventRegistered('PLAYER_REGEN_ENABLED') then
-            self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
-                local pending = self.pendingMicroMenuHide
-                self.pendingMicroMenuHide = nil
-                self:UnregisterEvent('PLAYER_REGEN_ENABLED')
-                self:ToggleBlizzardMicroMenu(pending)
-            end)
-        end
+        self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+            self:ToggleBlizzardMicroMenu(force)
+            self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+        end)
         return
     end
 
