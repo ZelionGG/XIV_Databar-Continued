@@ -278,3 +278,4 @@ L["Changelog"] = "Historique de modifications"
 
 -- Vault Module
 L['GREAT_VAULT_DISABLED'] = DELVES_GREAT_VAULT_LABEL .. " est actuellement désactivée jusqu'au début de la prochaine saison."
+L['MAX_LEVEL_DISCLAIMER'] = "Ce module ne s'affichera que lorsque vous atteindrez le niveau maximum."

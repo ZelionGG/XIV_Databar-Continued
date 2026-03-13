@@ -17,6 +17,30 @@ local TYPE_ORDER = {
     Enum.WeeklyRewardChestThresholdType.World,
 }
 
+-- Enable module, build frames, and refresh layout.
+function VaultModule:OnEnable()
+    local db = xb.db.profile
+    if not db.modules.vault.enabled or UnitLevel("player") ~= GetMaxLevelForPlayerExpansion() then
+        self:Disable()
+        return
+    end
+
+    if not self.vaultFrame then
+        self:CreateFrames()
+    end
+
+    self.vaultFrame:Show()
+    self:RegisterFrameEvents()
+    self:Refresh()
+end
+
+-- Disable module and hide its frame.
+function VaultModule:OnDisable()
+    if self.vaultFrame then
+        self.vaultFrame:Hide()
+    end
+end
+
 -- Collect weekly reward activities grouped by type, sorted by slot index.
 local function CollectActivitiesByType()
     local byType = {}
@@ -163,30 +187,6 @@ function VaultModule:OnInitialize()
     self.iconPath = self.mediaFolder .. 'vault.tga'
 end
 
--- Enable module, build frames, and refresh layout.
-function VaultModule:OnEnable()
-    local db = xb.db.profile
-    if not db.modules.vault.enabled then
-        self:Disable()
-        return
-    end
-
-    if not self.vaultFrame then
-        self:CreateFrames()
-    end
-
-    self.vaultFrame:Show()
-    self:RegisterFrameEvents()
-    self:Refresh()
-end
-
--- Disable module and hide its frame.
-function VaultModule:OnDisable()
-    if self.vaultFrame then
-        self.vaultFrame:Hide()
-    end
-end
-
 -- Pick the anchor frame used to position the vault module.
 local function getAnchorFrame()
     local order = {
@@ -299,9 +299,19 @@ function VaultModule:GetConfig()
         name = self:GetName(),
         type = "group",
         args = {
+            maxLevelDisclaimer = {
+                name = "|TInterface\\EncounterJournal\\UI-EJ-WarningTextIcon:16:16:0:0|t |cffffd200" .. L['MAX_LEVEL_DISCLAIMER'] .. "|r",
+                order = 0,
+                type = "description",
+                fontSize = "large",
+                width = "full",
+                hidden = function()
+                    return UnitLevel("player") == GetMaxLevelForPlayerExpansion()
+                end
+            },
             enable = {
                 name = ENABLE,
-                order = 0,
+                order = 1,
                 type = "toggle",
                 width = "full",
                 get = function()
@@ -318,7 +328,7 @@ function VaultModule:GetConfig()
             },
             showLabel = {
                 name = L['Show Button Text'],
-                order = 1,
+                order = 2,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.vault.showLabel
@@ -330,7 +340,7 @@ function VaultModule:GetConfig()
             },
             showTooltip = {
                 name = L['Show Tooltips'],
-                order = 2,
+                order = 3,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.vault.showTooltip
