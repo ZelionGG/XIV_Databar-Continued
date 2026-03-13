@@ -203,12 +203,14 @@ function TalentModule:Refresh()
         end
 
         self.specIcon:SetSize(iconSize, iconSize)
+        self.specIcon:ClearAllPoints()
         self.specIcon:SetPoint('LEFT')
         self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
         self.specText:SetFont(xb:GetFont(textHeight))
         self.specText:SetTextColor(xb:GetColor('normal'))
         self.specText:SetText(string.upper(name or ""))
+        self.specText:ClearAllPoints()
         self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
         self.specText:Show()
     else
@@ -220,12 +222,14 @@ function TalentModule:Refresh()
         self.specIcon:SetTexture(self.classIcon)
         self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
         self.specIcon:SetSize(iconSize, iconSize)
+        self.specIcon:ClearAllPoints()
         self.specIcon:SetPoint('LEFT')
         self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
         self.specText:SetFont(xb:GetFont(textHeight))
         self.specText:SetTextColor(xb:GetColor('normal'))
         self.specText:SetText(string.upper(name or ""))
+        self.specText:ClearAllPoints()
         self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
 
         self.lootSpecButtons[0].icon:SetTexture(self.classIcon)
@@ -235,6 +239,7 @@ function TalentModule:Refresh()
     end
 
     self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
+    self.specFrame:ClearAllPoints()
     self.specFrame:SetPoint('LEFT')
 
     if self.specFrame:GetWidth() < db.modules.talent.minWidth then
@@ -242,6 +247,14 @@ function TalentModule:Refresh()
     end
 
     self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('talent', self.talentFrame) then
+        self:CreateSpecPopup()
+        if not isVanilla then
+            self:CreateLootSpecPopup()
+        end
+        return
+    end
 
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
@@ -256,6 +269,7 @@ function TalentModule:Refresh()
             xOffset = 0
         end
     end
+    self.talentFrame:ClearAllPoints()
     self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
 
     self:CreateSpecPopup()

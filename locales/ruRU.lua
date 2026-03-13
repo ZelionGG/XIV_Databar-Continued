@@ -45,6 +45,21 @@ L["Vertical position of the bar"] = true
 L["Behavior"] = true
 L["Spacing"] = true
 
+-- Modules Positioning
+L["Modules Positioning"] = true
+L["Enable free placement"] = true
+L["Enable independent X positioning for each module and disable inter-module anchors"] = true
+L["Reset All Positions"] = true
+L["Reset all modules to their initial free placement positions"] = true
+L["Anchor Point"] = true
+L["X Position"] = true
+L["Reset Position"] = true
+L["Reset to the anchored position"] = true
+L["Re-capture initial position"] = true
+L["Use the current module position as the new initial free placement position"] = true
+L["Re-capture initial positions"] = true
+L["Capture the current anchored positions as the new initial free placement positions"] = true
+
 -- Positioning Options
 L['Positioning Options'] = "Настройки позиционированя"
 L['Horizontal Position'] = "Позиция по горизонтали"
@@ -174,6 +189,7 @@ L['Garbage Collect'] = "Очистить память"
 L['Cleaned'] = "Очищено"
 
 -- Reputation
+L['Open reputation'] = "Open " .. REPUTATION -- To Translate
 L['Paragon Reward available'] = true -- To translate
 L['Use Class Colors for Reputation Bar'] = true -- To translate
 L['Use Reputation Colors for Reputation Bar'] = true -- To translate

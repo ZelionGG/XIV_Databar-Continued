@@ -45,6 +45,21 @@ L["Vertical position of the bar"] = "Position verticale de la barre"
 L["Behavior"] = "Comportement"
 L["Spacing"] = "Espacement"
 
+-- Modules Positioning
+L["Modules Positioning"] = "Positionnement des modules"
+L["Enable free placement"] = "Activer le placement libre"
+L["Enable independent X positioning for each module and disable inter-module anchors"] = "Activer un positionnement X indépendant pour chaque module et désactiver les ancres inter-modules"
+L["Reset All Positions"] = "Réinitialiser toutes les positions"
+L["Reset all modules to their initial free placement positions"] = "Remet tous les modules à leurs positions initiales en placement libre"
+L["Anchor Point"] = "Point d'ancrage"
+L["X Position"] = "Position X"
+L["Reset Position"] = "Réinitialiser la position"
+L["Reset to the anchored position"] = "Remet le module à sa position en mode ancré"
+L["Re-capture initial position"] = "Recapturer la position initiale"
+L["Use the current module position as the new initial free placement position"] = "Utilise la position actuelle du module comme nouvelle position initiale en placement libre"
+L["Re-capture initial positions"] = "Recapturer les positions initiales"
+L["Capture the current anchored positions as the new initial free placement positions"] = "Capture les positions ancrées actuelles comme nouvelles positions initiales du placement libre"
+
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement"
 L['Horizontal Position'] = "Horizontal"
@@ -174,6 +189,7 @@ L['Garbage Collect'] = "Nettoyer la mémoire"
 L['Cleaned'] = "Nettoyé"
 
 -- Reputation
+L['Open reputation'] = "Ouvrir l'interface de " .. REPUTATION
 L['Paragon Reward available'] = "Récompense de parangon disponible"
 L['Use Class Colors for Reputation Bar'] = "Utiliser la couleur de classe pour la barre de réputation"
 L['Use Reputation Colors for Reputation Bar'] = "Utiliser la couleur de réputation pour la barre de réputation"

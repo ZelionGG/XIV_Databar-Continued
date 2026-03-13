@@ -1980,6 +1980,13 @@ function TravelModule:Refresh()
     end
 
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('travel', self.hearthFrame) then
+        self.hearthFrame:Show()
+        return
+    end
+
+    self.hearthFrame:ClearAllPoints()
     self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
     self.hearthFrame:Show()
 end

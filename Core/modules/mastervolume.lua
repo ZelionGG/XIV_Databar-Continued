@@ -38,19 +38,21 @@ function VolumeModule:CreateModuleFrame()
 	self.frame:EnableMouse(true)
 	self.frame:RegisterForClicks("AnyDown")
 
-  local relativeAnchorPoint = 'RIGHT'
-  local xOffset = xb.db.profile.general.moduleSpacing
-  local parentFrame = xb:GetFrame('armorFrame')
-  if not xb.db.profile.modules.armor.enabled then
-    parentFrame = xb:GetFrame('microMenuFrame')
-    if not xb.db.profile.modules.microMenu.enabled then
-      parentFrame = xb:GetFrame('bar')
-      relativeAnchorPoint = 'LEFT'
-      xOffset = 0
-    end
-  end
+if not xb:ApplyModuleFreePlacement('MasterVolume', self.frame) then
+		local relativeAnchorPoint = 'RIGHT'
+		local xOffset = xb.db.profile.general.moduleSpacing
+		local parentFrame = xb:GetFrame('armorFrame')
+		if not xb.db.profile.modules.armor.enabled then
+			parentFrame=xb:GetFrame('microMenuFrame')
+			if not xb.db.profile.modules.microMenu.enabled then
+				parentFrame=xb:GetFrame('bar')
+				relativeAnchorPoint = 'LEFT'
+				xOffset = 0
+			end
+		end
 
-  self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+		self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+	end
 
   self.icon = self.frame:CreateTexture(nil, "OVERLAY", nil, 7)
   self.icon:SetPoint("LEFT")

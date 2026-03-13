@@ -45,6 +45,21 @@ L["Vertical position of the bar"] = "Vertikale Position der Leiste"
 L["Behavior"] = "Verhalten"
 L["Spacing"] = "Abstand"
 
+-- Modules Positioning
+L["Modules Positioning"] = true
+L["Enable free placement"] = true
+L["Enable independent X positioning for each module and disable inter-module anchors"] = true
+L["Reset All Positions"] = true
+L["Reset all modules to their initial free placement positions"] = true
+L["Anchor Point"] = true
+L["X Position"] = true
+L["Reset Position"] = true
+L["Reset to the anchored position"] = true
+L["Re-capture initial position"] = true
+L["Use the current module position as the new initial free placement position"] = true
+L["Re-capture initial positions"] = true
+L["Capture the current anchored positions as the new initial free placement positions"] = true
+
 -- Positioning Options
 L['Positioning Options'] = "Positions Einstellungen"
 L['Horizontal Position'] = "Horizontale Position"
@@ -174,6 +189,7 @@ L['Garbage Collect'] = "Speicher säubern"
 L['Cleaned'] = "Gesäubert"
 
 -- Reputation
+L['Open reputation'] = "Öffne " .. REPUTATION
 L['Paragon Reward available'] = "Paragonbelohnung verfügbar"
 L['Use Class Colors for Reputation Bar'] = "Klassenfarben für die Rufleiste verwenden"
 L['Use Reputation Colors for Reputation Bar'] = "Verwendet Ruffarben für die Rufleiste."
