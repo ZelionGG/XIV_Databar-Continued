@@ -235,7 +235,7 @@ function XIVBar:SetupOptions()
                 version = {
                     order = 2,
                     type = "description",
-                    name = L["VERSION"] .. " " .. orange(versionString) ..
+                    name = GAME_VERSION_LABEL .. " " .. orange(versionString) ..
                         " - |cffbbbbbb" .. dateString .. "|r",
                     fontSize = "large"
                 }

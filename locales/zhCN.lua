@@ -282,7 +282,6 @@ L["IMPORT_PROFILE_DESC"] = "Import a profile from another player" -- TODO: To Tr
 
 -- Changelog
 L["DATE_FORMAT"] = "%year%年%month%月%day%日"
-L["VERSION"] = "版本"
 L["IMPORTANT"] = "重要"
 L["NEW"] = "新增"
 L["IMPROVEMENT"] = "改善"
