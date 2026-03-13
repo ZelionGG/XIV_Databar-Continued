@@ -6,6 +6,8 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "ruRU", false, false)
 if not L then return end
 
+-- NOTE : Strings that requires translation are marked with -- TODO: To Translate
+
 L["MODULES"] = "Модули"
 L["LEFT_CLICK"] = "Левая кнопка мыши"
 L["RIGHT_CLICK"] = "Правая кнопка мыши"
@@ -24,38 +26,38 @@ L["BAR_COLOR"] = "Цвет полосы"
 L["USE_CLASS_COLOR"] = "Использовать цвет класса для полосы"
 L["MISCELLANEOUS"] = "Разное"
 L["HIDE_IN_COMBAT"] = "Прятать полосу во время боя"
-L["HIDE_IN_FLIGHT"] = true
-L["SHOW_ON_MOUSEOVER"] = true -- Needs translation
-L["SHOW_ON_MOUSEOVER_DESC"] = true -- Needs translation
+L["HIDE_IN_FLIGHT"] = "Hide when in flight" -- TODO: To Translate
+L["SHOW_ON_MOUSEOVER"] = "Show on mouseover" -- TODO: To Translate
+L["SHOW_ON_MOUSEOVER_DESC"] = "Show the bar only when you mouseover it" -- TODO: To Translate
 L["BAR_PADDING"] = "Заполнение"
 L["MODULE_SPACING"] = "Расстояние между модулями"
-L["BAR_MARGIN"] = "Маржа бара" -- Need Translation ?
-L["BAR_MARGIN_DESC"] = true -- Need translation
+L["BAR_MARGIN"] = "Маржа бара" -- TODO: To Translate ?
+L["BAR_MARGIN_DESC"] = "Leftmost and rightmost margin of the bar modules" -- TODO: To Translate
 L["HIDE_ORDER_HALL_BAR"] = "Прятать полосу оплота класса"
 L["USE_ELVUI_FOR_TOOLTIPS"] = "Используйте ElvUI для подсказок"
-L["LOCK_BAR"] = true
-L["LOCK_BAR_DESC"] = true
-L["BAR_FULLSCREEN_DESC"] = true
-L["BAR_POSITION_DESC"] = true
-L["X_OFFSET"] = true
-L["Y_OFFSET"] = true
-L["HORIZONTAL_POSITION"] = true
-L["VERTICAL_POSITION"] = true
-L["BEHAVIOR"] = true
-L["SPACING"] = true
+L["LOCK_BAR"] = "Lock Bar" -- TODO: To Translate
+L["LOCK_BAR_DESC"] = "Lock the bar to prevent dragging" -- TODO: To Translate
+L["BAR_FULLSCREEN_DESC"] = "Makes the bar span the entire screen width" -- TODO: To Translate
+L["BAR_POSITION_DESC"] = "Position the bar at the top or bottom of the screen" -- TODO: To Translate
+L["X_OFFSET"] = "X Offset" -- TODO: To Translate
+L["Y_OFFSET"] = "Y Offset" -- TODO: To Translate
+L["HORIZONTAL_POSITION"] = "Horizontal position of the bar" -- TODO: To Translate
+L["VERTICAL_POSITION"] = "Vertical position of the bar" -- TODO: To Translate
+L["BEHAVIOR"] = "Behavior" -- TODO: To Translate
+L["SPACING"] = "Spacing" -- TODO: To Translate
 
 -- Modules Positioning
-L["MODULES_POSITIONING"] = true
-L["ENABLE_FREE_PLACEMENT"] = true
-L["ENABLE_FREE_PLACEMENT_DESC"] = true
-L["RESET_ALL_POSITIONS"] = true
-L["RESET_ALL_POSITIONS_DESC"] = true
-L["ANCHOR_POINT"] = true
-L["X_POSITION"] = true
-L["RESET_POSITION"] = true
-L["RESET_POSITION_DESC"] = true
-L["RECAPTURE_INITIAL_POSITIONS"] = true
-L["RECAPTURE_INITIAL_POSITIONS_DESC"] = true
+L["MODULES_POSITIONING"] = "Modules Positioning" -- TODO: To Translate
+L["ENABLE_FREE_PLACEMENT"] = "Enable free placement" -- TODO: To Translate
+L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors" -- TODO: To Translate
+L["RESET_ALL_POSITIONS"] = "Reset All Positions" -- TODO: To Translate
+L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions" -- TODO: To Translate
+L["ANCHOR_POINT"] = "Anchor Point" -- TODO: To Translate
+L["X_POSITION"] = "X Position" -- TODO: To Translate
+L["RESET_POSITION"] = "Reset Position" -- TODO: To Translate
+L["RESET_POSITION_DESC"] = "Reset to the anchored position" -- TODO: To Translate
+L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions" -- TODO: To Translate
+L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions" -- TODO: To Translate
 
 -- Positioning Options
 L["BAR_WIDTH"] = "Ширина полосы"
@@ -82,17 +84,17 @@ L["HOVER"] = "По наведению"
 
 L["MICROMENU"] = "Микроменю"
 L["SHOW_SOCIAL_TOOLTIPS"] = "Показывать подсказки гильдии и друзей"
-L["SHOW_ACCESSIBILITY_TOOLTIPS"] = true -- Needs Translation
-L["BLIZZARD_MICROMENU"] = true
-L["DISABLE_BLIZZARD_MICROMENU"] = true
-L["KEEP_QUEUE_STATUS_ICON"] = true
-L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
-L["BLIZZARD_BAGS_BAR"] = true
-L["DISABLE_BLIZZARD_BAGS_BAR"] = true
-L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
+L["SHOW_ACCESSIBILITY_TOOLTIPS"] = "Show Accessibility Tooltips" -- TODO: To Translate
+L["BLIZZARD_MICROMENU"] = "Blizzard Micromenu" -- TODO: To Translate
+L["DISABLE_BLIZZARD_MICROMENU"] = "Disable Blizzard Micromenu" -- TODO: To Translate
+L["KEEP_QUEUE_STATUS_ICON"] = "Keep Queue Status Icon" -- TODO: To Translate
+L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
+L["BLIZZARD_BAGS_BAR"] = "Blizzard Bags Bar" -- TODO: To Translate
+L["DISABLE_BLIZZARD_BAGS_BAR"] = "Disable Blizzard Bags Bar" -- TODO: To Translate
+L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
 L["MAIN_MENU_ICON_RIGHT_SPACING"] = "Расстояние от кнопки меню до других кнопок"
 L["ICON_SPACING"] = "Расстояние между кнопками"
-L["HIDE_BNET_APP_FRIENDS"] = true
+L["HIDE_BNET_APP_FRIENDS"] = "Hide BNet App Friends" -- TODO: To Translate
 L["OPEN_GUILD_PAGE"] = "Открыть страницу гильдии"
 L["NO_TAG"] = "Нет Battletag"
 L["WHISPER_BNET"] = "Шепнуть по Battle.Net"
@@ -117,9 +119,8 @@ L["SHOW_PVP_BUTTON"] = "Игрок против игрока"
 L["SHOW_PETS_BUTTON"] = "Коллекции"
 L["SHOW_SHOP_BUTTON"] = "Магазин"
 L["SHOW_HELP_BUTTON"] = "Помощь"
-L["SHOW_HOUSING_BUTTON"] = true -- TODO: translate
+L["SHOW_HOUSING_BUTTON"] = "Show Housing Button" -- TODO: translate
 L["NO_INFO"] = "Нет информации"
-L["CLASSIC"] = true
 L["ALLIANCE"] = "Альянс"
 L["HORDE"] = "Орда"
 
@@ -145,15 +146,15 @@ L["READY"] = "Готово"
 L["TRAVEL_COOLDOWNS"] = "Способности для перемещения"
 L["CHANGE_PORT_OPTION"] = "Изменить назначение телепорта"
 
-L["REGISTERED_CHARACTERS"] = true
-L["SHOW_FREE_BAG_SPACE"] = true
-L["SHOW_OTHER_REALMS"] = true
+L["REGISTERED_CHARACTERS"] = "Registered characters" -- TODO: To Translate
+L["SHOW_FREE_BAG_SPACE"] = "Show Free Bag Space" -- TODO: To Translate
+L["SHOW_OTHER_REALMS"] = "Show Other Realms" -- TODO: To Translate
 L["ALWAYS_SHOW_SILVER_COPPER"] = "Всегда показывать серебро и медь"
 L["SHORTEN_GOLD"] = "Сокращать число золота"
 L["TOGGLE_BAGS"] = "Переключить видимость сумок"
 L["SESSION_TOTAL"] = "Всего за сессию"
-L["DAILY_TOTAL"] = true
-L["GOLD_ROUNDED_VALUES"] = true
+L["DAILY_TOTAL"] = "Daily Total" -- TODO: To Translate
+L["GOLD_ROUNDED_VALUES"] = "Gold rounded values" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Показывать полоску опыта персонажам, не достигшим максимального уровня"
@@ -165,14 +166,14 @@ L["FIRST_CURRENCY"] = "Валюта №1"
 L["SECOND_CURRENCY"] = "Валюта №2"
 L["THIRD_CURRENCY"] = "Валюта №3"
 L["RESTED"] = "Отдых"
-L["SHOW_MORE_CURRENCIES"] = true -- To Translate
-L["MAX_CURRENCIES_SHOWN"] = true -- To Translate
-L["ONLY_SHOW_MODULE_ICON"] = true -- To Translate
-L["CURRENCY_NUMBER"] = true -- To Translate
-L["CURRENCY_SELECTION"] = true -- To Translate
-L["SELECT_ALL"] = true -- To Translate
-L["UNSELECT_ALL"] = true -- To Translate
-L["OPEN_XIV_CURRENCY_OPTIONS"] = true -- To Translate
+L["SHOW_MORE_CURRENCIES"] = "Show More Currencies on Shift+Hover" -- TODO: To Translate
+L["MAX_CURRENCIES_SHOWN"] = "Max currencies shown when holding Shift" -- TODO: To Translate
+L["ONLY_SHOW_MODULE_ICON"] = "Only Show Module Icon" -- TODO: To Translate
+L["CURRENCY_NUMBER"] = "Number of Currencies on Bar" -- TODO: To Translate
+L["CURRENCY_SELECTION"] = "Currency Selection" -- TODO: To Translate
+L["SELECT_ALL"] = "Select All" -- TODO: To Translate
+L["UNSELECT_ALL"] = "Unselect All" -- TODO: To Translate
+L["OPEN_XIV_CURRENCY_OPTIONS"] = "Open XIV's Currency Options" -- TODO: To Translate
 
 -- System
 L["WORLD_PING"] = "Показывать задержку сервера"
@@ -184,14 +185,14 @@ L["GARBAGE_COLLECT"] = "Очистить память"
 L["CLEANED"] = "Очищено"
 
 -- Reputation
-L["OPEN_REPUTATION"] = "Open " .. REPUTATION -- To Translate
-L["PARAGON_REWARD_AVAILABLE"] = true -- To translate
-L["CLASS_COLORS_REPUTATION"] = true -- To translate
-L["REPUTATION_COLORS_REPUTATION"] = true -- To translate
-L["FLASH_PARAGON_REWARD"] = true -- To translate
-L["PROGRESS"] = true -- To translate
-L["RANK"] = true -- To translate
-L["PARAGON"] = true -- To translate
+L["OPEN_REPUTATION"] = "Open " .. REPUTATION -- TODO: To Translate
+L["PARAGON_REWARD_AVAILABLE"] = "Paragon Reward available" -- TODO: To Translate
+L["CLASS_COLORS_REPUTATION"] = "Use Class Colors for Reputation Bar" -- TODO: To Translate
+L["REPUTATION_COLORS_REPUTATION"] = "Use Reputation Colors for Reputation Bar" -- TODO: To Translate
+L["FLASH_PARAGON_REWARD"] = "Flash on Paragon Reward" -- TODO: To Translate
+L["PROGRESS"] = "Progress" -- TODO: To Translate
+L["RANK"] = "Rank" -- TODO: To Translate
+L["PARAGON"] = "Paragon" -- TODO: To Translate
 
 L["USE_CLASS_COLORS"] = "Использовать цвет класса"
 L["COOLDOWNS"] = "Кулдауны"
@@ -199,7 +200,7 @@ L["TOGGLE_PROFESSION_FRAME"] = 'Показать кадр профессии'
 L["TOGGLE_PROFESSION_SPELLBOOK"] = 'показать книгу заклинаний профессии'
 
 L["SET_SPECIALIZATION"] = "Выбрать специализацию"
-L["SET_LOADOUT"] = true -- Translation needed
+L["SET_LOADOUT"] = "Set Loadout" -- TODO: To Translate
 L["SET_LOOT_SPECIALIZATION"] = "Выбрать специализацию для добычи"
 L["CURRENT_SPECIALIZATION"] = "Текущая специализация"
 L["CURRENT_LOOT_SPECIALIZATION"] = "Текущая специализация для добычи"
@@ -209,43 +210,43 @@ L["REMAINING"] = "Осталось"
 L["AVAILABLE_RANKS"] = "Доступно уровней"
 L["ARTIFACT_KNOWLEDGE"] = "Знание артефакта"
 
-L["SHOW_BUTTON_TEXT"] = true -- Needs Translation
+L["SHOW_BUTTON_TEXT"] = "Show Button Text" -- TODO: To Translate
 
--- Travel (Translation needed)
-L["HEARTHSTONE"] = true
-L["M_PLUS_TELEPORTS"] = true
-L["ONLY_SHOW_CURRENT_SEASON"] = true
-L["MYTHIC_PLUS_TELEPORTS"] = true
-L["HIDE_M_PLUS_TELEPORTS_TEXT"] = true -- Needs Translate
-L["SHOW_MYTHIC_PLUS_TELEPORTS"] = true
-L["USE_RANDOM_HEARTHSTONE"] = true
+-- Travel
+L["HEARTHSTONE"] = "Hearthstone" -- TODO: To Translate
+L["M_PLUS_TELEPORTS"] = "M+ Teleports" -- TODO: To Translate
+L["ONLY_SHOW_CURRENT_SEASON"] = "Only show current season" -- TODO: To Translate
+L["MYTHIC_PLUS_TELEPORTS"] = "Mythic+ Teleports" -- TODO: To Translate
+L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Hide M+ Teleports text" -- TODO: To Translate
+L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Show Mythic+ Teleports" -- TODO: To Translate
+L["USE_RANDOM_HEARTHSTONE"] = "Use Random Hearthstone" -- TODO: To Translate
 local retrievingData = "Получение данных..."
 L["RETRIEVING_DATA"] = retrievingData
 L["EMPTY_HEARTHSTONES_LIST"] = "Если вы видите '" .. retrievingData .. "' в списке ниже, просто переключите вкладку или откройте это меню заново, чтобы обновить данные."
-L["HEARTHSTONES_SELECT"] = true
-L["HEARTHSTONES_SELECT_DESC"] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)"
-L["HIDE_HEARTHSTONE_BUTTON"] = true -- To Translate
-L["HIDE_PORT_BUTTON"] = true -- To Translate
-L["HIDE_HOME_BUTTON"] = true -- To Translate
-L["HIDE_HEARTHSTONE_TEXT"] = true -- To Translate
-L["HIDE_PORT_TEXT"] = true -- To Translate
-L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = true -- To Translate
-L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Hide the hearthstone bind location and the select port button in the tooltip." -- To Translate
-L["NOT_LEARNED"] = true -- To Translate
-L["SHOW_UNLEARNED_TELEPORTS"] = true -- To Translate
-L["HIDE_BUTTON_DURING_OFF_SEASON"] = true -- To Translate
+L["HEARTHSTONES_SELECT"] = "Hearthstones Select" -- TODO: To Translate
+L["HEARTHSTONES_SELECT_DESC"] = "Select which hearthstones to use (be careful if you select multiple hearthstones, you might want to check the 'Hearthstones Select' option)" -- TODO: To Translate
+L["HIDE_HEARTHSTONE_BUTTON"] = "Hide Hearthstone Button" -- TODO: To Translate
+L["HIDE_PORT_BUTTON"] = "Hide Port Button" -- TODO: To Translate
+L["HIDE_HOME_BUTTON"] = "Hide Home Button" -- TODO: To Translate
+L["HIDE_HEARTHSTONE_TEXT"] = "Hide Hearthstone Text" -- TODO: To Translate
+L["HIDE_PORT_TEXT"] = "Hide Port Text" -- TODO: To Translate
+L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = "Hide Additional Tooltip Text" -- TODO: To Translate
+L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Hide the hearthstone bind location and the select port button in the tooltip." -- TODO: To Translate
+L["NOT_LEARNED"] = "Not learned" -- TODO: To Translate
+L["SHOW_UNLEARNED_TELEPORTS"] = "Show unlearned teleports" -- TODO: To Translate
+L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Hide button during off-season" -- TODO: To Translate
 
 -- House/Home Selection
-L["HOME"] = true -- To Translate
-L["UNKNOWN_HOUSE"] = true -- To Translate
-L["HOUSE"] = true -- To Translate
-L["PLOT"] = true -- To Translate
-L["SELECTED"] = true -- To Translate
-L["CHANGE_HOME"] = true -- To Translate
-L["NO_HOUSES_OWNED"] = true -- To Translate
-L["VISIT_SELECTED_HOME"] = true -- To Translate
+L["HOME"] = "Home" -- TODO: To Translate
+L["UNKNOWN_HOUSE"] = "Unknown House" -- TODO: To Translate
+L["HOUSE"] = "House" -- TODO: To Translate
+L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
+L["SELECTED"] = "Selected" -- TODO: To Translate
+L["CHANGE_HOME"] = "Change Home" -- TODO: To Translate
+L["NO_HOUSES_OWNED"] = "No Houses Owned" -- TODO: To Translate
+L["VISIT_SELECTED_HOME"] = "Visit Selected Home" -- TODO: To Translate
 
-L["CLASSIC"] = true
+L["CLASSIC"] = "Classic"
 L["Burning Crusade"] = true
 L["Wrath of the Lich King"] = true
 L["Cataclysm"] = true
@@ -260,23 +261,23 @@ L["Midnight"] = true
 L["CURRENT_SEASON"] = true
 
 -- Profile Import/Export
-L["PROFILE_SHARING"] = true
+L["PROFILE_SHARING"] = "Profile Sharing" -- TODO: To Translate
 
-L["INVALID_IMPORT_STRING"] = true
-L["FAILED_DECODE_IMPORT_STRING"] = true
-L["FAILED_DECOMPRESS_IMPORT_STRING"] = true
-L["FAILED_DESERIALIZE_IMPORT_STRING"] = true
-L["INVALID_PROFILE_FORMAT"] = true
-L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] = true
+L["INVALID_IMPORT_STRING"] = "Invalid import string" -- TODO: To Translate
+L["FAILED_DECODE_IMPORT_STRING"] = "Failed to decode import string" -- TODO: To Translate
+L["FAILED_DECOMPRESS_IMPORT_STRING"] = "Failed to decompress import string" -- TODO: To Translate
+L["FAILED_DESERIALIZE_IMPORT_STRING"] = "Failed to deserialize import string" -- TODO: To Translate
+L["INVALID_PROFILE_FORMAT"] = "Invalid profile format" -- TODO: To Translate
+L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] = "Profile imported successfully as" -- TODO: To Translate
 
-L["COPY_EXPORT_STRING"] = true
-L["PASTE_IMPORT_STRING"] = true
-L["IMPORT_EXPORT_PROFILES_DESC"] = true
-L["PROFILE_IMPORT_EXPORT"] = true
-L["EXPORT_PROFILE"] = true
-L["EXPORT_PROFILE_DESC"] = true
-L["IMPORT_PROFILE"] = true
-L["IMPORT_PROFILE_DESC"] = true
+L["COPY_EXPORT_STRING"] = "Copy the export string below:" -- TODO: To Translate
+L["PASTE_IMPORT_STRING"] = "Paste the import string below:" -- TODO: To Translate
+L["IMPORT_EXPORT_PROFILES_DESC"] = "Import or export your profiles to share them with other players." -- TODO: To Translate
+L["PROFILE_IMPORT_EXPORT"] = "Profile Import/Export" -- TODO: To Translate
+L["EXPORT_PROFILE"] = "Export Profile" -- TODO: To Translate
+L["EXPORT_PROFILE_DESC"] = "Export your current profile settings" -- TODO: To Translate
+L["IMPORT_PROFILE"] = "Import Profile" -- TODO: To Translate
+L["IMPORT_PROFILE_DESC"] = "Import a profile from another player" -- TODO: To Translate
 
 -- Changelog
 L["DATE_FORMAT"] = "%day%-%month%-%year%"
@@ -284,9 +285,9 @@ L["VERSION"] = "Версия"
 L["IMPORTANT"] = "Важные"
 L["NEW"] = "Новые"
 L["IMPROVEMENT"] = "Улучшения"
-L["BUGFIX"] = true -- To Translate
+L["BUGFIX"] = "Bugfix" -- TODO: To Translate
 L["CHANGELOG"] = "Журнал изменений"
 
 -- Vault Module
-L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts."
-L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level."
+L["GREAT_VAULT_DISABLED"] = true -- TODO: To Translate
+L["MAX_LEVEL_DISCLAIMER"] = true -- TODO: To Translate

@@ -6,6 +6,8 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "deDE", false, false)
 if not L then return end
 
+-- NOTE : Strings that requires translation are marked with -- TODO: To Translate
+
 L["MODULES"] = "Module"
 L["LEFT_CLICK"] = "Links-Klick"
 L["RIGHT_CLICK"] = "Rechts-Klick"
@@ -45,17 +47,17 @@ L["BEHAVIOR"] = "Verhalten"
 L["SPACING"] = "Abstand"
 
 -- Modules Positioning
-L["MODULES_POSITIONING"] = true
-L["ENABLE_FREE_PLACEMENT"] = true
-L["ENABLE_FREE_PLACEMENT_DESC"] = true
-L["RESET_ALL_POSITIONS"] = true
-L["RESET_ALL_POSITIONS_DESC"] = true
-L["ANCHOR_POINT"] = true
-L["X_POSITION"] = true
-L["RESET_POSITION"] = true
-L["RESET_POSITION_DESC"] = true
-L["RECAPTURE_INITIAL_POSITIONS"] = true
-L["RECAPTURE_INITIAL_POSITIONS_DESC"] = true
+L["MODULES_POSITIONING"] = "Modules Positioning" -- TODO: To Translate
+L["ENABLE_FREE_PLACEMENT"] = "Enable free placement" -- TODO: To Translate
+L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors" -- TODO: To Translate
+L["RESET_ALL_POSITIONS"] = "Reset All Positions" -- TODO: To Translate
+L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions" -- TODO: To Translate
+L["ANCHOR_POINT"] = "Anchor Point" -- TODO: To Translate
+L["X_POSITION"] = "X Position" -- TODO: To Translate
+L["RESET_POSITION"] = "Reset Position" -- TODO: To Translate
+L["RESET_POSITION_DESC"] = "Reset to the anchored position" -- TODO: To Translate
+L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions" -- TODO: To Translate
+L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions" -- TODO: To Translate
 
 -- Positioning Options
 L["BAR_WIDTH"] = "Leistenbreite"
@@ -83,13 +85,13 @@ L["HOVER"] = "Mouseover"
 L["MICROMENU"] = "Mikromenü"
 L["SHOW_SOCIAL_TOOLTIPS"] = "Social Tooltips anzeigen"
 L["SHOW_ACCESSIBILITY_TOOLTIPS"] = "Barrierefreiheits Tooltips anzeigen"
-L["BLIZZARD_MICROMENU"] = true -- No Translate needed
-L["DISABLE_BLIZZARD_MICROMENU"] = "Deaktiviert Blizzard Micromenu"
+L["BLIZZARD_MICROMENU"] = "Blizzard Mikromenü"
+L["DISABLE_BLIZZARD_MICROMENU"] = "Deaktiviert Blizzard Mikromenü"
 L["KEEP_QUEUE_STATUS_ICON"] = "Zeigt Wartenschlangen Statussymbol"
-L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
+L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
 L["BLIZZARD_BAGS_BAR"] = "Blizzard Taschenleiste"
 L["DISABLE_BLIZZARD_BAGS_BAR"] = "Deaktiviert Blizzard Taschenleiste"
-L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
+L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
 L["MAIN_MENU_ICON_RIGHT_SPACING"] = "Hauptmenü Symbolabstand Rechts"
 L["ICON_SPACING"] = "Symbolabstand"
 L["HIDE_BNET_APP_FRIENDS"] = "BNet App-Freunde verbergen"
@@ -119,9 +121,8 @@ L["SHOW_SHOP_BUTTON"] = "Zeigt Shop Taste"
 L["SHOW_HELP_BUTTON"] = "Zeigt Hilfe Taste"
 L["SHOW_HOUSING_BUTTON"] = "Zeigt Housing Taste"
 L["NO_INFO"] = "Keine Informationen"
-L["CLASSIC"] = true -- No Translate needed
 L["ALLIANCE"] = "Allianz"
-L["HORDE"] = true -- No Translate needed
+L["HORDE"] = "Horde" -- No Translate needed
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Haltbarkeitswarnschwelle"
 L["SHOW_ITEM_LEVEL"] = "Gegenstandsstufe anzeigen"
@@ -172,7 +173,7 @@ L["CURRENCY_NUMBER"] = "Anzahl der Währungen auf der Leiste"
 L["CURRENCY_SELECTION"] = "Währungsauswahl"
 L["SELECT_ALL"] = "Alle auswählen"
 L["UNSELECT_ALL"] = "Alles abwählen"
-L["OPEN_XIV_CURRENCY_OPTIONS"] = true -- To Translate
+L["OPEN_XIV_CURRENCY_OPTIONS"] = "Äffne XIV Währungseinstellungen"
 
 -- System
 L["WORLD_PING"] = "Welt-Ping anzeigen"
@@ -191,7 +192,7 @@ L["REPUTATION_COLORS_REPUTATION"] = "Verwendet Ruffarben für die Rufleiste."
 L["FLASH_PARAGON_REWARD"] = "Aufblitzen bei Paragonbelohnung"
 L["PROGRESS"] = "Fortschritt"
 L["RANK"] = "Rang"
-L["PARAGON"] = true -- No Translate needed
+L["PARAGON"] = "Paragon" -- No Translate needed
 
 L["USE_CLASS_COLORS"] = "Klassenfarben benutzen"
 L["COOLDOWNS"] = "Abklingzeiten"
@@ -231,21 +232,21 @@ L["HIDE_HEARTHSTONE_TEXT"] = "Versteckt Ruhesteintext"
 L["HIDE_PORT_TEXT"] = "Versteckt Porttext"
 L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = "Zusätzlichen Tooltiptext ausblenden"
 L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Blende den Hearthstone-Bindungsort und die Taste zur Portauswahl im Tooltip aus."
-L["NOT_LEARNED"] = true -- To Translate
-L["SHOW_UNLEARNED_TELEPORTS"] = true -- To Translate
-L["HIDE_BUTTON_DURING_OFF_SEASON"] = true -- To Translate
+L["NOT_LEARNED"] = "Nicht erlernt"
+L["SHOW_UNLEARNED_TELEPORTS"] = "Zeigt ungelernte Teleports"
+L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Versteckt Taste ausserhalb der Saeson"
 
 -- House/Home Selection
 L["HOME"] = "Zuhause"
 L["UNKNOWN_HOUSE"] = "Unbekanntes Haus"
 L["HOUSE"] = "Haus"
-L["PLOT"] = true -- No Translate needed
+L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
 L["SELECTED"] = "Ausgewählt"
 L["CHANGE_HOME"] = "Ändere Zuhause"
 L["NO_HOUSES_OWNED"] = "Kein eigenenes Haus"
 L["VISIT_SELECTED_HOME"] = "Besuche ausgewähltes Haus"
 
-L["CLASSIC"] = true -- No Translate needed
+L["CLASSIC"] = "Classic" -- No Translate needed
 L["Burning Crusade"] = true -- No Translate needed
 L["Wrath of the Lich King"] = true -- No Translate needed
 L["Cataclysm"] = true -- No Translate needed
@@ -271,16 +272,16 @@ L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] = "Profil erfolgreich importiert als"
 
 L["COPY_EXPORT_STRING"] = "Kopiere die unten stehende Exportzeichenfolge:"
 L["PASTE_IMPORT_STRING"] = "Füge die Importzeichenfolge unten ein:"
-L["IMPORT_EXPORT_PROFILES_DESC"] = "Importiere oder exportiere Deine Profile, um sie mit anderen Spielern zu teilen."
-L["PROFILE_IMPORT_EXPORT"] = true -- No Translate needed
+L["IMPORT_EXPORT_PROFILES_DESC"] = "Importiere oder Exportiere Deine Profile, um sie mit anderen Spielern zu teilen."
+L["PROFILE_IMPORT_EXPORT"] = "Profile Import/Export" -- No Translate needed
 L["EXPORT_PROFILE"] = "Profil Exportieren"
 L["EXPORT_PROFILE_DESC"] = "Exportiere Ihre aktuellen Profileinstellungen"
 L["IMPORT_PROFILE"] = "Profil Importieren"
 L["IMPORT_PROFILE_DESC"] = "Importiere ein Profil von einem anderen Spieler"
 
 -- Changelog
-L["DATE_FORMAT"] = true -- No Translate needed
-L["VERSION"] = true -- No Translate needed
+L["DATE_FORMAT"] = "%month%-%day%-%year%" -- No Translate needed
+L["VERSION"] = "Version" -- No Translate needed
 L["IMPORTANT"] = "Wichtig"
 L["NEW"] = "Neu"
 L["IMPROVEMENT"] = "Verbesserung"
@@ -288,5 +289,5 @@ L["BUGFIX"] = "Fehlerbehebung"
 L["CHANGELOG"] = "Änderungen"
 
 -- Vault Module
-L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts."
-L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level."
+L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts." -- TODO: To Translate
+L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level." -- TODO: To Translate

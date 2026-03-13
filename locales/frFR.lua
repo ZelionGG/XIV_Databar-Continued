@@ -119,9 +119,8 @@ L["SHOW_SHOP_BUTTON"] = "Afficher le bouton Boutique"
 L["SHOW_HELP_BUTTON"] = "Afficher le bouton Aide"
 L["SHOW_HOUSING_BUTTON"] = "Afficher le bouton Logis"
 L["NO_INFO"] = "Pas d'information"
-L["CLASSIC"] = true
-L["ALLIANCE"] = true
-L["HORDE"] = true
+L["ALLIANCE"] = "Alliance"
+L["HORDE"] = "Horde"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Seuil d'avertissement de durabilité"
 L["SHOW_ITEM_LEVEL"] = "Afficher le niveau d'équipement"
@@ -239,13 +238,13 @@ L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Masquer le bouton pendant l’entre-saison
 L["HOME"] = "Logis"
 L["UNKNOWN_HOUSE"] = "Maison Inconnue"
 L["HOUSE"] = "Logis"
-L["PLOT"] = "Parcelle"
+L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
 L["SELECTED"] = "Sélectionné"
 L["CHANGE_HOME"] = "Changer de Logis"
 L["NO_HOUSES_OWNED"] = "Aucun logis possédé"
 L["VISIT_SELECTED_HOME"] = "Visiter le logis sélectionné"
 
-L["CLASSIC"] = true
+L["CLASSIC"] = "Classic"
 L["Burning Crusade"] = true
 L["Wrath of the Lich King"] = true
 L["Cataclysm"] = true
@@ -279,9 +278,9 @@ L["IMPORT_PROFILE"] = "Importer un profil"
 L["IMPORT_PROFILE_DESC"] = "Importer un profil d'un autre joueur"
 
 -- Changelog
-L["DATE_FORMAT"] = "%month%-%day%-%year%"
-L["VERSION"] = true
-L["IMPORTANT"] = true
+L["DATE_FORMAT"] = "%day%/%month%/%year%"
+L["VERSION"] = "Version"
+L["IMPORTANT"] = "Important"
 L["NEW"] = "Nouveau"
 L["IMPROVEMENT"] = "Améliorations"
 L["BUGFIX"] = "Corrections de bugs"
