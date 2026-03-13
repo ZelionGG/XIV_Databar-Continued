@@ -152,7 +152,7 @@ function VaultModule:ShowTooltip()
             local label = TYPE_LABELS[typeId]
             local activities = activitiesByType[typeId] or {}
             local summary = BuildSlotSummary(typeId, activities)
-            GameTooltip:AddDoubleLine(label or ' ', summary or (L['None'] or 'None'), r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine(label or ' ', summary or (L["None"] or 'None'), r, g, b, 1, 1, 1)
         end
 
         local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
@@ -167,7 +167,7 @@ function VaultModule:ShowTooltip()
             GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
         end
     else
-        GameTooltip:AddLine(L['GREAT_VAULT_DISABLED'], 1, 1, 1)
+        GameTooltip:AddLine(L["GREAT_VAULT_DISABLED"], 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -304,7 +304,7 @@ function VaultModule:GetConfig()
         type = "group",
         args = {
             maxLevelDisclaimer = {
-                name = "|TInterface\\EncounterJournal\\UI-EJ-WarningTextIcon:16:16:0:0|t |cffffd200" .. L['MAX_LEVEL_DISCLAIMER'] .. "|r",
+                name = "|TInterface\\EncounterJournal\\UI-EJ-WarningTextIcon:16:16:0:0|t |cffffd200" .. L["MAX_LEVEL_DISCLAIMER"] .. "|r",
                 order = 0,
                 type = "description",
                 fontSize = "large",
@@ -331,7 +331,7 @@ function VaultModule:GetConfig()
                 end
             },
             showLabel = {
-                name = L['Show Button Text'],
+                name = L["SHOW_BUTTON_TEXT"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -343,7 +343,7 @@ function VaultModule:GetConfig()
                 end
             },
             showTooltip = {
-                name = L['Show Tooltips'],
+                name = L["SHOW_TOOLTIPS"],
                 order = 3,
                 type = "toggle",
                 get = function()

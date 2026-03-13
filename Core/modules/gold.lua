@@ -21,11 +21,11 @@ local function shortenNumber(num)
     if num < 1000 then
         return tostring(num)
     elseif num < 1000000 then
-        return format("%.1f" .. L['k'], num / 1000)
+        return format("%.1f" .. L["k"], num / 1000)
     elseif num < 1000000000 then
-        return format("%.2f" .. L['M'], num / 1000000)
+        return format("%.2f" .. L["M"], num / 1000000)
     else
-        return format("%.3f" .. L['B'], num / 1000000000)
+        return format("%.3f" .. L["B"], num / 1000000000)
     end
 end
 
@@ -376,14 +376,14 @@ function GoldModule:ShowTooltipClassic()
                             xb.constants.playerFactionLocal .. " " .. xb.constants.playerRealm .. "|cFFFFFFFF]|r",
         r, g, b)
     if not xb.db.profile.modules.gold.showSmallCoins then
-        GameTooltip:AddLine(L["Gold rounded values"], 1, 1, 1)
+        GameTooltip:AddLine(L["GOLD_ROUNDED_VALUES"], 1, 1, 1)
     end
     GameTooltip:AddLine(" ")
 
     local playerData, store = getPlayerData()
     if playerData then
-        GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(playerData.sessionMoney), true), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(math.abs(playerData.dailyMoney), true), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], moneyWithTexture(math.abs(playerData.sessionMoney), true), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], moneyWithTexture(math.abs(playerData.dailyMoney), true), r, g, b, 1, 1, 1)
     end
 
     GameTooltip:AddLine(" ")
@@ -403,7 +403,7 @@ function GoldModule:ShowTooltipClassic()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine(TOTAL, self:FormatCoinText(totalGold), r, g, b, 1, 1, 1)
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Bags'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["TOGGLE_BAGS"], r, g, b, 1, 1, 1)
     GameTooltip:Show()
 end
 
@@ -418,14 +418,14 @@ function GoldModule:ShowTooltipMainline()
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. BONUS_ROLL_REWARD_MONEY .. "|cFFFFFFFF]|r", r, g, b)
 
     if not xb.db.profile.modules.gold.showSmallCoins then
-        GameTooltip:AddLine(L["Gold rounded values"], 1, 1, 1)
+        GameTooltip:AddLine(L["GOLD_ROUNDED_VALUES"], 1, 1, 1)
     end
     GameTooltip:AddLine(" ")
 
     local playerData = getGoldStore()[getCharacterKey()]
     if playerData then
-        GameTooltip:AddDoubleLine(L['Session Total'], self:FormatGold(math.abs(playerData.sessionMoney)), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L['Daily Total'], self:FormatGold(math.abs(playerData.dailyMoney)), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], self:FormatGold(math.abs(playerData.sessionMoney)), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], self:FormatGold(math.abs(playerData.dailyMoney)), r, g, b, 1, 1, 1)
     end
 
     local realmCharacters = {}
@@ -502,7 +502,7 @@ function GoldModule:ShowTooltipMainline()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine(TOTAL, self:FormatGold(totalGold), r, g, b, 1, 1, 1)
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Bags'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["TOGGLE_BAGS"], r, g, b, 1, 1, 1)
     GameTooltip:Show()
 end
 
@@ -603,7 +603,7 @@ end
 function GoldModule:BuildMainlineCharacterOptions()
     local optTable = {
         header = {
-            name = "|cff82c5ff" .. L["Registered characters"] .. "|r",
+            name = "|cff82c5ff" .. L["REGISTERED_CHARACTERS"] .. "|r",
             type = "header",
             order = 0
         },
@@ -707,7 +707,7 @@ function GoldModule:GetConfig()
             width = "full"
         },
         showSmallCoins = {
-            name = L['Always Show Silver and Copper'],
+            name = L["ALWAYS_SHOW_SILVER_COPPER"],
             order = 1,
             type = "toggle",
             get = function()
@@ -719,7 +719,7 @@ function GoldModule:GetConfig()
             end
         },
         shortThousands = {
-            name = L['Shorten Gold'],
+            name = L["SHORTEN_GOLD"],
             order = 2,
             type = "toggle",
             get = function()
@@ -731,7 +731,7 @@ function GoldModule:GetConfig()
             end
         },
         showFreeBagSpace = {
-            name = L['Show Free Bag Space'],
+            name = L["SHOW_FREE_BAG_SPACE"],
             order = 3,
             type = "toggle",
             get = function()
@@ -746,7 +746,7 @@ function GoldModule:GetConfig()
 
     if compat.isMainline then
         args.showOtherRealms = {
-            name = L['Show Other Realms'],
+            name = L["SHOW_OTHER_REALMS"],
             order = 4,
             type = "toggle",
             get = function()
@@ -760,12 +760,12 @@ function GoldModule:GetConfig()
 
         args.blizzardBagsBar = {
             type = "group",
-            name = L['Blizzard Bags Bar'],
+            name = L["BLIZZARD_BAGS_BAR"],
             order = 4.5,
             inline = true,
             args = {
                 disableBlizzardBagsBar = {
-                    name = L['Disable Blizzard Bags Bar'],
+                    name = L["DISABLE_BLIZZARD_BAGS_BAR"],
                     order = 1,
                     type = "toggle",
                     width = "full",
@@ -784,7 +784,7 @@ function GoldModule:GetConfig()
                 blizzardBagsBarDisclaimer = {
                     name = function()
                         local addOnName = self:GetExternalActionBarManagerName()
-                        local text = L['Blizzard Bags Bar Disclaimer']
+                        local text = L["BLIZZARD_BAGS_BAR_DISCLAIMER"]
                         if addOnName then
                             text = string.format(text, addOnName)
                         end
@@ -799,7 +799,7 @@ function GoldModule:GetConfig()
         }
 
         args.characters = {
-            name = L['Registered characters'],
+            name = L["REGISTERED_CHARACTERS"],
             type = 'group',
             order = 5,
             args = self:BuildMainlineCharacterOptions()

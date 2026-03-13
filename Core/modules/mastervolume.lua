@@ -79,8 +79,8 @@ function VolumeModule:RegisterEvents()
 
     GameTooltip:AddLine("[|cff6699FF" .. MASTER_VOLUME .. "|r]")
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine("<" .. L['Left-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEUP .. "|r")
-    GameTooltip:AddDoubleLine("<" .. L['Right-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEDOWN .. "|r")
+    GameTooltip:AddDoubleLine("<" .. L["LEFT_CLICK"] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEUP .. "|r")
+    GameTooltip:AddDoubleLine("<" .. L["RIGHT_CLICK"] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEDOWN .. "|r")
     GameTooltip:Show()
   end)
 
@@ -165,7 +165,7 @@ end
 
 function VolumeModule:GetConfig()
   return {
-    name = L['Master Volume'],
+    name = L["MASTER_VOLUME"],
     type = "group",
     args = {
       enable = {
@@ -184,7 +184,7 @@ function VolumeModule:GetConfig()
         width = "full"
       },
 	  step = {
-		name = L["Volume step"],
+		name = L["VOLUME_STEP"],
 		order = 1,
 		type = "range",
 		min = 1,

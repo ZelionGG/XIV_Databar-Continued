@@ -89,7 +89,7 @@ function SystemModule:Refresh()
     end
 
     if db.modules.system.showWorld then
-        self.worldPingText:SetText(L['W'] .. ": 000" .. MILLISECONDS_ABBR)
+        self.worldPingText:SetText(L["W"] .. ": 000" .. MILLISECONDS_ABBR)
     elseif self.worldPing then
         self.worldPingText:SetText('')
     end
@@ -147,9 +147,9 @@ function SystemModule:UpdateTexts()
 
     self.fpsText:SetText(floor(GetFramerate()) .. FPS_ABBR)
     local _, _, homePing, worldPing = GetNetStats()
-    self.pingText:SetText(L['L'] .. ": " .. floor(homePing) .. MILLISECONDS_ABBR)
+    self.pingText:SetText(L["L"] .. ": " .. floor(homePing) .. MILLISECONDS_ABBR)
     if xb.db.profile.modules.system.showWorld then
-        self.worldPingText:SetText(L['W'] .. ": " .. floor(worldPing) .. MILLISECONDS_ABBR)
+        self.worldPingText:SetText(L["W"] .. ": " .. floor(worldPing) .. MILLISECONDS_ABBR)
     end
 end
 
@@ -213,7 +213,7 @@ function SystemModule:SetOnClickScript(prefix)
             else
                 memString = string.format("%.0f KB", floor(memDiff))
             end
-            print("|cff6699FFXIV_Databar|r: " .. L['Cleaned'] .. ": |cffffff00" .. memString)
+            print("|cff6699FFXIV_Databar|r: " .. L["CLEANED"] .. ": |cffffff00" .. memString)
         end
     end)
 end
@@ -291,7 +291,7 @@ function SystemModule:ShowTooltip()
     GameTooltip:SetOwner(self.systemFrame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Memory Usage'] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["MEMORY_USAGE"] .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
 
     local toLoop = xb.db.profile.modules.system.addonsToShow
@@ -314,7 +314,7 @@ function SystemModule:ShowTooltip()
     end
 
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Garbage Collect'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["GARBAGE_COLLECT"], r, g, b, 1, 1, 1)
     GameTooltip:Show()
 end
 
@@ -351,7 +351,7 @@ function SystemModule:GetConfig()
                 width = "full"
             },
             showTooltip = {
-                name = L['Show Tooltips'],
+                name = L["SHOW_TOOLTIPS"],
                 order = 1,
                 type = "toggle",
                 get = function()
@@ -363,7 +363,7 @@ function SystemModule:GetConfig()
                 end
             },
             showWorld = {
-                name = L['Show World Ping'],
+                name = L["WORLD_PING"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -375,7 +375,7 @@ function SystemModule:GetConfig()
                 end
             },
             addonsToShow = {
-                name = L['Addons to Show in Tooltip'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+                name = L["ADDONS_IN_TOOLTIP"], -- DROPDOWN, GoldModule:GetCurrencyOptions
                 type = "range",
                 order = 3,
                 min = 1,
@@ -390,7 +390,7 @@ function SystemModule:GetConfig()
                 end
             },
             showAllOnShift = {
-                name = L['Show All Addons in Tooltip with Shift'],
+                name = L["SHOW_ALL_ADDONS"],
                 order = 4,
                 type = "toggle",
                 get = function()

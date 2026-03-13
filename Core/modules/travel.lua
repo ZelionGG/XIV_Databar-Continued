@@ -51,10 +51,10 @@ end
 -- UTILITY FUNCTIONS - Centralized logic to reduce code duplication
 --------------------------------------------------------------------------------
 
-function TravelModule:GetName() return L['Travel']; end
+function TravelModule:GetName() return L["TRAVEL"]; end
 
 local function GetRetrievingText(id)
-    return L['Retrieving data'] .. " (" .. id .. ")"
+    return L["RETRIEVING_DATA"] .. " (" .. id .. ")"
 end
 
 local function GetItemName(id)
@@ -702,7 +702,7 @@ function TravelModule:SetButtonState(button, icon, text, isActive, isHover)
 end
 
 function TravelModule:FormatCooldown(cdTime)
-    if cdTime <= 0 then return L['Ready'] end
+    if cdTime <= 0 then return L["READY"] end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
     local minutes = string.format("%02.f",
                                   math.floor(cdTime / 60 - (hours * 60)))
@@ -873,7 +873,7 @@ end
 
 -- House selection utility functions
 function TravelModule:GetHouseDisplayName(house)
-    if not house then return L['Unknown House'] end
+    if not house then return L["UNKNOWN_HOUSE"] end
 
     local function IsReadable(value)
         return value and value ~= "" and
@@ -900,7 +900,7 @@ function TravelModule:GetHouseDisplayName(house)
     -- neighborhoodName is often more useful than an opaque GUID.
 
     if IsReadable(house.neighborhoodName) and house.plotID then
-        return house.neighborhoodName .. " - " .. L['Plot'] .. " " ..
+        return house.neighborhoodName .. " - " .. L["PLOT"] .. " " ..
                    tostring(house.plotID)
     end
     if IsReadable(house.neighborhoodName) then
@@ -910,12 +910,12 @@ function TravelModule:GetHouseDisplayName(house)
     -- Readable fallback.
 
     if house.plotID then
-        return L['Plot'] .. " " .. tostring(house.plotID)
+        return L["PLOT"] .. " " .. tostring(house.plotID)
     end
     if house.houseGUID then
-        return L['House'] .. " " .. string.sub(house.houseGUID, 1, 8)
+        return L["HOUSE"] .. " " .. string.sub(house.houseGUID, 1, 8)
     end
-    return L['Unknown House']
+    return L["UNKNOWN_HOUSE"]
 end
 
 function TravelModule:GetSelectedHouse()
@@ -1172,7 +1172,7 @@ function TravelModule:CreateTeleportButton(teleportInfo)
         button:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
         button:EnableMouse(true)
     else
-        button:SetText(teleportInfo.dungeonName .. " (" .. L["Not learned"] .. ")")
+        button:SetText(teleportInfo.dungeonName .. " (" .. L["NOT_LEARNED"] .. ")")
         button:SetAttribute("type", nil)
         button:SetAttribute("spell", nil)
         button:SetAttribute("useOnKeyDown", nil)
@@ -1216,7 +1216,7 @@ function TravelModule:CreatePortPopup()
                                                  self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.portOptionString:SetTextColor(r, g, b, 1)
-    self.portOptionString:SetText(L['Port Options'])
+    self.portOptionString:SetText(L["PORT_OPTIONS"])
     self.portOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.portOptionString:SetPoint('CENTER')
 
@@ -1319,7 +1319,7 @@ function TravelModule:CreateHomePopup()
     self.homeOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.homeOptionString:SetTextColor(r, g, b, 1)
-    self.homeOptionString:SetText(L['Home'])
+    self.homeOptionString:SetText(L["HOME"])
     self.homeOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.homeOptionString:SetPoint('CENTER')
 
@@ -1398,7 +1398,7 @@ function TravelModule:CreateHomePopup()
         end
 
         if not displayName or displayName == "" then
-            displayName = L['Unknown House']
+            displayName = L["UNKNOWN_HOUSE"]
         end
 
         button.textField:SetText(displayName)
@@ -1445,7 +1445,7 @@ function TravelModule:ShowHomeTooltip()
     GameTooltip:SetOwner(self.homeButton, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Home'] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["HOME"] .. "|cFFFFFFFF]|r", r, g, b)
     -- Cooldown display (similar to hearth/port tooltip)
     local visitCd = self:GetHousingCooldown()
     local cdText = self:FormatCooldown(visitCd)
@@ -1455,7 +1455,7 @@ function TravelModule:ShowHomeTooltip()
             local displayName = self:GetHouseDisplayName(house)
             local isSelected = house.houseGUID == xb.db.profile.selectedHouseGuid
             if isSelected then
-                GameTooltip:AddDoubleLine(displayName .. " |cffffffff(" .. L['Selected'] .. ")|r", cdText, r, g, b, 1, 1, 1)
+                GameTooltip:AddDoubleLine(displayName .. " |cffffffff(" .. L["SELECTED"] .. ")|r", cdText, r, g, b, 1, 1, 1)
             else
                 GameTooltip:AddDoubleLine(displayName, cdText, r, g, b, 1, 1, 1)
             end
@@ -1463,13 +1463,13 @@ function TravelModule:ShowHomeTooltip()
 
         GameTooltip:AddLine(" ")
         if self:GetEffectiveHomeAction() == 'return' then
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', HOUSING_DASHBOARD_RETURN, r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', HOUSING_DASHBOARD_RETURN, r, g, b, 1, 1, 1)
         else
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Visit Selected Home'], r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["VISIT_SELECTED_HOME"], r, g, b, 1, 1, 1)
         end
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Home'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["CHANGE_HOME"], r, g, b, 1, 1, 1)
     else
-        GameTooltip:AddLine(L['No Houses Owned'], r, g, b)
+        GameTooltip:AddLine(L["NO_HOUSES_OWNED"], r, g, b)
     end
 
     GameTooltip:Show()
@@ -1507,7 +1507,7 @@ function TravelModule:CreateMythicPopup()
 
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
-                    name = L["Current season"],
+                    name = L["CURRENT_SEASON"],
                     teleports = teleports
                 })
             end
@@ -1564,7 +1564,7 @@ function TravelModule:CreateMythicPopup()
 
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
-                    name = L["Current season"],
+                    name = L["CURRENT_SEASON"],
                     teleports = teleports
                 })
             end
@@ -1579,7 +1579,7 @@ function TravelModule:CreateMythicPopup()
         info.text = '[|cFF' .. string.format('%02x', r * 255) ..
                         string.format('%02x', g * 255) ..
                         string.format('%02x', b * 255) ..
-                        L['Mythic+ Teleports'] .. '|r]'
+                        L["MYTHIC_PLUS_TELEPORTS"] .. '|r]'
         info.notClickable, info.notCheckable = true, true
         UIDropDownMenu_AddButton(info, level)
 
@@ -1858,7 +1858,7 @@ function TravelModule:Refresh()
             local hideMythicText = db.hideMythicText
 
             self.mythicText:SetFont(xb:GetFont(db.text.fontSize))
-            self.mythicText:SetText(hideMythicText and '' or L['M+ Teleports'])
+            self.mythicText:SetText(hideMythicText and '' or L["M_PLUS_TELEPORTS"])
             self.mythicText:SetShown(not hideMythicText)
 
             self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
@@ -1997,7 +1997,7 @@ function TravelModule:ShowTooltip()
         GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
         GameTooltip:ClearLines()
         local r, g, b, _ = unpack(xb:HoverColors())
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
+        GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["TRAVEL_COOLDOWNS"] .. "|cFFFFFFFF]|r", r, g, b)
 
         -- Show hearthstone cooldown using utility function
         local hearthstoneId = 6948 -- Regular Hearthstone ID
@@ -2005,9 +2005,9 @@ function TravelModule:ShowTooltip()
         local hearthCdString = self:FormatCooldown(hearthCooldown)
 
         if(not xb.db.profile.hideAdditionalTooltipText) then
-            GameTooltip:AddDoubleLine(L['Hearthstone'] .. " |cffffffff(" .. GetBindLocation() .. ")|r", hearthCdString, r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["HEARTHSTONE"] .. " |cffffffff(" .. GetBindLocation() .. ")|r", hearthCdString, r, g, b, 1, 1, 1)
         else
-            GameTooltip:AddDoubleLine(L['Hearthstone'], hearthCdString, r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["HEARTHSTONE"], hearthCdString, r, g, b, 1, 1, 1)
         end
 
         -- Show teleport cooldowns using utility functions
@@ -2022,7 +2022,7 @@ function TravelModule:ShowTooltip()
 
                     local isSelectedPort = label == combatPortText
                     local selectedLabel = (isSelectedPort and not xb.db.profile.hideAdditionalTooltipText)
-                        and (label .. " |cffffffff(" .. L['Selected'] .. ")|r")
+                        and (label .. " |cffffffff(" .. L["SELECTED"] .. ")|r")
                         or label
 
                     if isSpell then
@@ -2041,7 +2041,7 @@ function TravelModule:ShowTooltip()
         end
 
         GameTooltip:AddLine(" ")
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Port Option'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["CHANGE_PORT_OPTION"], r, g, b, 1, 1, 1)
         GameTooltip:Show()
 
         -- Update the tooltip every second
@@ -2165,7 +2165,7 @@ function TravelModule:GetHearthstoneValues()
                 if xb.db.profile.hearthstoneCache[v] then
                     values[v] = xb.db.profile.hearthstoneCache[v]
                 else
-                    values[v] = L['Retrieving data'] .. " (" .. v .. ")"
+                    values[v] = L["RETRIEVING_DATA"] .. " (" .. v .. ")"
                 end
             end
         end
@@ -2196,7 +2196,7 @@ function TravelModule:GetConfig()
                 width = "full"
             },
             hideHearthstoneButton = {
-                name = L['Hide Hearthstone Button'],
+                name = L["HIDE_HEARTHSTONE_BUTTON"],
                 order = 12,
                 type = "toggle",
                 get = function()
@@ -2209,7 +2209,7 @@ function TravelModule:GetConfig()
                 width = "2"
             },
             hideHearthstoneText = {
-                name = L['Hide Hearthstone Text'],
+                name = L["HIDE_HEARTHSTONE_TEXT"],
                 order = 12.5,
                 type = "toggle",
                 get = function()
@@ -2223,7 +2223,7 @@ function TravelModule:GetConfig()
                 width = "1"
             },
             hidePortButton = {
-                name = L['Hide Port Button'],
+                name = L["HIDE_PORT_BUTTON"],
                 order = 14,
                 type = "toggle",
                 get = function()
@@ -2236,7 +2236,7 @@ function TravelModule:GetConfig()
                 width = "2"
             },
             hidePortText = {
-                name = L['Hide Port Text'],
+                name = L["HIDE_PORT_TEXT"],
                 order = 14.5,
                 type = "toggle",
                 get = function()
@@ -2250,8 +2250,8 @@ function TravelModule:GetConfig()
                 width = "1"
             },
             hideAdditionalTooltipText = {
-                name = L['Hide Additional Tooltip Text'],
-                desc = L['Hide Additional Tooltip Text Description'],
+                name = L["HIDE_ADDITIONAL_TOOLTIP_TEXT"],
+                desc = L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"],
                 order = 15,
                 type = "toggle",
                 get = function()
@@ -2264,7 +2264,7 @@ function TravelModule:GetConfig()
                 width = "1"
             },
             hideHomeButton = {
-                name = L['Hide Home Button'],
+                name = L["HIDE_HOME_BUTTON"],
                 order = 16,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2279,12 +2279,12 @@ function TravelModule:GetConfig()
             },
             mythicHeader = {
                 order = 18,
-                name = L['Mythic+ Teleports'],
+                name = L["MYTHIC_PLUS_TELEPORTS"],
                 type = 'header',
                 hidden = function() return not compat.isMainline end
             },
             enableMythicPortals = {
-                name = L['Show Mythic+ Teleports'],
+                name = L["SHOW_MYTHIC_PLUS_TELEPORTS"],
                 order = 20,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2298,7 +2298,7 @@ function TravelModule:GetConfig()
                 width = 1.2
             },
             hideMythicText = {
-                name = L['Hide M+ Teleports text'],
+                name = L["HIDE_M_PLUS_TELEPORTS_TEXT"],
                 order = 22,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2312,7 +2312,7 @@ function TravelModule:GetConfig()
                 width = 1.2
             },
             hideMythicInOffSeason = {
-                name = L["Hide button during off-season"],
+                name = L["HIDE_BUTTON_DURING_OFF_SEASON"],
                 order = 23,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2326,7 +2326,7 @@ function TravelModule:GetConfig()
                 width = 1.2
             },
             curSeasonOnly = {
-                name = L['Only show current season'],
+                name = L["ONLY_SHOW_CURRENT_SEASON"],
                 order = 25,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2340,7 +2340,7 @@ function TravelModule:GetConfig()
                 width = 1.2
             },
             showUnknownTeleports = {
-                name = L["Show unlearned teleports"],
+                name = L["SHOW_UNLEARNED_TELEPORTS"],
                 order = 26,
                 type = "toggle",
                 hidden = function() return not compat.isMainline end,
@@ -2359,7 +2359,7 @@ function TravelModule:GetConfig()
                 type = 'header',
             },
             randomizeHs = {
-                name = L['Use Random Hearthstone'],
+                name = L["USE_RANDOM_HEARTHSTONE"],
                 order = 30,
                 type = "toggle",
                 get = function()
@@ -2372,14 +2372,14 @@ function TravelModule:GetConfig()
                 width = "full"
             },
             information = {
-                name = L['Empty Hearthstones List'],
+                name = L["EMPTY_HEARTHSTONES_LIST"],
                 order = 40,
                 type = "description"
             },
             selectedHearthstones = {
                 order = 50,
-                name = L['Hearthstones Select'],
-                desc = L['Hearthstones Select Desc'],
+                name = L["HEARTHSTONES_SELECT"],
+                desc = L["HEARTHSTONES_SELECT_DESC"],
                 type = "multiselect",
                 values = function() return self:GetHearthstoneValues() end,
                 get = function(_, key)

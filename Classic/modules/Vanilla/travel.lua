@@ -9,7 +9,7 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 local TravelModule = xb:NewModule("TravelModule", 'AceEvent-3.0')
 
 function TravelModule:GetName()
-    return L['Travel'];
+    return L["TRAVEL"];
 end
 
 function TravelModule:OnInitialize()
@@ -163,7 +163,7 @@ end
 
 function TravelModule:FormatCooldown(cdTime)
     if cdTime <= 0 then
-        return L['Ready']
+        return L["READY"]
     end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
     local minutes = string.format("%02.f", math.floor(cdTime / 60 - (hours * 60)))
@@ -284,7 +284,7 @@ end
 --     self.portOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
 --     local r, g, b, _ = unpack(xb:HoverColors())
 --     self.portOptionString:SetTextColor(r, g, b, 1)
---     self.portOptionString:SetText(L['Port Options'])
+--     self.portOptionString:SetText(L["PORT_OPTIONS"])
 --     self.portOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
 --     self.portOptionString:SetPoint('CENTER')
 
@@ -454,7 +454,7 @@ function TravelModule:ShowTooltip()
     --     GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
     --     GameTooltip:ClearLines()
     --     local r, g, b, _ = unpack(xb:HoverColors())
-    --     GameTooltip:AddLine("|cFFFFFFFF[|r" .. L['Travel Cooldowns'] .. "|cFFFFFFFF]|r", r, g, b)
+    --     GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["TRAVEL_COOLDOWNS"] .. "|cFFFFFFFF]|r", r, g, b)
     --     for i, v in pairs(self.portOptions) do
     --         if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
     --             if IsUsableItem(v.portId) then
@@ -470,7 +470,7 @@ function TravelModule:ShowTooltip()
     --         end
     --     end
     --     GameTooltip:AddLine(" ")
-    --     GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Change Port Option'], r, g, b, 1, 1, 1)
+    --     GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["CHANGE_PORT_OPTION"], r, g, b, 1, 1, 1)
     --     GameTooltip:Show()
     -- end
 end

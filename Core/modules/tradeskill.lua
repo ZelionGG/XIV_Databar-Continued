@@ -453,9 +453,9 @@ function TradeskillModule:ShowTooltip()
     end
 
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Toggle Profession Frame'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["TOGGLE_PROFESSION_FRAME"], r, g, b, 1, 1, 1)
     if compat.isMainline or IsCataClassic() then
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Toggle Profession Spellbook'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["TOGGLE_PROFESSION_SPELLBOOK"], r, g, b, 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -497,7 +497,7 @@ function TradeskillModule:GetConfig()
                 width = "full"
             },
             barCC = {
-                name = L['Use Class Colors'],
+                name = L["USE_CLASS_COLORS"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -509,7 +509,7 @@ function TradeskillModule:GetConfig()
                 end
             },
             showTooltip = {
-                name = L['Show Tooltips'],
+                name = L["SHOW_TOOLTIPS"],
                 order = 3,
                 type = "toggle",
                 get = function()

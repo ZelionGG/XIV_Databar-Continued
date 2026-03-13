@@ -112,7 +112,7 @@ function XIVBar:SetupOptions()
     }
 
     local moduleOptions = {
-        name = L['Modules'],
+        name = L["MODULES"],
         type = "group",
         args = {}
     }
@@ -120,30 +120,30 @@ function XIVBar:SetupOptions()
     local changelogOptions = {
         type = "group",
         childGroups = "select",
-        name = L["Changelog"],
+        name = L["CHANGELOG"],
         args = {}
     }
 
     local profileSharingOptions = {
-        name = L["Profile Sharing"],
+        name = L["PROFILE_SHARING"],
         type = "group",
         args = {
             header = {
                 order = 1,
                 type = "header",
-                name = L["Profile Import/Export"],
+                name = L["PROFILE_IMPORT_EXPORT"],
             },
             desc = {
                 order = 2,
                 type = "description",
-                name = L["Import or export your profiles to share them with other players."],
+                name = L["IMPORT_EXPORT_PROFILES_DESC"],
                 fontSize = "medium",
             },
             export = {
                 order = 3,
                 type = "execute",
-                name = L["Export Profile"],
-                desc = L["Export your current profile settings"],
+                name = L["EXPORT_PROFILE"],
+                desc = L["EXPORT_PROFILE_DESC"],
                 func = function()
                     local exportString = XIVBar:ExportProfile()
                     if exportString then
@@ -161,8 +161,8 @@ function XIVBar:SetupOptions()
             import = {
                 order = 4,
                 type = "execute",
-                name = L["Import Profile"],
-                desc = L["Import a profile from another player"],
+                name = L["IMPORT_PROFILE"],
+                desc = L["IMPORT_PROFILE_DESC"],
                 func = function()
                     StaticPopup_Show("XIVBAR_IMPORT_PROFILE")
                 end,
@@ -221,7 +221,7 @@ function XIVBar:SetupOptions()
         local dateTable = {strsplit("/", data.release_date)}
         local dateString = data.release_date
         if #dateTable == 3 then
-            dateString = L["%month%-%day%-%year%"]
+            dateString = L["DATE_FORMAT"]
             dateString = gsub(dateString, "%%year%%", dateTable[1])
             dateString = gsub(dateString, "%%month%%", dateTable[2])
             dateString = gsub(dateString, "%%day%%", dateTable[3])
@@ -235,7 +235,7 @@ function XIVBar:SetupOptions()
                 version = {
                     order = 2,
                     type = "description",
-                    name = L["Version"] .. " " .. orange(versionString) ..
+                    name = L["VERSION"] .. " " .. orange(versionString) ..
                         " - |cffbbbbbb" .. dateString .. "|r",
                     fontSize = "large"
                 }
@@ -257,7 +257,7 @@ function XIVBar:SetupOptions()
             page.importantHeader = {
                 order = 3,
                 type = "header",
-                name = orange(L["Important"])
+                name = orange(L["IMPORTANT"])
             }
             page.important = {
                 order = 4,
@@ -287,7 +287,7 @@ function XIVBar:SetupOptions()
             page.bugfixHeader = {
                 order = 9,
                 type = "header",
-                name = orange(L["Bugfix"]) or orange("Bugfix")
+                name = orange(L["BUGFIX"]) or orange("Bugfix")
             }
             page.bugfix = {
                 order = 10,
@@ -317,7 +317,7 @@ function XIVBar:SetupOptions()
             page.newHeader = {
                 order = 5,
                 type = "header",
-                name = orange(L["New"])
+                name = orange(L["NEW"])
             }
             page.new = {
                 order = 6,
@@ -347,7 +347,7 @@ function XIVBar:SetupOptions()
             page.improvmentHeader = {
                 order = 7,
                 type = "header",
-                name = orange(L["Improvment"])
+                name = orange(L["IMPROVEMENT"])
             }
             page.improvment = {
                 order = 8,
@@ -378,9 +378,9 @@ function XIVBar:SetupOptions()
 
     -- Add to Blizzard options
     local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L['Modules'], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L['Modules Positioning'], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L['Changelog'], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_ProfileSharing", 'Profile Sharing', "XIV Bar Continued")
     self.optionsCategory = mainCategory
@@ -403,31 +403,31 @@ end
 
 function XIVBar:ImportProfile(encoded)
     if not encoded or encoded == "" then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Invalid import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["INVALID_IMPORT_STRING"])
         return false
     end
 
     local decoded = LibStub:GetLibrary("LibDeflate"):DecodeForPrint(encoded)
     if not decoded then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decode import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DECODE_IMPORT_STRING"])
         return false
     end
 
     local decompressed = LibStub:GetLibrary("LibDeflate"):DecompressDeflate(decoded)
     if not decompressed then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decompress import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DECOMPRESS_IMPORT_STRING"])
         return false
     end
 
     local success, imported = LibStub:GetLibrary("AceSerializer-3.0"):Deserialize(decompressed)
     if not success then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to deserialize import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DESERIALIZE_IMPORT_STRING"])
         return false
     end
 
     -- Validate the imported data
     if type(imported) ~= "table" or type(imported.profile) ~= "table" or type(imported.meta) ~= "table" then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Invalid profile format"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["INVALID_PROFILE_FORMAT"])
         return false
     end
 
@@ -454,7 +454,7 @@ function XIVBar:ImportProfile(encoded)
     end
 
     self:Refresh()
-    print("|cff00ff00XIV Databar Continued:|r " .. L["Profile imported successfully as"] .. " '" .. profileName .. "'")
+    print("|cff00ff00XIV Databar Continued:|r " .. L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] .. " '" .. profileName .. "'")
     return true
 end
 
@@ -478,7 +478,7 @@ function XIVBar:RGBToHex(r, g, b, header, ending)
 end
 
 StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
-    text = L["Copy the export string below:"],
+    text = L["COPY_EXPORT_STRING"],
     button1 = CLOSE,
     hasEditBox = true,
     editBoxWidth = 350,
@@ -501,7 +501,7 @@ StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
 }
 
 StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
-    text = L["Paste the import string below:"],
+    text = L["PASTE_IMPORT_STRING"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -550,7 +550,7 @@ function XIVBar:GetTextOptions()
         inline = true,
         args = {
             font = {
-                name = L['Font'],
+                name = L["FONT"],
                 type = "select",
                 dialogControl = 'LSM30_Font',
                 order = 1,
@@ -580,7 +580,7 @@ function XIVBar:GetTextOptions()
                 end
             },
             smallFontSize = {
-                name = L['Small Font Size'],
+                name = L["SMALL_FONT_SIZE"],
                 type = 'range',
                 order = 2,
                 min = 10,
@@ -595,7 +595,7 @@ function XIVBar:GetTextOptions()
                 end
             },
             textFlags = {
-                name = L['Text Style'],
+                name = L["TEXT_STYLE"],
                 type = 'select',
                 style = 'dropdown',
                 order = 3,
@@ -614,13 +614,13 @@ end
 
 function XIVBar:GetColorOptions()
     return {
-        name = L["Colors"],
+        name = L["COLORS"],
         type = "group",
         inline = true,
         order = 3,
         args = {
             barColor = {
-                name = L['Bar Color'],
+                name = L["BAR_COLOR"],
                 type = "color",
                 order = 1,
                 hasAlpha = true,
@@ -637,8 +637,8 @@ function XIVBar:GetColorOptions()
                 end
             },
             barCC = {
-                name = L['Use Class Color for Bar'],
-                desc = L["Only the alpha can be set with the color picker"],
+                name = L["USE_CLASS_COLOR"],
+                desc = L["USE_CLASS_COLOR_TEXT_DESC"],
                 type = "toggle",
                 order = 2,
                 set = function(info, val)
@@ -657,13 +657,13 @@ end
 
 function XIVBar:GetTextColorOptions()
     return {
-        name = L['Text Colors'],
+        name = L["TEXT_COLORS"],
         type = "group",
         order = 4,
         inline = true,
         args = {
             normal = {
-                name = L['Normal'],
+                name = L["NORMAL"],
                 type = "color",
                 order = 1,
                 width = "double",
@@ -678,8 +678,8 @@ function XIVBar:GetTextColorOptions()
                 get = function() return XIVBar:GetColor('normal') end
             },
             textCC = {
-                name = L["Use Class Color for Text"],
-                desc = L["Only the alpha can be set with the color picker"],
+                name = L["USE_CLASS_COLOR_TEXT"],
+                desc = L["USE_CLASS_COLOR_TEXT_DESC"],
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
@@ -693,7 +693,7 @@ function XIVBar:GetTextColorOptions()
                 end
             },
             hover = {
-                name = L['Hover'],
+                name = L["HOVER"],
                 type = "color",
                 order = 3,
                 width = "double",
@@ -708,7 +708,7 @@ function XIVBar:GetTextColorOptions()
                 get = function() return XIVBar:GetColor('hover') end
             },
             hoverCC = {
-                name = L['Use Class Colors for Hover'],
+                name = L["USE_CLASS_COLORS_FOR_HOVER"],
                 type = "toggle",
                 order = 4,
                 set = function(_, val)
@@ -723,7 +723,7 @@ function XIVBar:GetTextColorOptions()
                 end
             },
             inactive = {
-                name = L['Inactive'],
+                name = L["INACTIVE"],
                 type = "color",
                 order = 5,
                 hasAlpha = true,
@@ -741,19 +741,19 @@ end
 
 function XIVBar:GetPositioningOptions()
     return {
-        name = L["Positioning"],
+        name = L["POSITIONING"],
         type = "group",
         order = 1,
         inline = true,
         args = {
             positionHeader = {
-                name = L["Bar Position"],
+                name = L["BAR_POSITION"],
                 type = "header",
                 order = 1
             },
             barFullscreen = {
                 name = VIDEO_OPTIONS_FULLSCREEN,
-                desc = L["Makes the bar span the entire screen width"],
+                desc = L["BAR_FULLSCREEN_DESC"],
                 type = "toggle",
                 order = 2,
                 width = "full",
@@ -766,12 +766,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barPosition = {
-                name = L['Bar Position'],
-                desc = L["Position the bar at the top or bottom of the screen"],
+                name = L["BAR_POSITION"],
+                desc = L["BAR_POSITION_DESC"],
                 type = "select",
                 order = 3,
                 width = "full",
-                values = {TOP = L["Top"], BOTTOM = L["Bottom"]},
+                values = {TOP = L["TOP"], BOTTOM = L["BOTTOM"]},
                 style = "dropdown",
                 hidden = function()
                     return not self.db.profile.general.barFullscreen
@@ -785,8 +785,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             xOffset = {
-                name = L["X Offset"],
-                desc = L["Horizontal position of the bar"],
+                name = L["X_OFFSET"],
+                desc = L["HORIZONTAL_POSITION"],
                 type = "range",
                 order = 4,
                 hidden = function()
@@ -804,8 +804,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             yOffset = {
-                name = L["Y Offset"],
-                desc = L["Vertical position of the bar"],
+                name = L["Y_OFFSET"],
+                desc = L["VERTICAL_POSITION"],
                 type = "range",
                 order = 5,
                 hidden = function()
@@ -823,8 +823,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             locked = {
-                name = L["Lock Bar"],
-                desc = L["Lock the bar to prevent dragging"],
+                name = L["LOCK_BAR"],
+                desc = L["LOCK_BAR_DESC"],
                 type = "toggle",
                 order = 6,
                 hidden = function()
@@ -838,7 +838,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barWidth = {
-                name = L["Bar Width"],
+                name = L["BAR_WIDTH"],
                 type = "range",
                 order = 7,
                 hidden = function()
@@ -859,12 +859,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             behaviorHeader = {
-                name = L["Behavior"],
+                name = L["BEHAVIOR"],
                 type = "header",
                 order = 8
             },
             barCombatHide = {
-                name = L['Hide Bar in combat'],
+                name = L["HIDE_IN_COMBAT"],
                 type = "toggle",
                 order = 9,
                 get = function()
@@ -876,7 +876,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barFlightHide = {
-                name = L["Hide when in flight"],
+                name = L["HIDE_IN_FLIGHT"],
                 type = "toggle",
                 order = 10,
                 get = function()
@@ -887,8 +887,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             showOnMouseover = {
-                name = L["Show on mouseover"],
-                desc = L["Show the bar only when you mouseover it"],
+                name = L["SHOW_ON_MOUSEOVER"],
+                desc = L["SHOW_ON_MOUSEOVER_DESC"],
                 type = "toggle",
                 order = 10.5,
                 get = function()
@@ -900,12 +900,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             spacingHeader = {
-                name = L["Spacing"],
+                name = L["SPACING"],
                 type = "header",
                 order = 11
             },
             barPadding = {
-                name = L["Bar Padding"],
+                name = L["BAR_PADDING"],
                 type = "range",
                 order = 12,
                 min = 0,
@@ -920,7 +920,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             moduleSpacing = {
-                name = L["Module Spacing"],
+                name = L["MODULE_SPACING"],
                 type = "range",
                 order = 13,
                 min = 10,
@@ -938,8 +938,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barMargin = {
-                name = L["Bar Margin"],
-                desc = L["Leftmost and rightmost margin of the bar modules"],
+                name = L["BAR_MARGIN"],
+                desc = L["BAR_MARGIN_DESC"],
                 type = "range",
                 order = 14,
                 min = 0,
@@ -1187,8 +1187,8 @@ end
 function XIVBar:GetModulesPositionningOptions()
     local args = {
         enableFreePlacement = {
-            name = L["Enable free placement"],
-            desc = L["Enable independent X positioning for each module and disable inter-module anchors"],
+            name = L["ENABLE_FREE_PLACEMENT"],
+            desc = L["ENABLE_FREE_PLACEMENT_DESC"],
             type = "toggle",
             order = 1,
             width = "full",
@@ -1225,8 +1225,8 @@ function XIVBar:GetModulesPositionningOptions()
             end,
         },
         resetAllPositions = {
-            name = L["Reset All Positions"],
-            desc = L["Reset all modules to their initial free placement positions"],
+            name = L["RESET_ALL_POSITIONS"],
+            desc = L["RESET_ALL_POSITIONS_DESC"],
             type = "execute",
             order = 1.5,
             width = "full",
@@ -1242,8 +1242,8 @@ function XIVBar:GetModulesPositionningOptions()
             end,
         },
         recaptureAllInitialPositions = {
-            name = L["Re-capture initial positions"],
-            desc = L["Capture the current anchored positions as the new initial free placement positions"],
+            name = L["RECAPTURE_INITIAL_POSITIONS"],
+            desc = L["RECAPTURE_INITIAL_POSITIONS_DESC"],
             type = "execute",
             order = 1.6,
             width = "full",
@@ -1290,13 +1290,13 @@ function XIVBar:GetModulesPositionningOptions()
                 end,
                 args = {
                     anchorPoint = {
-                        name = L["Anchor Point"],
+                        name = L["ANCHOR_POINT"],
                         type = "select",
                         order = 1,
                         values = {
-                            LEFT = L["Left"],
-                            CENTER = L["Center"],
-                            RIGHT = L["Right"],
+                            LEFT = L["LEFT"],
+                            CENTER = L["CENTER"],
+                            RIGHT = L["RIGHT"],
                         },
                         get = function(info)
                             local moduleKeyFromInfo = info and info[#info - 1] or currentModuleKey
@@ -1314,7 +1314,7 @@ function XIVBar:GetModulesPositionningOptions()
                         end,
                     },
                     xPosition = {
-                        name = L["X Position"],
+                        name = L["X_POSITION"],
                         type = "range",
                         order = 2,
                         min = -floor(GetScreenWidth()),
@@ -1336,8 +1336,8 @@ function XIVBar:GetModulesPositionningOptions()
                         end,
                     },
                     resetPosition = {
-                        name = L["Reset Position"],
-                        desc = L["Reset to the anchored position"],
+                        name = L["RESET_POSITION"],
+                        desc = L["RESET_POSITION_DESC"],
                         type = "execute",
                         order = 3,
                         func = function()
@@ -1354,7 +1354,7 @@ function XIVBar:GetModulesPositionningOptions()
     end
 
     return {
-        name = L["Modules Positioning"],
+        name = L["MODULES_POSITIONING"],
         type = "group",
         args = args
     }

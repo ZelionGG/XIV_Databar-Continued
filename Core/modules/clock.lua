@@ -195,7 +195,7 @@ function ClockModule:RegisterFrameEvents()
             if not xb.db.profile.modules.clock.hideEventText and C_Calendar and C_Calendar.GetNumPendingInvites then
                 local eventInvites = C_Calendar.GetNumPendingInvites()
                 if eventInvites > 0 then
-                    ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
+                    ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L["NEW_EVENT"], eventInvites))
                 end
             end
 
@@ -223,14 +223,14 @@ function ClockModule:RegisterFrameEvents()
 
         local realmTime = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
 
-        GameTooltip:AddDoubleLine(L['Local Time'],
+        GameTooltip:AddDoubleLine(L["LOCAL_TIME"],
             date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L['Realm Time'], realmTime, r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["REALM_TIME"], realmTime, r, g, b, 1, 1, 1)
         GameTooltip:AddLine(" ")
         if ToggleCalendar and type(ToggleCalendar) == "function" then
-            GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Open Calendar'], r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["OPEN_CALENDAR"], r, g, b, 1, 1, 1)
         end
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Open Clock'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["OPEN_CLOCK"], r, g, b, 1, 1, 1)
         GameTooltip:Show()
     end)
 
@@ -308,7 +308,7 @@ function ClockModule:GetConfig()
                 hidden = true
             },
             useServerTime = {
-                name = L['Use Server Time'],
+                name = L["USE_SERVER_TIME"],
                 order = 1,
                 type = "toggle",
                 get = function()
@@ -319,7 +319,7 @@ function ClockModule:GetConfig()
                 end
             },
             hideEventText = {
-                name = L['Hide Event Text'],
+                name = L["HIDE_EVENT_TEXT"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -330,7 +330,7 @@ function ClockModule:GetConfig()
                 end
             },
             timeFormat = {
-                name = L['Time Format'],
+                name = L["TIME_FORMAT"],
                 order = 3,
                 type = "select",
                 values = { -- TODO: WTF is with this not accepting a variable?

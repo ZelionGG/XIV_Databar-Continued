@@ -432,7 +432,7 @@ function TalentModule:CreateSpecPopupProgression()
     self.specOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.specOptionString:SetTextColor(r, g, b, 1)
-    self.specOptionString:SetText(L['Set Specialization'])
+    self.specOptionString:SetText(L["SET_SPECIALIZATION"])
     self.specOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.specOptionString:SetPoint('CENTER')
 
@@ -540,7 +540,7 @@ function TalentModule:CreateSpecPopupVanilla()
     self.specOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.specOptionString:SetTextColor(r, g, b, 1)
-    self.specOptionString:SetText(L['Set Specialization'])
+    self.specOptionString:SetText(L["SET_SPECIALIZATION"])
     self.specOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.specOptionString:SetPoint('CENTER')
 
@@ -663,7 +663,7 @@ function TalentModule:CreateLootSpecPopup()
     self.lootSpecOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.lootSpecOptionString:SetTextColor(r, g, b, 1)
-    self.lootSpecOptionString:SetText(L['Set Loot Specialization'])
+    self.lootSpecOptionString:SetText(L["SET_LOOT_SPECIALIZATION"])
     self.lootSpecOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.lootSpecOptionString:SetPoint('CENTER')
 
@@ -675,7 +675,7 @@ function TalentModule:CreateLootSpecPopup()
             local specId = i
             local name
             if i == 0 then
-                name = L['Current Specialization']
+                name = L["CURRENT_SPECIALIZATION"]
                 specId = self.currentSpecID
             else
                 local _, specName = GetSpecializationInfo(i)
@@ -789,12 +789,12 @@ function TalentModule:ShowTooltip()
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. SPECIALIZATION .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
     if not isVanilla then
-        GameTooltip:AddDoubleLine(L['Current Loot Specialization'], "|cFFFFFFFF" .. name .. "|r", r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["CURRENT_LOOT_SPECIALIZATION"], "|cFFFFFFFF" .. name .. "|r", r, g, b, 1, 1, 1)
         GameTooltip:AddLine(" ")
     end
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Set Specialization'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["SET_SPECIALIZATION"], r, g, b, 1, 1, 1)
     if not isVanilla then
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Set Loot Specialization'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["SET_LOOT_SPECIALIZATION"], r, g, b, 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -829,7 +829,7 @@ function TalentModule:GetConfig()
                 end
             },
             showTooltip = {
-                name = L['Show Tooltips'],
+                name = L["SHOW_TOOLTIPS"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -841,7 +841,7 @@ function TalentModule:GetConfig()
                 end
             },
             minWidth = {
-                name = L['Talent Minimum Width'],
+                name = L["TALENT_MINIMUM_WIDTH"],
                 type = 'range',
                 order = 3,
                 min = 10,
