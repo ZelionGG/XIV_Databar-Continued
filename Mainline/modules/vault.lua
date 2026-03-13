@@ -113,38 +113,37 @@ function VaultModule:ShowTooltip()
 
     local r, g, b, _ = unpack(xb:HoverColors())
 
-    if C_AddOns and C_AddOns.IsAddOnLoaded and not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
-        C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
-    end
-
     GameTooltip:SetOwner(self.vaultFrame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. DELVES_GREAT_VAULT_LABEL .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
 
-    -- Refresh data if needed
-    if C_WeeklyRewards and C_WeeklyRewards.RequestRewards then
+    -- If the Great Vault is not disabled, show the tooltip with progress
+    if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
+        -- Refresh data if needed
         C_WeeklyRewards.RequestRewards()
-    end
 
-    local activitiesByType = CollectActivitiesByType()
-    for _, typeId in ipairs(TYPE_ORDER) do
-        local label = TYPE_LABELS[typeId]
-        local activities = activitiesByType[typeId] or {}
-        local summary = BuildSlotSummary(typeId, activities)
-        GameTooltip:AddDoubleLine(label or ' ', summary or (L['None'] or 'None'), r, g, b, 1, 1, 1)
-    end
+        local activitiesByType = CollectActivitiesByType()
+        for _, typeId in ipairs(TYPE_ORDER) do
+            local label = TYPE_LABELS[typeId]
+            local activities = activitiesByType[typeId] or {}
+            local summary = BuildSlotSummary(typeId, activities)
+            GameTooltip:AddDoubleLine(label or ' ', summary or (L['None'] or 'None'), r, g, b, 1, 1, 1)
+        end
 
-    local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
-    local keystoneLevel = C_MythicPlus.GetOwnedKeystoneLevel()
-    if mapId and mapId > 0 and keystoneLevel and keystoneLevel > 0 then
-        local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(mapId)
-        local iconTexture = texture
-        local icon = iconTexture and string.format(' |T%s:16|t', iconTexture) or ''
-        local label = WEEKLY_REWARDS_MYTHIC_KEYSTONE
-        local value = string.format('+%d %s%s', keystoneLevel, mapName or '', icon)
-        GameTooltip:AddLine(' ')
-        GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
+        local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
+        local keystoneLevel = C_MythicPlus.GetOwnedKeystoneLevel()
+        if mapId and mapId > 0 and keystoneLevel and keystoneLevel > 0 then
+            local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(mapId)
+            local iconTexture = texture
+            local icon = iconTexture and string.format(' |T%s:16|t', iconTexture) or ''
+            local label = WEEKLY_REWARDS_MYTHIC_KEYSTONE
+            local value = string.format('+%d %s%s', keystoneLevel, mapName or '', icon)
+            GameTooltip:AddLine(' ')
+            GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
+        end
+    else
+        GameTooltip:AddLine(L['GREAT_VAULT_DISABLED'], 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -232,20 +231,22 @@ function VaultModule:RegisterFrameEvents()
         GameTooltip:Hide()
     end)
 
-    self.vaultFrame:SetScript('OnClick', function(_, button)
-        if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
-            if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
-                C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
+    if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
+        self.vaultFrame:SetScript('OnClick', function(_, button)
+            if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
+                if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
+                    C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
+                end
             end
-        end
-        if WeeklyRewardsFrame then
-            if WeeklyRewardsFrame:IsShown() then
-                WeeklyRewardsFrame:Hide()
-            else
-                WeeklyRewardsFrame:Show()
+            if WeeklyRewardsFrame then
+                if WeeklyRewardsFrame:IsShown() then
+                    WeeklyRewardsFrame:Hide()
+                else
+                    WeeklyRewardsFrame:Show()
+                end
             end
-        end
-    end)
+        end)
+    end
 end
 
 -- Apply settings to layout, size, and position.

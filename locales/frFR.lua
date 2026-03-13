@@ -275,3 +275,6 @@ L["New"] = "Nouveau"
 L["Improvment"] = "Améliorations"
 L["Bugfix"] = "Corrections de bugs"
 L["Changelog"] = "Historique de modifications"
+
+-- Vault Module
+L['GREAT_VAULT_DISABLED'] = DELVES_GREAT_VAULT_LABEL .. " est actuellement désactivée jusqu'au début de la prochaine saison."

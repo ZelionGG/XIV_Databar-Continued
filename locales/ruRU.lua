@@ -275,3 +275,6 @@ L["New"] = "Новые"
 L["Improvment"] = "Улучшения"
 L["Bugfix"] = true -- To Translate
 L["Changelog"] = "Журнал изменений"
+
+-- Vault Module
+L['GREAT_VAULT_DISABLED'] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts."
