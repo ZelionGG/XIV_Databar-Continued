@@ -5,6 +5,12 @@ local xb = XIVBar;
 local L = XIVBar.L;
 local compat = xb.compat
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+local managedActionBarAddOns = {
+    Bartender4 = true,
+    Dominos = true,
+    ElvUI = true,
+    Tukui = true,
+}
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
@@ -156,6 +162,20 @@ function MenuModule:SkinFrame(frame, name)
     end
 end
 
+function MenuModule:GetExternalActionBarManagerName()
+    for addOnName in pairs(managedActionBarAddOns) do
+        if IsAddOnLoaded(addOnName) then
+            return addOnName
+        end
+    end
+
+    return nil
+end
+
+function MenuModule:HasExternalActionBarManager()
+    return self:GetExternalActionBarManagerName() ~= nil
+end
+
 function MenuModule:ToggleBlizzardMicroMenu(force)
     local hide = xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
     if force ~= nil then
@@ -168,6 +188,10 @@ function MenuModule:ToggleBlizzardMicroMenu(force)
             self:UnregisterEvent('PLAYER_REGEN_ENABLED')
         end)
         return
+    end
+
+    if self:HasExternalActionBarManager() then
+        hide = false
     end
 
     self.hiddenByXIV = self.hiddenByXIV or {}
@@ -1353,6 +1377,9 @@ function MenuModule:GetConfig()
                         order = 1,
                         type = "toggle",
                         width = "full",
+                        disabled = function()
+                            return self:HasExternalActionBarManager()
+                        end,
                         get = function()
                             return xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
                         end,
@@ -1369,7 +1396,8 @@ function MenuModule:GetConfig()
                         type = "toggle",
                         width = "full",
                         disabled = function()
-                            return not xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
+                            return self:HasExternalActionBarManager() or
+                                not xb.db.profile.modules.microMenu.disableBlizzardMicroMenu
                         end,
                         get = function()
                             return xb.db.profile.modules.microMenu.keepQueueStatusIcon
@@ -1382,7 +1410,15 @@ function MenuModule:GetConfig()
                     },
 
                     blizzardMicroMenuDisclaimer = {
-                        name = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. L['Blizzard Micromenu Disclaimer'],
+                        name = function()
+                            local addOnName = self:GetExternalActionBarManagerName()
+                            local text = L['Blizzard Micromenu Disclaimer']
+                            if addOnName then
+                                text = string.format(text, addOnName)
+                            end
+
+                            return "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. text
+                        end,
                         order = 3,
                         type = "description",
                         width = "full"

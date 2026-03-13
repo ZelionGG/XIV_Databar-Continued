@@ -4,6 +4,13 @@ local _G = _G
 local xb = XIVBar
 local L = XIVBar.L
 local compat = XIVBar.compat or {}
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
+local managedActionBarAddOns = {
+    Bartender4 = true,
+    Dominos = true,
+    ElvUI = true,
+    Tukui = true,
+}
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
@@ -93,6 +100,20 @@ local function getPlayerData()
     return store[key], store
 end
 
+function GoldModule:GetExternalActionBarManagerName()
+    for addOnName in pairs(managedActionBarAddOns) do
+        if IsAddOnLoaded(addOnName) then
+            return addOnName
+        end
+    end
+
+    return nil
+end
+
+function GoldModule:HasExternalActionBarManager()
+    return self:GetExternalActionBarManagerName() ~= nil
+end
+
 function GoldModule:ToggleBlizzardBagsBar(force)
     if not compat.isMainline then
         return
@@ -109,6 +130,10 @@ function GoldModule:ToggleBlizzardBagsBar(force)
             self:UnregisterEvent('PLAYER_REGEN_ENABLED')
         end)
         return
+    end
+
+    if self:HasExternalActionBarManager() then
+        hide = false
     end
 
     self.hiddenBagsByXIV = self.hiddenBagsByXIV or {}
@@ -744,6 +769,9 @@ function GoldModule:GetConfig()
                     order = 1,
                     type = "toggle",
                     width = "full",
+                    disabled = function()
+                        return self:HasExternalActionBarManager()
+                    end,
                     get = function()
                         return xb.db.profile.modules.gold.disableBlizzardBagsBar
                     end,
@@ -754,8 +782,15 @@ function GoldModule:GetConfig()
                     end
                 },
                 blizzardBagsBarDisclaimer = {
-                    name = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " ..
-                        L['Blizzard Bags Bar Disclaimer'],
+                    name = function()
+                        local addOnName = self:GetExternalActionBarManagerName()
+                        local text = L['Blizzard Bags Bar Disclaimer']
+                        if addOnName then
+                            text = string.format(text, addOnName)
+                        end
+
+                        return "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. text
+                    end,
                     order = 2,
                     type = "description",
                     width = "full"

@@ -2,7 +2,7 @@
 
 ## [5.0](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.0) (2026-03-09)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.8...v5.0) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/v4.8.1...v5.0) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
 ### _Global :_
 

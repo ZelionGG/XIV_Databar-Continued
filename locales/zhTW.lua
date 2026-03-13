@@ -93,10 +93,10 @@ L['Show Accessibility Tooltips'] = true -- Needs Translation
 L['Blizzard Micromenu'] = true
 L['Disable Blizzard Micromenu'] = true
 L["Keep Queue Status Icon"] = true
-L['Blizzard Micromenu Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its microbar in that addon\'s settings.'
+L['Blizzard Micromenu Disclaimer'] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
 L['Blizzard Bags Bar'] = true
 L['Disable Blizzard Bags Bar'] = true
-L['Blizzard Bags Bar Disclaimer'] = 'If you use another UI addon (e.g. ElvUI), hide its bags bar in that addon\'s settings.'
+L['Blizzard Bags Bar Disclaimer'] = 'This option is disabled because an external bar manager was detected: %s.' -- To Translate
 L['Main Menu Icon Right Spacing'] = "主選單圖示右方間距"
 L['Icon Spacing'] = "圖示間距"
 L["Hide BNet App Friends"] = "隱藏戰網 app 好友"
@@ -328,3 +328,7 @@ L["New"] = "新增"
 L["Improvment"] = "改善"
 L["Bugfix"] = true -- To Translate
 L["Changelog"] = "更新記錄"
+
+-- Vault Module
+L['GREAT_VAULT_DISABLED'] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts."
+L['MAX_LEVEL_DISCLAIMER'] = "This module will only show when you reach max level."
