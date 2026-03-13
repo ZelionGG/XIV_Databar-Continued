@@ -31,11 +31,18 @@ XIVBar.Changelog[5000] = {
         ["zhTW"] = {},
         ["enUS"] = {
             "[Retail] The [Great Vault] click is now disabled until the next season starts and a disclaimer was added in the tooltip.",
-            "[Retail] The [Great Vault] won't show anymore if you're not at max level.",
+            "[Retail] The [Great Vault] won't show anymore if your character is not at max level.",
             "[Retail] Added a disclaimer in the [Great Vault] module options to warn that max level is needed for the module to show.",
-            '[Global] Options for hiding Blizzard UI in the [Micromenu] and [Gold] modules when external action bar AddOns are detected will now be disabled.'
+            "[Global] Options to hide Blizzard UI in the [Micromenu] and [" .. BONUS_ROLL_REWARD_MONEY .. "] modules are now disabled when an external action bar AddOn is detected.",
+            "[Code] Refactored the locales system to make it easier to maintain, read, and update."
         },
-        ["frFR"] = {},
+        ["frFR"] = {
+            "[Retail] Le clic sur [La Grande Chambre Forte] est maintenant désactivé jusqu'au début de la prochaine saison et un avertissement a été ajouté dans l'infobulle.",
+            "[Retail] [La Grande Chambre Forte] ne s'affiche plus si votre personnage n'est pas au niveau maximum.",
+            "[Retail] Un avertissement a été ajouté dans les options du module [La Grande Chambre Forte] pour prévenir que le niveau maximum est nécessaire pour que le module s'affiche.",
+            "[Global] Les options pour masquer l'interface Blizzard dans les modules [Micro menu] et [" .. BONUS_ROLL_REWARD_MONEY .. "] sont maintenant désactivées quand un AddOn de barre d'action externe est détecté.",
+            "[Code] Le système de localisation a été repensé pour être plus facile à maintenir, à lire et à mettre à jour."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },
