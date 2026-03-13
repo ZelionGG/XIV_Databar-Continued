@@ -17,6 +17,30 @@ local TYPE_ORDER = {
     Enum.WeeklyRewardChestThresholdType.World,
 }
 
+-- Enable module, build frames, and refresh layout.
+function VaultModule:OnEnable()
+    local db = xb.db.profile
+    if not db.modules.vault.enabled or UnitLevel("player") ~= GetMaxLevelForPlayerExpansion() then
+        self:Disable()
+        return
+    end
+
+    if not self.vaultFrame then
+        self:CreateFrames()
+    end
+
+    self.vaultFrame:Show()
+    self:RegisterFrameEvents()
+    self:Refresh()
+end
+
+-- Disable module and hide its frame.
+function VaultModule:OnDisable()
+    if self.vaultFrame then
+        self.vaultFrame:Hide()
+    end
+end
+
 -- Collect weekly reward activities grouped by type, sorted by slot index.
 local function CollectActivitiesByType()
     local byType = {}
@@ -113,38 +137,37 @@ function VaultModule:ShowTooltip()
 
     local r, g, b, _ = unpack(xb:HoverColors())
 
-    if C_AddOns and C_AddOns.IsAddOnLoaded and not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
-        C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
-    end
-
     GameTooltip:SetOwner(self.vaultFrame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. DELVES_GREAT_VAULT_LABEL .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
 
-    -- Refresh data if needed
-    if C_WeeklyRewards and C_WeeklyRewards.RequestRewards then
+    -- If the Great Vault is not disabled, show the tooltip with progress
+    if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
+        -- Refresh data if needed
         C_WeeklyRewards.RequestRewards()
-    end
 
-    local activitiesByType = CollectActivitiesByType()
-    for _, typeId in ipairs(TYPE_ORDER) do
-        local label = TYPE_LABELS[typeId]
-        local activities = activitiesByType[typeId] or {}
-        local summary = BuildSlotSummary(typeId, activities)
-        GameTooltip:AddDoubleLine(label or ' ', summary or (L['None'] or 'None'), r, g, b, 1, 1, 1)
-    end
+        local activitiesByType = CollectActivitiesByType()
+        for _, typeId in ipairs(TYPE_ORDER) do
+            local label = TYPE_LABELS[typeId]
+            local activities = activitiesByType[typeId] or {}
+            local summary = BuildSlotSummary(typeId, activities)
+            GameTooltip:AddDoubleLine(label or ' ', summary or (L['None'] or 'None'), r, g, b, 1, 1, 1)
+        end
 
-    local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
-    local keystoneLevel = C_MythicPlus.GetOwnedKeystoneLevel()
-    if mapId and mapId > 0 and keystoneLevel and keystoneLevel > 0 then
-        local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(mapId)
-        local iconTexture = texture
-        local icon = iconTexture and string.format(' |T%s:16|t', iconTexture) or ''
-        local label = WEEKLY_REWARDS_MYTHIC_KEYSTONE
-        local value = string.format('+%d %s%s', keystoneLevel, mapName or '', icon)
-        GameTooltip:AddLine(' ')
-        GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
+        local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
+        local keystoneLevel = C_MythicPlus.GetOwnedKeystoneLevel()
+        if mapId and mapId > 0 and keystoneLevel and keystoneLevel > 0 then
+            local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(mapId)
+            local iconTexture = texture
+            local icon = iconTexture and string.format(' |T%s:16|t', iconTexture) or ''
+            local label = WEEKLY_REWARDS_MYTHIC_KEYSTONE
+            local value = string.format('+%d %s%s', keystoneLevel, mapName or '', icon)
+            GameTooltip:AddLine(' ')
+            GameTooltip:AddDoubleLine(label, value, r, g, b, 1, 1, 1)
+        end
+    else
+        GameTooltip:AddLine(L['GREAT_VAULT_DISABLED'], 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -162,30 +185,6 @@ end
 function VaultModule:OnInitialize()
     self.mediaFolder = xb.constants.mediaPath .. 'vault\\'
     self.iconPath = self.mediaFolder .. 'vault.tga'
-end
-
--- Enable module, build frames, and refresh layout.
-function VaultModule:OnEnable()
-    local db = xb.db.profile
-    if not db.modules.vault.enabled then
-        self:Disable()
-        return
-    end
-
-    if not self.vaultFrame then
-        self:CreateFrames()
-    end
-
-    self.vaultFrame:Show()
-    self:RegisterFrameEvents()
-    self:Refresh()
-end
-
--- Disable module and hide its frame.
-function VaultModule:OnDisable()
-    if self.vaultFrame then
-        self.vaultFrame:Hide()
-    end
 end
 
 -- Pick the anchor frame used to position the vault module.
@@ -232,20 +231,22 @@ function VaultModule:RegisterFrameEvents()
         GameTooltip:Hide()
     end)
 
-    self.vaultFrame:SetScript('OnClick', function(_, button)
-        if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
-            if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
-                C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
+    if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
+        self.vaultFrame:SetScript('OnClick', function(_, button)
+            if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
+                if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
+                    C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
+                end
             end
-        end
-        if WeeklyRewardsFrame then
-            if WeeklyRewardsFrame:IsShown() then
-                WeeklyRewardsFrame:Hide()
-            else
-                WeeklyRewardsFrame:Show()
+            if WeeklyRewardsFrame then
+                if WeeklyRewardsFrame:IsShown() then
+                    WeeklyRewardsFrame:Hide()
+                else
+                    WeeklyRewardsFrame:Show()
+                end
             end
-        end
-    end)
+        end)
+    end
 end
 
 -- Apply settings to layout, size, and position.
@@ -298,9 +299,19 @@ function VaultModule:GetConfig()
         name = self:GetName(),
         type = "group",
         args = {
+            maxLevelDisclaimer = {
+                name = "|TInterface\\EncounterJournal\\UI-EJ-WarningTextIcon:16:16:0:0|t |cffffd200" .. L['MAX_LEVEL_DISCLAIMER'] .. "|r",
+                order = 0,
+                type = "description",
+                fontSize = "large",
+                width = "full",
+                hidden = function()
+                    return UnitLevel("player") == GetMaxLevelForPlayerExpansion()
+                end
+            },
             enable = {
                 name = ENABLE,
-                order = 0,
+                order = 1,
                 type = "toggle",
                 width = "full",
                 get = function()
@@ -317,7 +328,7 @@ function VaultModule:GetConfig()
             },
             showLabel = {
                 name = L['Show Button Text'],
-                order = 1,
+                order = 2,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.vault.showLabel
@@ -329,7 +340,7 @@ function VaultModule:GetConfig()
             },
             showTooltip = {
                 name = L['Show Tooltips'],
-                order = 2,
+                order = 3,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.vault.showTooltip
