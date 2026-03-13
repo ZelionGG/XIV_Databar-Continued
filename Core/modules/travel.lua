@@ -880,42 +880,9 @@ function TravelModule:GetHouseDisplayName(house)
                    not string.match(value, "^Home%-opaque%-%d+$")
     end
 
-    -- Documented Retail fields.
-
     if IsReadable(house.houseName) then
         return house.houseName
     end
-
-    -- Compatibility fallbacks depending on client/build.
-    if IsReadable(house.plotName) then
-        return house.plotName
-    end
-    if IsReadable(house.plot) then
-        return house.plot
-    end
-    if IsReadable(house.name) then
-        return house.name
-    end
-
-    -- neighborhoodName is often more useful than an opaque GUID.
-
-    if IsReadable(house.neighborhoodName) and house.plotID then
-        return house.neighborhoodName .. " - " .. L["PLOT"] .. " " ..
-                   tostring(house.plotID)
-    end
-    if IsReadable(house.neighborhoodName) then
-        return house.neighborhoodName
-    end
-
-    -- Readable fallback.
-
-    if house.plotID then
-        return L["PLOT"] .. " " .. tostring(house.plotID)
-    end
-    if house.houseGUID then
-        return L["HOUSE"] .. " " .. string.sub(house.houseGUID, 1, 8)
-    end
-    return L["UNKNOWN_HOUSE"]
 end
 
 function TravelModule:GetSelectedHouse()
