@@ -21,8 +21,14 @@ XIVBar.Changelog[5000] = {
     new = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "[Global] Added a new highly customizable [Rest Icon] in the [Clock] module (Thank you [Skyfox] on the Discord for the suggestion).",
+            "[Global] Added an option to allow setting sound volume from the [Master Volume] module using mouse wheel (Thank you [Skyfox] on the Discord for the suggestion)."
+        },
+        ["frFR"] = {
+            "[Global] Ajout d'une nouvelle icône de repos hautement personnalisable dans le module [Horloge] (Merci à [Skyfox] sur le Discord pour la suggestion).",
+            "[Global] Ajout d'une option pour permettre de régler le volume sonore depuis le module [Master Volume] en utilisant la molette de la souris (Merci à [Skyfox] sur le Discord pour la suggestion)."
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },
