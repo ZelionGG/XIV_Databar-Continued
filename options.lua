@@ -244,6 +244,37 @@ function XIVBar:SetupOptions()
 
         local page = changelogOptions.args[tostring(version)].args
 
+        local header
+        if data.header then
+            local headerLocalized = data.header[GetLocale()]
+            if headerLocalized ~= nil and (headerLocalized.title ~= nil or headerLocalized.text ~= nil) then
+                header = headerLocalized
+            else
+                header = data.header["enUS"]
+            end
+        end
+
+        if header and (header.title ~= nil or header.text ~= nil) then
+            if header.title ~= nil and header.title ~= "" then
+                page.headerHeader = {
+                    order = 2.5,
+                    type = "header",
+                    name = orange(header.title)
+                }
+            end
+
+            if header.text ~= nil and header.text ~= "" then
+                page.headerText = {
+                    order = 2.6,
+                    type = "description",
+                    name = function()
+                        return renderChangelogLine(header.text) .. "\n"
+                    end,
+                    fontSize = "medium"
+                }
+            end
+        end
+
         -- Checking localized "Important" category
         local important_localized
         if data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
