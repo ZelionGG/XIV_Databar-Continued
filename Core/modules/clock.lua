@@ -23,6 +23,7 @@ function ClockModule:ApplyRestIconTexture()
     local custom = xb.db.profile.modules.clock.restIconCustomTexture
     local size = xb.db.profile.modules.clock.restIconSize or 24
     local useCustomColor = xb.db.profile.modules.clock.restIconUseCustomColor
+    local useClassColor = xb.db.profile.modules.clock.restIconUseClassColor
     local color = xb.db.profile.modules.clock.restIconColor or { r = 1, g = 1, b = 1, a = 1 }
     local elvuiRestIcons = nil
     ---@diagnostic disable-next-line: undefined-field
@@ -52,7 +53,11 @@ function ClockModule:ApplyRestIconTexture()
     end
 
     if useCustomColor then
-        self.restIcon:SetVertexColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)
+        local r, g, b = color.r or 1, color.g or 1, color.b or 1
+        if useClassColor then
+            r, g, b = xb:GetClassColors()
+        end
+        self.restIcon:SetVertexColor(r, g, b, color.a or 1)
         if self.restIcon.SetDesaturated then
             self.restIcon:SetDesaturated(true)
         end
@@ -169,11 +174,6 @@ function ClockModule:Refresh()
         self:Disable();
         return;
     end
-
-    --[[ if InCombatLockdown() then
-        self:SetClockColor()
-        return
-    end ]]
 
     self.clockText:SetFont(xb:GetFont(xb.db.profile.modules.clock.fontSize))
     local dateString
@@ -396,6 +396,7 @@ function ClockModule:GetDefaultOptions()
         restIconYOffset = 10,
         restIconPosition = "TOPRIGHT",
         restIconUseCustomColor = false,
+        restIconUseClassColor = false,
         restIconColor = { r = 1, g = 1, b = 1, a = 1 }
     }
 end
@@ -589,18 +590,44 @@ function ClockModule:GetConfig()
                     self:ApplyRestIconTexture();
                     self:Refresh();
                 end,
+                width = "full"
+            },
+            restIconUseClassColor = {
+                name = L["USE_CLASS_COLORS"],
+                order = 13,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.clock.restIconUseClassColor;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.clock.restIconUseClassColor = val;
+                    self:ApplyRestIconTexture();
+                    self:Refresh();
+                end,
+                hidden = function()
+                    return not xb.db.profile.modules.clock.restIconUseCustomColor
+                end,
             },
             restIconColor = {
                 name = L["COLOR"],
-                order = 13,
+                order = 14,
                 type = "color",
                 hasAlpha = true,
                 get = function()
                     local c = xb.db.profile.modules.clock.restIconColor
+                    if xb.db.profile.modules.clock.restIconUseClassColor then
+                        local r, g, b = xb:GetClassColors()
+                        return r, g, b, c.a
+                    end
                     return c.r, c.g, c.b, c.a
                 end,
                 set = function(_, r, g, b, a)
-                    xb.db.profile.modules.clock.restIconColor = { r = r, g = g, b = b, a = a }
+                    local current = xb.db.profile.modules.clock.restIconColor or { r = 1, g = 1, b = 1, a = 1 }
+                    if xb.db.profile.modules.clock.restIconUseClassColor then
+                        xb.db.profile.modules.clock.restIconColor = { r = current.r, g = current.g, b = current.b, a = a }
+                    else
+                        xb.db.profile.modules.clock.restIconColor = { r = r, g = g, b = b, a = a }
+                    end
                     self:ApplyRestIconTexture();
                     self:Refresh();
                 end,
@@ -610,7 +637,7 @@ function ClockModule:GetConfig()
             },
             restIconTextureMode = {
                 name = L["TEXTURE"],
-                order = 14,
+                order = 15,
                 type = "select",
                 values = function()
                     local values = {
@@ -654,7 +681,7 @@ function ClockModule:GetConfig()
             },
             restIconCustomTexture = {
                 name = L["CUSTOM_TEXTURE"],
-                order = 15,
+                order = 16,
                 type = "input",
                 get = function()
                     return xb.db.profile.modules.clock.restIconCustomTexture;
