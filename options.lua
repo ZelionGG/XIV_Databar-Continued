@@ -1212,6 +1212,15 @@ function XIVBar:GetModulesPositionningOptions()
                     self:CaptureAllModulePlacements()
                 end
 
+                if not val then
+                    self.db.profile.modules.clock.enabled = true
+
+                    local clockModule = self:GetModule("ClockModule", true)
+                    if clockModule then
+                        clockModule:Enable()
+                        clockModule:Refresh()
+                    end
+                end
 
                 self:Refresh()
 

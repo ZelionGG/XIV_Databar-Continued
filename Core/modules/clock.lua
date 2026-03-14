@@ -166,6 +166,11 @@ end
 
 function ClockModule:Refresh()
     local db = xb.db.profile
+
+    if not xb:IsFreePlacementEnabled() and db.modules.clock.enabled ~= true then
+        db.modules.clock.enabled = true
+    end
+
     self:EnsureFrames()
     if self.clockFrame == nil then
         return;
@@ -422,7 +427,9 @@ function ClockModule:GetConfig()
                     end
                 end,
                 width = "full",
-                hidden = true
+                disabled = function()
+                    return not xb:IsFreePlacementEnabled()
+                end,
             },
             useServerTime = {
                 name = L["USE_SERVER_TIME"],
