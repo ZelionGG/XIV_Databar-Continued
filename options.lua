@@ -1112,7 +1112,29 @@ function XIVBar:RecaptureAllInitialModulePlacements()
         return false
     end
 
-    self:CaptureAllModulePlacements(true)
+    if not self.freePlacementModuleOrder then
+        return false
+    end
+
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder) do
+        local meta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
+        local frameName = meta and meta.frameName or self.freePlacementFrameMap[moduleKey]
+        local frame = frameName and self:GetFrame(frameName) or nil
+        local placement = self:GetModulePlacement(moduleKey, true)
+
+        if frame and placement then
+            local previousX = placement.x
+            local previousAnchorPoint = placement.anchorPoint
+            local previousCaptured = placement.captured
+
+            self:CaptureModulePlacement(moduleKey, frame, true)
+
+            placement.x = previousX
+            placement.anchorPoint = previousAnchorPoint
+            placement.captured = previousCaptured
+        end
+    end
+
     return true
 end
 
