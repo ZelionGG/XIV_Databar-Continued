@@ -41,7 +41,7 @@ function ClockModule:ApplyRestIconTexture()
         self.restIcon:SetTexCoord(0, 1, 0, 1)
         self.restIcon:SetSize(size, size)
     else
-        -- default: atlas modern puis fallback texture classique
+        -- default: atlas modern then fallback classic texture
         if self.restIcon.SetAtlas and self.restIcon:SetAtlas("UI-HUD-UnitFrame-PlayerPortrait-Rest") then
             self.restIcon:SetSize(size, size)
             self.restIcon:SetTexCoord(0, 1, 0, 1)
