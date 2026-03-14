@@ -122,8 +122,8 @@ L["SHOW_SHOP_BUTTON"] = "Mostrar Botão da Loja"
 L["SHOW_HELP_BUTTON"] = "Mostrar Botão de Ajuda"
 L["SHOW_HOUSING_BUTTON"] = "Show Housing Button" -- TODO: translate
 L["NO_INFO"] = "Sem Informação"
-L["ALLIANCE"] = "Aliança"
-L["HORDE"] = "Horda"
+L["Alliance"] = FACTION_ALLIANCE
+L["Horde"] = FACTION_HORDE
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Aviso de Durabilidade"
 L["SHOW_ITEM_LEVEL"] = "Mostrar item level"

@@ -121,8 +121,8 @@ L["SHOW_SHOP_BUTTON"] = "Zeigt Shop Taste"
 L["SHOW_HELP_BUTTON"] = "Zeigt Hilfe Taste"
 L["SHOW_HOUSING_BUTTON"] = "Zeigt Housing Taste"
 L["NO_INFO"] = "Keine Informationen"
-L["ALLIANCE"] = "Allianz"
-L["HORDE"] = "Horde" -- No Translate needed
+L["Alliance"] = FACTION_ALLIANCE
+L["Horde"] = FACTION_HORDE
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Haltbarkeitswarnschwelle"
 L["SHOW_ITEM_LEVEL"] = "Gegenstandsstufe anzeigen"

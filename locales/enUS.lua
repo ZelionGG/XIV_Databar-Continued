@@ -119,8 +119,8 @@ L["SHOW_SHOP_BUTTON"] = "Show Shop Button"
 L["SHOW_HELP_BUTTON"] = "Show Help Button"
 L["SHOW_HOUSING_BUTTON"] = "Show Housing Button"
 L["NO_INFO"] = "No Info"
-L["ALLIANCE"] = "Alliance"
-L["HORDE"] = "Horde"
+L["Alliance"] = FACTION_ALLIANCE
+L["Horde"] = FACTION_HORDE
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Durability Warning Threshold"
 L["SHOW_ITEM_LEVEL"] = "Show Item Level"

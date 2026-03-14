@@ -122,8 +122,8 @@ L["SHOW_HELP_BUTTON"] = "显示帮助按钮"
 L["SHOW_HOUSING_BUTTON"] = "Show Housing Button" -- TODO: translate
 L["NO_INFO"] = "暂无信息"
 L["CLASSIC"] = "经典怀旧服"
-L["ALLIANCE"] = "联盟"
-L["HORDE"] = "部落"
+L["Alliance"] = FACTION_ALLIANCE
+L["Horde"] = FACTION_HORDE
 
 L["DURABILITY_WARNING_THRESHOLD"] = "耐久性警告閾值"
 L["SHOW_ITEM_LEVEL"] = "顯示物品等級"
