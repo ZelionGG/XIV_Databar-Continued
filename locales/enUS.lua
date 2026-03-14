@@ -158,6 +158,7 @@ L["READY"] = "Ready"
 L["TRAVEL_COOLDOWNS"] = "Travel Cooldowns"
 L["CHANGE_PORT_OPTION"] = "Change Port Option"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Registered characters"
 L["SHOW_FREE_BAG_SPACE"] = "Show Free Bag Space"
 L["SHOW_OTHER_REALMS"] = "Show Other Realms"
@@ -167,6 +168,8 @@ L["TOGGLE_BAGS"] = "Toggle Bags"
 L["SESSION_TOTAL"] = "Session Total"
 L["DAILY_TOTAL"] = "Daily Total"
 L["GOLD_ROUNDED_VALUES"] = "Gold rounded values"
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold"
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold"
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Show XP Bar Below Max Level"

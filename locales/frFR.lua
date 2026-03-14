@@ -158,6 +158,7 @@ L["READY"] = "Prêt"
 L["TRAVEL_COOLDOWNS"] = "Temps de recharge des voyages"
 L["CHANGE_PORT_OPTION"] = "Option de changement de la téléportation"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Personnages enregistrés"
 L["SHOW_FREE_BAG_SPACE"] = "Montrer l'espace libre dans les sacs"
 L["SHOW_OTHER_REALMS"] = "Montrer les autres royaumes"
@@ -166,7 +167,9 @@ L["SHORTEN_GOLD"] = "Raccourcir le montant d'or"
 L["TOGGLE_BAGS"] = "Ouvrir/Fermer les sacs"
 L["SESSION_TOTAL"] = "Total sur la session"
 L["DAILY_TOTAL"] = "Total quotidien"
-L["GOLD_ROUNDED_VALUES"] = "Valeurs arrondies au po"
+L["GOLD_ROUNDED_VALUES"] = "Valeurs arrondies à l'or"
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Masquer les personnages sous le seuil"
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Seuil"
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Montrer la barre d'XP quand le niveau max n'est pas atteint"

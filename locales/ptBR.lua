@@ -161,6 +161,7 @@ L["READY"] = "Pronto"
 L["TRAVEL_COOLDOWNS"] = "Recargas de Teleporte"
 L["CHANGE_PORT_OPTION"] = "Alterar Opção de Teleporte"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Personagens registrados"
 L["SHOW_FREE_BAG_SPACE"] = "Mostrar espaço livre na bolsa"
 L["SHOW_OTHER_REALMS"] = "Mostrar Outros Servidores"
@@ -170,6 +171,8 @@ L["TOGGLE_BAGS"] = "Mostrar bolsa"
 L["SESSION_TOTAL"] = "Total da Sessão"
 L["DAILY_TOTAL"] = "Total do Dia"
 L["GOLD_ROUNDED_VALUES"] = "Valores arredondados de ouro"
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Mostrar barra de XP abaixo do nível máximo"
