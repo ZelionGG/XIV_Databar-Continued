@@ -131,8 +131,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "裝備耐久度警告門檻"
 L["SHOW_ITEM_LEVEL"] = "顯示物品等級"
 L["SHOW_COORDINATES"] = "顯示座標"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "主音量"
 L["VOLUME_STEP"] = "每點一下調整的值"
+L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
 
 -- Clock
 L["TIME_FORMAT"] = "時間格式"

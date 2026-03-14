@@ -126,8 +126,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "Seuil d'avertissement de durabilité"
 L["SHOW_ITEM_LEVEL"] = "Afficher le niveau d'équipement"
 L["SHOW_COORDINATES"] = "Afficher les coordonnées"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "Volume principal"
 L["VOLUME_STEP"] = "Incrément de volume"
+L["ENABLE_MOUSE_WHEEL"] = "Activer le réglage par molette"
 
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"

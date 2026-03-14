@@ -126,8 +126,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "Durability Warning Threshold"
 L["SHOW_ITEM_LEVEL"] = "Show Item Level"
 L["SHOW_COORDINATES"] = "Show Coordinates"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "Master Volume"
 L["VOLUME_STEP"] = "Volume step"
+L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"

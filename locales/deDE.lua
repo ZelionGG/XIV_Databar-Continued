@@ -128,8 +128,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "Haltbarkeitswarnschwelle"
 L["SHOW_ITEM_LEVEL"] = "Gegenstandsstufe anzeigen"
 L["SHOW_COORDINATES"] = "Koordinaten anzeigen"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "Hauptlautstärke"
 L["VOLUME_STEP"] = "Lautstärken Schritte"
+L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
 
 -- Clock
 L["TIME_FORMAT"] = "Uhrzeit Format"

@@ -129,8 +129,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "Aviso de Durabilidade"
 L["SHOW_ITEM_LEVEL"] = "Mostrar item level"
 L["SHOW_COORDINATES"] = "Mostrar coordenadas"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "Volume geral"
 L["VOLUME_STEP"] = "Volume step" -- TODO: translate
+L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
 
 -- Clock
 L["TIME_FORMAT"] = "Formato da Hora"

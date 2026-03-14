@@ -128,8 +128,10 @@ L["DURABILITY_WARNING_THRESHOLD"] = "Порог предупреждения о 
 L["SHOW_ITEM_LEVEL"] = "Показать уровень элемента"
 L["SHOW_COORDINATES"] = "Показать координаты"
 
+-- Master Volume
 L["MASTER_VOLUME"] = "Громкость игры"
 L["VOLUME_STEP"] = "Шаг изменения громкости"
+L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
 
 -- Clock
 L["TIME_FORMAT"] = "Формат времени"
