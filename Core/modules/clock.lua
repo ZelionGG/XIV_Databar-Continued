@@ -391,8 +391,8 @@ function ClockModule:GetDefaultOptions()
         restIconTextureMode = "default",
         restIconCustomTexture = nil,
         hideRestIconMaxLevel = false,
-        restIconSize = 24,
-        restIconXOffset = 0,
+        restIconSize = 20,
+        restIconXOffset = 17,
         restIconYOffset = 10,
         restIconPosition = "TOPRIGHT",
         restIconUseCustomColor = false,
@@ -501,7 +501,7 @@ function ClockModule:GetConfig()
             },
             hideRestIconMaxLevel = {
                 name = L["HIDE_REST_ICON_MAX_LEVEL"],
-                order = 6.2,
+                order = 7,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.clock.hideRestIconMaxLevel;
@@ -514,7 +514,7 @@ function ClockModule:GetConfig()
             },
             restIconSize = {
                 name = L["TEXTURE_SIZE"],
-                order = 6.3,
+                order = 8,
                 type = 'range',
                 min = 10,
                 max = 64,
@@ -530,7 +530,7 @@ function ClockModule:GetConfig()
             },
             restIconPosition = {
                 name = L["POSITION"],
-                order = 6.4,
+                order = 9,
                 type = "select",
                 values = {
                     TOPLEFT = "TOPLEFT", TOP = "TOP", TOPRIGHT = "TOPRIGHT",
@@ -547,7 +547,7 @@ function ClockModule:GetConfig()
             },
             restIconXOffset = {
                 name = L["X_OFFSET"],
-                order = 6.5,
+                order = 10,
                 type = 'range',
                 min = -100,
                 max = 100,
@@ -563,7 +563,7 @@ function ClockModule:GetConfig()
             },
             restIconYOffset = {
                 name = L["Y_OFFSET"],
-                order = 6.6,
+                order = 11,
                 type = 'range',
                 min = -100,
                 max = 100,
@@ -577,59 +577,9 @@ function ClockModule:GetConfig()
                 end,
                 width = "double"
             },
-            restIconTextureMode = {
-                name = L["TEXTURE"],
-                order = 7,
-                type = "select",
-                values = function()
-                    local values = {
-                        default = L["DEFAULT"],
-                        custom = L["CUSTOM"]
-                    }
-                    ---@diagnostic disable-next-line: undefined-field
-                    local elvui = _G.ElvUI and _G.ElvUI[1]
-                    ---@diagnostic disable-next-line: undefined-field
-                    local icons = elvui and elvui.Media and elvui.Media.RestIcons
-                    if icons then
-                        for key, tex in pairs(icons) do
-                            if tex and elvui and elvui.TextureString then
-                                values[key] = elvui:TextureString(tex, ':14:14')
-                            else
-                                values[key] = tex or key
-                            end
-                        end
-                    end
-                    return values
-                end,
-                get = function()
-                    return xb.db.profile.modules.clock.restIconTextureMode;
-                end,
-                set = function(_, val)
-                    xb.db.profile.modules.clock.restIconTextureMode = val;
-                    self:ApplyRestIconTexture();
-                    self:Refresh();
-                end
-            },
-            restIconCustomTexture = {
-                name = L["CUSTOM_TEXTURE"],
-                order = 8,
-                type = "input",
-                get = function()
-                    return xb.db.profile.modules.clock.restIconCustomTexture;
-                end,
-                set = function(_, val)
-                    local trimmed = (val and val:match("%S")) and val or nil
-                    xb.db.profile.modules.clock.restIconCustomTexture = trimmed;
-                    self:ApplyRestIconTexture();
-                    self:Refresh();
-                end,
-                hidden = function()
-                    return xb.db.profile.modules.clock.restIconTextureMode ~= "custom";
-                end
-            },
             restIconUseCustomColor = {
                 name = L["CUSTOM_TEXTURE_COLOR"],
-                order = 9,
+                order = 12,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.clock.restIconUseCustomColor;
@@ -642,7 +592,7 @@ function ClockModule:GetConfig()
             },
             restIconColor = {
                 name = L["COLOR"],
-                order = 10,
+                order = 13,
                 type = "color",
                 hasAlpha = true,
                 get = function()
@@ -657,6 +607,67 @@ function ClockModule:GetConfig()
                 hidden = function()
                     return not xb.db.profile.modules.clock.restIconUseCustomColor
                 end,
+            },
+            restIconTextureMode = {
+                name = L["TEXTURE"],
+                order = 14,
+                type = "select",
+                values = function()
+                    local values = {
+                        default = L["DEFAULT"],
+                        custom = L["CUSTOM"]
+                    }
+                    local elvui = _G.ElvUI and _G.ElvUI[1]
+                    local icons = elvui and elvui.Media and elvui.Media.RestIcons
+                    if icons then
+                        for key, tex in pairs(icons) do
+                            if tex and elvui and elvui.TextureString then
+                                values[key] = elvui:TextureString(tex, ':14:14')
+                            else
+                                values[key] = tex or key
+                            end
+                        end
+                    end
+                    return values
+                end,
+                sorting = function()
+                    local sorting = { "default", "custom" }
+                    local elvui = _G.ElvUI and _G.ElvUI[1]
+                    local icons = elvui and elvui.Media and elvui.Media.RestIcons
+                    if icons then
+                        for key in pairs(icons) do
+                            if key ~= "default" and key ~= "custom" then
+                                sorting[#sorting + 1] = key
+                            end
+                        end
+                    end
+                    return sorting
+                end,
+                get = function()
+                    return xb.db.profile.modules.clock.restIconTextureMode;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.clock.restIconTextureMode = val;
+                    self:ApplyRestIconTexture();
+                    self:Refresh();
+                end
+            },
+            restIconCustomTexture = {
+                name = L["CUSTOM_TEXTURE"],
+                order = 15,
+                type = "input",
+                get = function()
+                    return xb.db.profile.modules.clock.restIconCustomTexture;
+                end,
+                set = function(_, val)
+                    local trimmed = (val and val:match("%S")) and val or nil
+                    xb.db.profile.modules.clock.restIconCustomTexture = trimmed;
+                    self:ApplyRestIconTexture();
+                    self:Refresh();
+                end,
+                hidden = function()
+                    return xb.db.profile.modules.clock.restIconTextureMode ~= "custom";
+                end
             },
         }
     }
