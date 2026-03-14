@@ -131,6 +131,7 @@ L["SHOW_COORDINATES"] = "Показать координаты"
 L["MASTER_VOLUME"] = "Громкость игры"
 L["VOLUME_STEP"] = "Шаг изменения громкости"
 
+-- Clock
 L["TIME_FORMAT"] = "Формат времени"
 L["USE_SERVER_TIME"] = "Использовать серверное время"
 L["NEW_EVENT"] = "Новое событие!"
@@ -139,6 +140,17 @@ L["REALM_TIME"] = "Серверное время"
 L["OPEN_CALENDAR"] = "Открыть календарь"
 L["OPEN_CLOCK"] = "Открыть часы"
 L["HIDE_EVENT_TEXT"] = "Скрыть текст событий"
+L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
+L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
+L["TEXTURE"] = "Texture" -- TODO: To Translate
+L["DEFAULT"] = "Default" -- TODO: To Translate
+L["CUSTOM"] = "Custom" -- TODO: To Translate
+L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
+L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
+L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
+L["POSITION"] = "Position" -- TODO: To Translate
+L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
+L["COLOR"] = "Color" -- TODO: To Translate
 
 L["TRAVEL"] = "Перемещение"
 L["PORT_OPTIONS"] = "Назначение телепорта"
