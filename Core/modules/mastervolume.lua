@@ -36,6 +36,7 @@ function VolumeModule:CreateModuleFrame()
 	self.frame=CreateFrame("BUTTON","masterVolume", xb:GetFrame('bar'))
 	xb:RegisterFrame('volumeFrame',self.frame)
 	self.frame:EnableMouse(true)
+	self.frame:EnableMouseWheel(true)
 	self.frame:RegisterForClicks("AnyDown")
 
 if not xb:ApplyModuleFreePlacement('MasterVolume', self.frame) then
@@ -71,16 +72,19 @@ function VolumeModule:RegisterEvents()
     self.icon:SetVertexColor(xb:GetColor('hover'))
     self.text:SetTextColor(xb:GetColor('hover'))
 
+    local r, g, b, _ = unpack(xb:HoverColors())
     if xb.db.profile.general.barPosition == "TOP" then
       GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
     else
       GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
     end
 
-    GameTooltip:AddLine("[|cff6699FF" .. MASTER_VOLUME .. "|r]")
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. MASTER_VOLUME .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine("<" .. L["LEFT_CLICK"] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEUP .. "|r")
-    GameTooltip:AddDoubleLine("<" .. L["RIGHT_CLICK"] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEDOWN .. "|r")
+    GameTooltip:AddDoubleLine("<" .. L["LEFT_CLICK"] .. ">", BINDING_NAME_MASTERVOLUMEUP, r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine("<" .. L["RIGHT_CLICK"] .. ">", BINDING_NAME_MASTERVOLUMEDOWN, r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine("<" .. KEY_MOUSEWHEELUP .. ">", BINDING_NAME_MASTERVOLUMEUP, r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine("<" .. KEY_MOUSEWHEELDOWN .. ">", BINDING_NAME_MASTERVOLUMEDOWN, r, g, b, 1, 1, 1)
     GameTooltip:Show()
   end)
 
@@ -93,6 +97,20 @@ function VolumeModule:RegisterEvents()
     elseif button == "RightButton" then
       SetCVar("Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
     end
+    volume = tonumber(GetCVar("Sound_MasterVolume"));
+    if volume <= 0 then SetCVar("Sound_MasterVolume", 0); end
+    if volume >= 1 then SetCVar("Sound_MasterVolume", 1); end
+  end)
+
+  self.frame:SetScript("OnMouseWheel", function(_, delta)
+    local volume = tonumber(GetCVar("Sound_MasterVolume"));
+
+    if delta > 0 then
+      SetCVar("Sound_MasterVolume", volume + xb.db.profile.modules.MasterVolume.step);
+    elseif delta < 0 then
+      SetCVar("Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
+    end
+
     volume = tonumber(GetCVar("Sound_MasterVolume"));
     if volume <= 0 then SetCVar("Sound_MasterVolume", 0); end
     if volume >= 1 then SetCVar("Sound_MasterVolume", 1); end
