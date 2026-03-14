@@ -163,6 +163,7 @@ L["READY"] = "完成"
 L["TRAVEL_COOLDOWNS"] = "旅行傳送冷卻"
 L["CHANGE_PORT_OPTION"] = "變更傳送選項"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Registered characters" -- TODO: To Translate
 L["SHOW_FREE_BAG_SPACE"] = "Show Free Bag Space" -- TODO: To Translate
 L["SHOW_OTHER_REALMS"] = "Show Other Realms" -- TODO: To Translate
@@ -170,6 +171,10 @@ L["ALWAYS_SHOW_SILVER_COPPER"] = "總是顯示銀和銅"
 L["SHORTEN_GOLD"] = "金額縮寫"
 L["TOGGLE_BAGS"] = "打開/關閉背包"
 L["SESSION_TOTAL"] = "本次登入總計"
+L["DAILY_TOTAL"] = "本日總計"
+L["GOLD_ROUNDED_VALUES"] = "只顯示金的部分"
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "未滿等時顯示經驗條"
@@ -281,8 +286,6 @@ L["XIV Bar Continued"] = "資訊列"  -- used for config menu
 L["Profiles"] = "設定檔"
 L["Money"] = "金錢"
 L["Enable in combat"] = "戰鬥中可使用"
-L["GOLD_ROUNDED_VALUES"] = "只顯示金的部分"
-L["DAILY_TOTAL"] = "本日總計"
 L["REGISTERED_CHARACTERS"] = "記錄的角色"
 L["Overwatch"] = "鬥陣特攻"
 L["Heroes of the Storm"] = "暴雪英霸"

@@ -160,6 +160,7 @@ L["READY"] = "Готово"
 L["TRAVEL_COOLDOWNS"] = "Способности для перемещения"
 L["CHANGE_PORT_OPTION"] = "Изменить назначение телепорта"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Registered characters" -- TODO: To Translate
 L["SHOW_FREE_BAG_SPACE"] = "Show Free Bag Space" -- TODO: To Translate
 L["SHOW_OTHER_REALMS"] = "Show Other Realms" -- TODO: To Translate
@@ -169,6 +170,8 @@ L["TOGGLE_BAGS"] = "Переключить видимость сумок"
 L["SESSION_TOTAL"] = "Всего за сессию"
 L["DAILY_TOTAL"] = "Daily Total" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "Gold rounded values" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Показывать полоску опыта персонажам, не достигшим максимального уровня"

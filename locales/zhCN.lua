@@ -161,6 +161,7 @@ L["READY"] = "就绪"
 L["TRAVEL_COOLDOWNS"] = "传送冷却"
 L["CHANGE_PORT_OPTION"] = "更改传送选项"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Registered characters" -- TODO: To Translate
 L["SHOW_FREE_BAG_SPACE"] = "Show Free Bag Space" -- TODO: To Translate
 L["SHOW_OTHER_REALMS"] = "Show Other Realms" -- TODO: To Translate
@@ -170,6 +171,8 @@ L["TOGGLE_BAGS"] = "切换背包"
 L["SESSION_TOTAL"] = "汇总"
 L["DAILY_TOTAL"] = "Daily Total" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "Gold rounded values" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "未满级时显示经验条"

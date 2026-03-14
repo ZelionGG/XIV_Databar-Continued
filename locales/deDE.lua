@@ -160,6 +160,7 @@ L["READY"] = "Bereit"
 L["TRAVEL_COOLDOWNS"] = "Reise Abklingzeiten"
 L["CHANGE_PORT_OPTION"] = "Teleport Einstellungen ändern"
 
+-- Gold
 L["REGISTERED_CHARACTERS"] = "Registrierte Charaktere"
 L["SHOW_FREE_BAG_SPACE"] = "Zeige Freie Taschenplätze"
 L["SHOW_OTHER_REALMS"] = "Zeige andere Realms"
@@ -169,6 +170,8 @@ L["TOGGLE_BAGS"] = "Taschen anzeigen"
 L["SESSION_TOTAL"] = "Sitzung total"
 L["DAILY_TOTAL"] = "Heute total"
 L["GOLD_ROUNDED_VALUES"] = "Gold runden"
+L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
+L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Erfahrungsleiste unter Levelcap anzeigen"
