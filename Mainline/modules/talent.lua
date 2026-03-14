@@ -271,6 +271,7 @@ function TalentModule:CreateLoadoutFrames()
                          (BackdropTemplateMixin and "BackdropTemplate")
     self.loadoutPopup = self.loadoutPopup or CreateFrame('BUTTON', 'loadoutPopup', self.loadoutFrame, template)
     self.loadoutPopup:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(self.loadoutPopup, true)
 
     if TooltipBackdropTemplateMixin then
         self.loadoutPopup.layoutType = GameTooltip.layoutType
@@ -301,6 +302,8 @@ function TalentModule:CreateTalentFrames()
     self.specPopup:SetFrameStrata('TOOLTIP')
     self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, template)
     self.lootSpecPopup:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(self.specPopup, true)
+    xb:RegisterMouseoverHoldFrame(self.lootSpecPopup, true)
 
     if TooltipBackdropTemplateMixin then
         self.specPopup.layoutType = GameTooltip.layoutType

@@ -807,6 +807,7 @@ function MenuModule:SocialHover(hoverFunc)
         -- declare our LTip tooltip with 2 columns and mouse interaction when hovering/leaving/updating the tooltip
         local tooltip = self.LTip:AcquireTooltip("SocialToolTip", 2, "LEFT", "RIGHT")
         tooltip:EnableMouse(true)
+        xb:RegisterMouseoverHoldFrame(tooltip, true)
         tooltip:SetScript("OnEnter", function()
             self.tipHover = true
         end)
@@ -1089,6 +1090,7 @@ function MenuModule:GuildHover(hoverFunc)
         -- declare our LTip tooltip with 2 columns and mouse interaction when hovering/leaving/updating the tooltip
         local tooltip = self.LTip:AcquireTooltip("GuildToolTip", 2, "LEFT", "RIGHT")
         tooltip:EnableMouse(true)
+        xb:RegisterMouseoverHoldFrame(tooltip, true)
         tooltip:SetScript("OnEnter", function()
             self.gtipHover = true
         end)

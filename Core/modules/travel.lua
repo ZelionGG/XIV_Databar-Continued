@@ -317,6 +317,7 @@ function TravelModule:CreateFrames()
                          CreateFrame('BUTTON', 'portPopup', self.portButton,
                                      "TooltipBackdropTemplate")
     self.portPopup:SetFrameStrata("TOOLTIP")
+    xb:RegisterMouseoverHoldFrame(self.portPopup, true)
 
     if TooltipBackdropTemplateMixin then
         self.portPopup.layoutType = GameTooltip.layoutType
@@ -359,6 +360,7 @@ function TravelModule:CreateFrames()
                              CreateFrame('BUTTON', 'homePopup', self.homeButton,
                                          "TooltipBackdropTemplate")
         self.homePopup:SetFrameStrata("TOOLTIP")
+        xb:RegisterMouseoverHoldFrame(self.homePopup, true)
 
         if TooltipBackdropTemplateMixin then
             self.homePopup.layoutType = GameTooltip.layoutType

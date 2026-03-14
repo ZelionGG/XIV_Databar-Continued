@@ -307,6 +307,15 @@ function XIVBar:RegisterFrame(name, frame)
     self.frames[name] = frame
 end
 
+function XIVBar:RegisterMouseoverHoldFrame(frame, keepVisibleWhileShown)
+    if not frame then
+        return
+    end
+    self.mouseoverHoldFrames = self.mouseoverHoldFrames or {}
+    self.mouseoverHoldFrames[frame] = true
+    frame._xivKeepVisibleWhileShown = (keepVisibleWhileShown ~= false)
+end
+
 --- Get the frame with the specified name
 ---@param name string name of the frame as supplied to RegisterFrame
 ---@return Frame
@@ -472,7 +481,25 @@ function XIVBar:UpdateMouseoverScripts()
     if not bar then return end
 
     local function IsMouseOverBar()
-        return MouseIsOver(bar)
+        if MouseIsOver(bar) then
+            return true
+        end
+
+        if XIVBar.mouseoverHoldFrames then
+            for frame in pairs(XIVBar.mouseoverHoldFrames) do
+                if frame then
+                    local isShown = frame.IsShown and frame:IsShown()
+                    local isVisible = frame.IsVisible and frame:IsVisible()
+                    if isShown and isVisible then
+                        if MouseIsOver(frame) or frame._xivKeepVisibleWhileShown then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        return false
     end
 
     local function IsBarChild(frame)
@@ -517,7 +544,23 @@ function XIVBar:UpdateMouseoverScripts()
         group:Play()
     end
 
-    local function showBar()
+    local showBar
+    local hideBarIfOut
+
+    local function HookMouseoverFrame(frame)
+        if not (frame and frame.EnableMouse and frame.HookScript) then
+            return
+        end
+        if frame._xivMouseoverHooksInstalled then
+            return
+        end
+        frame._xivMouseoverHooksInstalled = true
+        frame:EnableMouse(true)
+        frame:HookScript('OnEnter', showBar)
+        frame:HookScript('OnLeave', hideBarIfOut)
+    end
+
+    showBar = function()
         bar._xivHidePending = false
         if not bar._xivMouseoverEnabled then
             return
@@ -535,7 +578,7 @@ function XIVBar:UpdateMouseoverScripts()
         PlayAlpha(bar._xivFadeInGroup, bar._xivFadeIn, bar:GetAlpha(), 1)
     end
 
-    local function hideBarIfOut()
+    hideBarIfOut = function()
         -- Petit délai pour laisser le curseur passer d'un enfant à l'autre sans clignoter
         if bar._xivHidePending then return end
         bar._xivHidePending = true
@@ -585,9 +628,14 @@ function XIVBar:UpdateMouseoverScripts()
         if XIVBar.frames then
             for _, frame in pairs(XIVBar.frames) do
                 if frame and frame ~= bar and frame.EnableMouse and frame.HookScript and IsBarChild(frame) then
-                    frame:EnableMouse(true)
-                    frame:HookScript('OnEnter', showBar)
-                    frame:HookScript('OnLeave', hideBarIfOut)
+                    HookMouseoverFrame(frame)
+                end
+            end
+        end
+        if XIVBar.mouseoverHoldFrames then
+            for frame in pairs(XIVBar.mouseoverHoldFrames) do
+                if frame and frame ~= bar then
+                    HookMouseoverFrame(frame)
                 end
             end
         end

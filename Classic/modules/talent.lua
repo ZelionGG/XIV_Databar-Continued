@@ -287,10 +287,12 @@ function TalentModule:CreateTalentFrames()
                          (BackdropTemplateMixin and "BackdropTemplate")
     self.specPopup = self.specPopup or CreateFrame('BUTTON', 'SpecPopup', self.specFrame, template)
     self.specPopup:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(self.specPopup, true)
 
     if not isVanilla then
         self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, template)
         self.lootSpecPopup:SetFrameStrata('TOOLTIP')
+        xb:RegisterMouseoverHoldFrame(self.lootSpecPopup, true)
     end
 
     if TooltipBackdropTemplateMixin then
