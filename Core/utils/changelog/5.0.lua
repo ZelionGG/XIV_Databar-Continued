@@ -4,6 +4,20 @@ local XIVBar = select(2, ...);
 XIVBar.Changelog[5000] = {
     version_string = "5.0",
     release_date = "2026/03/14",
+    header = {
+        ["zhCN"] = {},
+        ["zhTW"] = {},
+        ["enUS"] = {
+            title = "Version 5.0 - Thank You, Community",
+            text = "This milestone release brings one of the biggest updates in the AddOn's history, and it would not mean as much without the community that helps me shape, improve, and enrich XIV every day, so thank you once again."
+        },
+        ["frFR"] = {
+            title = "Version 5.0 - Merci à la communauté",
+            text = "Cette mise à jour majeure apporte l'une des évolutions les plus importantes de l'histoire de l'AddOn, et elle n'aurait pas la même portée sans la communauté qui aide chaque jour à façonner, améliorer et enrichir XIV, donc merci encore une fois."
+        },
+        ["koKR"] = {},
+        ["ruRU"] = {}
+    },
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
@@ -44,6 +58,7 @@ XIVBar.Changelog[5000] = {
             "[Global] Options to hide Blizzard UI in the [Micromenu] and [" .. BONUS_ROLL_REWARD_MONEY .. "] modules are now disabled when an external action bar AddOn is detected.",
             "[Global] Popups now stay visible when using [Show on mouseover].",
             "[Global] [Talent] and [Travel] popups are now closed automatically when you click anywhere outside of them.",
+            "[Global] Updated German translation (thank you [DlargeX]).",
             "[Code] Refactored the locales system to make it easier to maintain, read, and update.",
         },
         ["frFR"] = {
@@ -53,6 +68,7 @@ XIVBar.Changelog[5000] = {
             "[Global] Les options pour masquer l'interface Blizzard dans les modules [Micro menu] et [" .. BONUS_ROLL_REWARD_MONEY .. "] sont maintenant désactivées quand un AddOn de barre d'action externe est détecté.",
             "[Global] Les popups restent maintenant affichées correctement lorsque l’option [Afficher au survol] est active.",
             "[Global] Les popups [Talents] et [Voyage] se ferment désormais automatiquement lorsque vous cliquez ailleurs sur l'écran.",
+            "[Global] Mise à jour de la traduction allemande (merci [DlargeX]).",
             "[Code] Le système de localisation a été repensé pour être plus facile à maintenir, à lire et à mettre à jour."
         },
         ["koKR"] = {},
