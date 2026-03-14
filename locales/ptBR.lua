@@ -132,6 +132,7 @@ L["SHOW_COORDINATES"] = "Mostrar coordenadas"
 L["MASTER_VOLUME"] = "Volume geral"
 L["VOLUME_STEP"] = "Volume step" -- TODO: translate
 
+-- Clock
 L["TIME_FORMAT"] = "Formato da Hora"
 L["USE_SERVER_TIME"] = "Usar hora do Servidor"
 L["NEW_EVENT"] = "Novo Evento!"
@@ -140,6 +141,17 @@ L["REALM_TIME"] = "Horário do Servidor"
 L["OPEN_CALENDAR"] = "Abrir Calendário"
 L["OPEN_CLOCK"] = "Abrir Relógio"
 L["HIDE_EVENT_TEXT"] = "Ocultar texto do evento"
+L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
+L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
+L["TEXTURE"] = "Texture" -- TODO: To Translate
+L["DEFAULT"] = "Default" -- TODO: To Translate
+L["CUSTOM"] = "Custom" -- TODO: To Translate
+L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
+L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
+L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
+L["POSITION"] = "Position" -- TODO: To Translate
+L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
+L["COLOR"] = "Color" -- TODO: To Translate
 
 L["TRAVEL"] = "Travel" -- TODO: translate
 L["PORT_OPTIONS"] = "Opções de Teleporte"

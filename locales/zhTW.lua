@@ -134,6 +134,7 @@ L["SHOW_COORDINATES"] = "顯示座標"
 L["MASTER_VOLUME"] = "主音量"
 L["VOLUME_STEP"] = "每點一下調整的值"
 
+-- Clock
 L["TIME_FORMAT"] = "時間格式"
 L["USE_SERVER_TIME"] = "使用伺服器時間"
 L["NEW_EVENT"] = "新活動!"
@@ -142,6 +143,17 @@ L["REALM_TIME"] = "伺服器時間"
 L["OPEN_CALENDAR"] = "開啟行事曆"
 L["OPEN_CLOCK"] = "開啟時鐘"
 L["HIDE_EVENT_TEXT"] = "隱藏活動文字"
+L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
+L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
+L["TEXTURE"] = "Texture" -- TODO: To Translate
+L["DEFAULT"] = "Default" -- TODO: To Translate
+L["CUSTOM"] = "Custom" -- TODO: To Translate
+L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
+L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
+L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
+L["POSITION"] = "Position" -- TODO: To Translate
+L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
+L["COLOR"] = "Color" -- TODO: To Translate
 
 L["TRAVEL"] = "旅行傳送"
 L["PORT_OPTIONS"] = "傳送選項"

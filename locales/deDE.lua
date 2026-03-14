@@ -131,6 +131,7 @@ L["SHOW_COORDINATES"] = "Koordinaten anzeigen"
 L["MASTER_VOLUME"] = "Hauptlautstärke"
 L["VOLUME_STEP"] = "Lautstärken Schritte"
 
+-- Clock
 L["TIME_FORMAT"] = "Uhrzeit Format"
 L["USE_SERVER_TIME"] = "Serverzeit benutzen"
 L["NEW_EVENT"] = "Neue Veranstaltung!"
@@ -139,6 +140,17 @@ L["REALM_TIME"] = "Realm Zeit"
 L["OPEN_CALENDAR"] = "Kalendar öffnen"
 L["OPEN_CLOCK"] = "Stoppuhr öffnen"
 L["HIDE_EVENT_TEXT"] = "Eventtext verstecken"
+L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
+L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
+L["TEXTURE"] = "Texture" -- TODO: To Translate
+L["DEFAULT"] = "Default" -- TODO: To Translate
+L["CUSTOM"] = "Custom" -- TODO: To Translate
+L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
+L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
+L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
+L["POSITION"] = "Position" -- TODO: To Translate
+L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
+L["COLOR"] = "Color" -- TODO: To Translate
 
 L["TRAVEL"] = "Reise"
 L["PORT_OPTIONS"] = "Teleport Einstellungen"
