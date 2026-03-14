@@ -316,6 +316,82 @@ function XIVBar:RegisterMouseoverHoldFrame(frame, keepVisibleWhileShown)
     frame._xivKeepVisibleWhileShown = (keepVisibleWhileShown ~= false)
 end
 
+function XIVBar:GetPopupDismissLayer()
+    if self.popupDismissLayer then
+        return self.popupDismissLayer
+    end
+
+    local layer = CreateFrame("BUTTON", nil, UIParent)
+    layer:SetAllPoints(UIParent)
+    layer:Hide()
+    layer:EnableMouse(true)
+    layer:RegisterForClicks("AnyUp", "AnyDown")
+    layer:SetFrameStrata("TOOLTIP")
+    layer:SetFrameLevel(1)
+    layer:SetScript("OnClick", function()
+        XIVBar:HideActivePopup()
+    end)
+
+    self.popupDismissLayer = layer
+    return layer
+end
+
+function XIVBar:ShowPopup(popup)
+    if not popup then
+        return
+    end
+
+    local layer = self:GetPopupDismissLayer()
+    if self.activePopup and self.activePopup ~= popup and self.activePopup.Hide then
+        self.activePopup:Hide()
+    end
+
+    self.activePopup = popup
+
+    if not popup._xivPopupAutoCloseHooked then
+        popup._xivPopupAutoCloseHooked = true
+        popup:HookScript("OnHide", function(frame)
+            if XIVBar.activePopup == frame then
+                XIVBar.activePopup = nil
+                if XIVBar.popupDismissLayer then
+                    XIVBar.popupDismissLayer:Hide()
+                end
+            end
+        end)
+    end
+
+    layer:ClearAllPoints()
+    layer:SetAllPoints(UIParent)
+    layer:SetFrameStrata(popup:GetFrameStrata() or "TOOLTIP")
+    local popupLevel = popup:GetFrameLevel() or 1
+    layer:SetFrameLevel(math.max(1, popupLevel - 1))
+    layer:Show()
+    popup:Show()
+end
+
+function XIVBar:HidePopup(popup)
+    if not popup then
+        return
+    end
+    popup:Hide()
+    if self.activePopup == popup then
+        self.activePopup = nil
+        if self.popupDismissLayer then
+            self.popupDismissLayer:Hide()
+        end
+    end
+end
+
+function XIVBar:HideActivePopup()
+    if self.activePopup and self.activePopup.Hide then
+        self.activePopup:Hide()
+        return
+    end
+    if self.popupDismissLayer then
+        self.popupDismissLayer:Hide()
+    end
+end
+
 --- Get the frame with the specified name
 ---@param name string name of the frame as supplied to RegisterFrame
 ---@return Frame

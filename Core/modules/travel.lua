@@ -455,17 +455,17 @@ function TravelModule:RegisterFrameEvents()
 
     self.portButton.portFunction = self.portButton.portFunction or function()
         if TravelModule.portPopup:IsVisible() then
-            TravelModule.portPopup:Hide()
+            xb:HidePopup(TravelModule.portPopup)
             self:ShowTooltip()
         else
             TravelModule:CreatePortPopup()
-            TravelModule.portPopup:Show()
+            xb:ShowPopup(TravelModule.portPopup)
             GameTooltip:Hide()
         end
     end
 
     self.portPopup:SetScript('OnClick', function(popupFrame, button)
-        if button == 'RightButton' then popupFrame:Hide() end
+        if button == 'RightButton' then xb:HidePopup(popupFrame) end
     end)
 
     -- Heartstone Randomizer
@@ -518,10 +518,10 @@ function TravelModule:RegisterFrameEvents()
         self.homeButton.homeFunction = function()
             if not InCombatLockdown() then
                 if TravelModule.homePopup:IsVisible() then
-                    TravelModule.homePopup:Hide()
+                    xb:HidePopup(TravelModule.homePopup)
                 else
                     TravelModule:CreateHomePopup()
-                    TravelModule.homePopup:Show()
+                    xb:ShowPopup(TravelModule.homePopup)
                     GameTooltip:Hide()
                 end
             end
@@ -547,7 +547,7 @@ function TravelModule:RegisterFrameEvents()
 
         -- Close popup on right-click
         self.homePopup:SetScript('OnClick', function(popupFrame, button)
-            if button == 'RightButton' then popupFrame:Hide() end
+            if button == 'RightButton' then xb:HidePopup(popupFrame) end
         end)
     end
 end

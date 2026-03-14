@@ -376,11 +376,11 @@ function TalentModule:RegisterFrameEvents()
             if button == 'LeftButton' then
                 if not self.loadoutPopup:IsVisible() then
                     self:CreateLoadoutPopup()
-                    self.loadoutPopup:Show()
-                    self.specPopup:Hide()
-                    self.lootSpecPopup:Hide()
+                    xb:ShowPopup(self.loadoutPopup)
+                    xb:HidePopup(self.specPopup)
+                    xb:HidePopup(self.lootSpecPopup)
                 else
-                    self.loadoutPopup:Hide()
+                    xb:HidePopup(self.loadoutPopup)
                     if xb.db.profile.modules.talent.showTooltip then
                         self:ShowTooltip()
                     end
@@ -421,28 +421,28 @@ function TalentModule:RegisterFrameEvents()
 
         if button == 'LeftButton' then
             if not self.specPopup:IsVisible() then
-                self.lootSpecPopup:Hide()
+                xb:HidePopup(self.lootSpecPopup)
                 self:CreateSpecPopup()
-                self.specPopup:Show()
+                xb:ShowPopup(self.specPopup)
                 if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-                    self.loadoutPopup:Hide()
+                    xb:HidePopup(self.loadoutPopup)
                 end
             else
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end
             end
         elseif button == 'RightButton' then
             if not self.lootSpecPopup:IsVisible() then
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-                    self.loadoutPopup:Hide()
+                    xb:HidePopup(self.loadoutPopup)
                 end
                 self:CreateLootSpecPopup()
-                self.lootSpecPopup:Show()
+                xb:ShowPopup(self.lootSpecPopup)
             else
-                self.lootSpecPopup:Hide()
+                xb:HidePopup(self.lootSpecPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end

@@ -378,23 +378,23 @@ function TalentModule:RegisterFrameEvents()
         if button == 'LeftButton' then
             if not self.specPopup:IsVisible() then
                 if self.lootSpecPopup then
-                    self.lootSpecPopup:Hide()
+                    xb:HidePopup(self.lootSpecPopup)
                 end
                 self:CreateSpecPopup()
-                self.specPopup:Show()
+                xb:ShowPopup(self.specPopup)
             else
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end
             end
         elseif button == 'RightButton' and self.lootSpecPopup then
             if not self.lootSpecPopup:IsVisible() then
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 self:CreateLootSpecPopup()
-                self.lootSpecPopup:Show()
+                xb:ShowPopup(self.lootSpecPopup)
             else
-                self.lootSpecPopup:Hide()
+                xb:HidePopup(self.lootSpecPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end
