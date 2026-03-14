@@ -3,7 +3,7 @@ local XIVBar = select(2, ...);
 
 XIVBar.Changelog[5000] = {
     version_string = "5.0",
-    release_date = "2026/03/09",
+    release_date = "2026/03/14",
     important = {
         ["zhCN"] = {},
         ["zhTW"] = {},
