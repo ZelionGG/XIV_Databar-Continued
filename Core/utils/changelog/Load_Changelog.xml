@@ -73,6 +73,8 @@
     <Script file='Old/v4/4.7.1.lua'/>
     <Script file='Old/v4/4.8.lua'/>
     <Script file='Old/v4/4.8.1.lua'/>
+    <!-- OLD V5 -->
+    <Script file='Old/v5/5.0.lua'/>
     <!-- LIVE -->
-    <Script file='5.0.lua'/>
+    <Script file='5.1.lua'/>
 </Ui>
