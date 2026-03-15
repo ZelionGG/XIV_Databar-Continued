@@ -88,13 +88,13 @@ L["SHOW_ACCESSIBILITY_TOOLTIPS"] = "Barrierefreiheits Tooltips anzeigen"
 L["BLIZZARD_MICROMENU"] = "Blizzard Mikromenü"
 L["DISABLE_BLIZZARD_MICROMENU"] = "Deaktiviert Blizzard Mikromenü"
 L["KEEP_QUEUE_STATUS_ICON"] = "Zeigt Wartenschlangen Statussymbol"
-L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
+L["BLIZZARD_MICROMENU_DISCLAIMER"] = "Diese Option ist deaktiviert, da ein externer Bar-Manager erkannt wurde: %s."
 L["BLIZZARD_BAGS_BAR"] = "Blizzard Taschenleiste"
 L["DISABLE_BLIZZARD_BAGS_BAR"] = "Deaktiviert Blizzard Taschenleiste"
-L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
+L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = "Diese Option ist deaktiviert, da ein externes Leistenmanagement Addon erkannt wurde: %s."
 L["MAIN_MENU_ICON_RIGHT_SPACING"] = "Hauptmenü Symbolabstand Rechts"
 L["ICON_SPACING"] = "Symbolabstand"
-L["HIDE_BNET_APP_FRIENDS"] = "BNet App-Freunde verbergen"
+L["HIDE_BNET_APP_FRIENDS"] = "BNet-App Freunde verbergen"
 L["OPEN_GUILD_PAGE"] = "Öffnet Gildenfenster"
 L["NO_TAG"] = "Keine Markierung"
 L["WHISPER_BNET"] = "über BNet anflüstern"
@@ -131,7 +131,7 @@ L["SHOW_COORDINATES"] = "Koordinaten anzeigen"
 -- Master Volume
 L["MASTER_VOLUME"] = "Hauptlautstärke"
 L["VOLUME_STEP"] = "Lautstärken Schritte"
-L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
+L["ENABLE_MOUSE_WHEEL"] = "Aktiviert MAusrad"
 
 -- Clock
 L["TIME_FORMAT"] = "Uhrzeit Format"
@@ -142,17 +142,17 @@ L["REALM_TIME"] = "Realm Zeit"
 L["OPEN_CALENDAR"] = "Kalendar öffnen"
 L["OPEN_CLOCK"] = "Stoppuhr öffnen"
 L["HIDE_EVENT_TEXT"] = "Eventtext verstecken"
-L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
-L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
-L["TEXTURE"] = "Texture" -- TODO: To Translate
-L["DEFAULT"] = "Default" -- TODO: To Translate
-L["CUSTOM"] = "Custom" -- TODO: To Translate
-L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
-L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
-L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
-L["POSITION"] = "Position" -- TODO: To Translate
-L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
-L["COLOR"] = "Color" -- TODO: To Translate
+L["REST_ICON"] = "Ausgeruhtsymbol"
+L["SHOW_REST_ICON"] = "Zeige Ausgeruhtsymbol"
+L["TEXTURE"] = "Textur"
+L["DEFAULT"] = "Standart"
+L["CUSTOM"] = "Benutzerdefiniert"
+L["CUSTOM_TEXTURE"] = "Benutzerdefinierte Textur"
+L["HIDE_REST_ICON_MAX_LEVEL"] = "Verstecken auf Max Stufe"
+L["TEXTURE_SIZE"] = "Texturgröße"
+L["POSITION"] = "Position"
+L["CUSTOM_TEXTURE_COLOR"] = "Benutzerdefinierte Farbe"
+L["COLOR"] = "Farbe"
 
 L["TRAVEL"] = "Reise"
 L["PORT_OPTIONS"] = "Teleport Einstellungen"
@@ -190,7 +190,7 @@ L["CURRENCY_NUMBER"] = "Anzahl der Währungen auf der Leiste"
 L["CURRENCY_SELECTION"] = "Währungsauswahl"
 L["SELECT_ALL"] = "Alle auswählen"
 L["UNSELECT_ALL"] = "Alles abwählen"
-L["OPEN_XIV_CURRENCY_OPTIONS"] = "Äffne XIV Währungseinstellungen"
+L["OPEN_XIV_CURRENCY_OPTIONS"] = "Öffne XIV Währungseinstellungen"
 
 -- System
 L["WORLD_PING"] = "Welt-Ping anzeigen"
@@ -305,5 +305,5 @@ L["BUGFIX"] = "Fehlerbehebung"
 L["CHANGELOG"] = "Änderungen"
 
 -- Vault Module
-L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts." -- TODO: To Translate
-L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level." -- TODO: To Translate
+L["GREAT_VAULT_DISABLED"] = "Das " .. DELVES_GREAT_VAULT_LABEL .. " ist derzeit bis zum Beginn der nächsten Saison deaktiviert."
+L["MAX_LEVEL_DISCLAIMER"] = "Dieses Modul wird erst angezeigt, wenn Du die maximale Stufe erreicht hast."
