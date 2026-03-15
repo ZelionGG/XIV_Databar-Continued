@@ -250,6 +250,10 @@ function CurrencyModule:Refresh()
         self.xpFrame:Hide()
     end
 
+    if xb:ApplyModuleFreePlacement('currency', self.currencyFrame) then
+        return
+    end
+
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = db.general.moduleSpacing
     local anchorFrame = xb:GetFrame('tradeskillFrame')
@@ -542,18 +546,18 @@ function CurrencyModule:ShowTooltip()
         local rested = GetXPExhaustion()
         GameTooltip:AddDoubleLine(XP .. ':',
             string.format('%d / %d (%d%%)', curXp, maxXp, floor((curXp / maxXp) * 100)), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L['Remaining'] .. ':',
+        GameTooltip:AddDoubleLine(L["REMAINING"] .. ':',
             string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), r, g, b, 1, 1, 1)
         if self.killsRemaining then
-            GameTooltip:AddDoubleLine(L['Kills to level'] .. ':',
+            GameTooltip:AddDoubleLine(L["KILLS_TO_LEVEL"] .. ':',
                 '~' .. string.format('%d', math.ceil(self.killsRemaining)), r, g, b, 1, 1, 1)
         end
         if self.lastXp then
-            GameTooltip:AddDoubleLine(L['Last xp gain'] .. ':',
+            GameTooltip:AddDoubleLine(L["LAST_XP_GAIN"] .. ':',
                 string.format('%d', self.lastXp), r, g, b, 1, 1, 1)
         end
         if rested then
-            GameTooltip:AddDoubleLine(L['Rested'] .. ':',
+            GameTooltip:AddDoubleLine(L["RESTED"] .. ':',
                 string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), r, g, b, 1, 1, 1)
         end
     else
@@ -664,8 +668,8 @@ function CurrencyModule:ShowTooltip()
             GameTooltip:AddLine(" ")
         end
 
-        GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Open XIV Currency Options'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', BINDING_NAME_TOGGLECURRENCY, r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["OPEN_XIV_CURRENCY_OPTIONS"], r, g, b, 1, 1, 1)
     end
 
     GameTooltip:Show()
@@ -761,7 +765,7 @@ function CurrencyModule:GetConfig()
             width = "full"
         },
         showXPbar = {
-            name = L['Show XP Bar Below Max Level'],
+            name = L["SHOW_XP_BAR_BELOW_MAX_LEVEL"],
             order = 1,
             type = "toggle",
             get = function()
@@ -773,7 +777,7 @@ function CurrencyModule:GetConfig()
             end
         },
         xpBarCC = {
-            name = L['Use Class Colors for XP Bar'],
+            name = L["CLASS_COLORS_XP_BAR"],
             order = 2,
             type = "toggle",
             get = function()
@@ -788,7 +792,7 @@ function CurrencyModule:GetConfig()
             end
         },
         showTooltip = {
-            name = L['Show Tooltips'],
+            name = L["SHOW_TOOLTIPS"],
             order = 3,
             type = "toggle",
             get = function()
@@ -800,7 +804,7 @@ function CurrencyModule:GetConfig()
             end
         },
         textOnRight = {
-            name = L['Text on Right'],
+            name = L["TEXT_ON_RIGHT"],
             order = 4,
             type = "toggle",
             get = function()
@@ -815,7 +819,7 @@ function CurrencyModule:GetConfig()
             end
         },
         showOnlyModuleIcon = {
-            name = L['Only Show Module Icon'],
+            name = L["ONLY_SHOW_MODULE_ICON"],
             order = 5,
             type = "toggle",
             get = function()
@@ -830,7 +834,7 @@ function CurrencyModule:GetConfig()
             end
         },
         numCurrenciesOnBar = {
-            name = L['Number of Currencies on Bar'],
+            name = L["CURRENCY_NUMBER"],
             order = 6,
             type = "range",
             min = 1,
@@ -851,7 +855,7 @@ function CurrencyModule:GetConfig()
             end
         },
         showMoreCurrenciesOnShift = {
-            name = L['Show More Currencies on Shift+Hover'],
+            name = L["SHOW_MORE_CURRENCIES"],
             order = 7,
             type = "toggle",
             get = function()
@@ -866,7 +870,7 @@ function CurrencyModule:GetConfig()
             end
         },
         maxCurrenciesTooltipShift = {
-            name = L['Max currencies shown when holding Shift'],
+            name = L["MAX_CURRENCIES_SHOWN"],
             order = 8,
             type = "range",
             min = 10,
@@ -894,7 +898,7 @@ function CurrencyModule:GetConfig()
         self.currencySelectionArgs = self.currencySelectionArgs or {}
         args['currency_selection'] = {
             type = 'group',
-            name = L['Currency Selection'],
+            name = L["CURRENCY_SELECTION"],
             order = 9,
             inline = true,
             args = self.currencySelectionArgs
@@ -921,7 +925,7 @@ function CurrencyModule:BuildCurrencySelectionArgs()
 
     -- Select All / Unselect All buttons
     self.currencySelectionArgs['selectAll'] = {
-        name = L['Select All'],
+        name = L["SELECT_ALL"],
         type = "execute",
         order = order,
         func = function()
@@ -939,7 +943,7 @@ function CurrencyModule:BuildCurrencySelectionArgs()
     order = order + 1
 
     self.currencySelectionArgs['unselectAll'] = {
-        name = L['Unselect All'],
+        name = L["UNSELECT_ALL"],
         type = "execute",
         order = order,
         func = function()

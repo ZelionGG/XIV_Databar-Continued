@@ -21,7 +21,8 @@ function VolumeModule:OnEnable()
 		self:Hooks()
 	else
 		self.frame:Show()
-		self:RegisterEvents()
+    self.frame:EnableMouseWheel(xb.db.profile.modules.MasterVolume.enableMouseWheel)
+    self:RegisterEvents()
 	end
 end
 
@@ -36,21 +37,24 @@ function VolumeModule:CreateModuleFrame()
 	self.frame=CreateFrame("BUTTON","masterVolume", xb:GetFrame('bar'))
 	xb:RegisterFrame('volumeFrame',self.frame)
 	self.frame:EnableMouse(true)
+	self.frame:EnableMouseWheel(xb.db.profile.modules.MasterVolume.enableMouseWheel)
 	self.frame:RegisterForClicks("AnyDown")
 
-  local relativeAnchorPoint = 'RIGHT'
-  local xOffset = xb.db.profile.general.moduleSpacing
-  local parentFrame = xb:GetFrame('armorFrame')
-  if not xb.db.profile.modules.armor.enabled then
-    parentFrame = xb:GetFrame('microMenuFrame')
-    if not xb.db.profile.modules.microMenu.enabled then
-      parentFrame = xb:GetFrame('bar')
-      relativeAnchorPoint = 'LEFT'
-      xOffset = 0
-    end
-  end
+if not xb:ApplyModuleFreePlacement('MasterVolume', self.frame) then
+		local relativeAnchorPoint = 'RIGHT'
+		local xOffset = xb.db.profile.general.moduleSpacing
+		local parentFrame = xb:GetFrame('armorFrame')
+		if not xb.db.profile.modules.armor.enabled then
+			parentFrame=xb:GetFrame('microMenuFrame')
+			if not xb.db.profile.modules.microMenu.enabled then
+				parentFrame=xb:GetFrame('bar')
+				relativeAnchorPoint = 'LEFT'
+				xOffset = 0
+			end
+		end
 
-  self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+		self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+	end
 
   self.icon = self.frame:CreateTexture(nil, "OVERLAY", nil, 7)
   self.icon:SetPoint("LEFT")
@@ -69,16 +73,21 @@ function VolumeModule:RegisterEvents()
     self.icon:SetVertexColor(xb:GetColor('hover'))
     self.text:SetTextColor(xb:GetColor('hover'))
 
+    local r, g, b, _ = unpack(xb:HoverColors())
     if xb.db.profile.general.barPosition == "TOP" then
       GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
     else
       GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
     end
 
-    GameTooltip:AddLine("[|cff6699FF" .. MASTER_VOLUME .. "|r]")
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. MASTER_VOLUME .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine("<" .. L['Left-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEUP .. "|r")
-    GameTooltip:AddDoubleLine("<" .. L['Right-Click'] .. ">", "|cffffffff" .. BINDING_NAME_MASTERVOLUMEDOWN .. "|r")
+    GameTooltip:AddDoubleLine("<" .. L["LEFT_CLICK"] .. ">", BINDING_NAME_MASTERVOLUMEUP, r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine("<" .. L["RIGHT_CLICK"] .. ">", BINDING_NAME_MASTERVOLUMEDOWN, r, g, b, 1, 1, 1)
+    if xb.db.profile.modules.MasterVolume.enableMouseWheel then
+      GameTooltip:AddDoubleLine("<" .. KEY_MOUSEWHEELUP .. ">", BINDING_NAME_MASTERVOLUMEUP, r, g, b, 1, 1, 1)
+      GameTooltip:AddDoubleLine("<" .. KEY_MOUSEWHEELDOWN .. ">", BINDING_NAME_MASTERVOLUMEDOWN, r, g, b, 1, 1, 1)
+    end
     GameTooltip:Show()
   end)
 
@@ -95,6 +104,24 @@ function VolumeModule:RegisterEvents()
     if volume <= 0 then SetCVar("Sound_MasterVolume", 0); end
     if volume >= 1 then SetCVar("Sound_MasterVolume", 1); end
   end)
+
+  if xb.db.profile.modules.MasterVolume.enableMouseWheel then
+    self.frame:SetScript("OnMouseWheel", function(_, delta)
+      local volume = tonumber(GetCVar("Sound_MasterVolume"));
+
+      if delta > 0 then
+        SetCVar("Sound_MasterVolume", volume + xb.db.profile.modules.MasterVolume.step);
+      elseif delta < 0 then
+        SetCVar("Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
+      end
+
+      volume = tonumber(GetCVar("Sound_MasterVolume"));
+      if volume <= 0 then SetCVar("Sound_MasterVolume", 0); end
+      if volume >= 1 then SetCVar("Sound_MasterVolume", 1); end
+    end)
+  else
+    self.frame:SetScript("OnMouseWheel", nil)
+  end
 
   self.frame:SetScript("OnLeave", function()
     self.icon:SetVertexColor(xb:GetColor('normal'))
@@ -129,6 +156,8 @@ function VolumeModule:Refresh()
       end
     end
     self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+    self.frame:EnableMouseWheel(xb.db.profile.modules.MasterVolume.enableMouseWheel)
+    self:RegisterEvents()
     self.frame:Show()
   end
 end
@@ -157,13 +186,14 @@ end
 function VolumeModule:GetDefaultOptions()
   return self:GetName(), {
       enabled = false,
+      enableMouseWheel = true,
       step = 0.1
     }
 end
 
 function VolumeModule:GetConfig()
   return {
-    name = L['Master Volume'],
+    name = L["MASTER_VOLUME"],
     type = "group",
     args = {
       enable = {
@@ -179,18 +209,27 @@ function VolumeModule:GetConfig()
             self:Disable();
           end
         end,
-        width = "full"
       },
-	  step = {
-		name = L["Volume step"],
-		order = 1,
-		type = "range",
-		min = 1,
-		max = 50,
-		step = 1,
-		get = function() return xb.db.profile.modules.MasterVolume.step*100; end,
-		set = function(_,val) xb.db.profile.modules.MasterVolume.step = val/100.0; end
-	  }
-	  }
+      enableMouseWheel = {
+        name = L["ENABLE_MOUSE_WHEEL"],
+        order = 1,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.MasterVolume.enableMouseWheel; end,
+        set = function(_, val)
+          xb.db.profile.modules.MasterVolume.enableMouseWheel = val
+          self:Refresh()
+        end
+      },
+      step = {
+        name = L["VOLUME_STEP"],
+        order = 2,
+        type = "range",
+        min = 1,
+        max = 50,
+        step = 1,
+        get = function() return xb.db.profile.modules.MasterVolume.step*100; end,
+        set = function(_,val) xb.db.profile.modules.MasterVolume.step = val/100.0; end
+      },
+    }
   }
  end

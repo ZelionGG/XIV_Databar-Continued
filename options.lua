@@ -25,6 +25,9 @@ XIVBar.defaults = {
             xOffset = 0,
             yOffset = 0,
             showOnMouseover = false,
+            enableFreePlacement = false,
+            freePlacementInitialized = false,
+            modulePlacements = {},
         },
         color = {
             barColor = {r = 0.094, g = 0.094, b = 0.094, a = 0.75},
@@ -48,6 +51,56 @@ XIVBar.defaults = {
     }
 };
 
+XIVBar.freePlacementFrameMap = {
+    armor = "armorFrame",
+    clock = "clockFrame",
+    currency = "currencyFrame",
+    gold = "goldFrame",
+    MasterVolume = "volumeFrame",
+    microMenu = "microMenuFrame",
+    reputation = "reputationFrame",
+    system = "systemFrame",
+    talent = "talentFrame",
+    tradeskill = "tradeskillFrame",
+    travel = "travelFrame",
+    vault = "vaultFrame",
+}
+
+XIVBar.freePlacementDefaultAnchor = {
+    armor = "LEFT",
+    clock = "CENTER",
+    currency = "LEFT",
+    gold = "RIGHT",
+    MasterVolume = "LEFT",
+    microMenu = "LEFT",
+    reputation = "LEFT",
+    system = "RIGHT",
+    talent = "RIGHT",
+    tradeskill = "LEFT",
+    travel = "RIGHT",
+    vault = "RIGHT",
+}
+
+local function RoundNearest(value)
+    if type(value) ~= "number" then
+        return 0
+    end
+
+    if value >= 0 then
+        return floor(value + 0.5)
+    end
+
+    return floor(value - 0.5)
+end
+
+local function NormalizeAnchor(anchor)
+    if anchor == "LEFT" or anchor == "CENTER" or anchor == "RIGHT" then
+        return anchor
+    end
+
+    return "CENTER"
+end
+
 function XIVBar:SetupOptions()
     local options = {
         name = "XIV Bar Continued",
@@ -59,7 +112,7 @@ function XIVBar:SetupOptions()
     }
 
     local moduleOptions = {
-        name = L['Modules'],
+        name = L["MODULES"],
         type = "group",
         args = {}
     }
@@ -67,30 +120,30 @@ function XIVBar:SetupOptions()
     local changelogOptions = {
         type = "group",
         childGroups = "select",
-        name = L["Changelog"],
+        name = L["CHANGELOG"],
         args = {}
     }
 
     local profileSharingOptions = {
-        name = L["Profile Sharing"],
+        name = L["PROFILE_SHARING"],
         type = "group",
         args = {
             header = {
                 order = 1,
                 type = "header",
-                name = L["Profile Import/Export"],
+                name = L["PROFILE_IMPORT_EXPORT"],
             },
             desc = {
                 order = 2,
                 type = "description",
-                name = L["Import or export your profiles to share them with other players."],
+                name = L["IMPORT_EXPORT_PROFILES_DESC"],
                 fontSize = "medium",
             },
             export = {
                 order = 3,
                 type = "execute",
-                name = L["Export Profile"],
-                desc = L["Export your current profile settings"],
+                name = L["EXPORT_PROFILE"],
+                desc = L["EXPORT_PROFILE_DESC"],
                 func = function()
                     local exportString = XIVBar:ExportProfile()
                     if exportString then
@@ -108,14 +161,17 @@ function XIVBar:SetupOptions()
             import = {
                 order = 4,
                 type = "execute",
-                name = L["Import Profile"],
-                desc = L["Import a profile from another player"],
+                name = L["IMPORT_PROFILE"],
+                desc = L["IMPORT_PROFILE_DESC"],
                 func = function()
                     StaticPopup_Show("XIVBAR_IMPORT_PROFILE")
                 end,
             },
         }
     }
+
+    self.freePlacementModuleOrder = {}
+    self.freePlacementModuleMeta = {}
 
     for name, module in self:IterateModules() do
         if module['GetConfig'] ~= nil then
@@ -124,8 +180,30 @@ function XIVBar:SetupOptions()
         if module['GetDefaultOptions'] ~= nil then
             local oName, oTable = module:GetDefaultOptions()
             self.defaults.profile.modules[oName] = oTable
+
+            local frameName = self.freePlacementFrameMap[oName]
+            if frameName and self.freePlacementModuleMeta[oName] == nil then
+                local displayName = oName
+                if module['GetName'] ~= nil then
+                    local success, moduleName = pcall(function()
+                        return module:GetName()
+                    end)
+                    if success and moduleName then
+                        displayName = moduleName
+                    end
+                end
+
+                self.freePlacementModuleMeta[oName] = {
+                    displayName = displayName,
+                    frameName = frameName,
+                    module = module,
+                }
+                table.insert(self.freePlacementModuleOrder, oName)
+            end
         end
     end
+
+    local modulesPositioningOptions = self:GetModulesPositionningOptions()
 
     local function orange(string)
         if type(string) ~= "string" then string = tostring(string) end
@@ -143,7 +221,7 @@ function XIVBar:SetupOptions()
         local dateTable = {strsplit("/", data.release_date)}
         local dateString = data.release_date
         if #dateTable == 3 then
-            dateString = L["%month%-%day%-%year%"]
+            dateString = L["DATE_FORMAT"]
             dateString = gsub(dateString, "%%year%%", dateTable[1])
             dateString = gsub(dateString, "%%month%%", dateTable[2])
             dateString = gsub(dateString, "%%day%%", dateTable[3])
@@ -157,7 +235,7 @@ function XIVBar:SetupOptions()
                 version = {
                     order = 2,
                     type = "description",
-                    name = L["Version"] .. " " .. orange(versionString) ..
+                    name = GAME_VERSION_LABEL .. " " .. orange(versionString) ..
                         " - |cffbbbbbb" .. dateString .. "|r",
                     fontSize = "large"
                 }
@@ -165,6 +243,37 @@ function XIVBar:SetupOptions()
         }
 
         local page = changelogOptions.args[tostring(version)].args
+
+        local header
+        if data.header then
+            local headerLocalized = data.header[GetLocale()]
+            if headerLocalized ~= nil and (headerLocalized.title ~= nil or headerLocalized.text ~= nil) then
+                header = headerLocalized
+            else
+                header = data.header["enUS"]
+            end
+        end
+
+        if header and (header.title ~= nil or header.text ~= nil) then
+            if header.title ~= nil and header.title ~= "" then
+                page.headerHeader = {
+                    order = 2.5,
+                    type = "header",
+                    name = orange(header.title)
+                }
+            end
+
+            if header.text ~= nil and header.text ~= "" then
+                page.headerText = {
+                    order = 2.6,
+                    type = "description",
+                    name = function()
+                        return renderChangelogLine(header.text) .. "\n"
+                    end,
+                    fontSize = "medium"
+                }
+            end
+        end
 
         -- Checking localized "Important" category
         local important_localized
@@ -179,7 +288,7 @@ function XIVBar:SetupOptions()
             page.importantHeader = {
                 order = 3,
                 type = "header",
-                name = orange(L["Important"])
+                name = orange(L["IMPORTANT"])
             }
             page.important = {
                 order = 4,
@@ -209,7 +318,7 @@ function XIVBar:SetupOptions()
             page.bugfixHeader = {
                 order = 9,
                 type = "header",
-                name = orange(L["Bugfix"]) or orange("Bugfix")
+                name = orange(L["BUGFIX"]) or orange("Bugfix")
             }
             page.bugfix = {
                 order = 10,
@@ -239,7 +348,7 @@ function XIVBar:SetupOptions()
             page.newHeader = {
                 order = 5,
                 type = "header",
-                name = orange(L["New"])
+                name = orange(L["NEW"])
             }
             page.new = {
                 order = 6,
@@ -269,7 +378,7 @@ function XIVBar:SetupOptions()
             page.improvmentHeader = {
                 order = 7,
                 type = "header",
-                name = orange(L["Improvment"])
+                name = orange(L["IMPROVEMENT"])
             }
             page.improvment = {
                 order = 8,
@@ -293,14 +402,16 @@ function XIVBar:SetupOptions()
     -- Register all options tables
     AceConfig:RegisterOptionsTable(AddOnName, options)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Modules", moduleOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", modulesPositioningOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Changelog", changelogOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_ProfileSharing", profileSharingOptions)
 
     -- Add to Blizzard options
     local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L['Modules'], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L['Changelog'], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Bar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_ProfileSharing", 'Profile Sharing', "XIV Bar Continued")
     self.optionsCategory = mainCategory
@@ -323,31 +434,31 @@ end
 
 function XIVBar:ImportProfile(encoded)
     if not encoded or encoded == "" then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Invalid import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["INVALID_IMPORT_STRING"])
         return false
     end
 
     local decoded = LibStub:GetLibrary("LibDeflate"):DecodeForPrint(encoded)
     if not decoded then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decode import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DECODE_IMPORT_STRING"])
         return false
     end
 
     local decompressed = LibStub:GetLibrary("LibDeflate"):DecompressDeflate(decoded)
     if not decompressed then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to decompress import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DECOMPRESS_IMPORT_STRING"])
         return false
     end
 
     local success, imported = LibStub:GetLibrary("AceSerializer-3.0"):Deserialize(decompressed)
     if not success then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Failed to deserialize import string"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["FAILED_DESERIALIZE_IMPORT_STRING"])
         return false
     end
 
     -- Validate the imported data
     if type(imported) ~= "table" or type(imported.profile) ~= "table" or type(imported.meta) ~= "table" then
-        print("|cffff0000XIV Databar Continued:|r " .. L["Invalid profile format"])
+        print("|cffff0000XIV Databar Continued:|r " .. L["INVALID_PROFILE_FORMAT"])
         return false
     end
 
@@ -374,7 +485,7 @@ function XIVBar:ImportProfile(encoded)
     end
 
     self:Refresh()
-    print("|cff00ff00XIV Databar Continued:|r " .. L["Profile imported successfully as"] .. " '" .. profileName .. "'")
+    print("|cff00ff00XIV Databar Continued:|r " .. L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] .. " '" .. profileName .. "'")
     return true
 end
 
@@ -398,7 +509,7 @@ function XIVBar:RGBToHex(r, g, b, header, ending)
 end
 
 StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
-    text = L["Copy the export string below:"],
+    text = L["COPY_EXPORT_STRING"],
     button1 = CLOSE,
     hasEditBox = true,
     editBoxWidth = 350,
@@ -421,7 +532,7 @@ StaticPopupDialogs["XIVBAR_EXPORT_PROFILE"] = {
 }
 
 StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
-    text = L["Paste the import string below:"],
+    text = L["PASTE_IMPORT_STRING"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -470,7 +581,7 @@ function XIVBar:GetTextOptions()
         inline = true,
         args = {
             font = {
-                name = L['Font'],
+                name = L["FONT"],
                 type = "select",
                 dialogControl = 'LSM30_Font',
                 order = 1,
@@ -500,7 +611,7 @@ function XIVBar:GetTextOptions()
                 end
             },
             smallFontSize = {
-                name = L['Small Font Size'],
+                name = L["SMALL_FONT_SIZE"],
                 type = 'range',
                 order = 2,
                 min = 10,
@@ -515,7 +626,7 @@ function XIVBar:GetTextOptions()
                 end
             },
             textFlags = {
-                name = L['Text Style'],
+                name = L["TEXT_STYLE"],
                 type = 'select',
                 style = 'dropdown',
                 order = 3,
@@ -534,13 +645,13 @@ end
 
 function XIVBar:GetColorOptions()
     return {
-        name = L["Colors"],
+        name = L["COLORS"],
         type = "group",
         inline = true,
         order = 3,
         args = {
             barColor = {
-                name = L['Bar Color'],
+                name = L["BAR_COLOR"],
                 type = "color",
                 order = 1,
                 hasAlpha = true,
@@ -557,8 +668,8 @@ function XIVBar:GetColorOptions()
                 end
             },
             barCC = {
-                name = L['Use Class Color for Bar'],
-                desc = L["Only the alpha can be set with the color picker"],
+                name = L["USE_CLASS_COLOR"],
+                desc = L["USE_CLASS_COLOR_TEXT_DESC"],
                 type = "toggle",
                 order = 2,
                 set = function(info, val)
@@ -577,13 +688,13 @@ end
 
 function XIVBar:GetTextColorOptions()
     return {
-        name = L['Text Colors'],
+        name = L["TEXT_COLORS"],
         type = "group",
         order = 4,
         inline = true,
         args = {
             normal = {
-                name = L['Normal'],
+                name = L["NORMAL"],
                 type = "color",
                 order = 1,
                 width = "double",
@@ -598,8 +709,8 @@ function XIVBar:GetTextColorOptions()
                 get = function() return XIVBar:GetColor('normal') end
             },
             textCC = {
-                name = L["Use Class Color for Text"],
-                desc = L["Only the alpha can be set with the color picker"],
+                name = L["USE_CLASS_COLOR_TEXT"],
+                desc = L["USE_CLASS_COLOR_TEXT_DESC"],
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
@@ -613,7 +724,7 @@ function XIVBar:GetTextColorOptions()
                 end
             },
             hover = {
-                name = L['Hover'],
+                name = L["HOVER"],
                 type = "color",
                 order = 3,
                 width = "double",
@@ -628,7 +739,7 @@ function XIVBar:GetTextColorOptions()
                 get = function() return XIVBar:GetColor('hover') end
             },
             hoverCC = {
-                name = L['Use Class Colors for Hover'],
+                name = L["USE_CLASS_COLORS_FOR_HOVER"],
                 type = "toggle",
                 order = 4,
                 set = function(_, val)
@@ -643,7 +754,7 @@ function XIVBar:GetTextColorOptions()
                 end
             },
             inactive = {
-                name = L['Inactive'],
+                name = L["INACTIVE"],
                 type = "color",
                 order = 5,
                 hasAlpha = true,
@@ -661,19 +772,19 @@ end
 
 function XIVBar:GetPositioningOptions()
     return {
-        name = L["Positioning"],
+        name = L["POSITIONING"],
         type = "group",
         order = 1,
         inline = true,
         args = {
             positionHeader = {
-                name = L["Bar Position"],
+                name = L["BAR_POSITION"],
                 type = "header",
                 order = 1
             },
             barFullscreen = {
                 name = VIDEO_OPTIONS_FULLSCREEN,
-                desc = L["Makes the bar span the entire screen width"],
+                desc = L["BAR_FULLSCREEN_DESC"],
                 type = "toggle",
                 order = 2,
                 width = "full",
@@ -686,12 +797,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barPosition = {
-                name = L['Bar Position'],
-                desc = L["Position the bar at the top or bottom of the screen"],
+                name = L["BAR_POSITION"],
+                desc = L["BAR_POSITION_DESC"],
                 type = "select",
                 order = 3,
                 width = "full",
-                values = {TOP = L["Top"], BOTTOM = L["Bottom"]},
+                values = {TOP = L["TOP"], BOTTOM = L["BOTTOM"]},
                 style = "dropdown",
                 hidden = function()
                     return not self.db.profile.general.barFullscreen
@@ -705,8 +816,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             xOffset = {
-                name = L["X Offset"],
-                desc = L["Horizontal position of the bar"],
+                name = L["X_OFFSET"],
+                desc = L["HORIZONTAL_POSITION"],
                 type = "range",
                 order = 4,
                 hidden = function()
@@ -724,8 +835,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             yOffset = {
-                name = L["Y Offset"],
-                desc = L["Vertical position of the bar"],
+                name = L["Y_OFFSET"],
+                desc = L["VERTICAL_POSITION"],
                 type = "range",
                 order = 5,
                 hidden = function()
@@ -743,8 +854,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             locked = {
-                name = L["Lock Bar"],
-                desc = L["Lock the bar to prevent dragging"],
+                name = L["LOCK_BAR"],
+                desc = L["LOCK_BAR_DESC"],
                 type = "toggle",
                 order = 6,
                 hidden = function()
@@ -758,7 +869,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barWidth = {
-                name = L["Bar Width"],
+                name = L["BAR_WIDTH"],
                 type = "range",
                 order = 7,
                 hidden = function()
@@ -779,12 +890,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             behaviorHeader = {
-                name = L["Behavior"],
+                name = L["BEHAVIOR"],
                 type = "header",
                 order = 8
             },
             barCombatHide = {
-                name = L['Hide Bar in combat'],
+                name = L["HIDE_IN_COMBAT"],
                 type = "toggle",
                 order = 9,
                 get = function()
@@ -796,7 +907,7 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barFlightHide = {
-                name = L["Hide when in flight"],
+                name = L["HIDE_IN_FLIGHT"],
                 type = "toggle",
                 order = 10,
                 get = function()
@@ -807,8 +918,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             showOnMouseover = {
-                name = L["Show on mouseover"],
-                desc = L["Show the bar only when you mouseover it"],
+                name = L["SHOW_ON_MOUSEOVER"],
+                desc = L["SHOW_ON_MOUSEOVER_DESC"],
                 type = "toggle",
                 order = 10.5,
                 get = function()
@@ -820,12 +931,12 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             spacingHeader = {
-                name = L["Spacing"],
+                name = L["SPACING"],
                 type = "header",
                 order = 11
             },
             barPadding = {
-                name = L["Bar Padding"],
+                name = L["BAR_PADDING"],
                 type = "range",
                 order = 12,
                 min = 0,
@@ -840,12 +951,15 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             moduleSpacing = {
-                name = L["Module Spacing"],
+                name = L["MODULE_SPACING"],
                 type = "range",
                 order = 13,
                 min = 10,
                 max = 80,
                 step = 1,
+                disabled = function()
+                    return self.db.profile.general.enableFreePlacement
+                end,
                 get = function()
                     return self.db.profile.general.moduleSpacing
                 end,
@@ -855,8 +969,8 @@ function XIVBar:GetPositioningOptions()
                 end
             },
             barMargin = {
-                name = L["Bar Margin"],
-                desc = L["Leftmost and rightmost margin of the bar modules"],
+                name = L["BAR_MARGIN"],
+                desc = L["BAR_MARGIN_DESC"],
                 type = "range",
                 order = 14,
                 min = 0,
@@ -871,5 +985,439 @@ function XIVBar:GetPositioningOptions()
                 end
             }
         }
+    }
+end
+
+function XIVBar:IsFreePlacementEnabled()
+    return self.db and self.db.profile and self.db.profile.general.enableFreePlacement
+end
+
+function XIVBar:GetModulePlacements(create)
+    local general = self.db and self.db.profile and self.db.profile.general
+    if not general then
+        return nil
+    end
+
+    if create and type(general.modulePlacements) ~= "table" then
+        general.modulePlacements = {}
+    end
+
+    return general.modulePlacements
+end
+
+function XIVBar:GetDefaultModulePlacement(moduleKey)
+    local anchor = self.freePlacementDefaultAnchor[moduleKey] or "CENTER"
+    local padding = self.db and self.db.profile and self.db.profile.general.barPadding or 0
+    local x = 0
+
+    if anchor == "LEFT" then
+        x = padding
+    elseif anchor == "RIGHT" then
+        x = -(padding)
+    end
+
+    return anchor, x
+end
+
+function XIVBar:GetModulePlacement(moduleKey, create)
+    if type(moduleKey) ~= "string" then
+        return nil
+    end
+
+    local placements = self:GetModulePlacements(create)
+    if not placements then
+        return nil
+    end
+
+    if create and type(placements[moduleKey]) ~= "table" then
+        local defaultAnchor, defaultX = self:GetDefaultModulePlacement(moduleKey)
+        placements[moduleKey] = {
+            anchorPoint = defaultAnchor,
+            x = defaultX,
+            captured = false,
+        }
+    end
+
+    return placements[moduleKey]
+end
+
+function XIVBar:CaptureModulePlacement(moduleKey, frame, isInitial)
+    if type(moduleKey) ~= "string" then
+        return false
+    end
+
+    local placement = self:GetModulePlacement(moduleKey, true)
+    if not placement then
+        return false
+    end
+
+    local bar = self:GetFrame("bar")
+    local captured = false
+
+    if frame and bar then
+        local barLeft, barRight, barCenter = bar:GetLeft(), bar:GetRight(), bar:GetCenter()
+        local frameLeft, frameRight, frameCenter = frame:GetLeft(), frame:GetRight(), frame:GetCenter()
+
+        if barLeft and barRight and barCenter and frameLeft and frameRight and frameCenter then
+            local distanceLeft = abs(frameLeft - barLeft)
+            local distanceCenter = abs(frameCenter - barCenter)
+            local distanceRight = abs(frameRight - barRight)
+
+            local anchor = "CENTER"
+            if distanceLeft <= distanceCenter and distanceLeft <= distanceRight then
+                anchor = "LEFT"
+            elseif distanceRight < distanceCenter and distanceRight < distanceLeft then
+                anchor = "RIGHT"
+            end
+
+            local x
+            if anchor == "LEFT" then
+                x = frameLeft - barLeft
+            elseif anchor == "RIGHT" then
+                x = frameRight - barRight
+            else
+                x = frameCenter - barCenter
+            end
+
+            placement.anchorPoint = anchor
+            placement.x = x
+            captured = true
+        end
+    end
+
+    if not captured and frame then
+        local point, _, _, xOffset = frame:GetPoint(1)
+        if point and type(xOffset) == "number" then
+            local anchor = "CENTER"
+            if point:find("LEFT") then
+                anchor = "LEFT"
+            elseif point:find("RIGHT") then
+                anchor = "RIGHT"
+            end
+
+            placement.anchorPoint = anchor
+            placement.x = xOffset
+            captured = true
+        end
+    end
+
+    if not captured then
+        local defaultAnchor, defaultX = self:GetDefaultModulePlacement(moduleKey)
+        placement.anchorPoint = defaultAnchor
+        placement.x = defaultX
+    end
+
+    if isInitial then
+        placement.initialX = placement.x
+        placement.initialAnchorPoint = placement.anchorPoint
+    end
+    placement.captured = true
+    return captured
+end
+
+function XIVBar:CaptureAllModulePlacements(forceInitial)
+    if not self.freePlacementModuleOrder then
+        return
+    end
+
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder) do
+        local meta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
+        local frameName = meta and meta.frameName or self.freePlacementFrameMap[moduleKey]
+        local frame = frameName and self:GetFrame(frameName) or nil
+        local placement = self:GetModulePlacement(moduleKey, true)
+        if forceInitial == true
+            or not placement
+            or placement.initialX == nil
+            or placement.initialAnchorPoint == nil then
+            self:CaptureModulePlacement(moduleKey, frame, true)
+        end
+    end
+
+    if self.db and self.db.profile and self.db.profile.general then
+        self.db.profile.general.freePlacementInitialized = true
+    end
+end
+
+function XIVBar:RecaptureAllInitialModulePlacements()
+    if self:IsFreePlacementEnabled() then
+        return false
+    end
+
+    if not self.freePlacementModuleOrder then
+        return false
+    end
+
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder) do
+        local meta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
+        local frameName = meta and meta.frameName or self.freePlacementFrameMap[moduleKey]
+        local frame = frameName and self:GetFrame(frameName) or nil
+        local placement = self:GetModulePlacement(moduleKey, true)
+
+        if frame and placement then
+            local previousX = placement.x
+            local previousAnchorPoint = placement.anchorPoint
+            local previousCaptured = placement.captured
+
+            self:CaptureModulePlacement(moduleKey, frame, true)
+
+            placement.x = previousX
+            placement.anchorPoint = previousAnchorPoint
+            placement.captured = previousCaptured
+        end
+    end
+
+    return true
+end
+
+function XIVBar:ApplyModuleFreePlacement(moduleKey, frame)
+    if not self:IsFreePlacementEnabled() then
+        return false
+    end
+
+    if type(moduleKey) ~= "string" or frame == nil then
+        return true
+    end
+
+    local bar = self:GetFrame('bar')
+    if not bar then
+        return true
+    end
+
+    local placement = self:GetModulePlacement(moduleKey, true)
+    if not placement then
+        return true
+    end
+
+    if type(placement.x) ~= "number" then
+        placement.captured = false
+    end
+
+    if placement.captured ~= true then
+        self:CaptureModulePlacement(moduleKey, frame)
+    end
+
+    local anchor = NormalizeAnchor(placement.anchorPoint)
+    local xOffset = placement.x
+
+    frame:ClearAllPoints()
+    frame:SetPoint(anchor, bar, anchor, xOffset, 0)
+
+    placement.captured = true
+    return true
+end
+
+function XIVBar:ApplySingleModuleFreePlacement(moduleKey)
+    local meta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
+    local frameName = meta and meta.frameName or (self.freePlacementFrameMap and self.freePlacementFrameMap[moduleKey])
+    local frame = frameName and self:GetFrame(frameName)
+    if frame then
+        self:ApplyModuleFreePlacement(moduleKey, frame)
+    end
+end
+
+function XIVBar:ResetModulePlacement(moduleKey)
+    local placement = self:GetModulePlacement(moduleKey, false)
+    if not placement or placement.initialX == nil then return end
+    placement.x = placement.initialX
+    placement.anchorPoint = placement.initialAnchorPoint
+    placement.captured = true
+    self:ApplySingleModuleFreePlacement(moduleKey)
+end
+
+function XIVBar:ResetAllModulePlacements()
+    if not self.freePlacementModuleOrder then
+        return
+    end
+
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder) do
+        local mod = self.db and self.db.profile and self.db.profile.modules and self.db.profile.modules[moduleKey]
+        if mod == nil or mod.enabled ~= false then
+            self:ResetModulePlacement(moduleKey)
+        end
+    end
+end
+
+function XIVBar:GetModulesPositionningOptions()
+    local args = {
+        enableFreePlacement = {
+            name = L["ENABLE_FREE_PLACEMENT"],
+            desc = L["ENABLE_FREE_PLACEMENT_DESC"],
+            type = "toggle",
+            order = 1,
+            width = "full",
+            get = function()
+                return self.db.profile.general.enableFreePlacement
+            end,
+            set = function(_, val)
+                if self.freePlacementToggleInProgress then
+                    return
+                end
+
+                local wasEnabled = self.db.profile.general.enableFreePlacement
+                if val == wasEnabled then
+                    return
+                end
+
+                self.freePlacementToggleInProgress = true
+                self.db.profile.general.enableFreePlacement = val
+
+                if val and not wasEnabled and not self.db.profile.general.freePlacementInitialized then
+                    self:CaptureAllModulePlacements()
+                end
+
+                if not val then
+                    self.db.profile.modules.clock.enabled = true
+
+                    local clockModule = self:GetModule("ClockModule", true)
+                    if clockModule then
+                        clockModule:Enable()
+                        clockModule:Refresh()
+                    end
+                end
+
+                self:Refresh()
+
+                local registry = LibStub("AceConfigRegistry-3.0", true)
+                if registry then
+                    registry:NotifyChange(AddOnName)
+                    registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                end
+
+                self.freePlacementToggleInProgress = false
+            end,
+        },
+        resetAllPositions = {
+            name = L["RESET_ALL_POSITIONS"],
+            desc = L["RESET_ALL_POSITIONS_DESC"],
+            type = "execute",
+            order = 1.5,
+            width = "full",
+            disabled = function()
+                return not self.db.profile.general.enableFreePlacement
+            end,
+            func = function()
+                self:ResetAllModulePlacements()
+                local registry = LibStub("AceConfigRegistry-3.0", true)
+                if registry then
+                    registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                end
+            end,
+        },
+        recaptureAllInitialPositions = {
+            name = L["RECAPTURE_INITIAL_POSITIONS"],
+            desc = L["RECAPTURE_INITIAL_POSITIONS_DESC"],
+            type = "execute",
+            order = 1.6,
+            width = "full",
+            disabled = function()
+                return self.db.profile.general.enableFreePlacement
+            end,
+            func = function()
+                self:RecaptureAllInitialModulePlacements()
+                local registry = LibStub("AceConfigRegistry-3.0", true)
+                if registry then
+                    registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                end
+            end,
+        },
+    }
+
+    local sortedModuleOrder = {}
+    for _, moduleKey in ipairs(self.freePlacementModuleOrder or {}) do
+        table.insert(sortedModuleOrder, moduleKey)
+    end
+    table.sort(sortedModuleOrder, function(a, b)
+        local metaA = self.freePlacementModuleMeta and self.freePlacementModuleMeta[a]
+        local metaB = self.freePlacementModuleMeta and self.freePlacementModuleMeta[b]
+        local nameA = metaA and metaA.displayName or a
+        local nameB = metaB and metaB.displayName or b
+        return nameA:lower() < nameB:lower()
+    end)
+
+    for order, moduleKey in ipairs(sortedModuleOrder) do
+        local moduleMeta = self.freePlacementModuleMeta and self.freePlacementModuleMeta[moduleKey]
+        if moduleMeta then
+            local currentModuleKey = moduleKey
+            local currentModuleMeta = moduleMeta
+
+            args[currentModuleKey] = {
+                name = currentModuleMeta.displayName,
+                type = "group",
+                order = order + 1,
+                inline = true,
+                disabled = function()
+                    if not self.db.profile.general.enableFreePlacement then return true end
+                    local mod = self.db.profile.modules[currentModuleKey]
+                    return mod ~= nil and mod.enabled == false
+                end,
+                args = {
+                    anchorPoint = {
+                        name = L["ANCHOR_POINT"],
+                        type = "select",
+                        order = 1,
+                        values = {
+                            LEFT = L["LEFT"],
+                            CENTER = L["CENTER"],
+                            RIGHT = L["RIGHT"],
+                        },
+                        get = function(info)
+                            local moduleKeyFromInfo = info and info[#info - 1] or currentModuleKey
+                            local placement = self:GetModulePlacement(moduleKeyFromInfo, true)
+                            return placement and NormalizeAnchor(placement.anchorPoint) or "CENTER"
+                        end,
+                        set = function(info, value)
+                            local moduleKeyFromInfo = info and info[#info - 1] or currentModuleKey
+                            local placement = self:GetModulePlacement(moduleKeyFromInfo, true)
+                            if placement then
+                                placement.anchorPoint = NormalizeAnchor(value)
+                                placement.captured = true
+                            end
+                            self:ApplySingleModuleFreePlacement(moduleKeyFromInfo)
+                        end,
+                    },
+                    xPosition = {
+                        name = L["X_POSITION"],
+                        type = "range",
+                        order = 2,
+                        min = -floor(GetScreenWidth()),
+                        max = floor(GetScreenWidth()),
+                        step = 1,
+                        get = function(info)
+                            local moduleKeyFromInfo = info and info[#info - 1] or currentModuleKey
+                            local placement = self:GetModulePlacement(moduleKeyFromInfo, true)
+                            return placement and RoundNearest(placement.x) or 0
+                        end,
+                        set = function(info, value)
+                            local moduleKeyFromInfo = info and info[#info - 1] or currentModuleKey
+                            local placement = self:GetModulePlacement(moduleKeyFromInfo, true)
+                            if placement then
+                                placement.x = RoundNearest(value)
+                                placement.captured = true
+                            end
+                            self:ApplySingleModuleFreePlacement(moduleKeyFromInfo)
+                        end,
+                    },
+                    resetPosition = {
+                        name = L["RESET_POSITION"],
+                        desc = L["RESET_POSITION_DESC"],
+                        type = "execute",
+                        order = 3,
+                        func = function()
+                            self:ResetModulePlacement(currentModuleKey)
+                            local registry = LibStub("AceConfigRegistry-3.0", true)
+                            if registry then
+                                registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+                            end
+                        end,
+                    },
+                }
+            }
+        end
+    end
+
+    return {
+        name = L["MODULES_POSITIONING"],
+        type = "group",
+        args = args
     }
 end

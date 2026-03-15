@@ -203,12 +203,14 @@ function TalentModule:Refresh()
         end
 
         self.specIcon:SetSize(iconSize, iconSize)
+        self.specIcon:ClearAllPoints()
         self.specIcon:SetPoint('LEFT')
         self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
         self.specText:SetFont(xb:GetFont(textHeight))
         self.specText:SetTextColor(xb:GetColor('normal'))
         self.specText:SetText(string.upper(name or ""))
+        self.specText:ClearAllPoints()
         self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
         self.specText:Show()
     else
@@ -220,12 +222,14 @@ function TalentModule:Refresh()
         self.specIcon:SetTexture(self.classIcon)
         self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
         self.specIcon:SetSize(iconSize, iconSize)
+        self.specIcon:ClearAllPoints()
         self.specIcon:SetPoint('LEFT')
         self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
         self.specText:SetFont(xb:GetFont(textHeight))
         self.specText:SetTextColor(xb:GetColor('normal'))
         self.specText:SetText(string.upper(name or ""))
+        self.specText:ClearAllPoints()
         self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
 
         self.lootSpecButtons[0].icon:SetTexture(self.classIcon)
@@ -235,6 +239,7 @@ function TalentModule:Refresh()
     end
 
     self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
+    self.specFrame:ClearAllPoints()
     self.specFrame:SetPoint('LEFT')
 
     if self.specFrame:GetWidth() < db.modules.talent.minWidth then
@@ -242,6 +247,14 @@ function TalentModule:Refresh()
     end
 
     self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
+
+    if xb:ApplyModuleFreePlacement('talent', self.talentFrame) then
+        self:CreateSpecPopup()
+        if not isVanilla then
+            self:CreateLootSpecPopup()
+        end
+        return
+    end
 
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
@@ -256,6 +269,7 @@ function TalentModule:Refresh()
             xOffset = 0
         end
     end
+    self.talentFrame:ClearAllPoints()
     self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
 
     self:CreateSpecPopup()
@@ -273,10 +287,12 @@ function TalentModule:CreateTalentFrames()
                          (BackdropTemplateMixin and "BackdropTemplate")
     self.specPopup = self.specPopup or CreateFrame('BUTTON', 'SpecPopup', self.specFrame, template)
     self.specPopup:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(self.specPopup, true)
 
     if not isVanilla then
         self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, template)
         self.lootSpecPopup:SetFrameStrata('TOOLTIP')
+        xb:RegisterMouseoverHoldFrame(self.lootSpecPopup, true)
     end
 
     if TooltipBackdropTemplateMixin then
@@ -362,23 +378,23 @@ function TalentModule:RegisterFrameEvents()
         if button == 'LeftButton' then
             if not self.specPopup:IsVisible() then
                 if self.lootSpecPopup then
-                    self.lootSpecPopup:Hide()
+                    xb:HidePopup(self.lootSpecPopup)
                 end
                 self:CreateSpecPopup()
-                self.specPopup:Show()
+                xb:ShowPopup(self.specPopup)
             else
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end
             end
         elseif button == 'RightButton' and self.lootSpecPopup then
             if not self.lootSpecPopup:IsVisible() then
-                self.specPopup:Hide()
+                xb:HidePopup(self.specPopup)
                 self:CreateLootSpecPopup()
-                self.lootSpecPopup:Show()
+                xb:ShowPopup(self.lootSpecPopup)
             else
-                self.lootSpecPopup:Hide()
+                xb:HidePopup(self.lootSpecPopup)
                 if xb.db.profile.modules.talent.showTooltip then
                     self:ShowTooltip()
                 end
@@ -418,7 +434,7 @@ function TalentModule:CreateSpecPopupProgression()
     self.specOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.specOptionString:SetTextColor(r, g, b, 1)
-    self.specOptionString:SetText(L['Set Specialization'])
+    self.specOptionString:SetText(L["SET_SPECIALIZATION"])
     self.specOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.specOptionString:SetPoint('CENTER')
 
@@ -526,7 +542,7 @@ function TalentModule:CreateSpecPopupVanilla()
     self.specOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.specOptionString:SetTextColor(r, g, b, 1)
-    self.specOptionString:SetText(L['Set Specialization'])
+    self.specOptionString:SetText(L["SET_SPECIALIZATION"])
     self.specOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.specOptionString:SetPoint('CENTER')
 
@@ -649,7 +665,7 @@ function TalentModule:CreateLootSpecPopup()
     self.lootSpecOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
     local r, g, b, _ = unpack(xb:HoverColors())
     self.lootSpecOptionString:SetTextColor(r, g, b, 1)
-    self.lootSpecOptionString:SetText(L['Set Loot Specialization'])
+    self.lootSpecOptionString:SetText(L["SET_LOOT_SPECIALIZATION"])
     self.lootSpecOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
     self.lootSpecOptionString:SetPoint('CENTER')
 
@@ -661,7 +677,7 @@ function TalentModule:CreateLootSpecPopup()
             local specId = i
             local name
             if i == 0 then
-                name = L['Current Specialization']
+                name = L["CURRENT_SPECIALIZATION"]
                 specId = self.currentSpecID
             else
                 local _, specName = GetSpecializationInfo(i)
@@ -775,12 +791,12 @@ function TalentModule:ShowTooltip()
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. SPECIALIZATION .. "|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
     if not isVanilla then
-        GameTooltip:AddDoubleLine(L['Current Loot Specialization'], "|cFFFFFFFF" .. name .. "|r", r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["CURRENT_LOOT_SPECIALIZATION"], "|cFFFFFFFF" .. name .. "|r", r, g, b, 1, 1, 1)
         GameTooltip:AddLine(" ")
     end
-    GameTooltip:AddDoubleLine('<' .. L['Left-Click'] .. '>', L['Set Specialization'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["SET_SPECIALIZATION"], r, g, b, 1, 1, 1)
     if not isVanilla then
-        GameTooltip:AddDoubleLine('<' .. L['Right-Click'] .. '>', L['Set Loot Specialization'], r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["SET_LOOT_SPECIALIZATION"], r, g, b, 1, 1, 1)
     end
     GameTooltip:Show()
 end
@@ -815,7 +831,7 @@ function TalentModule:GetConfig()
                 end
             },
             showTooltip = {
-                name = L['Show Tooltips'],
+                name = L["SHOW_TOOLTIPS"],
                 order = 2,
                 type = "toggle",
                 get = function()
@@ -827,7 +843,7 @@ function TalentModule:GetConfig()
                 end
             },
             minWidth = {
-                name = L['Talent Minimum Width'],
+                name = L["TALENT_MINIMUM_WIDTH"],
                 type = 'range',
                 order = 3,
                 min = 10,
