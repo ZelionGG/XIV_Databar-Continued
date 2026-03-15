@@ -24,7 +24,7 @@ jobs:
             tbc
             vanilla
           beta: false
-          ptr: true
+          ptr: false
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
