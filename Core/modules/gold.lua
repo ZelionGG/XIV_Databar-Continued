@@ -701,6 +701,7 @@ function GoldModule:GetDefaultOptions()
     }
 
     if compat.isMainline then
+        defaults.showWarbandBankGold = true
         defaults.disableBlizzardBagsBar = false
         defaults.showOtherRealms = true
     end
