@@ -620,10 +620,9 @@ function TravelModule:UpdatePortOptions()
         self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
     end
 
-    if xb.constants.playerClass == 'MONK' and not self.portOptions[193759] then
-        local portText = C_Map.GetMapInfo(809)
-        if IsPlayerSpell(200617) then portText = ORDER_HALL_MONK end
-        self.portOptions[193759] = {portId = 193759, text = portText}
+    if xb.constants.playerClass == 'MONK' and not self.portOptions[126892] then
+        local spellInfo = GetSpellInfo(126892)
+        self.portOptions[126892] = {portId = 126892, text = spellInfo.name}
     end
 
     local _, race = UnitRace("player")
