@@ -624,14 +624,25 @@ function XIVBar:UpdateMouseoverScripts()
     local hideBarIfOut
 
     local function HookMouseoverFrame(frame)
-        if not (frame and frame.EnableMouse and frame.HookScript) then
+        if not (frame and frame.EnableMouse) then
             return
         end
         if frame._xivMouseoverHooksInstalled then
             return
         end
-        frame._xivMouseoverHooksInstalled = true
+
         frame:EnableMouse(true)
+
+        if frame._xivKeepVisibleWhileShown then
+            frame._xivMouseoverHooksInstalled = true
+            return
+        end
+
+        if not frame.HookScript then
+            return
+        end
+
+        frame._xivMouseoverHooksInstalled = true
         frame:HookScript('OnEnter', showBar)
         frame:HookScript('OnLeave', hideBarIfOut)
     end
