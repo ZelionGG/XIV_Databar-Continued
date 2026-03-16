@@ -10,7 +10,11 @@ local FACTION_BAR_COLORS  = FACTION_BAR_COLORS
 local RANK_LABEL = rawget(_G, "RANK") or L["RANK"]
 
 local LegacyGetWatchedFactionInfo = rawget(_G, "GetWatchedFactionInfo")
+local LegacyGetFactionInfoByID = rawget(_G, "GetFactionInfoByID")
+local LegacyGetNumFactions = rawget(_G, "GetNumFactions")
+local LegacyGetFactionInfo = rawget(_G, "GetFactionInfo")
 local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
+local C_Reputation_GetFactionDataByID = C_Reputation.GetFactionDataByID
 
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
 local C_Reputation_IsFactionParagonForCurrentPlayer = C_Reputation.IsFactionParagonForCurrentPlayer
@@ -102,9 +106,77 @@ local function GetWatchedFactionInfoCompat()
     return nil
 end
 
-local function GetWatchedReputationDisplayData()
-    local name, reaction, minValue, maxValue, curValue, factionID =
-        GetWatchedFactionInfoCompat()
+local function GetFactionListEntry(index)
+    if not LegacyGetFactionInfo then
+        return nil
+    end
+
+    local name, _, reaction, minValue, maxValue, curValue, _, _, isHeader, _, _, _, _, factionID =
+        LegacyGetFactionInfo(index)
+    if not name or isHeader then
+        return nil
+    end
+
+    return name, reaction, minValue, maxValue, curValue, factionID
+end
+
+local function GetFactionInfoByIDCompat(factionID)
+    if type(factionID) ~= "number" then
+        return nil
+    end
+
+    if LegacyGetFactionInfoByID then
+        local name, _, reaction, minValue, maxValue, curValue, _, _, isHeader, _, _, _, _, resolvedFactionID =
+            LegacyGetFactionInfoByID(factionID)
+        if name and not isHeader then
+            return name, reaction, minValue, maxValue, curValue, resolvedFactionID or factionID
+        end
+    end
+
+    if C_Reputation_GetFactionDataByID then
+        local data = C_Reputation_GetFactionDataByID(factionID)
+        if data and data.name then
+            return data.name, data.reaction, data.currentReactionThreshold,
+                   data.nextReactionThreshold, data.currentStanding,
+                   data.factionID or factionID
+        end
+    end
+
+    if LegacyGetNumFactions and LegacyGetFactionInfo then
+        local numFactions = LegacyGetNumFactions()
+        for index = 1, numFactions do
+            local name, reaction, minValue, maxValue, curValue, resolvedFactionID =
+                GetFactionListEntry(index)
+            if resolvedFactionID == factionID then
+                return name, reaction, minValue, maxValue, curValue, resolvedFactionID
+            end
+        end
+    end
+
+    return nil
+end
+
+local function GetFactionInfoByNameCompat(targetName)
+    if type(targetName) ~= "string" or targetName == "" then
+        return nil
+    end
+
+    if LegacyGetNumFactions and LegacyGetFactionInfo then
+        local numFactions = LegacyGetNumFactions()
+        for index = 1, numFactions do
+            local name, reaction, minValue, maxValue, curValue, factionID =
+                GetFactionListEntry(index)
+            if name == targetName then
+                return name, reaction, minValue, maxValue, curValue, factionID
+            end
+        end
+    end
+
+    return nil
+end
+
+local function BuildReputationDisplayData(name, reaction, minValue, maxValue, curValue,
+                                          factionID)
     if not name then
         return nil
     end
@@ -267,6 +339,27 @@ local function GetWatchedReputationDisplayData()
     return data
 end
 
+local function GetWatchedReputationDisplayData()
+    local name, reaction, minValue, maxValue, curValue, factionID =
+        GetWatchedFactionInfoCompat()
+    return BuildReputationDisplayData(name, reaction, minValue, maxValue, curValue,
+                                      factionID)
+end
+
+local function GetReputationDisplayDataByFactionID(factionID)
+    local name, reaction, minValue, maxValue, curValue, resolvedFactionID =
+        GetFactionInfoByIDCompat(factionID)
+    return BuildReputationDisplayData(name, reaction, minValue, maxValue, curValue,
+                                      resolvedFactionID)
+end
+
+local function GetReputationDisplayDataByFactionName(name)
+    local factionName, reaction, minValue, maxValue, curValue, factionID =
+        GetFactionInfoByNameCompat(name)
+    return BuildReputationDisplayData(factionName, reaction, minValue, maxValue,
+                                      curValue, factionID)
+end
+
 local ReputationModule = xb:NewModule("ReputationModule", 'AceEvent-3.0',
                                       'AceHook-3.0')
 
@@ -293,6 +386,7 @@ end
 function ReputationModule:OnDisable()
     self:SetParagonRewardFlash(false)
     self.reputationFrame:Hide()
+    self:UnregisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
     self:UnregisterEvent('UPDATE_FACTION', 'Refresh')
     if compat.isMainline then
         self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
@@ -300,6 +394,67 @@ function ReputationModule:OnDisable()
     end
     self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:UnregisterEvent('QUEST_TURNED_IN', 'Refresh')
+end
+
+local function GetCharReputationStorage()
+    xb.db.char.modules = xb.db.char.modules or {}
+    xb.db.char.modules.reputation = xb.db.char.modules.reputation or {}
+    return xb.db.char.modules.reputation
+end
+
+function ReputationModule:SetAutoTrackedFaction(factionID, factionName)
+    local charRep = GetCharReputationStorage()
+    charRep.lastAutoTrackedFactionID = factionID
+    charRep.lastAutoTrackedFactionName = factionName
+end
+
+function ReputationModule:GetAutoTrackedFaction()
+    local charRep = xb.db.char.modules and xb.db.char.modules.reputation
+    if not charRep then
+        return nil, nil
+    end
+
+    return charRep.lastAutoTrackedFactionID, charRep.lastAutoTrackedFactionName
+end
+
+function ReputationModule:ClearAutoTrackedFaction()
+    self:SetAutoTrackedFaction(nil, nil)
+end
+
+function ReputationModule:GetDisplayReputationData()
+    local reputationDB = xb.db.profile.modules.reputation
+    if reputationDB.autoSwitchOnRepGain then
+        local lastFactionID, lastFactionName = self:GetAutoTrackedFaction()
+        local autoTrackedData =
+            GetReputationDisplayDataByFactionID(lastFactionID) or
+                GetReputationDisplayDataByFactionName(lastFactionName)
+        if autoTrackedData then
+            return autoTrackedData
+        end
+
+        self:ClearAutoTrackedFaction()
+    end
+
+    return GetWatchedReputationDisplayData()
+end
+
+function ReputationModule:HandleFactionStandingChanged(_, factionID)
+    if not xb.db.profile.modules.reputation.autoSwitchOnRepGain then
+        return
+    end
+
+    if type(factionID) ~= "number" then
+        return
+    end
+
+    local factionData = GetReputationDisplayDataByFactionID(factionID)
+    if not factionData then
+        return
+    end
+
+    local factionName = factionData.name
+    self:SetAutoTrackedFaction(factionID, factionName)
+    self:Refresh()
 end
 
 function ReputationModule:SetParagonRewardFlash(enabled)
@@ -344,7 +499,7 @@ function ReputationModule:Refresh()
         return;
     end
 
-    local watchedData = GetWatchedReputationDisplayData()
+    local watchedData = self:GetDisplayReputationData()
 
     if not watchedData then
         if self.reputationBarFrame then
@@ -541,6 +696,7 @@ function ReputationModule:RegisterFrameEvents()
             OpenReputationPanel()
         end)
     end
+    self:RegisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
     self:RegisterEvent('UPDATE_FACTION', 'Refresh')
     if compat.isMainline then
         self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
@@ -613,7 +769,7 @@ function ReputationModule:ShowTooltip()
                         g, b)
     GameTooltip:AddLine(" ")
 
-    local watchedData = GetWatchedReputationDisplayData()
+    local watchedData = self:GetDisplayReputationData()
 
     if not watchedData then
         GameTooltip:AddLine("No Watched Faction", 1, 1, 1)
@@ -659,7 +815,8 @@ function ReputationModule:GetDefaultOptions()
         enabled = false,
         reputationBarClassCC = false,
         showTooltip = true,
-        flashParagonReward = true
+        flashParagonReward = true,
+        autoSwitchOnRepGain = false
     }
 end
 
@@ -721,9 +878,22 @@ function ReputationModule:GetConfig()
                     self:Refresh();
                 end
             },
+            autoSwitchOnRepGain = {
+                name = L["SHOW_LAST_REPUTATION_GAINED"],
+                order = 5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.reputation.autoSwitchOnRepGain;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.reputation.autoSwitchOnRepGain = val;
+                    self:ClearAutoTrackedFaction()
+                    self:Refresh();
+                end
+            },
             flashParagonReward = {
                 name = L["FLASH_PARAGON_REWARD"],
-                order = 5,
+                order = 6,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.reputation.flashParagonReward;

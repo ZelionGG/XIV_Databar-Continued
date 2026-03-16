@@ -209,6 +209,7 @@ L["OPEN_REPUTATION"] = "Open " .. REPUTATION -- TODO: To Translate
 L["PARAGON_REWARD_AVAILABLE"] = "Paragon Reward available" -- TODO: To Translate
 L["CLASS_COLORS_REPUTATION"] = "Use Class Colors for Reputation Bar" -- TODO: To Translate
 L["REPUTATION_COLORS_REPUTATION"] = "Use Reputation Colors for Reputation Bar" -- TODO: To Translate
+L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation" -- TODO: To Translate
 L["FLASH_PARAGON_REWARD"] = "Flash on Paragon Reward" -- TODO: To Translate
 L["PROGRESS"] = "Progress" -- TODO: To Translate
 L["RANK"] = "Rank" -- TODO: To Translate

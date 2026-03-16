@@ -209,6 +209,7 @@ L["OPEN_REPUTATION"] = "Öffne " .. REPUTATION
 L["PARAGON_REWARD_AVAILABLE"] = "Paragonbelohnung verfügbar"
 L["CLASS_COLORS_REPUTATION"] = "Klassenfarben für die Rufleiste verwenden"
 L["REPUTATION_COLORS_REPUTATION"] = "Verwendet Ruffarben für die Rufleiste."
+L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation" -- TODO: To Translate
 L["FLASH_PARAGON_REWARD"] = "Aufblitzen bei Paragonbelohnung"
 L["PROGRESS"] = "Fortschritt"
 L["RANK"] = "Rang"

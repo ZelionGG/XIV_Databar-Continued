@@ -208,6 +208,7 @@ L["OPEN_REPUTATION"] = "Ouvrir l'interface de " .. REPUTATION
 L["PARAGON_REWARD_AVAILABLE"] = "Récompense de parangon disponible"
 L["CLASS_COLORS_REPUTATION"] = "Utiliser la couleur de classe pour la barre de réputation"
 L["REPUTATION_COLORS_REPUTATION"] = "Utiliser la couleur de réputation pour la barre de réputation"
+L["SHOW_LAST_REPUTATION_GAINED"] = "Toujours afficher la dernière réputation gagnée"
 L["FLASH_PARAGON_REWARD"] = "Flash lorsque la récompense de parangon est disponible"
 L["PROGRESS"] = "Progression"
 L["RANK"] = "Rang"

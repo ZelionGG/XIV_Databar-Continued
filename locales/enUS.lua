@@ -208,6 +208,7 @@ L["OPEN_REPUTATION"] = "Open " .. REPUTATION
 L["PARAGON_REWARD_AVAILABLE"] = "Paragon Reward available"
 L["CLASS_COLORS_REPUTATION"] = "Use Class Colors for Reputation Bar"
 L["REPUTATION_COLORS_REPUTATION"] = "Use Reputation Colors for Reputation Bar"
+L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation"
 L["FLASH_PARAGON_REWARD"] = "Flash on Paragon Reward"
 L["PROGRESS"] = "Progress"
 L["RANK"] = "Rank"
