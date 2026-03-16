@@ -172,6 +172,7 @@ L["SHORTEN_GOLD"] = "金钱缩写"
 L["TOGGLE_BAGS"] = "切换背包"
 L["SESSION_TOTAL"] = "汇总"
 L["DAILY_TOTAL"] = "Daily Total" -- TODO: To Translate
+L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "Gold rounded values" -- TODO: To Translate
 L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
 L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate

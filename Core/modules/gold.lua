@@ -432,11 +432,20 @@ function GoldModule:ShowTooltipMainline()
         GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], self:FormatGold(math.abs(playerData.sessionMoney)), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], self:FormatGold(math.abs(playerData.dailyMoney)), r, g, b, 1, 1, 1)
     end
+    local warbandBankGold = 0
+    if xb.db.profile.modules.gold.showWarbandBankGold then
+        warbandBankGold = C_Bank.FetchDepositedMoney(Enum.BankType.Account)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddDoubleLine(ACCOUNT_BANK_PANEL_TITLE, self:FormatGold(warbandBankGold), r, g, b, 1, 1, 1)
+    end
 
     local realmCharacters = {}
     local currentRealm = GetRealmName()
     local currentName = UnitName('player')
     local totalGold = 0
+    if xb.db.profile.modules.gold.showWarbandBankGold then
+        totalGold = warbandBankGold
+    end
 
     local hideThreshold = tonumber(xb.db.profile.modules.gold.hideCharUnderThresholdAmount) or 0
 
@@ -781,7 +790,8 @@ function GoldModule:GetConfig()
             end,
             hidden = function()
                 return not xb.db.profile.modules.gold.hideCharUnderThreshold
-            end
+            end,
+            width = "full"
         }
     }
 
@@ -797,7 +807,18 @@ function GoldModule:GetConfig()
                 xb.db.profile.modules.gold.showOtherRealms = val
                 self:Refresh()
             end,
-            width = "full"
+        }
+        args.showWarbandBankGold = {
+            name = L["SHOW_WARBAND_BANK_GOLD"],
+            order = 4.2,
+            type = "toggle",
+            get = function()
+                return xb.db.profile.modules.gold.showWarbandBankGold
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.gold.showWarbandBankGold = val
+                self:Refresh()
+            end,
         }
 
         args.blizzardBagsBar = {
