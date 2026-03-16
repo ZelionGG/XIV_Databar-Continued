@@ -519,9 +519,31 @@ function CurrencyModule:ExperienceGains()
     return self.xpGained, curXp, maxXp, self.killsRemaining
 end
 
-function CurrencyModule:XpUpdate()
-    CurrencyModule:ExperienceGains()
-    CurrencyModule:Refresh()
+function CurrencyModule:ScheduleXpRefresh(attempt)
+    local retryAttempt = attempt or 1
+    local maxXp = UnitXPMax('player') or 0
+
+    if maxXp > 0 or retryAttempt >= 10 then
+        self:Refresh()
+        return
+    end
+
+    C_Timer.After(0.1, function()
+        if self and self:IsEnabled() then
+            self:ScheduleXpRefresh(retryAttempt + 1)
+        end
+    end)
+end
+
+function CurrencyModule:XpUpdate(event)
+    self:ExperienceGains()
+
+    if event == 'PLAYER_LEVEL_UP' then
+        self:ScheduleXpRefresh()
+        return
+    end
+
+    self:Refresh()
 end
 
 function CurrencyModule:ShowTooltip()
