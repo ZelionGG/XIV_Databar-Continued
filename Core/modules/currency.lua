@@ -116,6 +116,116 @@ function CurrencyModule:OnDisable()
     self:UnregisterEvent('PLAYER_LEVEL_UP')
 end
 
+function CurrencyModule:GetSelectedCurrencyLookup()
+    local selectedLookup = {}
+    local selectedCurrencies = xb.db.profile.modules.currency.selectedCurrencies or {}
+    for _, currencyId in ipairs(selectedCurrencies) do
+        selectedLookup[currencyId] = true
+    end
+    return selectedLookup
+end
+
+function CurrencyModule:SanitizeBarCurrencies()
+    local db = xb.db.profile.modules.currency
+    local barCurrencies = db.barCurrencies or {}
+    local selectedLookup = self:GetSelectedCurrencyLookup()
+    local sanitized = {}
+
+    for slot = 1, 3 do
+        local currencyId = barCurrencies[slot]
+        if currencyId and currencyId ~= "" and selectedLookup[currencyId] then
+            local duplicate = false
+            for previousSlot = 1, slot - 1 do
+                if sanitized[previousSlot] == currencyId then
+                    duplicate = true
+                    break
+                end
+            end
+            if not duplicate then
+                sanitized[slot] = currencyId
+            end
+        end
+    end
+
+    db.barCurrencies = sanitized
+    return sanitized
+end
+
+function CurrencyModule:GetBarCurrenciesForDisplay(maxCurrencies)
+    local db = xb.db.profile.modules.currency
+    local currenciesToDisplay = {}
+    local barCurrencies = self:SanitizeBarCurrencies()
+    local selectedCurrencies = db.selectedCurrencies or {}
+
+    for slot = 1, math.min(maxCurrencies or 3, 3) do
+        local currencyId = barCurrencies[slot]
+        if currencyId then
+            table.insert(currenciesToDisplay, currencyId)
+        end
+    end
+
+    if #currenciesToDisplay > 0 then
+        return currenciesToDisplay
+    end
+
+    for _, currencyId in ipairs(selectedCurrencies) do
+        table.insert(currenciesToDisplay, currencyId)
+        if #currenciesToDisplay >= (maxCurrencies or 3) then
+            break
+        end
+    end
+
+    return currenciesToDisplay
+end
+
+function CurrencyModule:GetSelectedCurrencyValues()
+    local values = {
+        [""] = NONE
+    }
+    local selectedLookup = self:GetSelectedCurrencyLookup()
+
+    for _, expansionData in ipairs(self:GetCurrenciesByExpansion()) do
+        for _, currencyInfo in ipairs(expansionData.currencies) do
+            if selectedLookup[currencyInfo.id] then
+                local iconString = string.format("|T%s:16:16:0:0|t ",
+                                                 currencyInfo.iconFileID or "")
+                values[currencyInfo.id] = iconString .. currencyInfo.name
+            end
+        end
+    end
+
+    return values
+end
+
+function CurrencyModule:SetBarCurrency(slot, value)
+    local db = xb.db.profile.modules.currency
+    db.barCurrencies = db.barCurrencies or {}
+
+    if value == "" then
+        value = nil
+    end
+
+    for index = 1, 3 do
+        if index ~= slot and db.barCurrencies[index] == value then
+            db.barCurrencies[index] = nil
+        end
+    end
+
+    db.barCurrencies[slot] = value
+    self:SanitizeBarCurrencies()
+end
+
+function CurrencyModule:RemoveCurrencyFromSelection(currencyId)
+    local selected = xb.db.profile.modules.currency.selectedCurrencies or {}
+    for i, id in ipairs(selected) do
+        if id == currencyId then
+            table.remove(selected, i)
+            break
+        end
+    end
+    self:SanitizeBarCurrencies()
+end
+
 function CurrencyModule:Refresh()
     local db = xb.db.profile
     xb.constants.playerLevel = UnitLevel("player")
@@ -211,21 +321,21 @@ function CurrencyModule:Refresh()
             local buttonIndex = 1
             local maxCurrencies = db.modules.currency.numCurrenciesOnBar or 3
             if ShouldUseSelectedCurrencies() then
-                local selectedCurrencies = db.modules.currency.selectedCurrencies
-                for _, currencyId in ipairs(selectedCurrencies) do
-                    if buttonIndex <= maxCurrencies then
-                        local width = self:StyleCurrencyFrame(currencyId, nil, buttonIndex)
-                        if width > 0 then
-                            iconsWidth = iconsWidth + width
-                            if buttonIndex == 1 then
-                                self.curButtons[1]:SetPoint('RIGHT')
-                            elseif buttonIndex == 2 then
-                                self.curButtons[2]:SetPoint('RIGHT', self.curButtons[1], 'LEFT', -5, 0)
-                            elseif buttonIndex == 3 then
-                                self.curButtons[3]:SetPoint('RIGHT', self.curButtons[2], 'LEFT', -5, 0)
-                            end
-                            buttonIndex = buttonIndex + 1
+                local currenciesToDisplay =
+                    self:GetBarCurrenciesForDisplay(maxCurrencies)
+                for _, currencyId in ipairs(currenciesToDisplay) do
+                    local width = self:StyleCurrencyFrame(currencyId, nil,
+                                                         buttonIndex)
+                    if width > 0 then
+                        iconsWidth = iconsWidth + width
+                        if buttonIndex == 1 then
+                            self.curButtons[1]:SetPoint('RIGHT')
+                        elseif buttonIndex == 2 then
+                            self.curButtons[2]:SetPoint('RIGHT', self.curButtons[1], 'LEFT', -5, 0)
+                        elseif buttonIndex == 3 then
+                            self.curButtons[3]:SetPoint('RIGHT', self.curButtons[2], 'LEFT', -5, 0)
                         end
+                        buttonIndex = buttonIndex + 1
                     end
                 end
             elseif GetNumWatchedTokens and type(GetNumWatchedTokens) == "function" then
@@ -761,6 +871,7 @@ function CurrencyModule:GetDefaultOptions()
         showOnlyModuleIcon = false,
         numCurrenciesOnBar = 3,
         selectedCurrencies = {},  -- Array of selected currency IDs
+        barCurrencies = {},
         showMoreCurrenciesOnShift = false,  -- Setting to display more currencies while using Shift+Hover
         maxCurrenciesTooltipShift = 30  -- Maximum number of currencies displayed during Shift+Hover
     }
@@ -918,10 +1029,69 @@ function CurrencyModule:GetConfig()
         -- This fixes the "0 currency" bug: at OnInitialize time, GetCurrencyListSize() returns 0,
         -- so we populate the args later when the data is loaded.
         self.currencySelectionArgs = self.currencySelectionArgs or {}
+        args['currency_bar_selection'] = {
+            type = 'group',
+            name = L["BAR_CURRENCY_SELECT"],
+            order = 9,
+            inline = true,
+            disabled = function()
+                return xb.db.profile.modules.currency.showOnlyModuleIcon
+            end,
+            args = {
+                barCurrencyOne = {
+                    name = L["FIRST_CURRENCY"],
+                    type = "select",
+                    order = 1,
+                    values = function()
+                        return self:GetSelectedCurrencyValues()
+                    end,
+                    get = function()
+                        local barCurrencies = self:SanitizeBarCurrencies()
+                        return barCurrencies[1] or ""
+                    end,
+                    set = function(_, val)
+                        self:SetBarCurrency(1, val)
+                        self:Refresh()
+                    end
+                },
+                barCurrencyTwo = {
+                    name = L["SECOND_CURRENCY"],
+                    type = "select",
+                    order = 2,
+                    values = function()
+                        return self:GetSelectedCurrencyValues()
+                    end,
+                    get = function()
+                        local barCurrencies = self:SanitizeBarCurrencies()
+                        return barCurrencies[2] or ""
+                    end,
+                    set = function(_, val)
+                        self:SetBarCurrency(2, val)
+                        self:Refresh()
+                    end
+                },
+                barCurrencyThree = {
+                    name = L["THIRD_CURRENCY"],
+                    type = "select",
+                    order = 3,
+                    values = function()
+                        return self:GetSelectedCurrencyValues()
+                    end,
+                    get = function()
+                        local barCurrencies = self:SanitizeBarCurrencies()
+                        return barCurrencies[3] or ""
+                    end,
+                    set = function(_, val)
+                        self:SetBarCurrency(3, val)
+                        self:Refresh()
+                    end
+                }
+            }
+        }
         args['currency_selection'] = {
             type = 'group',
             name = L["CURRENCY_SELECTION"],
-            order = 9,
+            order = 10,
             inline = true,
             args = self.currencySelectionArgs
         }
@@ -959,6 +1129,7 @@ function CurrencyModule:BuildCurrencySelectionArgs()
                 end
             end
             xb.db.profile.modules.currency.selectedCurrencies = allCurrencies
+            self:SanitizeBarCurrencies()
             self:Refresh()
         end
     }
@@ -970,6 +1141,7 @@ function CurrencyModule:BuildCurrencySelectionArgs()
         order = order,
         func = function()
             xb.db.profile.modules.currency.selectedCurrencies = {}
+            xb.db.profile.modules.currency.barCurrencies = {}
             self:Refresh()
         end
     }
@@ -1007,13 +1179,9 @@ function CurrencyModule:BuildCurrencySelectionArgs()
                         if val then
                             table.insert(selected, currencyInfo.id)
                         else
-                            for i, id in ipairs(selected) do
-                                if id == currencyInfo.id then
-                                    table.remove(selected, i)
-                                    break
-                                end
-                            end
+                            self:RemoveCurrencyFromSelection(currencyInfo.id)
                         end
+                        self:SanitizeBarCurrencies()
                         self:Refresh()
                     end
                 }
@@ -1046,13 +1214,9 @@ function CurrencyModule:BuildCurrencySelectionArgs()
                         if val then
                             table.insert(selected, currencyInfo.id)
                         else
-                            for i, id in ipairs(selected) do
-                                if id == currencyInfo.id then
-                                    table.remove(selected, i)
-                                    break
-                                end
-                            end
+                            self:RemoveCurrencyFromSelection(currencyInfo.id)
                         end
+                        self:SanitizeBarCurrencies()
                         self:Refresh()
                     end
                 }
