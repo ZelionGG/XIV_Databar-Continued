@@ -625,6 +625,12 @@ function TravelModule:UpdatePortOptions()
         if IsPlayerSpell(200617) then portText = ORDER_HALL_MONK end
         self.portOptions[193759] = {portId = 193759, text = portText}
     end
+
+    local _, race = UnitRace("player")
+    if(race == "Harronir") and not self.portOptions[1238686] then
+        local spellInfo = GetSpellInfo(1238686)
+        self.portOptions[1238686] = {portId = 1238686, text = spellInfo.name}
+    end
 end
 
 function TravelModule:GetRemainingCooldown(id, isSpell)
