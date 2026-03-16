@@ -144,6 +144,12 @@ function VolumeModule:Refresh()
   end
   if self.frame then
     self.frame:Hide()
+    if xb:ApplyModuleFreePlacement('MasterVolume', self.frame) then
+      self.frame:EnableMouseWheel(xb.db.profile.modules.MasterVolume.enableMouseWheel)
+      self:RegisterEvents()
+      self.frame:Show()
+      return
+    end
     local relativeAnchorPoint = 'RIGHT'
     local xOffset = xb.db.profile.general.moduleSpacing
     local parentFrame = xb:GetFrame('armorFrame')
@@ -155,6 +161,7 @@ function VolumeModule:Refresh()
         xOffset = 0
       end
     end
+    self.frame:ClearAllPoints()
     self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
     self.frame:EnableMouseWheel(xb.db.profile.modules.MasterVolume.enableMouseWheel)
     self:RegisterEvents()
