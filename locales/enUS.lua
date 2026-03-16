@@ -6,6 +6,9 @@ local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "enUS", true, false)
 
+-- NOTE: Some strings are sourced from BlizzardInterfaceResources:
+-- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/enUS.lua
+
 L["MODULES"] = "Modules"
 L["LEFT_CLICK"] = "Left-Click"
 L["RIGHT_CLICK"] = "Right-Click"
