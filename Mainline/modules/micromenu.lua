@@ -1175,7 +1175,8 @@ function MenuModule:GuildHover(hoverFunc)
             local name, _, _, level, _, zone, note, _, isOnline, status, class, _, _, _, _ =
                 GetGuildRosterInfo(i)
             if isOnline then
-                local colorHex = RAID_CLASS_COLORS[class].colorStr
+                local classColor = class and RAID_CLASS_COLORS[class]
+                local colorHex = classColor and classColor.colorStr or 'ffffffff'
 
                 -- determine afk/dnd/online status of guild members
                 local statusText = ''
@@ -1188,11 +1189,20 @@ function MenuModule:GuildHover(hoverFunc)
                 -- name given by Blizzard is CharName-RealmName, truncate to CharName
                 local charName = name:match('[^-]+')
 
+                note = note or ''
+                zone = zone or L["NO_INFO"]
+
                 if note ~= '' then
                     note = '|cffffffff(|r' .. note .. '|cffffffff)|r'
                 end
-                local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex,
-                    charName or name or L["NO_INFO"], statusText, note)
+
+                local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r',
+                    level or '',
+                    colorHex,
+                    charName or name or L["NO_INFO"],
+                    statusText or '',
+                    note
+                )
                 local lineRight = string.format("|cffffffff%s|r", zone)
                 local lineRow = tooltip:AddRow(lineLeft, lineRight)
                 lineRow:SetScript('OnEnter', function()
