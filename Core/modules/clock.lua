@@ -149,7 +149,11 @@ function ClockModule:OnDisable()
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     self:UnregisterEvent("PLAYER_UPDATE_RESTING")
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-    self.clockFrame:Hide()
+
+    if self.clockFrame then
+        self.clockFrame:SetScript("OnUpdate", nil)
+        self.clockFrame:Hide()
+    end
 end
 
 function ClockModule:EnsureFrames()
@@ -171,12 +175,13 @@ function ClockModule:Refresh()
         db.modules.clock.enabled = true
     end
 
+    if not db.modules.clock.enabled then
+        self:Disable()
+        return
+    end
+
     self:EnsureFrames()
     if self.clockFrame == nil then
-        return;
-    end
-    if not db.modules.clock.enabled then
-        self:Disable();
         return;
     end
 
