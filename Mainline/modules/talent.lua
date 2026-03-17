@@ -212,20 +212,6 @@ function TalentModule:Refresh()
 
     self.specText:Show()
 
-    local relativeAnchorPoint = 'LEFT'
-    local xOffset = db.general.moduleSpacing
-    local anchorFrame = xb:GetFrame('clockFrame')
-    if not anchorFrame:IsVisible() and not db.modules.clock.enabled then
-        if xb:GetFrame('tradeskillFrame'):IsVisible() then
-            anchorFrame = xb:GetFrame('tradeskillFrame')
-        elseif xb:GetFrame('currencyFrame'):IsVisible() then
-            anchorFrame = xb:GetFrame('currencyFrame')
-        else
-            relativeAnchorPoint = 'RIGHT'
-            xOffset = 0
-        end
-    end
-
     if not InCombatLockdown() then
         self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
         if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
@@ -253,8 +239,30 @@ function TalentModule:Refresh()
             return
         end
 
-        self.talentFrame:ClearAllPoints()
-        self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+        local relativeAnchorPoint = 'LEFT'
+        local xOffset = db.general.moduleSpacing
+        local anchorFrame = xb:GetFrame('clockFrame')
+
+        if anchorFrame and anchorFrame:IsVisible() then
+            self.talentFrame:ClearAllPoints()
+            self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+        else
+            local tradeskillFrame = xb:GetFrame('tradeskillFrame')
+            local currencyFrame = xb:GetFrame('currencyFrame')
+
+            if tradeskillFrame and tradeskillFrame:IsVisible() then
+                anchorFrame = tradeskillFrame
+            elseif currencyFrame and currencyFrame:IsVisible() then
+                anchorFrame = currencyFrame
+            else
+                relativeAnchorPoint = 'RIGHT'
+                xOffset = 0
+                anchorFrame = xb:GetFrame('bar')
+            end
+
+            self.talentFrame:ClearAllPoints()
+            self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+        end
     end
 
     self:CreateLoadoutPopup()
