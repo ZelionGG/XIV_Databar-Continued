@@ -271,7 +271,7 @@ function TalentModule:Refresh()
 end
 
 function TalentModule:CreateLoadoutFrames()
-    self.loadoutFrame = self.loadoutFrame or CreateFrame('BUTTON', nil, self.talentFrame, 'SecureActionButtonTemplate')
+    self.loadoutFrame = self.loadoutFrame or CreateFrame('BUTTON', nil, self.talentFrame)
     self.loadoutIcon = self.loadoutIcon or self.loadoutFrame:CreateTexture(nil, 'OVERLAY')
     self.loadoutText = self.loadoutText or self.loadoutFrame:CreateFontString(nil, 'OVERLAY')
 
@@ -300,7 +300,7 @@ function TalentModule:CreateLoadoutFrames()
 end
 
 function TalentModule:CreateTalentFrames()
-    self.specFrame = self.specFrame or CreateFrame('BUTTON', nil, self.talentFrame, 'InsecureActionButtonTemplate')
+    self.specFrame = self.specFrame or CreateFrame('BUTTON', nil, self.talentFrame)
     self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
     self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
 
