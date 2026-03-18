@@ -211,8 +211,14 @@ function XIVBar:SetupOptions()
         return string
     end
 
-    local function renderChangelogLine(line)
-        line = gsub(line, "%[[^%[]+%]", orange)
+    local function lightblue(string)
+        if type(string) ~= "string" then string = tostring(string) end
+        string = XIVBar:CreateColorString(string, {r = 0.4, g = 0.6, b = 1.0})
+        return string
+    end
+
+    local function renderChangelogLine(line, color)
+        line = gsub(line, "%[[^%[]+%]", color)
         return line
     end
 
@@ -259,7 +265,7 @@ function XIVBar:SetupOptions()
                 page.headerHeader = {
                     order = 2.5,
                     type = "header",
-                    name = orange(header.title)
+                    name = lightblue(header.title)
                 }
             end
 
@@ -268,7 +274,7 @@ function XIVBar:SetupOptions()
                     order = 2.6,
                     type = "description",
                     name = function()
-                        return renderChangelogLine(header.text) .. "\n"
+                        return renderChangelogLine(header.text, lightblue) .. "\n"
                     end,
                     fontSize = "medium"
                 }
@@ -297,7 +303,7 @@ function XIVBar:SetupOptions()
                     local text = ""
                     for index, line in ipairs(important) do
                         text = text .. index .. ". " ..
-                                   renderChangelogLine(line) .. "\n"
+                                   renderChangelogLine(line, orange) .. "\n"
                     end
                     return text .. "\n"
                 end,
@@ -327,7 +333,7 @@ function XIVBar:SetupOptions()
                     local text = ""
                     for index, line in ipairs(bugfix) do
                         text = text .. index .. ". " ..
-                                   renderChangelogLine(line) .. "\n"
+                                   renderChangelogLine(line, orange) .. "\n"
                     end
                     return text .. "\n"
                 end,
@@ -357,7 +363,7 @@ function XIVBar:SetupOptions()
                     local text = ""
                     for index, line in ipairs(new) do
                         text = text .. index .. ". " ..
-                                   renderChangelogLine(line) .. "\n"
+                                   renderChangelogLine(line, orange) .. "\n"
                     end
                     return text .. "\n"
                 end,
@@ -387,7 +393,7 @@ function XIVBar:SetupOptions()
                     local text = ""
                     for index, line in ipairs(improvment) do
                         text = text .. index .. ". " ..
-                                   renderChangelogLine(line) .. "\n"
+                                   renderChangelogLine(line, orange) .. "\n"
                     end
                     return text .. "\n"
                 end,
