@@ -109,22 +109,22 @@ function MenuModule:OnInitialize()
     }
 
     self.buttonInfo = {
-        { key = 'menu',   binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
-        { key = 'chat',   binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
-        { key = 'guild',  binding = 'TOGGLEGUILD',            label = GUILD },
-        { key = 'social', binding = 'TOGGLESOCIAL',           label = SOCIAL_LABEL },
-        { key = 'char',   binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
-        { key = 'spell',  binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
-        { key = 'talent', binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
-        { key = 'ach',    binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
-        { key = 'quest',  binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
-        { key = 'lfg',    binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
-        { key = 'journal',binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
-        { key = 'pvp',    binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
-        { key = 'pet',    binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
-        { key = 'house',  binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
-        { key = 'shop',   binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
-        { key = 'help',   binding = 'TOGGLEHELP',             label = HELP_BUTTON },
+        { key = 'menu',       binding = 'TOGGLEGAMEMENU',         label = MAINMENU_BUTTON },
+        { key = 'chat',       binding = 'TOGGLECHATMENU',         label = CHAT_MENU },
+        { key = 'guild',      binding = 'TOGGLEGUILD',            label = GUILD },
+        { key = 'social',     binding = 'TOGGLESOCIAL',           label = SOCIAL_LABEL },
+        { key = 'char',       binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
+        { key = 'profession', binding = 'TOGGLEPROFESSIONBOOK',   label = PROFESSIONS_BUTTON },
+        { key = 'talent',     binding = 'TOGGLETALENTS',          label = PLAYERSPELLS_BUTTON  },
+        { key = 'ach',        binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS },
+        { key = 'quest',      binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
+        { key = 'lfg',        binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
+        { key = 'journal',    binding = 'TOGGLEENCOUNTERJOURNAL', label = ADVENTURE_JOURNAL },
+        { key = 'pvp',        binding = 'TOGGLECHARACTER4',       label = PLAYER_V_PLAYER },
+        { key = 'pet',        binding = 'TOGGLECOLLECTIONS',      label = COLLECTIONS },
+        { key = 'house',      binding = 'TOGGLEHOUSINGDASHBOARD', label = HOUSING_MICRO_BUTTON },
+        { key = 'shop',       binding = 'TOGGLESTORE',            label = BLIZZARD_STORE },
+        { key = 'help',       binding = 'TOGGLEHELP',             label = HELP_BUTTON },
     }
 
     -- Build helpers
@@ -133,6 +133,22 @@ function MenuModule:OnInitialize()
     for _, info in ipairs(self.buttonInfo) do
         self.buttonOrder[#self.buttonOrder+1] = info.key
         self.buttonInfoByKey[info.key] = info
+    end
+
+    --- Migration: old SpellBook button removed → enable Talent if user had it checked
+    local mm = xb.db.profile.modules.microMenu
+    if mm and not mm.spellMergedIntoTalent then
+        local oldSpellEnabled = mm.spell
+        if oldSpellEnabled == nil then
+            oldSpellEnabled = true
+        end
+
+        if oldSpellEnabled and not mm.talent then
+            mm.talent = true
+        end
+
+        mm.spell = nil
+        mm.spellMergedIntoTalent = true
     end
 end
 
@@ -397,10 +413,12 @@ function MenuModule:CreateFrames()
             micro = CharacterMicroButton,
         },
         {
-            key = 'spell', frameName = 'XIVBar_SpellButton',
+            key = 'profession', frameName = 'XIVBar_ProfessionButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = ProfessionMicroButton,
         },
         {
-            key = 'talent', frameName = 'XIVBar_TalentButton',
+            key = 'talent', frameName = 'XIVBar_TalentButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            micro = PlayerSpellsMicroButton,
         },
         {
             key = 'ach', frameName = 'XIVBar_AchievementButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -489,27 +507,6 @@ function MenuModule:CreateFrames()
                 self.bgTexture.social = nil
             end
         end
-    end
-
-    -- Sélection d'onglet sécurisée pour Spell/Talent via PlayerSpellsMicroButton
-    if self.frames.spell then
-        self.frames.spell:HookScript('PostClick', function()
-            self.playerSpellsTargetTab = 3 -- Spellbook
-        end)
-    end
-    if self.frames.talent then
-        self.frames.talent:HookScript('PostClick', function()
-            self.playerSpellsTargetTab = 1 -- Talents
-        end)
-    end
-    if not self.playerSpellsHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
-        self.playerSpellsHooked = true
-        PlayerSpellsFrame:HookScript('OnShow', function()
-            local tab = self.playerSpellsTargetTab
-            if tab and PlayerSpellsFrame.SetTab then
-                PlayerSpellsFrame:SetTab(tab)
-            end
-        end)
     end
 
     self:ApplyCombatState()
@@ -1266,33 +1263,6 @@ function MenuModule:CreateClickFunctions()
             end
         end
     end; -- chat
-
-    self.functions.spell = function(_, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            PlayerSpellsUtil.ToggleSpellBookFrame()
-        end
-    end; -- spell
-
-    self.functions.talent = function(_, button, down)
-        if InCombatLockdown() then
-            return;
-        end
-        if button == "LeftButton" then
-            PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
-        end
-    end; -- talent
-
-    -- self.functions.help = function(self, button, down)
-    --     if InCombatLockdown() then
-    --         return;
-    --     end
-    --     if button == "LeftButton" then
-    --         ToggleHelpFrame()
-    --     end
-    -- end; -- help
 end
 
 function MenuModule:GetDefaultOptions()
@@ -1314,7 +1284,7 @@ function MenuModule:GetDefaultOptions()
         guild = true,
         social = true,
         char = true,
-        spell = true,
+        profession = true,
         talent = true,
         ach = true,
         quest = true,
@@ -1627,15 +1597,15 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
-                    spell = {
-                        name = L["SHOW_SPELLBOOK_BUTTON"],
+                    profession = {
+                        name = L["SHOW_PROFESSIONS_BUTTON"],
                         order = 6,
                         type = "toggle",
                         get = function()
-                            return xb.db.profile.modules.microMenu.spell;
+                            return xb.db.profile.modules.microMenu.profession;
                         end,
                         set = function(_, val)
-                            xb.db.profile.modules.microMenu.spell = val;
+                            xb.db.profile.modules.microMenu.profession = val;
                             self:UpdateMenu();
                             self:Refresh();
                         end
