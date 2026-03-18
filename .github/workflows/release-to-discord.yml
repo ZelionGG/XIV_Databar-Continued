@@ -7,7 +7,7 @@ on:
 
 jobs:
   github-releases-to-discord:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false }}
+    if: ${{ github.event_name == 'release' && github.event.release.prerelease == false }}
     runs-on: ubuntu-latest
     steps:
       - name: Github Releases To Discord
@@ -21,3 +21,45 @@ jobs:
           footer_title: "XIV_Databar Continued Changelog"
           footer_icon_url: "https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png"
           footer_timestamp: true
+
+  manual-latest-release-to-discord:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Get latest published release
+        id: latest_release
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo } = context.repo;
+            const release = await github.rest.repos.getLatestRelease({ owner, repo });
+            const data = release.data;
+            const description = (data.body || 'No changelog provided.').slice(0, 4096);
+            return JSON.stringify({
+              content: '||<@&1471583615145083099>||',
+              username: 'XIV_Databar Continued',
+              avatar_url: 'https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png',
+              embeds: [
+                {
+                  title: data.name || data.tag_name,
+                  url: data.html_url,
+                  description,
+                  color: 197379,
+                  footer: {
+                    text: 'XIV_Databar Continued Changelog',
+                    icon_url: 'https://raw.githubusercontent.com/ZelionGG/XIV_Databar-Continued/main/icon.png'
+                  },
+                  timestamp: data.published_at
+                }
+              ]
+            });
+
+      - name: Send latest release to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_PAYLOAD: ${{ steps.latest_release.outputs.result }}
+        run: |
+          curl -H "Content-Type: application/json" -X POST -d "$DISCORD_PAYLOAD" "$DISCORD_WEBHOOK_URL"
