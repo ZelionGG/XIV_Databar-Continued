@@ -112,6 +112,7 @@ L["SHOW_GUILD_BUTTON"] = "显示公会按钮"
 L["SHOW_SOCIAL_BUTTON"] = "显示好友列表按钮"
 L["SHOW_CHARACTER_BUTTON"] = "显示角色信息按钮"
 L["SHOW_SPELLBOOK_BUTTON"] = "显示法术书和技能按钮"
+L["SHOW_PROFESSIONS_BUTTON"] = "Show " .. PROFESSIONS_BUTTON .. " Button" -- TODO: To Translate
 L["SHOW_TALENTS_BUTTON"] = "显示专精和天赋按钮"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "显示成就按钮"
 L["SHOW_QUESTS_BUTTON"] = "显示任务日志按钮"

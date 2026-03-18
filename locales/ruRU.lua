@@ -112,6 +112,7 @@ L["SHOW_GUILD_BUTTON"] = "Гильдия"
 L["SHOW_SOCIAL_BUTTON"] = "Общение"
 L["SHOW_CHARACTER_BUTTON"] = "Информация о персонаже"
 L["SHOW_SPELLBOOK_BUTTON"] = "Способности"
+L["SHOW_PROFESSIONS_BUTTON"] = "Show " .. PROFESSIONS_BUTTON .. " Button" -- TODO: To Translate
 L["SHOW_TALENTS_BUTTON"] = "Специализация и таланты"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Достижения"
 L["SHOW_QUESTS_BUTTON"] = "Журнал заданий"

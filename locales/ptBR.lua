@@ -113,6 +113,7 @@ L["SHOW_GUILD_BUTTON"] = "Mostrar Botão da Guilda"
 L["SHOW_SOCIAL_BUTTON"] = "Mostrar Botão Social"
 L["SHOW_CHARACTER_BUTTON"] = "Mostrar Botão do Personagem"
 L["SHOW_SPELLBOOK_BUTTON"] = "Mostrar Botão de Magias"
+L["SHOW_PROFESSIONS_BUTTON"] = "Mostrar Botão de " .. PROFESSIONS_BUTTON
 L["SHOW_TALENTS_BUTTON"] = "Mostrar Botão de Talentos"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Mostrar Botão de Conquistas"
 L["SHOW_QUESTS_BUTTON"] = "Mostrar Botão de Missões"
