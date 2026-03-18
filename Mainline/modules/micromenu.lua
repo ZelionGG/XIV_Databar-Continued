@@ -135,7 +135,7 @@ function MenuModule:OnInitialize()
         self.buttonInfoByKey[info.key] = info
     end
 
-    --- Migration: old SpellBook button removed → enable Talent if user had it checked
+    --- Migration: old SpellBook button removed → enable Professions if user had it checked
     local mm = xb.db.profile.modules.microMenu
     if mm and not mm.spellMergedIntoTalent then
         local oldSpellEnabled = mm.spell
@@ -143,8 +143,8 @@ function MenuModule:OnInitialize()
             oldSpellEnabled = true
         end
 
-        if oldSpellEnabled and not mm.talent then
-            mm.talent = true
+        if oldSpellEnabled and not mm.profession then
+            mm.profession = true
         end
 
         mm.spell = nil
