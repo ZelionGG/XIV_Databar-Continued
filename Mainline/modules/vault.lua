@@ -144,9 +144,6 @@ function VaultModule:ShowTooltip()
 
     -- If the Great Vault is not disabled, show the tooltip with progress
     if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
-        -- Refresh data if needed
-        C_WeeklyRewards.RequestRewards()
-
         local activitiesByType = CollectActivitiesByType()
         for _, typeId in ipairs(TYPE_ORDER) do
             local label = TYPE_LABELS[typeId]
