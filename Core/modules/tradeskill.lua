@@ -610,8 +610,8 @@ function TradeskillModule:ShowTooltip()
     end
 
     -- construit une couleur hex à partir de r/g/b (0-1)
-    local function HexColor(r, g, b)
-        return string.format("%02x%02x%02x", r * 255, g * 255, b * 255)
+    local function HexColor(hr, hg, hb)
+        return string.format("%02x%02x%02x", hr * 255, hg * 255, hb * 255)
     end
 
     tooltip:AddRow(' ', ' ')
