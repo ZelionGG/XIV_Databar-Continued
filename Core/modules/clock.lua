@@ -6,6 +6,10 @@ local L = XIVBar.L;
 
 local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
+local GetNumDayEvents = C_Calendar.GetNumDayEvents
+local GetHolidayInfo = C_Calendar.GetHolidayInfo
+local GetCurrentCalendarTime = C_DateAndTime.GetCurrentCalendarTime
+
 local function SnapToEvenPixel(value)
     local snapped = floor((value or 0) + 0.5)
     if snapped < 1 then
@@ -71,8 +75,19 @@ function ClockModule:ApplyRestIconTexture()
     self.restIconFrame:SetSize(self.restIcon:GetWidth(), self.restIcon:GetHeight())
 end
 
-local function GetServerTimeString(optFormat)
+local function GetServerTimeString(optFormat, calendarTime)
     local hour, minute = GetGameTime()
+    if calendarTime then
+        local constructedServerTime = time({
+            year = calendarTime and calendarTime.year or 1970,
+            month = calendarTime and calendarTime.month or 1,
+            day = calendarTime and calendarTime.monthDay or 2,
+            hour = calendarTime and calendarTime.hour or hour,
+            min = calendarTime and calendarTime.min or 0,
+            sec = 0
+        })
+        return date(ClockModule.timeFormats[optFormat], constructedServerTime)
+    end
     local constructedServerTime = time({
         year = 1970,
         month = 1,
@@ -82,6 +97,18 @@ local function GetServerTimeString(optFormat)
         sec = 0
     })
     return date(ClockModule.timeFormats[optFormat], constructedServerTime)
+end
+
+local function FormatCalendarDateTime(calendarTime)
+    local timeFormat = xb.db.profile.modules.clock.timeFormat
+
+    if not calendarTime then
+        return nil
+    end
+
+    local dateText = calendarTime.monthDay .. "/" .. calendarTime.month
+    local timeText = GetServerTimeString(timeFormat, calendarTime)
+    return dateText .. " " .. timeText
 end
 
 function ClockModule:OnLeaveCombat()
@@ -291,7 +318,6 @@ function ClockModule:RegisterFrameEvents()
         end ]]
         ClockModule:SetClockColor()
         GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 3)
-        -- GameTooltip:SetPoint(xb.db.profile.general.barPosition, self.clockTextFrame, xb.miniTextPosition, 0, 1)
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. TIMEMANAGER_TITLE .. "|cFFFFFFFF]|r", r, g, b)
         GameTooltip:AddLine(" ")
@@ -308,6 +334,32 @@ function ClockModule:RegisterFrameEvents()
             date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine(L["REALM_TIME"], realmTime, r, g, b, 1, 1, 1)
         GameTooltip:AddLine(" ")
+
+        local today = GetCurrentCalendarTime()
+        local day = today.monthDay
+        local numDayEvents = GetNumDayEvents(0, day)
+        if numDayEvents > 0 then
+            GameTooltip:AddLine(EVENTS_LABEL)
+
+            for i = 1, numDayEvents do
+                local event = GetHolidayInfo(0, day, i)
+                if event then
+                    local startText = FormatCalendarDateTime(event.startTime)
+                    local endText = FormatCalendarDateTime(event.endTime)
+
+                    if startText and endText then
+                        GameTooltip:AddDoubleLine(event.name, startText .. " - " .. endText, r, g, b, 1, 1, 1)
+                    elseif startText then
+                        GameTooltip:AddDoubleLine(event.name, startText, r, g, b, 1, 1, 1)
+                    else
+                        GameTooltip:AddDoubleLine(event.name, "", r, g, b, 1, 1, 1)
+                    end
+                end
+            end
+
+            GameTooltip:AddLine(" ")
+        end
+
         if ToggleCalendar and type(ToggleCalendar) == "function" then
             GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["OPEN_CALENDAR"], r, g, b, 1, 1, 1)
         end
