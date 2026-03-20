@@ -172,6 +172,10 @@ function GoldModule:OnInitialize()
     local store = getGoldStore()
     local key = getCharacterKey()
 
+    if xb.db.profile.modules.gold.showTokenPrice == nil then
+        xb.db.profile.modules.gold.showTokenPrice = true
+    end
+
     if not store[key] then
         store[key] = {
             currentMoney = 0,
@@ -386,6 +390,15 @@ function GoldModule:ShowTooltipClassic()
         GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], moneyWithTexture(math.abs(playerData.dailyMoney), true), r, g, b, 1, 1, 1)
     end
 
+    if xb.db.profile.modules.gold.showTokenPrice then
+        C_WowTokenPublic.UpdateMarketPrice()
+        local tokenPrice = C_WowTokenPublic.GetCurrentMarketPrice()
+        if tokenPrice then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine(TOKEN_FILTER_LABEL, self:FormatGold(tokenPrice), r, g, b, 1, 1, 1)
+        end
+    end
+
     GameTooltip:AddLine(" ")
 
     local hideThreshold = tonumber(xb.db.profile.modules.gold.hideCharUnderThresholdAmount) or 0
@@ -432,6 +445,16 @@ function GoldModule:ShowTooltipMainline()
         GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], self:FormatGold(math.abs(playerData.sessionMoney)), r, g, b, 1, 1, 1)
         GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], self:FormatGold(math.abs(playerData.dailyMoney)), r, g, b, 1, 1, 1)
     end
+
+    if xb.db.profile.modules.gold.showTokenPrice then
+        C_WowTokenPublic.UpdateMarketPrice()
+        local tokenPrice = C_WowTokenPublic.GetCurrentMarketPrice()
+        if tokenPrice then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine(TOKEN_FILTER_LABEL, self:FormatGold(tokenPrice), r, g, b, 1, 1, 1)
+        end
+    end
+
     local warbandBankGold = 0
     if xb.db.profile.modules.gold.showWarbandBankGold then
         warbandBankGold = C_Bank.FetchDepositedMoney(Enum.BankType.Account)
@@ -697,7 +720,8 @@ function GoldModule:GetDefaultOptions()
         showFreeBagSpace = true,
         shortThousands = false,
         hideCharUnderThreshold = false,
-        hideCharUnderThresholdAmount = 0
+        hideCharUnderThresholdAmount = 0,
+        showTokenPrice = true,
     }
 
     if compat.isMainline then
@@ -793,6 +817,18 @@ function GoldModule:GetConfig()
                 return not xb.db.profile.modules.gold.hideCharUnderThreshold
             end,
             width = "full"
+        },
+        showTokenPrice = {
+            name = L["SHOW_TOKEN_PRICE"],
+            order = 3.8,
+            type = "toggle",
+            get = function()
+                return xb.db.profile.modules.gold.showTokenPrice
+            end,
+            set = function(_, val)
+                xb.db.profile.modules.gold.showTokenPrice = val
+                self:Refresh()
+            end,
         }
     }
 

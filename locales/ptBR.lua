@@ -173,6 +173,7 @@ L["SHORTEN_GOLD"] = "Encurtar Ouro"
 L["TOGGLE_BAGS"] = "Mostrar bolsa"
 L["SESSION_TOTAL"] = "Total da Sessão"
 L["DAILY_TOTAL"] = "Total do Dia"
+L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price" -- TODO: To Translate
 L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "Valores arredondados de ouro"
 L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate

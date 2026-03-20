@@ -172,6 +172,7 @@ L["SHORTEN_GOLD"] = "Сокращать число золота"
 L["TOGGLE_BAGS"] = "Переключить видимость сумок"
 L["SESSION_TOTAL"] = "Всего за сессию"
 L["DAILY_TOTAL"] = "Daily Total" -- TODO: To Translate
+L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price" -- TODO: To Translate
 L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "Gold rounded values" -- TODO: To Translate
 L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate

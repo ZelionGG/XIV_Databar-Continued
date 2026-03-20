@@ -175,6 +175,7 @@ L["SHORTEN_GOLD"] = "金額縮寫"
 L["TOGGLE_BAGS"] = "打開/關閉背包"
 L["SESSION_TOTAL"] = "本次登入總計"
 L["DAILY_TOTAL"] = "本日總計"
+L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price" -- TODO: To Translate
 L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
 L["GOLD_ROUNDED_VALUES"] = "只顯示金的部分"
 L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
