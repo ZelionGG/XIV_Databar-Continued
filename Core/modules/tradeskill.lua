@@ -9,14 +9,46 @@ local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
 
 local LibStub = _G.LibStub
 local LibAddonCompat = nil
+local C_Timer = _G.C_Timer
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 function TradeskillModule:GetName()
     return TRADESKILLS
 end
 
+-- Skin Support for ElvUI/TukUI (align with micromenu/travel/talent)
+function TradeskillModule:SkinFrame(frame, name)
+    local ElvUI = rawget(_G, 'ElvUI')
+    local Tukui = rawget(_G, 'Tukui')
+
+    if xb.db.profile.general.useElvUI and IsAddOnLoaded and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
+        if frame.StripTextures then
+            frame:StripTextures()
+        end
+        if frame.SetTemplate then
+            frame:SetTemplate("Transparent")
+        end
+
+        local close = _G[name .. "CloseButton"] or frame.CloseButton
+        if close and close.SetAlpha then
+            if ElvUI and ElvUI[1] and ElvUI[1].GetModule then
+                ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+            end
+
+            if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+                Tukui[1].SkinCloseButton(close)
+            end
+            close:SetAlpha(1)
+        end
+    end
+end
+
 function TradeskillModule:OnInitialize()
     if not compat.isMainline and LibStub then
         LibAddonCompat = LibStub("LibAddonCompat-1.0")
+    end
+    if LibStub then
+        self.LTip = LibStub('LibQTip-2.0', true)
     end
 
     self.profIcons = {
@@ -103,6 +135,7 @@ function TradeskillModule:OnEnable()
 end
 
 function TradeskillModule:OnDisable()
+    self:HideTooltip(true)
     self.tradeskillFrame:Hide()
     self:UnregisterEvent('TRADE_SKILL_DETAILS_UPDATE')
     self:UnregisterEvent('SPELLS_CHANGED')
@@ -206,13 +239,26 @@ function TradeskillModule:Refresh()
     end
 
     local db = xb.db.profile
-    if not db.modules.tradeskill.enabled then
+    if not db then
+        return
+    end
+
+    local modulesDb = db.modules
+    local moduleDb = modulesDb and modulesDb.tradeskill
+    if not moduleDb then
+        return
+    end
+    if not moduleDb.showTooltip then
+        self:HideTooltip(true)
+    end
+    if not moduleDb.enabled then
         self:Disable()
         return
     end
 
     self:UpdateProfValues()
     if not self.firstProf.idx then
+        self:HideTooltip(true)
         return
     end
 
@@ -349,43 +395,132 @@ function TradeskillModule:ConfigureSecureRightClick(prefix)
     end
 end
 
+function TradeskillModule:OpenProfession(prefix)
+    if not prefix or not self[prefix] then
+        return
+    end
+
+    if compat.isMainline then
+        local currentProfessionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+        if currentProfessionInfo and currentProfessionInfo.professionID == self[prefix].id then
+            C_TradeSkillUI.CloseTradeSkill()
+            return
+        end
+        C_TradeSkillUI.OpenTradeSkill(self[prefix].id)
+        return
+    end
+
+    if self[prefix].offset ~= nil then
+        CastSpell(self[prefix].offset + 1, "Spell")
+    end
+end
+
+function TradeskillModule:HideTooltip(force)
+    if not self.LTip then
+        GameTooltip:Hide()
+        return
+    end
+
+    if not force and (self.frameHover or self.tooltipHover or self.lineHover) then
+        return
+    end
+
+    if self.tooltip and self.LTip:IsAcquiredTooltip("TradeskillToolTip") then
+        self.LTip:ReleaseTooltip(self.tooltip)
+    end
+
+    self.tooltip = nil
+    self.tooltipHover = false
+    self.lineHover = false
+end
+
+function TradeskillModule:QueueTooltipHide()
+    if not C_Timer then
+        self:HideTooltip()
+        return
+    end
+
+    C_Timer.After(0.05, function()
+        self:HideTooltip()
+    end)
+end
+
+function TradeskillModule:AcquireTooltip()
+    if not self.LTip then
+        return nil
+    end
+
+    if self.LTip:IsAcquiredTooltip("TradeskillToolTip") then
+        local existingTooltip = self.LTip:AcquireTooltip("TradeskillToolTip", 2, "LEFT", "RIGHT")
+        self.LTip:ReleaseTooltip(existingTooltip)
+    end
+
+    local tooltip = self.LTip:AcquireTooltip("TradeskillToolTip", 2, "LEFT", "RIGHT")
+    tooltip:EnableMouse(true)
+    tooltip:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(tooltip, true)
+    tooltip:SetScript("OnEnter", function()
+        self.tooltipHover = true
+    end)
+    tooltip:SetScript("OnLeave", function()
+        self.tooltipHover = false
+        self:QueueTooltipHide()
+    end)
+    tooltip:SetScript("OnUpdate", function()
+        if not self.frameHover and not self.tooltipHover and not self.lineHover then
+            self:HideTooltip()
+        end
+    end)
+
+    self:SkinFrame(tooltip, "TradeskillToolTip")
+
+    self.tooltip = tooltip
+    return tooltip
+end
+
+function TradeskillModule:AddTooltipProfessionRow(tooltip, prefix, r, g, b)
+    local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
+    local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
+    local lineRow = tooltip:AddRow(left, right)
+    lineRow:SetScript("OnEnter", function()
+        self.lineHover = true
+    end)
+    lineRow:SetScript("OnLeave", function()
+        self.lineHover = false
+        self:QueueTooltipHide()
+    end)
+    lineRow:SetScript("OnMouseUp", function(_, _, button)
+        if button ~= 'LeftButton' then
+            return
+        end
+        self:OpenProfession(prefix)
+    end)
+end
+
 function TradeskillModule:SetProfScripts(prefix)
     self[prefix .. 'Frame']:SetScript('OnMouseDown', function(_, button)
         if button == 'LeftButton' then
-            if compat.isMainline then
-                local currentProfessionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-                if currentProfessionInfo and currentProfessionInfo.professionID == self[prefix].id then
-                    C_TradeSkillUI.CloseTradeSkill()
-                    return
-                end
-                C_TradeSkillUI.OpenTradeSkill(self[prefix].id)
-            else
-                if self[prefix].offset ~= nil then
-                    CastSpell(self[prefix].offset + 1, "Spell")
-                end
-            end
+            self:OpenProfession(prefix)
         end
     end)
 
     self:ConfigureSecureRightClick(prefix)
 
     self[prefix .. 'Frame']:SetScript('OnEnter', function()
-        if InCombatLockdown() then
-            return
-        end
+        self.frameHover = true
         self[prefix .. 'Text']:SetTextColor(unpack(xb:HoverColors()))
-        if xb.db.profile.modules.tradeskill.showTooltip then
+        local moduleDb = xb.db.profile.modules.tradeskill
+        if moduleDb.showTooltip then
             self:ShowTooltip()
         end
     end)
 
     self[prefix .. 'Frame']:SetScript('OnLeave', function()
-        if InCombatLockdown() then
-            return
-        end
+        self.frameHover = false
         self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
-        if xb.db.profile.modules.tradeskill.showTooltip then
-            GameTooltip:Hide()
+        local moduleDb = xb.db.profile.modules.tradeskill
+        if moduleDb.showTooltip then
+            self:QueueTooltipHide()
         end
     end)
 end
@@ -403,14 +538,18 @@ function TradeskillModule:RegisterFrameEvents()
     self:SetProfScripts('secondProf')
 
     self.tradeskillFrame:SetScript('OnEnter', function()
-        if xb.db.profile.modules.tradeskill.showTooltip then
+        local moduleDb = xb.db.profile.modules.tradeskill
+        self.frameHover = true
+        if moduleDb.showTooltip then
             self:ShowTooltip()
         end
     end)
 
     self.tradeskillFrame:SetScript('OnLeave', function()
-        if xb.db.profile.modules.tradeskill.showTooltip then
-            GameTooltip:Hide()
+        local moduleDb = xb.db.profile.modules.tradeskill
+        self.frameHover = false
+        if moduleDb.showTooltip then
+            self:QueueTooltipHide()
         end
     end)
 
@@ -428,42 +567,56 @@ function TradeskillModule:RegisterFrameEvents()
 end
 
 function TradeskillModule:ShowTooltip()
+    if not self.LTip then
+        return
+    end
+
     local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_' .. xb.miniTextPosition)
-    GameTooltip:AddLine("|cFFFFFFFF[|r" .. TRADE_SKILLS .. "|cFFFFFFFF]|r", r, g, b)
-    GameTooltip:AddLine(" ")
+    local tooltip = self:AcquireTooltip()
+    if not tooltip then
+        return
+    end
+
+    tooltip:SmartAnchorTo(self.tradeskillFrame)
+    local headerRow = tooltip:AddHeadingRow("|cFFFFFFFF[|r" .. TRADE_SKILLS .. "|cFFFFFFFF]|r")
+    headerRow:SetTextColor(r, g, b, 1)
+    tooltip:AddRow(' ', ' ')
 
     if self.firstProf.idx then
-        self:ListTooltipProfession('firstProf', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'firstProf', r, g, b)
     end
     if self.secondProf.idx then
-        self:ListTooltipProfession('secondProf', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'secondProf', r, g, b)
     end
     if self.cook.idx then
-        self:ListTooltipProfession('cook', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'cook', r, g, b)
     end
     if self.fish.idx then
-        self:ListTooltipProfession('fish', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'fish', r, g, b)
     end
     if self.arch.idx then
-        self:ListTooltipProfession('arch', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'arch', r, g, b)
     end
     if self.first_aid.idx and not compat.isMainline then
-        self:ListTooltipProfession('first_aid', r, g, b)
+        self:AddTooltipProfessionRow(tooltip, 'first_aid', r, g, b)
     end
 
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["TOGGLE_PROFESSION_FRAME"], r, g, b, 1, 1, 1)
+    -- construit une couleur hex à partir de r/g/b (0-1)
+    local function HexColor(r, g, b)
+        return string.format("%02x%02x%02x", r * 255, g * 255, b * 255)
+    end
+
+    tooltip:AddRow(' ', ' ')
+    local color = HexColor(r, g, b)
+
+    local row1Left = string.format("|cff%s<%s>|r", color, L["LEFT_CLICK"])
+    tooltip:AddRow(row1Left, L["TOGGLE_PROFESSION_FRAME"])
+
     if compat.isMainline or IsCataClassic() then
-        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["TOGGLE_PROFESSION_SPELLBOOK"], r, g, b, 1, 1, 1)
+        local row2Left = string.format("|cff%s<%s>|r", color, L["RIGHT_CLICK"])
+        tooltip:AddRow(row2Left, L["TOGGLE_PROFESSION_SPELLBOOK"])
     end
-    GameTooltip:Show()
-end
-
-function TradeskillModule:ListTooltipProfession(prefix, r, g, b)
-    local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
-    local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
-    GameTooltip:AddDoubleLine(left, right, 1, 1, 1, r, g, b)
+    tooltip:Show()
 end
 
 function TradeskillModule:GetDefaultOptions()
