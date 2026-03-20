@@ -127,6 +127,7 @@ L["SHOW_HOUSING_BUTTON"] = "Show Housing Button" -- TODO: translate
 L["NO_INFO"] = "Sem Informação"
 L["Alliance"] = FACTION_ALLIANCE
 L["Horde"] = FACTION_HORDE
+L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat" -- TODO: To Translate
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Aviso de Durabilidade"
 L["SHOW_ITEM_LEVEL"] = "Mostrar item level"

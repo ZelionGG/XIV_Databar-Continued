@@ -510,8 +510,10 @@ function TradeskillModule:SetProfScripts(prefix)
         self.frameHover = true
         self[prefix .. 'Text']:SetTextColor(unpack(xb:HoverColors()))
         local moduleDb = xb.db.profile.modules.tradeskill
-        if moduleDb.showTooltip then
+        if moduleDb.showTooltip and xb:ShouldShowTooltip() then
             self:ShowTooltip()
+        else
+            self:HideTooltip(true)
         end
     end)
 
@@ -540,8 +542,10 @@ function TradeskillModule:RegisterFrameEvents()
     self.tradeskillFrame:SetScript('OnEnter', function()
         local moduleDb = xb.db.profile.modules.tradeskill
         self.frameHover = true
-        if moduleDb.showTooltip then
+        if moduleDb.showTooltip and xb:ShouldShowTooltip() then
             self:ShowTooltip()
+        else
+            self:HideTooltip(true)
         end
     end)
 
@@ -568,6 +572,10 @@ end
 
 function TradeskillModule:ShowTooltip()
     if not self.LTip then
+        return
+    end
+    if not xb:ShouldShowTooltip() then
+        self:HideTooltip(true)
         return
     end
 

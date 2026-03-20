@@ -1968,6 +1968,10 @@ end
 -- Optimized tooltip display using utility functions
 function TravelModule:ShowTooltip()
     if not self.portPopup:IsVisible() then
+        if not xb:ShouldShowTooltip() then
+            GameTooltip:Hide()
+            return
+        end
         GameTooltip:SetOwner(self.portButton, 'ANCHOR_' .. xb.miniTextPosition)
         GameTooltip:ClearLines()
         local r, g, b, _ = unpack(xb:HoverColors())

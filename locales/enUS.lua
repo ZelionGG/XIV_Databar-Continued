@@ -125,6 +125,7 @@ L["SHOW_HOUSING_BUTTON"] = "Show Housing Button"
 L["NO_INFO"] = "No Info"
 L["Alliance"] = FACTION_ALLIANCE
 L["Horde"] = FACTION_HORDE
+L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Durability Warning Threshold"
 L["SHOW_ITEM_LEVEL"] = "Show Item Level"

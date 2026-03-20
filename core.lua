@@ -746,3 +746,9 @@ function XIVBar:UpdateMouseoverScripts()
     end
 end
 
+function XIVBar:ShouldShowTooltip()
+    if self.db.profile.general.disableTooltipsInCombat and InCombatLockdown() then
+        return false
+    end
+    return true
+end

@@ -660,6 +660,10 @@ function CurrencyModule:ShowTooltip()
     if not xb.db.profile.modules.currency.showTooltip then
         return
     end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
 
     local r, g, b, _ = unpack(xb:HoverColors())
 

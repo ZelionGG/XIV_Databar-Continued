@@ -756,6 +756,10 @@ function MenuModule:ShowButtonTooltip(name)
     if (name == "social" or name == "guild") then
         return
     end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
 
     local frame = self.frames[name]
     if not frame then
@@ -811,6 +815,11 @@ function MenuModule:SocialHover(hoverFunc)
     return function()
         -- get out of here if showTooltips in the options is set to false
         if not xb.db.profile.modules.microMenu.showTooltips then
+            hoverFunc()
+            return
+        end
+        if not xb:ShouldShowTooltip() then
+            self.tipHover = false
             hoverFunc()
             return
         end
@@ -1094,6 +1103,11 @@ function MenuModule:GuildHover(hoverFunc)
         end
         -- get out if tooltips are disabled
         if not xb.db.profile.modules.microMenu.showTooltips then
+            hoverFunc()
+            return
+        end
+        if not xb:ShouldShowTooltip() then
+            self.gtipHover = false
             hoverFunc()
             return
         end

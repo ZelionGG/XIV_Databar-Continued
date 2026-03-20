@@ -270,6 +270,14 @@ function SystemModule:RegisterFrameEvents()
 end
 
 function SystemModule:ShowTooltip()
+    if not xb.db.profile.modules.system.showTooltip then
+        return
+    end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
+
     local totalAddons = GetNumAddOns()
     local memTable = {}
 

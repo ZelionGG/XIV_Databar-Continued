@@ -127,6 +127,7 @@ L["NO_INFO"] = "暂无信息"
 L["CLASSIC"] = "经典怀旧服"
 L["Alliance"] = FACTION_ALLIANCE
 L["Horde"] = FACTION_HORDE
+L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat" -- TODO: To Translate
 
 L["DURABILITY_WARNING_THRESHOLD"] = "耐久性警告閾值"
 L["SHOW_ITEM_LEVEL"] = "顯示物品等級"

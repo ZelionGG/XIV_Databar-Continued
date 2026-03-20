@@ -317,6 +317,10 @@ function ClockModule:RegisterFrameEvents()
             return;
         end ]]
         ClockModule:SetClockColor()
+        if not xb:ShouldShowTooltip() then
+            GameTooltip:Hide()
+            return
+        end
         GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 3)
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. TIMEMANAGER_TITLE .. "|cFFFFFFFF]|r", r, g, b)

@@ -17,6 +17,7 @@ XIVBar.defaults = {
             barFullscreen = true,
             barCombatHide = false,
             barFlightHide = false,
+            disableTooltipsInCombat = false,
             useElvUI = true,
             barWidth = floor(GetScreenWidth()),
             locked = true,
@@ -934,6 +935,18 @@ function XIVBar:GetPositioningOptions()
                 set = function(_, val)
                     self.db.profile.general.showOnMouseover = val
                     XIVBar:UpdateMouseoverScripts()
+                end
+            },
+            disableTooltipsInCombat = {
+                name = L["DISABLE_TOOLTIPS_IN_COMBAT"] or "Disable Tooltips in Combat",
+                type = "toggle",
+                order = 10.6,
+                get = function()
+                    return self.db.profile.general.disableTooltipsInCombat
+                end,
+                set = function(_, val)
+                    self.db.profile.general.disableTooltipsInCombat = val
+                    self:Refresh()
                 end
             },
             spacingHeader = {

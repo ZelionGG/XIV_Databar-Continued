@@ -125,6 +125,7 @@ L["SHOW_HOUSING_BUTTON"] = "Afficher le bouton Logis"
 L["NO_INFO"] = "Pas d'information"
 L["Alliance"] = FACTION_ALLIANCE
 L["Horde"] = FACTION_HORDE
+L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Masquer les infobulles en combat"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Seuil d'avertissement de durabilité"
 L["SHOW_ITEM_LEVEL"] = "Afficher le niveau d'équipement"

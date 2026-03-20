@@ -760,6 +760,10 @@ end
 
 function ReputationModule:ShowTooltip()
     if not xb.db.profile.modules.reputation.showTooltip then return end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
 
     local r, g, b, _ = unpack(xb:HoverColors())
 

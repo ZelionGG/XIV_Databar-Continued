@@ -373,6 +373,10 @@ function GoldModule:ShowTooltipClassic()
     if GameTooltip:IsOwned(self.goldButton) then
         return
     end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
 
     GameTooltip:SetOwner(self.goldFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 6)
     local r, g, b, _ = unpack(xb:HoverColors())
@@ -427,6 +431,10 @@ end
 
 function GoldModule:ShowTooltipMainline()
     if GameTooltip:IsOwned(self.goldButton) then
+        return
+    end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
         return
     end
 

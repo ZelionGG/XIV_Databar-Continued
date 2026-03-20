@@ -136,6 +136,10 @@ end
 -- Render the Great Vault tooltip with compact rewards + M+ keystone line.
 function VaultModule:ShowTooltip()
     if not xb.db.profile.modules.vault.showTooltip then return end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
 
     local r, g, b, _ = unpack(xb:HoverColors())
 

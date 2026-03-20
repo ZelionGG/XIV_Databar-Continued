@@ -362,7 +362,7 @@ function TalentModule:RegisterFrameEvents()
             return
         end
         self.specText:SetTextColor(unpack(xb:HoverColors()))
-        if xb.db.profile.modules.talent.showTooltip then
+        if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
             if (not self.specPopup:IsVisible()) or (self.lootSpecPopup and not self.lootSpecPopup:IsVisible()) then
                 self:ShowTooltip()
             end
@@ -393,7 +393,7 @@ function TalentModule:RegisterFrameEvents()
                 xb:ShowPopup(self.specPopup)
             else
                 xb:HidePopup(self.specPopup)
-                if xb.db.profile.modules.talent.showTooltip then
+                if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
                     self:ShowTooltip()
                 end
             end
@@ -404,7 +404,7 @@ function TalentModule:RegisterFrameEvents()
                 xb:ShowPopup(self.lootSpecPopup)
             else
                 xb:HidePopup(self.lootSpecPopup)
-                if xb.db.profile.modules.talent.showTooltip then
+                if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
                     self:ShowTooltip()
                 end
             end
@@ -781,6 +781,10 @@ end
 
 function TalentModule:ShowTooltip()
     if not xb.db.profile.modules.talent.showTooltip then
+        return
+    end
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
         return
     end
 
