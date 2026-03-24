@@ -238,6 +238,7 @@ function GoldModule:OnEnable()
 
     self:CreateFrames()
     self:RegisterFrameEvents()
+    self:RequestWowTokenPrice()
     self:Refresh()
 end
 
@@ -246,6 +247,7 @@ function GoldModule:OnDisable()
     self:ToggleBlizzardBagsBar(false)
     self:UnregisterEvent('PLAYER_MONEY')
     self:UnregisterEvent('BAG_UPDATE')
+    self:UnregisterEvent('TOKEN_MARKET_PRICE_UPDATED')
 end
 
 function GoldModule:Refresh()
@@ -328,12 +330,19 @@ function GoldModule:CreateFrames()
     self.bagText = self.bagText or self.goldButton:CreateFontString(nil, "OVERLAY")
 end
 
+function GoldModule:RequestWowTokenPrice()
+    if xb.db.profile.modules.gold.showTokenPrice then
+        C_WowTokenPublic.UpdateMarketPrice()
+    end
+end
+
 function GoldModule:RegisterFrameEvents()
     self.goldButton:EnableMouse(true)
     self.goldButton:RegisterForClicks("AnyUp")
 
     self:RegisterEvent('PLAYER_MONEY')
     self:RegisterEvent('BAG_UPDATE', 'Refresh')
+    self:RegisterEvent('TOKEN_MARKET_PRICE_UPDATED')
 
     self.goldButton:SetScript('OnEnter', function()
         self.goldText:SetTextColor(unpack(xb:HoverColors()))
@@ -369,6 +378,20 @@ function GoldModule:RegisterFrameEvents()
     end)
 end
 
+function GoldModule:TOKEN_MARKET_PRICE_UPDATED()
+    if not xb.db.profile.modules.gold.showTokenPrice then
+        return
+    end
+
+    if GameTooltip:IsOwned(self.goldButton) and self.goldButton:IsMouseOver() then
+        if compat.isMainline then
+            self:ShowTooltipMainline()
+        else
+            self:ShowTooltipClassic()
+        end
+    end
+end
+
 function GoldModule:ShowTooltipClassic()
     if GameTooltip:IsOwned(self.goldButton) then
         return
@@ -395,11 +418,12 @@ function GoldModule:ShowTooltipClassic()
     end
 
     if xb.db.profile.modules.gold.showTokenPrice then
-        C_WowTokenPublic.UpdateMarketPrice()
         local tokenPrice = C_WowTokenPublic.GetCurrentMarketPrice()
         if tokenPrice then
             GameTooltip:AddLine(" ")
             GameTooltip:AddDoubleLine(TOKEN_FILTER_LABEL, self:FormatGold(tokenPrice), r, g, b, 1, 1, 1)
+        else
+            self:RequestWowTokenPrice()
         end
     end
 
@@ -455,11 +479,12 @@ function GoldModule:ShowTooltipMainline()
     end
 
     if xb.db.profile.modules.gold.showTokenPrice then
-        C_WowTokenPublic.UpdateMarketPrice()
         local tokenPrice = C_WowTokenPublic.GetCurrentMarketPrice()
         if tokenPrice then
             GameTooltip:AddLine(" ")
             GameTooltip:AddDoubleLine(TOKEN_FILTER_LABEL, self:FormatGold(tokenPrice), r, g, b, 1, 1, 1)
+        else
+            self:RequestWowTokenPrice()
         end
     end
 
