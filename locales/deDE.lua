@@ -218,7 +218,9 @@ L["PROGRESS"] = "Fortschritt"
 L["RANK"] = "Rang"
 L["PARAGON"] = "Paragon" -- No Translate needed
 
+-- Tradeskills
 L["USE_CLASS_COLORS"] = "Klassenfarben benutzen"
+L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip" -- TODO: To Translate
 L["COOLDOWNS"] = "Abklingzeiten"
 L["TOGGLE_PROFESSION_FRAME"] = "Berufsfenster anzeigen"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Zauberbuch für Berufe anzeigen"

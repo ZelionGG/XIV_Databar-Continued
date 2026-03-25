@@ -415,9 +415,92 @@ function TradeskillModule:OpenProfession(prefix)
     end
 end
 
+function TradeskillModule:IsInteractiveTooltipEnabled()
+    local moduleDb = xb.db.profile.modules and xb.db.profile.modules.tradeskill
+    return moduleDb and moduleDb.useInteractiveTooltip ~= false and self.LTip
+end
+
+function TradeskillModule:ShowGameTooltip()
+    if not xb:ShouldShowTooltip() then
+        self:HideTooltip(true)
+        return
+    end
+
+    local r, g, b, _ = unpack(xb:HoverColors())
+
+    self.tooltipHover = false
+    self.lineHover = false
+
+    GameTooltip:SetOwner(self.tradeskillFrame, "ANCHOR_TOP")
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. TRADE_SKILLS .. "|cFFFFFFFF]|r", r, g, b, true)
+    GameTooltip:AddLine(' ')
+
+    local function AddGameTooltipProfessionRow(prefix)
+        local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
+        local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
+        GameTooltip:AddDoubleLine(left, right, 1, 1, 1, 1, 1, 1)
+    end
+
+    if self.firstProf.idx then
+        AddGameTooltipProfessionRow('firstProf')
+    end
+    if self.secondProf.idx then
+        AddGameTooltipProfessionRow('secondProf')
+    end
+    if self.cook.idx then
+        AddGameTooltipProfessionRow('cook')
+    end
+    if self.fish.idx then
+        AddGameTooltipProfessionRow('fish')
+    end
+    if self.arch.idx then
+        AddGameTooltipProfessionRow('arch')
+    end
+    if self.first_aid.idx and not compat.isMainline then
+        AddGameTooltipProfessionRow('first_aid')
+    end
+
+    local function HexColor(hr, hg, hb)
+        return string.format("%02x%02x%02x", hr * 255, hg * 255, hb * 255)
+    end
+
+    GameTooltip:AddLine(' ')
+    local color = HexColor(r, g, b)
+    local row1Left = string.format("|cff%s<%s>|r", color, L["LEFT_CLICK"])
+    GameTooltip:AddDoubleLine(row1Left, L["TOGGLE_PROFESSION_FRAME"], 1, 1, 1, 1, 1, 1)
+
+    if compat.isMainline or IsCataClassic() then
+        local row2Left = string.format("|cff%s<%s>|r", color, L["RIGHT_CLICK"])
+        GameTooltip:AddDoubleLine(row2Left, L["TOGGLE_PROFESSION_SPELLBOOK"], 1, 1, 1, 1, 1, 1)
+    end
+
+    GameTooltip:Show()
+end
+
+function TradeskillModule:ShowConfiguredTooltip()
+    local moduleDb = xb.db.profile.modules and xb.db.profile.modules.tradeskill
+    if not moduleDb or not moduleDb.showTooltip then
+        self:HideTooltip(true)
+        return
+    end
+
+    if self:IsInteractiveTooltipEnabled() then
+        self:ShowTooltip()
+        return
+    end
+
+    self:HideTooltip(true)
+    self:ShowGameTooltip()
+end
+
 function TradeskillModule:HideTooltip(force)
-    if not self.LTip then
-        GameTooltip:Hide()
+    GameTooltip:Hide()
+
+    if not self:IsInteractiveTooltipEnabled() then
+        self.tooltip = nil
+        self.tooltipHover = false
+        self.lineHover = false
         return
     end
 
@@ -435,6 +518,11 @@ function TradeskillModule:HideTooltip(force)
 end
 
 function TradeskillModule:QueueTooltipHide()
+    if not self:IsInteractiveTooltipEnabled() then
+        self:HideTooltip(true)
+        return
+    end
+
     if not C_Timer then
         self:HideTooltip()
         return
@@ -509,9 +597,8 @@ function TradeskillModule:SetProfScripts(prefix)
     self[prefix .. 'Frame']:SetScript('OnEnter', function()
         self.frameHover = true
         self[prefix .. 'Text']:SetTextColor(unpack(xb:HoverColors()))
-        local moduleDb = xb.db.profile.modules.tradeskill
-        if moduleDb.showTooltip and xb:ShouldShowTooltip() then
-            self:ShowTooltip()
+        if xb:ShouldShowTooltip() then
+            self:ShowConfiguredTooltip()
         else
             self:HideTooltip(true)
         end
@@ -540,10 +627,9 @@ function TradeskillModule:RegisterFrameEvents()
     self:SetProfScripts('secondProf')
 
     self.tradeskillFrame:SetScript('OnEnter', function()
-        local moduleDb = xb.db.profile.modules.tradeskill
         self.frameHover = true
-        if moduleDb.showTooltip and xb:ShouldShowTooltip() then
-            self:ShowTooltip()
+        if xb:ShouldShowTooltip() then
+            self:ShowConfiguredTooltip()
         else
             self:HideTooltip(true)
         end
@@ -578,6 +664,8 @@ function TradeskillModule:ShowTooltip()
         self:HideTooltip(true)
         return
     end
+
+    GameTooltip:Hide()
 
     local r, g, b, _ = unpack(xb:HoverColors())
     local tooltip = self:AcquireTooltip()
@@ -631,7 +719,8 @@ function TradeskillModule:GetDefaultOptions()
     return 'tradeskill', {
         enabled = true,
         barCC = false,
-        showTooltip = true
+        showTooltip = true,
+        useInteractiveTooltip = true
     }
 end
 
@@ -679,6 +768,21 @@ function TradeskillModule:GetConfig()
                 set = function(_, val)
                     xb.db.profile.modules.tradeskill.showTooltip = val
                     self:Refresh()
+                end
+            },
+            useInteractiveTooltip = {
+                name = L["USE_INTERACTIVE_TOOLTIP"],
+                order = 4,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.tradeskill.useInteractiveTooltip ~= false
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.tradeskill.useInteractiveTooltip = val
+                    self:Refresh()
+                end,
+                disabled = function()
+                    return not xb.db.profile.modules.tradeskill.showTooltip
                 end
             }
         }

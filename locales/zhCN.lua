@@ -219,7 +219,9 @@ L["PROGRESS"] = "Progress" -- TODO: To Translate
 L["RANK"] = "Rank" -- TODO: To Translate
 L["PARAGON"] = "Paragon" -- TODO: To Translate
 
+-- Tradeskills
 L["USE_CLASS_COLORS"] = "使用职业颜色"
+L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip" -- TODO: To Translate
 L["COOLDOWNS"] = "冷却"
 L["TOGGLE_PROFESSION_FRAME"] = '顯示職業框架'
 L["TOGGLE_PROFESSION_SPELLBOOK"] = '表演專業拼寫本'

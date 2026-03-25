@@ -217,7 +217,9 @@ L["PROGRESS"] = "Progress"
 L["RANK"] = "Rank"
 L["PARAGON"] = "Paragon"
 
+-- Tradeskills
 L["USE_CLASS_COLORS"] = "Use Class Colors"
+L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip"
 L["COOLDOWNS"] = "Cooldowns"
 L["TOGGLE_PROFESSION_FRAME"] = "Toggle Profession Frame"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Toggle Profession Spellbook"
