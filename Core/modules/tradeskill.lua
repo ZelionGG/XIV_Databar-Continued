@@ -566,7 +566,7 @@ function TradeskillModule:AcquireTooltip()
     return tooltip
 end
 
-function TradeskillModule:AddTooltipProfessionRow(tooltip, prefix, r, g, b)
+function TradeskillModule:AddTooltipProfessionRow(tooltip, prefix)
     local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
     local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
     local lineRow = tooltip:AddRow(left, right)
