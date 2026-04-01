@@ -597,7 +597,7 @@ function XIVBar:GetTextOptions()
                 get = function()
                     return self.db.profile.text.font;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     self.db.profile.text.font = val;
                     self:Refresh();
                 end
@@ -612,7 +612,7 @@ function XIVBar:GetTextOptions()
                 get = function()
                     return self.db.profile.text.fontSize;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     self.db.profile.text.fontSize = val;
                     self:Refresh();
                 end
@@ -627,7 +627,7 @@ function XIVBar:GetTextOptions()
                 get = function()
                     return self.db.profile.text.smallFontSize;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     self.db.profile.text.smallFontSize = val;
                     self:Refresh();
                 end
@@ -641,7 +641,7 @@ function XIVBar:GetTextOptions()
                 get = function()
                     return self.db.profile.text.flags;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     self.db.profile.text.flags = val;
                     self:Refresh();
                 end
@@ -662,7 +662,7 @@ function XIVBar:GetColorOptions()
                 type = "color",
                 order = 1,
                 hasAlpha = true,
-                set = function(info, r, g, b, a)
+                set = function(_, r, g, b, a)
                     if not self.db.profile.color.useCC then
                         self:SetColor('barColor', r, g, b, a)
                     else
@@ -679,7 +679,7 @@ function XIVBar:GetColorOptions()
                 desc = L["USE_CLASS_COLOR_TEXT_DESC"],
                 type = "toggle",
                 order = 2,
-                set = function(info, val)
+                set = function(_, val)
                     XIVBar:SetColor('barColor', self:GetClassColors());
                     self.db.profile.color.useCC = val;
                     self:Refresh();
@@ -706,7 +706,7 @@ function XIVBar:GetTextColorOptions()
                 order = 1,
                 width = "double",
                 hasAlpha = true,
-                set = function(info, r, g, b, a)
+                set = function(_, r, g, b, a)
                     if self.db.profile.color.useTextCC then
                         local cr, cg, cb, _ = self:GetClassColors()
                         r, g, b = cr, cg, cb
@@ -736,7 +736,7 @@ function XIVBar:GetTextColorOptions()
                 order = 3,
                 width = "double",
                 hasAlpha = true,
-                set = function(info, r, g, b, a)
+                set = function(_, r, g, b, a)
                     if self.db.profile.color.useHoverCC then
                         local cr, cg, cb, _ = self:GetClassColors()
                         r, g, b = cr, cg, cb
@@ -766,7 +766,7 @@ function XIVBar:GetTextColorOptions()
                 order = 5,
                 hasAlpha = true,
                 width = "double",
-                set = function(info, r, g, b, a)
+                set = function(_, r, g, b, a)
                     XIVBar:SetColor('inactive', r, g, b, a)
                 end,
                 get = function()

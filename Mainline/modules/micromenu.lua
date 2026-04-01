@@ -1249,7 +1249,7 @@ function MenuModule:CreateClickFunctions()
         return;
     end
 
-    self.functions.menu = function(_, button, down)
+    self.functions.menu = function(_, button)
         if InCombatLockdown() and not xb.db.profile.modules.microMenu.combatEn then
             return;
         end
@@ -1265,7 +1265,7 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- menu
 
-    self.functions.chat = function(_, button, down)
+    self.functions.chat = function(_, button)
         if InCombatLockdown() then
             return;
         end
@@ -1502,7 +1502,7 @@ function MenuModule:GetConfig()
                 get = function()
                     return xb.db.profile.modules.microMenu.modifierTooltip;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     xb.db.profile.modules.microMenu.modifierTooltip = val;
                     self:Refresh();
                 end,

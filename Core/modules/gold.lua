@@ -361,7 +361,7 @@ function GoldModule:RegisterFrameEvents()
         GameTooltip:Hide()
     end)
 
-    self.goldButton:SetScript('OnClick', function(_, button)
+    self.goldButton:SetScript('OnClick', function()
         ToggleAllBags()
     end)
 

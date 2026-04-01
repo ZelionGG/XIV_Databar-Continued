@@ -235,7 +235,7 @@ function VaultModule:RegisterFrameEvents()
     end)
 
     if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
-        self.vaultFrame:SetScript('OnClick', function(_, button)
+        self.vaultFrame:SetScript('OnClick', function()
             if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
                 if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
                     C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")

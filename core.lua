@@ -10,7 +10,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
 LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
     type = "launcher",
     icon = "Interface\\Icons\\Spell_Nature_StormReach",
-    OnClick = function(_, button) XIVBar:ToggleConfig() end
+    OnClick = function() XIVBar:ToggleConfig() end
 })
 
 XIVBar.Changelog = {}
@@ -410,7 +410,7 @@ function XIVBar:HideBarEvent()
     bar:RegisterEvent("PLAYER_ENTERING_WORLD")
     bar:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-    bar:SetScript("OnEvent", function(_, event, ...)
+    bar:SetScript("OnEvent", function(_, event)
         local barFrame = XIVBar:GetFrame("bar")
 
         -- Handle zone changes and instance transitions
@@ -455,7 +455,7 @@ function XIVBar:HideBarEvent()
         bar:RegisterEvent("PLAYER_REGEN_ENABLED")
         bar:RegisterEvent("PLAYER_REGEN_DISABLED")
 
-        bar:HookScript("OnEvent", function(_, event, ...)
+        bar:HookScript("OnEvent", function(_, event)
             local barFrame = XIVBar:GetFrame("bar")
             if event == "PLAYER_REGEN_DISABLED" and barFrame:IsVisible() then
                 barFrame:Hide()

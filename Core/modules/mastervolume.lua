@@ -183,7 +183,7 @@ function VolumeModule:Hooks()
 	hooksecurefunc("Sound_MasterVolumeUp", VolumeModule.MasterVolume_Update_Value)
 	hooksecurefunc("Sound_MasterVolumeDown", VolumeModule.MasterVolume_Update_Value)
 
-	hooksecurefunc("SetCVar", function(cvar, value)
+	hooksecurefunc("SetCVar", function(cvar)
 		if cvar == "Sound_MasterVolume" then
 			VolumeModule:MasterVolume_Update_Value()
 		end

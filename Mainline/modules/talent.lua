@@ -892,7 +892,7 @@ function TalentModule:GetConfig()
                 get = function()
                     return xb.db.profile.modules.talent.minWidth;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     xb.db.profile.modules.talent.minWidth = val;
                     self:Refresh();
                 end

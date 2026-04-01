@@ -530,7 +530,7 @@ function ClockModule:GetConfig()
                 get = function()
                     return xb.db.profile.modules.clock.timeFormat;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     xb.db.profile.modules.clock.timeFormat = val;
                     self:Refresh();
                 end
@@ -545,7 +545,7 @@ function ClockModule:GetConfig()
                 get = function()
                     return xb.db.profile.modules.clock.fontSize;
                 end,
-                set = function(info, val)
+                set = function(_, val)
                     xb.db.profile.modules.clock.fontSize = val;
                     self:Refresh();
                 end

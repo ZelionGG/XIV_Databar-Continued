@@ -692,7 +692,7 @@ function TravelModule:FindUsableTransport(ids, preferRandom)
     return available[1]
 end
 
-function TravelModule:SetButtonState(button, icon, text, isActive, isHover)
+function TravelModule:SetButtonState(_, icon, text, isActive, isHover)
     local db = xb.db.profile
 
     if isHover then
@@ -1605,7 +1605,7 @@ function TravelModule:CreateMythicPopup()
             end
         end, 'MENU')
     else -- Single-level menu
-        UIDropDownMenu_Initialize(self.mythicPopup, function(_, level, menuList)
+        UIDropDownMenu_Initialize(self.mythicPopup, function(_, level)
             AddMenuHeader(level)
 
             -- Add all teleports to the menu

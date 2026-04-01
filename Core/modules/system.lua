@@ -392,7 +392,7 @@ function SystemModule:GetConfig()
                 get = function()
                     return xb.db.profile.modules.system.addonsToShow;
                 end,
-                set = function(info, value)
+                set = function(_, value)
                     xb.db.profile.modules.system.addonsToShow = value;
                     self:Refresh();
                 end
