@@ -21,6 +21,7 @@ locales\locales.xml
 core.lua
 options.lua
 Core\compat.lua
+Core\utils\addons.lua
 Core\modules\load_modules.xml
 
 Core\utils\changelog\Load_Changelog.xml

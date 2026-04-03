@@ -4,13 +4,6 @@ local _G = _G
 local xb = XIVBar
 local L = XIVBar.L
 local compat = XIVBar.compat or {}
-local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-local managedActionBarAddOns = {
-    Bartender4 = true,
-    Dominos = true,
-    ElvUI = true,
-    Tukui = true,
-}
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
@@ -101,17 +94,11 @@ local function getPlayerData()
 end
 
 function GoldModule:GetExternalActionBarManagerName()
-    for addOnName in pairs(managedActionBarAddOns) do
-        if IsAddOnLoaded(addOnName) then
-            return addOnName
-        end
-    end
-
-    return nil
+    return xb.addons.GetExternalActionBarManagerName()
 end
 
 function GoldModule:HasExternalActionBarManager()
-    return self:GetExternalActionBarManagerName() ~= nil
+    return xb.addons.HasExternalActionBarManager()
 end
 
 function GoldModule:ToggleBlizzardBagsBar(force)
@@ -923,6 +910,9 @@ function GoldModule:GetConfig()
                         end
 
                         return "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. text
+                    end,
+                    hidden = function()
+                        return not self:HasExternalActionBarManager()
                     end,
                     order = 2,
                     type = "description",

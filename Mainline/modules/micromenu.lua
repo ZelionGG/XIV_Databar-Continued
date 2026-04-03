@@ -4,13 +4,6 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 local compat = xb.compat
-local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-local managedActionBarAddOns = {
-    Bartender4 = true,
-    Dominos = true,
-    ElvUI = true,
-    Tukui = true,
-}
 
 local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
@@ -156,7 +149,7 @@ end
 -- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function MenuModule:SkinFrame(frame, name)
-    if xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
+    if xb.db.profile.general.useElvUI and (compat.IsAddOnLoaded('ElvUI') or compat.IsAddOnLoaded('Tukui')) then
         if frame.StripTextures then
             frame:StripTextures()
         end
@@ -179,17 +172,11 @@ function MenuModule:SkinFrame(frame, name)
 end
 
 function MenuModule:GetExternalActionBarManagerName()
-    for addOnName in pairs(managedActionBarAddOns) do
-        if IsAddOnLoaded(addOnName) then
-            return addOnName
-        end
-    end
-
-    return nil
+    return xb.addons.GetExternalActionBarManagerName()
 end
 
 function MenuModule:HasExternalActionBarManager()
-    return self:GetExternalActionBarManagerName() ~= nil
+    return xb.addons.HasExternalActionBarManager()
 end
 
 function MenuModule:ToggleBlizzardMicroMenu(force)
@@ -1414,6 +1401,9 @@ function MenuModule:GetConfig()
                             end
 
                             return "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t " .. text
+                        end,
+                        hidden = function()
+                            return not self:HasExternalActionBarManager()
                         end,
                         order = 3,
                         type = "description",
