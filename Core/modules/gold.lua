@@ -7,7 +7,6 @@ local compat = XIVBar.compat or {}
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
-local isSessionNegative = false
 local negativeSign = "|cffff0000- "
 
 local function shortenNumber(num)
@@ -22,7 +21,7 @@ local function shortenNumber(num)
     end
 end
 
-local function moneyWithTexture(amount, session)
+local function moneyWithTexture(amount, isNegative)
     local copper, silver
     local showSC = xb.db.profile.modules.gold.showSmallCoins
     local shortThousands = xb.db.profile.modules.gold.shortThousands
@@ -51,11 +50,11 @@ local function moneyWithTexture(amount, session)
         amountStringTexture = amountStringTexture:gsub(amount .. "|T", shortGold .. "|T")
     end
 
-    if not session then
-        return amountStringTexture
-    else
-        return isSessionNegative and negativeSign .. amountStringTexture or amountStringTexture
-    end
+    return isNegative and negativeSign .. amountStringTexture or amountStringTexture
+end
+
+local function moneyWithTextureSigned(amount)
+    return moneyWithTexture(math.abs(amount), amount < 0)
 end
 
 local function ConvertDateToNumber(month, day, year)
@@ -400,8 +399,8 @@ function GoldModule:ShowTooltipClassic()
 
     local playerData, store = getPlayerData()
     if playerData then
-        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], moneyWithTexture(math.abs(playerData.sessionMoney), true), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], moneyWithTexture(math.abs(playerData.dailyMoney), true), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], moneyWithTextureSigned(playerData.sessionMoney), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], moneyWithTextureSigned(playerData.dailyMoney), r, g, b, 1, 1, 1)
     end
 
     if xb.db.profile.modules.gold.showTokenPrice then
@@ -461,8 +460,8 @@ function GoldModule:ShowTooltipMainline()
 
     local playerData = getGoldStore()[getCharacterKey()]
     if playerData then
-        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], self:FormatGold(math.abs(playerData.sessionMoney)), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], self:FormatGold(math.abs(playerData.dailyMoney)), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["SESSION_TOTAL"], self:FormatSignedGold(playerData.sessionMoney), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(L["DAILY_TOTAL"], self:FormatSignedGold(playerData.dailyMoney), r, g, b, 1, 1, 1)
     end
 
     if xb.db.profile.modules.gold.showTokenPrice then
@@ -584,6 +583,10 @@ function GoldModule:FormatGold(money)
     end
 end
 
+function GoldModule:FormatSignedGold(money)
+    return money < 0 and negativeSign .. self:FormatGold(math.abs(money)) or self:FormatGold(money)
+end
+
 function GoldModule:PLAYER_MONEY()
     local playerData = getGoldStore()[getCharacterKey()]
     if not playerData then
@@ -597,7 +600,6 @@ function GoldModule:PLAYER_MONEY()
     playerData.sessionMoney = playerData.sessionMoney + moneyDiff
     playerData.dailyMoney = playerData.dailyMoney + moneyDiff
 
-    isSessionNegative = playerData.sessionMoney < 0
     playerData.currentMoney = tmpMoney
     self:Refresh()
 end
