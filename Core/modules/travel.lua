@@ -194,7 +194,8 @@ function TravelModule:OnInitialize()
             210455, -- Draenic Hologem
             263489, -- Naaru's Embrace (Retail)
             260221, -- Naaru's Embrace (Classic)
-            184871 -- Dark Portal (Classic)
+            184871, -- Dark Portal (Classic)
+            206195 -- Path of the Naaru
         }
     end
 
