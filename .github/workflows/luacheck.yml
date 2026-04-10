@@ -1,0 +1,13 @@
+name: Luacheck
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  luacheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lunarmodules/luacheck@v1
