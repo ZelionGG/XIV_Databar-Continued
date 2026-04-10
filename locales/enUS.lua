@@ -6,8 +6,11 @@ local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "enUS", true, false)
 
--- NOTE: Some strings are sourced from BlizzardInterfaceResources:
--- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/enUS.lua
+-- Reference:
+-- Some strings below are sourced from BlizzardInterfaceResources.
+-- Source: https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/enUS.lua
+-- @Translation Team: If you find a false positive (a string that should stay identical),
+-- add `-- @no-translate` at the end of the line so the locale sync script ignores it.
 
 -- ## Translations Start ## --
 
