@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Sync locale files when enUS.lua is staged
+
+# Skip if npx is not available (Node not installed)
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Warning: npx not found, skipping locale sync (run 'npm install' to enable)" >&2
+  exit 0
+fi
+
+if git diff --cached --name-only | grep -q '^locales/enUS.lua$'; then
+  patch=$(mktemp)
+  trap 'rm -f "$patch"' EXIT
+
+  git diff --cached -- locales/enUS.lua > "$patch"
+
+  if [ -s "$patch" ]; then
+    npx tsx scripts/sync-locales.ts --diff "$patch" || exit 1
+    git add locales/
+  fi
+fi
