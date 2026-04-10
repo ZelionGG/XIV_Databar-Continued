@@ -365,11 +365,6 @@ end
 local ReputationModule = xb:NewModule("ReputationModule", 'AceEvent-3.0',
                                       'AceHook-3.0')
 
-local function SupportsAutoTrackOnRepGain()
-    return compat.features and compat.features.reputation and
-               compat.features.reputation.autoTrackOnGain == true
-end
-
 local function SupportsFactionStandingChangedEvent()
     return compat.isMainline
 end
@@ -524,7 +519,7 @@ end
 
 function ReputationModule:GetDisplayReputationData()
     local reputationDB = xb.db.profile.modules.reputation
-    if reputationDB.autoSwitchOnRepGain and SupportsAutoTrackOnRepGain() then
+    if reputationDB.autoSwitchOnRepGain then
         local lastFactionID, lastFactionName = self:GetAutoTrackedFaction()
         local autoTrackedData =
             GetReputationDisplayDataByFactionID(lastFactionID) or
@@ -541,7 +536,6 @@ end
 
 function ReputationModule:HandleFactionStandingChanged(_, factionID)
     if not SupportsFactionStandingChangedEvent() or
-        not SupportsAutoTrackOnRepGain() or
         not xb.db.profile.modules.reputation.autoSwitchOnRepGain then
         return
     end
@@ -563,8 +557,7 @@ end
 function ReputationModule:HandleFactionUpdate()
     local currentSnapshot = BuildFactionSnapshot()
 
-    if SupportsAutoTrackOnRepGain() and
-        xb.db.profile.modules.reputation.autoSwitchOnRepGain and
+    if xb.db.profile.modules.reputation.autoSwitchOnRepGain and
         not SupportsFactionStandingChangedEvent() and self.factionSnapshot then
         local bestFactionGain = FindBestFactionGain(self.factionSnapshot,
                                                     currentSnapshot)
@@ -1010,8 +1003,7 @@ function ReputationModule:GetConfig()
                 order = 5,
                 type = "toggle",
                 get = function()
-                    return SupportsAutoTrackOnRepGain() and
-                               xb.db.profile.modules.reputation.autoSwitchOnRepGain;
+                    return xb.db.profile.modules.reputation.autoSwitchOnRepGain;
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.reputation.autoSwitchOnRepGain = val;
