@@ -6,8 +6,6 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "ptBR", false, false)
 if not L then return end
 
-local professionsButtonLabel = _G.PROFESSIONS_BUTTON or _G.TRADE_SKILLS or "Professions"
-
 -- Reference:
 -- Some strings below are sourced from BlizzardInterfaceResources.
 -- Source: https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/ptBR.lua
