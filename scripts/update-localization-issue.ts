@@ -33,7 +33,7 @@ interface GitHubIssueResponse {
 }
 
 const DEFAULT_OWNER = "ZelionGG";
-const DEFAULT_REPO = "XIV_Databar_Continued";
+const DEFAULT_REPO = "XIV_Databar-Continued";
 const DEFAULT_ISSUE_NUMBER = 10;
 const LOCALE_SYNC_START_MARKER = "<!-- locale-sync:start -->";
 const LOCALE_SYNC_END_MARKER = "<!-- locale-sync:end -->";
