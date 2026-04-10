@@ -6,10 +6,11 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "frFR", false, false)
 if not L then return end
 
-local professionsButtonLabel = _G.PROFESSIONS_BUTTON or _G.TRADE_SKILLS or "Professions"
-
--- NOTE: Some strings are sourced from BlizzardInterfaceResources:
--- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/frFR.lua
+-- Reference:
+-- Some strings below are sourced from BlizzardInterfaceResources.
+-- Source: https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/frFR.lua
+-- @Translation Team: If you find a false positive (a string that should stay identical),
+-- add `-- @no-translate` at the end of the line so the locale sync script ignores it.
 
 -- TODO: L["MODULES"] = "Modules"
 L["LEFT_CLICK"] = "Clic gauche"
