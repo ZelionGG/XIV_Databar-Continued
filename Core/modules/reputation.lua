@@ -15,6 +15,8 @@ local LegacyGetNumFactions = rawget(_G, "GetNumFactions")
 local LegacyGetFactionInfo = rawget(_G, "GetFactionInfo")
 local C_Reputation_GetWatchedFactionData = C_Reputation.GetWatchedFactionData
 local C_Reputation_GetFactionDataByID = C_Reputation.GetFactionDataByID
+local C_Reputation_GetNumFactions = C_Reputation.GetNumFactions
+local C_Reputation_GetFactionDataByIndex = C_Reputation.GetFactionDataByIndex
 
 local C_Reputation_IsFactionParagon = C_Reputation.IsFactionParagon
 local C_Reputation_IsFactionParagonForCurrentPlayer = C_Reputation.IsFactionParagonForCurrentPlayer
@@ -363,12 +365,106 @@ end
 local ReputationModule = xb:NewModule("ReputationModule", 'AceEvent-3.0',
                                       'AceHook-3.0')
 
+local function SupportsAutoTrackOnRepGain()
+    return compat.features and compat.features.reputation and
+               compat.features.reputation.autoTrackOnGain == true
+end
+
+local function SupportsFactionStandingChangedEvent()
+    return compat.isMainline
+end
+
+local function GetFactionSnapshotKey(factionID, name)
+    if type(factionID) == "number" then
+        return "id:" .. factionID
+    end
+
+    if type(name) == "string" and name ~= "" then
+        return "name:" .. name
+    end
+
+    return nil
+end
+
+local function BuildFactionSnapshot()
+    local snapshot = {}
+
+    if LegacyGetNumFactions and LegacyGetFactionInfo then
+        local numFactions = LegacyGetNumFactions()
+        for index = 1, numFactions do
+            local name, reaction, minValue, maxValue, curValue, factionID =
+                GetFactionListEntry(index)
+            local key = GetFactionSnapshotKey(factionID, name)
+            if key then
+                snapshot[key] = {
+                    name = name,
+                    factionID = factionID,
+                    reaction = reaction,
+                    minValue = minValue,
+                    maxValue = maxValue,
+                    curValue = curValue,
+                }
+            end
+        end
+
+        return snapshot
+    end
+
+    if C_Reputation_GetNumFactions and C_Reputation_GetFactionDataByIndex then
+        local numFactions = C_Reputation_GetNumFactions()
+        for index = 1, numFactions do
+            local data = C_Reputation_GetFactionDataByIndex(index)
+            if data and data.name and not data.isHeader then
+                local key = GetFactionSnapshotKey(data.factionID, data.name)
+                if key then
+                    snapshot[key] = {
+                        name = data.name,
+                        factionID = data.factionID,
+                        reaction = data.reaction,
+                        minValue = data.currentReactionThreshold,
+                        maxValue = data.nextReactionThreshold,
+                        curValue = data.currentStanding,
+                    }
+                end
+            end
+        end
+    end
+
+    return snapshot
+end
+
+local function FindBestFactionGain(previousSnapshot, currentSnapshot)
+    local bestFaction
+    local bestDelta = 0
+
+    for key, currentData in pairs(currentSnapshot) do
+        local previousData = previousSnapshot[key]
+        if previousData then
+            local currentValue = type(currentData.curValue) == "number" and
+                                     currentData.curValue or nil
+            local previousValue = type(previousData.curValue) == "number" and
+                                      previousData.curValue or nil
+
+            if currentValue and previousValue then
+                local delta = currentValue - previousValue
+                if delta > bestDelta then
+                    bestDelta = delta
+                    bestFaction = currentData
+                end
+            end
+        end
+    end
+
+    return bestFaction
+end
+
 function ReputationModule:GetName() return REPUTATION; end
 
 function ReputationModule:OnInitialize()
     self.curButtons = {}
     self.curIcons = {}
     self.curText = {}
+    self.factionSnapshot = nil
 end
 
 function ReputationModule:OnEnable()
@@ -376,6 +472,8 @@ function ReputationModule:OnEnable()
         self.reputationFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
         xb:RegisterFrame('reputationFrame', self.reputationFrame)
     end
+
+    self.factionSnapshot = BuildFactionSnapshot()
 
     self.reputationFrame:Show()
     self:CreateFrames()
@@ -386,14 +484,17 @@ end
 function ReputationModule:OnDisable()
     self:SetParagonRewardFlash(false)
     self.reputationFrame:Hide()
-    self:UnregisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
-    self:UnregisterEvent('UPDATE_FACTION', 'Refresh')
+    if SupportsFactionStandingChangedEvent() then
+        self:UnregisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
+    end
+    self:UnregisterEvent('UPDATE_FACTION', 'HandleFactionUpdate')
     if compat.isMainline then
         self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
         self:UnregisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
     end
     self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:UnregisterEvent('QUEST_TURNED_IN', 'Refresh')
+    self.factionSnapshot = nil
 end
 
 local function GetCharReputationStorage()
@@ -423,7 +524,7 @@ end
 
 function ReputationModule:GetDisplayReputationData()
     local reputationDB = xb.db.profile.modules.reputation
-    if reputationDB.autoSwitchOnRepGain then
+    if reputationDB.autoSwitchOnRepGain and SupportsAutoTrackOnRepGain() then
         local lastFactionID, lastFactionName = self:GetAutoTrackedFaction()
         local autoTrackedData =
             GetReputationDisplayDataByFactionID(lastFactionID) or
@@ -439,7 +540,9 @@ function ReputationModule:GetDisplayReputationData()
 end
 
 function ReputationModule:HandleFactionStandingChanged(_, factionID)
-    if not xb.db.profile.modules.reputation.autoSwitchOnRepGain then
+    if not SupportsFactionStandingChangedEvent() or
+        not SupportsAutoTrackOnRepGain() or
+        not xb.db.profile.modules.reputation.autoSwitchOnRepGain then
         return
     end
 
@@ -454,6 +557,24 @@ function ReputationModule:HandleFactionStandingChanged(_, factionID)
 
     local factionName = factionData.name
     self:SetAutoTrackedFaction(factionID, factionName)
+    self:Refresh()
+end
+
+function ReputationModule:HandleFactionUpdate()
+    local currentSnapshot = BuildFactionSnapshot()
+
+    if SupportsAutoTrackOnRepGain() and
+        xb.db.profile.modules.reputation.autoSwitchOnRepGain and
+        not SupportsFactionStandingChangedEvent() and self.factionSnapshot then
+        local bestFactionGain = FindBestFactionGain(self.factionSnapshot,
+                                                    currentSnapshot)
+        if bestFactionGain then
+            self:SetAutoTrackedFaction(bestFactionGain.factionID,
+                                       bestFactionGain.name)
+        end
+    end
+
+    self.factionSnapshot = currentSnapshot
     self:Refresh()
 end
 
@@ -696,8 +817,10 @@ function ReputationModule:RegisterFrameEvents()
             OpenReputationPanel()
         end)
     end
-    self:RegisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
-    self:RegisterEvent('UPDATE_FACTION', 'Refresh')
+    if SupportsFactionStandingChangedEvent() then
+        self:RegisterEvent('FACTION_STANDING_CHANGED', 'HandleFactionStandingChanged')
+    end
+    self:RegisterEvent('UPDATE_FACTION', 'HandleFactionUpdate')
     if compat.isMainline then
         self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'Refresh')
         self:RegisterEvent('MAJOR_FACTION_UNLOCKED', 'Refresh')
@@ -887,11 +1010,13 @@ function ReputationModule:GetConfig()
                 order = 5,
                 type = "toggle",
                 get = function()
-                    return xb.db.profile.modules.reputation.autoSwitchOnRepGain;
+                    return SupportsAutoTrackOnRepGain() and
+                               xb.db.profile.modules.reputation.autoSwitchOnRepGain;
                 end,
                 set = function(_, val)
                     xb.db.profile.modules.reputation.autoSwitchOnRepGain = val;
                     self:ClearAutoTrackedFaction()
+                    self.factionSnapshot = BuildFactionSnapshot()
                     self:Refresh();
                 end
             },
