@@ -9,6 +9,8 @@ L = AceLocale:NewLocale(AddOnName, "enUS", true, false)
 -- NOTE: Some strings are sourced from BlizzardInterfaceResources:
 -- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/enUS.lua
 
+-- ## Translations Start ## --
+
 L["MODULES"] = "Modules"
 L["LEFT_CLICK"] = "Left-Click"
 L["RIGHT_CLICK"] = "Right-Click"
@@ -111,7 +113,7 @@ L["SHOW_GUILD_BUTTON"] = "Show Guild Button"
 L["SHOW_SOCIAL_BUTTON"] = "Show Social Button"
 L["SHOW_CHARACTER_BUTTON"] = "Show Character Button"
 L["SHOW_SPELLBOOK_BUTTON"] = "Show Spellbook Button"
-L["SHOW_PROFESSIONS_BUTTON"] = "Show " .. PROFESSIONS_BUTTON .. " Button"
+L["SHOW_PROFESSIONS_BUTTON"] = "Show Professions Button"
 L["SHOW_TALENTS_BUTTON"] = "Show Talents Button"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Show Achievements Button"
 L["SHOW_QUESTS_BUTTON"] = "Show Quests Button"

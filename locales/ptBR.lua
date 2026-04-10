@@ -6,6 +6,8 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "ptBR", false, false)
 if not L then return end
 
+local professionsButtonLabel = _G.PROFESSIONS_BUTTON or _G.TRADE_SKILLS or "Professions"
+
 -- NOTE: Strings needing translation are marked with `-- TODO: To Translate`.
 -- Some strings are sourced from BlizzardInterfaceResources:
 -- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/ptBR.lua
@@ -13,11 +15,11 @@ if not L then return end
 L["MODULES"] = "Módulos"
 L["LEFT_CLICK"] = "Clique Esquerdo"
 L["RIGHT_CLICK"] = "Clique Direito"
-L["k"] = true -- short for 1000
-L["M"] = true -- short for 1000000
-L["B"] = true -- short for 1000000000
-L["L"] = true -- For the local ping
-L["W"] = true -- For the world ping
+-- TODO: L["k"] = true -- short for 1000
+-- TODO: L["M"] = true -- short for 1000000
+-- TODO: L["B"] = true -- short for 1000000000
+-- TODO: L["L"] = true -- For the local ping
+-- TODO: L["W"] = true -- For the world ping
 
 -- General
 L["POSITIONING"] = "Posicionamento"
@@ -29,8 +31,8 @@ L["USE_CLASS_COLOR"] = "Cor da classe na barra"
 L["MISCELLANEOUS"] = "Outros"
 L["HIDE_IN_COMBAT"] = "Ocultar barra em combate"
 L["HIDE_IN_FLIGHT"] = "Ocultar durante voo"
-L["SHOW_ON_MOUSEOVER"] = "Show on mouseover" -- TODO: To Translate
-L["SHOW_ON_MOUSEOVER_DESC"] = "Show the bar only when you mouseover it" -- TODO: To Translate
+-- TODO: L["SHOW_ON_MOUSEOVER"] = "Show on mouseover"
+-- TODO: L["SHOW_ON_MOUSEOVER_DESC"] = "Show the bar only when you mouseover it"
 L["BAR_PADDING"] = "Preenchimento da Barra"
 L["MODULE_SPACING"] = "Espaçamento entre Módulos"
 L["BAR_MARGIN"] = "Margem da Barra"
@@ -49,17 +51,17 @@ L["BEHAVIOR"] = "Comportamento"
 L["SPACING"] = "Espaçamento"
 
 -- Modules Positioning
-L["MODULES_POSITIONING"] = "Modules Positioning" -- TODO: To Translate
-L["ENABLE_FREE_PLACEMENT"] = "Enable free placement" -- TODO: To Translate
-L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors" -- TODO: To Translate
-L["RESET_ALL_POSITIONS"] = "Reset All Positions" -- TODO: To Translate
-L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions" -- TODO: To Translate
-L["ANCHOR_POINT"] = "Anchor Point" -- TODO: To Translate
-L["X_POSITION"] = "X Position" -- TODO: To Translate
-L["RESET_POSITION"] = "Reset Position" -- TODO: To Translate
-L["RESET_POSITION_DESC"] = "Reset to the anchored position" -- TODO: To Translate
-L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions" -- TODO: To Translate
-L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions" -- TODO: To Translate
+-- TODO: L["MODULES_POSITIONING"] = "Modules Positioning"
+-- TODO: L["ENABLE_FREE_PLACEMENT"] = "Enable free placement"
+-- TODO: L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors"
+-- TODO: L["RESET_ALL_POSITIONS"] = "Reset All Positions"
+-- TODO: L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions"
+-- TODO: L["ANCHOR_POINT"] = "Anchor Point"
+-- TODO: L["X_POSITION"] = "X Position"
+-- TODO: L["RESET_POSITION"] = "Reset Position"
+-- TODO: L["RESET_POSITION_DESC"] = "Reset to the anchored position"
+-- TODO: L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions"
+-- TODO: L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions"
 
 -- Positioning Options
 L["BAR_WIDTH"] = "Largura da Barra"
@@ -75,7 +77,7 @@ L["TEXT_STYLE"] = "Estilo do Texto"
 -- Text Colors
 L["COLORS"] = "Cores"
 L["TEXT_COLORS"] = "Cores do Texto"
-L["NORMAL"] = "Normal"
+-- TODO: L["NORMAL"] = "Normal"
 L["INACTIVE"] = "Inativo"
 L["USE_CLASS_COLOR_TEXT"] = "Usar cor da classe para o texto"
 L["USE_CLASS_COLOR_TEXT_DESC"] = "Transparência apenas no seletor de cores"
@@ -84,28 +86,27 @@ L["HOVER"] = "Mouse sobre"
 
 -------------------- MODULES ---------------------------
 
-L["MICROMENU"] = "Micromenu" -- TODO: To Translate
+-- TODO: L["MICROMENU"] = "Micromenu"
 L["SHOW_SOCIAL_TOOLTIPS"] = "Mostrar informações da lista de amigos"
 L["SHOW_ACCESSIBILITY_TOOLTIPS"] = "Mostrar informações de acessibilidade"
-L["BLIZZARD_MICROMENU"] = "Blizzard Micromenu" -- TODO: To Translate
-L["DISABLE_BLIZZARD_MICROMENU"] = "Disable Blizzard Micromenu" -- TODO: To Translate
-L["KEEP_QUEUE_STATUS_ICON"] = "Keep Queue Status Icon" -- TODO: To Translate
-L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
-L["BLIZZARD_BAGS_BAR"] = "Blizzard Bags Bar" -- TODO: To Translate
-L["DISABLE_BLIZZARD_BAGS_BAR"] = "Disable Blizzard Bags Bar" -- TODO: To Translate
-L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.' -- TODO: To Translate
+-- TODO: L["BLIZZARD_MICROMENU"] = "Blizzard Micromenu"
+-- TODO: L["DISABLE_BLIZZARD_MICROMENU"] = "Disable Blizzard Micromenu"
+-- TODO: L["KEEP_QUEUE_STATUS_ICON"] = "Keep Queue Status Icon"
+-- TODO: L["BLIZZARD_MICROMENU_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.'
+-- TODO: L["BLIZZARD_BAGS_BAR"] = "Blizzard Bags Bar"
+-- TODO: L["DISABLE_BLIZZARD_BAGS_BAR"] = "Disable Blizzard Bags Bar"
+-- TODO: L["BLIZZARD_BAGS_BAR_DISCLAIMER"] = 'This option is disabled because an external bar manager was detected: %s.'
 L["MAIN_MENU_ICON_RIGHT_SPACING"] = "Espaçamento à Direita do Ícone do Menu Principal"
 L["ICON_SPACING"] = "Espaçamento dos Ícones"
 L["HIDE_BNET_APP_FRIENDS"] = "Ocultar Amigos da BNet"
 L["OPEN_GUILD_PAGE"] = "Abrir Página da Guilda"
-L["NO_TAG"] = "No Tag" -- TODO: To Translate
+-- TODO: L["NO_TAG"] = "No Tag"
 L["WHISPER_BNET"] = "Sussurrar via BNet"
 L["WHISPER_CHARACTER"] = "Sussurrar para o Personagem"
 L["HIDE_SOCIAL_TEXT"] = "Ocultar Texto Social"
 L["SOCIAL_TEXT_OFFSET"] = "Deslocamento do Texto Social"
 L["GMOTD_IN_TOOLTIP"] = "Mensagem do Dia na Dica de Tela"
 L["FRIEND_INVITE_MODIFIER"] = "Modificador para Convite de Amigo"
-
 L["SHOW_HIDE_BUTTONS"] = "Mostrar/Ocultar Botões"
 L["SHOW_MENU_BUTTON"] = "Mostrar Botão de Menu"
 L["SHOW_CHAT_BUTTON"] = "Mostrar Botão de Chat"
@@ -113,7 +114,7 @@ L["SHOW_GUILD_BUTTON"] = "Mostrar Botão da Guilda"
 L["SHOW_SOCIAL_BUTTON"] = "Mostrar Botão Social"
 L["SHOW_CHARACTER_BUTTON"] = "Mostrar Botão do Personagem"
 L["SHOW_SPELLBOOK_BUTTON"] = "Mostrar Botão de Magias"
-L["SHOW_PROFESSIONS_BUTTON"] = "Mostrar Botão de " .. PROFESSIONS_BUTTON
+L["SHOW_PROFESSIONS_BUTTON"] = "Mostrar Botão de " .. professionsButtonLabel
 L["SHOW_TALENTS_BUTTON"] = "Mostrar Botão de Talentos"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Mostrar Botão de Conquistas"
 L["SHOW_QUESTS_BUTTON"] = "Mostrar Botão de Missões"
@@ -123,11 +124,11 @@ L["SHOW_PVP_BUTTON"] = "Mostrar Botão de PVP"
 L["SHOW_PETS_BUTTON"] = "Mostrar Botão de Mascotes"
 L["SHOW_SHOP_BUTTON"] = "Mostrar Botão da Loja"
 L["SHOW_HELP_BUTTON"] = "Mostrar Botão de Ajuda"
-L["SHOW_HOUSING_BUTTON"] = "Show Housing Button" -- TODO: translate
+-- TODO: L["SHOW_HOUSING_BUTTON"] = "Show Housing Button"
 L["NO_INFO"] = "Sem Informação"
-L["Alliance"] = FACTION_ALLIANCE
-L["Horde"] = FACTION_HORDE
-L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat" -- TODO: To Translate
+-- TODO: L["Alliance"] = FACTION_ALLIANCE
+-- TODO: L["Horde"] = FACTION_HORDE
+-- TODO: L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Aviso de Durabilidade"
 L["SHOW_ITEM_LEVEL"] = "Mostrar item level"
@@ -135,8 +136,8 @@ L["SHOW_COORDINATES"] = "Mostrar coordenadas"
 
 -- Master Volume
 L["MASTER_VOLUME"] = "Volume geral"
-L["VOLUME_STEP"] = "Volume step" -- TODO: translate
-L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel" -- TODO: To Translate
+-- TODO: L["VOLUME_STEP"] = "Volume step"
+-- TODO: L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel"
 
 -- Clock
 L["TIME_FORMAT"] = "Formato da Hora"
@@ -147,19 +148,19 @@ L["REALM_TIME"] = "Horário do Servidor"
 L["OPEN_CALENDAR"] = "Abrir Calendário"
 L["OPEN_CLOCK"] = "Abrir Relógio"
 L["HIDE_EVENT_TEXT"] = "Ocultar texto do evento"
-L["REST_ICON"] = "Rest Icon" -- TODO: To Translate
-L["SHOW_REST_ICON"] = "Show Rest Icon" -- TODO: To Translate
-L["TEXTURE"] = "Texture" -- TODO: To Translate
-L["DEFAULT"] = "Default" -- TODO: To Translate
-L["CUSTOM"] = "Custom" -- TODO: To Translate
-L["CUSTOM_TEXTURE"] = "Custom Texture" -- TODO: To Translate
-L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level" -- TODO: To Translate
-L["TEXTURE_SIZE"] = "Texture Size" -- TODO: To Translate
-L["POSITION"] = "Position" -- TODO: To Translate
-L["CUSTOM_TEXTURE_COLOR"] = "Custom Color" -- TODO: To Translate
-L["COLOR"] = "Color" -- TODO: To Translate
+-- TODO: L["REST_ICON"] = "Rest Icon"
+-- TODO: L["SHOW_REST_ICON"] = "Show Rest Icon"
+-- TODO: L["TEXTURE"] = "Texture"
+-- TODO: L["DEFAULT"] = "Default"
+-- TODO: L["CUSTOM"] = "Custom"
+-- TODO: L["CUSTOM_TEXTURE"] = "Custom Texture"
+-- TODO: L["HIDE_REST_ICON_MAX_LEVEL"] = "Hide at Max Level"
+-- TODO: L["TEXTURE_SIZE"] = "Texture Size"
+-- TODO: L["POSITION"] = "Position"
+-- TODO: L["CUSTOM_TEXTURE_COLOR"] = "Custom Color"
+-- TODO: L["COLOR"] = "Color"
 
-L["TRAVEL"] = "Travel" -- TODO: translate
+-- TODO: L["TRAVEL"] = "Travel"
 L["PORT_OPTIONS"] = "Opções de Teleporte"
 L["READY"] = "Pronto"
 L["TRAVEL_COOLDOWNS"] = "Recargas de Teleporte"
@@ -174,30 +175,30 @@ L["SHORTEN_GOLD"] = "Encurtar Ouro"
 L["TOGGLE_BAGS"] = "Mostrar bolsa"
 L["SESSION_TOTAL"] = "Total da Sessão"
 L["DAILY_TOTAL"] = "Total do Dia"
-L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price" -- TODO: To Translate
-L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
+-- TODO: L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price"
+-- TODO: L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold"
 L["GOLD_ROUNDED_VALUES"] = "Valores arredondados de ouro"
-L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
-L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
+-- TODO: L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold"
+-- TODO: L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold"
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Mostrar barra de XP abaixo do nível máximo"
 L["CLASS_COLORS_XP_BAR"] = "Usar cores de classe para a barra de XP"
 L["SHOW_TOOLTIPS"] = "Mostrar informações"
 L["TEXT_ON_RIGHT"] = "Texto à Direita"
-L["BAR_CURRENCY_SELECT"] = "Currencies displayed on the bar" -- TODO: To Translate
+-- TODO: L["BAR_CURRENCY_SELECT"] = "Currencies displayed on the bar"
 L["FIRST_CURRENCY"] = "Moeda #1"
 L["SECOND_CURRENCY"] = "Moeda #2"
 L["THIRD_CURRENCY"] = "Moeda #3"
 L["RESTED"] = "Descansado"
-L["SHOW_MORE_CURRENCIES"] = "Show More Currencies on Shift+Hover" -- TODO: To Translate
-L["MAX_CURRENCIES_SHOWN"] = "Max currencies shown when holding Shift" -- TODO: To Translate
-L["ONLY_SHOW_MODULE_ICON"] = "Only Show Module Icon" -- TODO: To Translate
-L["CURRENCY_NUMBER"] = "Number of Currencies on Bar" -- TODO: To Translate
-L["CURRENCY_SELECTION"] = "Currency Selection" -- TODO: To Translate
-L["SELECT_ALL"] = "Select All" -- TODO: To Translate
-L["UNSELECT_ALL"] = "Unselect All" -- TODO: To Translate
-L["OPEN_XIV_CURRENCY_OPTIONS"] = "Open XIV's Currency Options" -- TODO: To Translate
+-- TODO: L["SHOW_MORE_CURRENCIES"] = "Show More Currencies on Shift+Hover"
+-- TODO: L["MAX_CURRENCIES_SHOWN"] = "Max currencies shown when holding Shift"
+-- TODO: L["ONLY_SHOW_MODULE_ICON"] = "Only Show Module Icon"
+-- TODO: L["CURRENCY_NUMBER"] = "Number of Currencies on Bar"
+-- TODO: L["CURRENCY_SELECTION"] = "Currency Selection"
+-- TODO: L["SELECT_ALL"] = "Select All"
+-- TODO: L["UNSELECT_ALL"] = "Unselect All"
+-- TODO: L["OPEN_XIV_CURRENCY_OPTIONS"] = "Open XIV's Currency Options"
 
 -- System
 L["WORLD_PING"] = "Mostrar Ping Global"
@@ -209,19 +210,19 @@ L["GARBAGE_COLLECT"] = "Limpeza de Memória"
 L["CLEANED"] = "Limpo"
 
 -- Reputation
-L["OPEN_REPUTATION"] = "Open " .. REPUTATION -- TODO: To Translate
-L["PARAGON_REWARD_AVAILABLE"] = "Paragon Reward available" -- TODO: To Translate
-L["CLASS_COLORS_REPUTATION"] = "Use Class Colors for Reputation Bar" -- TODO: To Translate
-L["REPUTATION_COLORS_REPUTATION"] = "Use Reputation Colors for Reputation Bar" -- TODO: To Translate
-L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation" -- TODO: To Translate
-L["FLASH_PARAGON_REWARD"] = "Flash on Paragon Reward" -- TODO: To Translate
-L["PROGRESS"] = "Progress" -- TODO: To Translate
-L["RANK"] = "Rank" -- TODO: To Translate
-L["PARAGON"] = "Paragon" -- TODO: To Translate
+-- TODO: L["OPEN_REPUTATION"] = "Open " .. REPUTATION
+-- TODO: L["PARAGON_REWARD_AVAILABLE"] = "Paragon Reward available"
+-- TODO: L["CLASS_COLORS_REPUTATION"] = "Use Class Colors for Reputation Bar"
+-- TODO: L["REPUTATION_COLORS_REPUTATION"] = "Use Reputation Colors for Reputation Bar"
+-- TODO: L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation"
+-- TODO: L["FLASH_PARAGON_REWARD"] = "Flash on Paragon Reward"
+-- TODO: L["PROGRESS"] = "Progress"
+-- TODO: L["RANK"] = "Rank"
+-- TODO: L["PARAGON"] = "Paragon"
 
 -- Tradeskills
 L["USE_CLASS_COLORS"] = "Usar Cores de Classe"
-L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip" -- TODO: To Translate
+-- TODO: L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip"
 L["COOLDOWNS"] = "Tempo de Recarga"
 L["TOGGLE_PROFESSION_FRAME"] = "Profissões"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Magias de Profissão"
@@ -231,49 +232,52 @@ L["SET_LOADOUT"] = "Trocar Loadout"
 L["SET_LOOT_SPECIALIZATION"] = "Trocar Especialização de Saque"
 L["CURRENT_SPECIALIZATION"] = "Especialização Atual"
 L["CURRENT_LOOT_SPECIALIZATION"] = "Especialização de Saque Atual"
+-- TODO: L["ENABLE_LOADOUT_SWITCHER"] = "Enable Loadout Switcher"
 L["TALENT_MINIMUM_WIDTH"] = "Largura Mínima dos Talentos"
 L["OPEN_ARTIFACT"] = "Abrir Artefato"
 L["REMAINING"] = "Restante"
+-- TODO: L["KILLS_TO_LEVEL"] = "Kills to level"
+-- TODO: L["LAST_XP_GAIN"] = "Last xp gain"
 L["AVAILABLE_RANKS"] = "Ranks Disponíveis"
 L["ARTIFACT_KNOWLEDGE"] = "Conhecimento de Artefato"
 
-L["SHOW_BUTTON_TEXT"] = "Show Button Text" -- TODO: To Translate
+-- TODO: L["SHOW_BUTTON_TEXT"] = "Show Button Text"
 
--- Travel (Translation needed)
+-- Travel
 L["HEARTHSTONE"] = "Pedra de Regresso"
 L["M_PLUS_TELEPORTS"] =  "Teleportes de M+"
 L["ONLY_SHOW_CURRENT_SEASON"] = "Mostrar Temporada Atual"
 L["MYTHIC_PLUS_TELEPORTS"] = "Teleportes de Mitica+"
-L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Hide M+ Teleports text" -- TODO: To Translate
+-- TODO: L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Hide M+ Teleports text"
 L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Mostrar Teleportes de Mitica+"
 L["USE_RANDOM_HEARTHSTONE"] = "Usar Pedra de Regresso aleatória"
-local retrievingData = "Recuperando dados..."
-L["RETRIEVING_DATA"] = retrievingData
+local retrievingData = "Retrieving data..."
+-- TODO: L["RETRIEVING_DATA"] = retrievingData
 L["EMPTY_HEARTHSTONES_LIST"] = "Se você vir '" .. retrievingData .. "' na lista abaixo, basta mudar de aba ou reabrir este menu para atualizar os dados."
 L["HEARTHSTONES_SELECT"] = "Selecionar Pedra de Regresso"
 L["HEARTHSTONES_SELECT_DESC"] = "Selecionar a Pedra de Regresso"
-L["HIDE_HEARTHSTONE_BUTTON"] = "Hide Hearthstone Button" -- TODO: To Translate
-L["HIDE_PORT_BUTTON"] = "Hide Port Button" -- TODO: To Translate
-L["HIDE_HOME_BUTTON"] = "Hide Home Button" -- TODO: To Translate
-L["HIDE_HEARTHSTONE_TEXT"] = "Hide Hearthstone Text" -- TODO: To Translate
-L["HIDE_PORT_TEXT"] = "Hide Port Text" -- TODO: To Translate
-L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = "Hide Additional Tooltip Text" -- TODO: To Translate
-L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Hide the hearthstone bind location and the select port button in the tooltip." -- TODO: To Translate
-L["NOT_LEARNED"] = "Not learned" -- TODO: To Translate
-L["SHOW_UNLEARNED_TELEPORTS"] = "Show unlearned teleports" -- TODO: To Translate
-L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Hide button during off-season" -- TODO: To Translate
+-- TODO: L["HIDE_HEARTHSTONE_BUTTON"] = "Hide Hearthstone Button"
+-- TODO: L["HIDE_PORT_BUTTON"] = "Hide Port Button"
+-- TODO: L["HIDE_HOME_BUTTON"] = "Hide Home Button"
+-- TODO: L["HIDE_HEARTHSTONE_TEXT"] = "Hide Hearthstone Text"
+-- TODO: L["HIDE_PORT_TEXT"] = "Hide Port Text"
+-- TODO: L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = "Hide Additional Tooltip Text"
+-- TODO: L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Hide the hearthstone bind location and the select port button in the tooltip."
+-- TODO: L["NOT_LEARNED"] = "Not learned"
+-- TODO: L["SHOW_UNLEARNED_TELEPORTS"] = "Show unlearned teleports"
+-- TODO: L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Hide button during off-season"
 
 -- House/Home Selection
-L["HOME"] = "Home" -- TODO: To Translate
-L["UNKNOWN_HOUSE"] = "Unknown House" -- TODO: To Translate
-L["HOUSE"] = "House" -- TODO: To Translate
-L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
-L["SELECTED"] = "Selected" -- TODO: To Translate
-L["CHANGE_HOME"] = "Change Home" -- TODO: To Translate
-L["NO_HOUSES_OWNED"] = "No Houses Owned" -- TODO: To Translate
-L["VISIT_SELECTED_HOME"] = "Visit Selected Home" -- TODO: To Translate
+-- TODO: L["HOME"] = "Home"
+-- TODO: L["UNKNOWN_HOUSE"] = "Unknown House"
+-- TODO: L["HOUSE"] = "House"
+-- TODO: L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
+-- TODO: L["SELECTED"] = "Selected"
+-- TODO: L["CHANGE_HOME"] = "Change Home"
+-- TODO: L["NO_HOUSES_OWNED"] = "No Houses Owned"
+-- TODO: L["VISIT_SELECTED_HOME"] = "Visit Selected Home"
 
-L["CLASSIC"] = "Classic"
+-- TODO: L["CLASSIC"] = "Classic"
 L["Burning Crusade"] = true
 L["Wrath of the Lich King"] = true
 L["Cataclysm"] = true
@@ -307,13 +311,13 @@ L["IMPORT_PROFILE"] = "Importar Perfil"
 L["IMPORT_PROFILE_DESC"] = "Importar perfil de outro jogador"
 
 -- Changelog
-L["DATE_FORMAT"] = "%month%-%day%-%year%"
+-- TODO: L["DATE_FORMAT"] = "%month%-%day%-%year%"
 L["IMPORTANT"] = "Importante"
 L["NEW"] = "Novo"
 L["IMPROVEMENT"] = "Melhorias"
 L["BUGFIX"] = "Correções de bugs"
-L["CHANGELOG"] = "Changelog"
+-- TODO: L["CHANGELOG"] = "Changelog"
 
 -- Vault Module
-L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts." -- TODO: To Translate
-L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level." -- TODO: To Translate
+-- TODO: L["GREAT_VAULT_DISABLED"] = "The " .. DELVES_GREAT_VAULT_LABEL .. " is currently disabled until the next season starts."
+-- TODO: L["MAX_LEVEL_DISCLAIMER"] = "This module will only show when you reach max level."

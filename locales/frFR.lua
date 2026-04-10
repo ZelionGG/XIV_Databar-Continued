@@ -6,16 +6,18 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "frFR", false, false)
 if not L then return end
 
+local professionsButtonLabel = _G.PROFESSIONS_BUTTON or _G.TRADE_SKILLS or "Professions"
+
 -- NOTE: Some strings are sourced from BlizzardInterfaceResources:
 -- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/frFR.lua
 
-L["MODULES"] = "Modules"
+-- TODO: L["MODULES"] = "Modules"
 L["LEFT_CLICK"] = "Clic gauche"
 L["RIGHT_CLICK"] = "Clic droit"
-L["k"] = true -- short for 1000
+-- TODO: L["k"] = true -- short for 1000
 L["M"] = "m" -- short for 1000000
 L["B"] = "M" -- short for 1000000000
-L["L"] = true -- For the local ping
+-- TODO: L["L"] = true -- For the local ping
 L["W"] = "M" -- For the world ping
 
 -- General
@@ -111,7 +113,7 @@ L["SHOW_GUILD_BUTTON"] = "Afficher le bouton Guilde"
 L["SHOW_SOCIAL_BUTTON"] = "Afficher le bouton Contacts"
 L["SHOW_CHARACTER_BUTTON"] = "Afficher le bouton Personnage"
 L["SHOW_SPELLBOOK_BUTTON"] = "Afficher le bouton Grimoire"
-L["SHOW_PROFESSIONS_BUTTON"] = "Afficher le bouton " .. PROFESSIONS_BUTTON
+L["SHOW_PROFESSIONS_BUTTON"] = "Afficher le bouton " .. professionsButtonLabel
 L["SHOW_TALENTS_BUTTON"] = "Afficher le bouton Talents"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Afficher le bouton Haut-faits"
 L["SHOW_QUESTS_BUTTON"] = "Afficher le bouton Quêtes"
@@ -123,8 +125,8 @@ L["SHOW_SHOP_BUTTON"] = "Afficher le bouton Boutique"
 L["SHOW_HELP_BUTTON"] = "Afficher le bouton Aide"
 L["SHOW_HOUSING_BUTTON"] = "Afficher le bouton Logis"
 L["NO_INFO"] = "Pas d'information"
-L["Alliance"] = FACTION_ALLIANCE
-L["Horde"] = FACTION_HORDE
+-- TODO: L["Alliance"] = FACTION_ALLIANCE
+-- TODO: L["Horde"] = FACTION_HORDE
 L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Masquer les infobulles en combat"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Seuil d'avertissement de durabilité"
@@ -147,13 +149,13 @@ L["OPEN_CLOCK"] = "Ouvrir l'horloge"
 L["HIDE_EVENT_TEXT"] = "Cacher le texte d'événement"
 L["REST_ICON"] = "Icône de repos"
 L["SHOW_REST_ICON"] = "Afficher l'icône de repos"
-L["TEXTURE"] = "Texture"
+-- TODO: L["TEXTURE"] = "Texture"
 L["DEFAULT"] = "Par défaut"
 L["CUSTOM"] = "Personnalisée"
 L["CUSTOM_TEXTURE"] = "Texture personnalisée"
 L["HIDE_REST_ICON_MAX_LEVEL"] = "Masquer au niveau maximum"
 L["TEXTURE_SIZE"] = "Taille de la texture"
-L["POSITION"] = "Position"
+-- TODO: L["POSITION"] = "Position"
 L["CUSTOM_TEXTURE_COLOR"] = "Couleur personnalisée"
 L["COLOR"] = "Couleur"
 
@@ -183,7 +185,7 @@ L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Montrer la barre d'XP quand le niveau max n'
 L["CLASS_COLORS_XP_BAR"] = "Utiliser la couleur de classe pour la barre d'XP"
 L["SHOW_TOOLTIPS"] = "Montrer les bulles"
 L["TEXT_ON_RIGHT"] = "Texte à droite"
-L["CURRENCY_SELECT"] = "Monnaies affichées dans la barre"
+-- TODO: L["BAR_CURRENCY_SELECT"] = "Currencies displayed on the bar"
 L["FIRST_CURRENCY"] = "Première monnaie"
 L["SECOND_CURRENCY"] = "Seconde monnaie"
 L["THIRD_CURRENCY"] = "Troisième monnaie"
@@ -229,9 +231,12 @@ L["SET_LOADOUT"] = "Choix de la configuration"
 L["SET_LOOT_SPECIALIZATION"] = "Spécialisation du butin"
 L["CURRENT_SPECIALIZATION"] = "Spécialisation actuelle"
 L["CURRENT_LOOT_SPECIALIZATION"] = "Spécialisation du butin actuelle"
+-- TODO: L["ENABLE_LOADOUT_SWITCHER"] = "Enable Loadout Switcher"
 L["TALENT_MINIMUM_WIDTH"] = "Longueur minimum"
 L["OPEN_ARTIFACT"] = "Ouvrir l'Arme Prodigieuse"
 L["REMAINING"] = "Restant"
+-- TODO: L["KILLS_TO_LEVEL"] = "Kills to level"
+-- TODO: L["LAST_XP_GAIN"] = "Last xp gain"
 L["AVAILABLE_RANKS"] = "Rangs disponibles"
 L["ARTIFACT_KNOWLEDGE"] = "Connaissance de l'arme prodigieuse"
 
@@ -245,8 +250,8 @@ L["MYTHIC_PLUS_TELEPORTS"] = "Téléportations Mythique+"
 L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Masquer le texte des téléportations M+"
 L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Montrer les téléportations Mythique+"
 L["USE_RANDOM_HEARTHSTONE"] = "Utiliser une pierre de foyer aléatoire"
-local retrievingData = "Récupération des données..."
-L["RETRIEVING_DATA"] = retrievingData
+local retrievingData = "Retrieving data..."
+-- TODO: L["RETRIEVING_DATA"] = retrievingData
 L["EMPTY_HEARTHSTONES_LIST"] = "Si vous voyez '" .. retrievingData .. "' dans la liste ci-dessous, changez simplement d'onglet ou rouvrez ce menu pour rafraîchir les données."
 L["HEARTHSTONES_SELECT"] = "Sélection des pierres de foyers"
 L["HEARTHSTONES_SELECT_DESC"] = "Sélectionner les pierres de foyers à utiliser (Attention, si vous sélectionnez plusieurs pierres de foyers, il faudrait cocher l'option 'Sélection des pierres de foyers')"
@@ -256,7 +261,7 @@ L["HIDE_HOME_BUTTON"] = "Masquer le bouton Logis"
 L["HIDE_HEARTHSTONE_TEXT"] = "Masquer le texte de la pierre de foyer"
 L["HIDE_PORT_TEXT"] = "Masquer le texte des téléportations secondaires"
 L["HIDE_ADDITIONAL_TOOLTIP_TEXT"] = "Masquer les textes additionnels de l'infobulle"
-L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Masquer les textes additionnels de l'infobulle comme le point de liaison de la pierre de foyer et le bouton de téléportation secondaire sélectionné." -- To Translate
+-- TODO: L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"] = "Hide the hearthstone bind location and the select port button in the tooltip."
 L["NOT_LEARNED"] = "Non appris"
 L["SHOW_UNLEARNED_TELEPORTS"] = "Afficher les sorts de téléportation non appris"
 L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Masquer le bouton pendant l’entre-saison"
@@ -265,13 +270,13 @@ L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Masquer le bouton pendant l’entre-saison
 L["HOME"] = "Logis"
 L["UNKNOWN_HOUSE"] = "Maison Inconnue"
 L["HOUSE"] = "Logis"
-L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
+-- TODO: L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
 L["SELECTED"] = "Sélectionné"
 L["CHANGE_HOME"] = "Changer de Logis"
 L["NO_HOUSES_OWNED"] = "Aucun logis possédé"
 L["VISIT_SELECTED_HOME"] = "Visiter le logis sélectionné"
 
-L["CLASSIC"] = "Classic"
+-- TODO: L["CLASSIC"] = "Classic"
 L["Burning Crusade"] = true
 L["Wrath of the Lich King"] = true
 L["Cataclysm"] = true
@@ -306,7 +311,7 @@ L["IMPORT_PROFILE_DESC"] = "Importer un profil d'un autre joueur"
 
 -- Changelog
 L["DATE_FORMAT"] = "%day%/%month%/%year%"
-L["IMPORTANT"] = "Important"
+-- TODO: L["IMPORTANT"] = "Important"
 L["NEW"] = "Nouveau"
 L["IMPROVEMENT"] = "Améliorations"
 L["BUGFIX"] = "Corrections de bugs"

@@ -6,6 +6,8 @@ local L ---@type XIV_DatabarLocale
 L = AceLocale:NewLocale(AddOnName, "deDE", false, false)
 if not L then return end
 
+local professionsButtonLabel = _G.PROFESSIONS_BUTTON or _G.TRADE_SKILLS or "Professions"
+
 -- NOTE: Strings needing translation are marked with `-- TODO: To Translate`.
 -- Some strings are sourced from BlizzardInterfaceResources:
 -- https://github.com/Ketho/BlizzardInterfaceResources/blob/live/Resources/GlobalStrings/deDE.lua
@@ -13,11 +15,11 @@ if not L then return end
 L["MODULES"] = "Module"
 L["LEFT_CLICK"] = "Links-Klick"
 L["RIGHT_CLICK"] = "Rechts-Klick"
-L["k"] = true -- short for 1000
-L["M"] = true -- short for 1000000
-L["B"] = true -- short for 1000000000
-L["L"] = true -- For the local ping
-L["W"] = true -- For the world ping
+-- TODO: L["k"] = true -- short for 1000
+-- TODO: L["M"] = true -- short for 1000000
+-- TODO: L["B"] = true -- short for 1000000000
+-- TODO: L["L"] = true -- For the local ping
+-- TODO: L["W"] = true -- For the world ping
 
 -- General
 L["POSITIONING"] = "Positionierung"
@@ -49,17 +51,17 @@ L["BEHAVIOR"] = "Verhalten"
 L["SPACING"] = "Abstand"
 
 -- Modules Positioning
-L["MODULES_POSITIONING"] = "Modules Positioning" -- TODO: To Translate
-L["ENABLE_FREE_PLACEMENT"] = "Enable free placement" -- TODO: To Translate
-L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors" -- TODO: To Translate
-L["RESET_ALL_POSITIONS"] = "Reset All Positions" -- TODO: To Translate
-L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions" -- TODO: To Translate
-L["ANCHOR_POINT"] = "Anchor Point" -- TODO: To Translate
-L["X_POSITION"] = "X Position" -- TODO: To Translate
-L["RESET_POSITION"] = "Reset Position" -- TODO: To Translate
-L["RESET_POSITION_DESC"] = "Reset to the anchored position" -- TODO: To Translate
-L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions" -- TODO: To Translate
-L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions" -- TODO: To Translate
+-- TODO: L["MODULES_POSITIONING"] = "Modules Positioning"
+-- TODO: L["ENABLE_FREE_PLACEMENT"] = "Enable free placement"
+-- TODO: L["ENABLE_FREE_PLACEMENT_DESC"] = "Enable independent X positioning for each module and disable inter-module anchors"
+-- TODO: L["RESET_ALL_POSITIONS"] = "Reset All Positions"
+-- TODO: L["RESET_ALL_POSITIONS_DESC"] = "Reset all modules to their initial free placement positions"
+-- TODO: L["ANCHOR_POINT"] = "Anchor Point"
+-- TODO: L["X_POSITION"] = "X Position"
+-- TODO: L["RESET_POSITION"] = "Reset Position"
+-- TODO: L["RESET_POSITION_DESC"] = "Reset to the anchored position"
+-- TODO: L["RECAPTURE_INITIAL_POSITIONS"] = "Re-capture initial positions"
+-- TODO: L["RECAPTURE_INITIAL_POSITIONS_DESC"] = "Capture the current anchored positions as the new initial free placement positions"
 
 -- Positioning Options
 L["BAR_WIDTH"] = "Leistenbreite"
@@ -75,7 +77,7 @@ L["TEXT_STYLE"] = "Schriftstil"
 -- Text Colors
 L["COLORS"] = "Farben"
 L["TEXT_COLORS"] = "Textfarben"
-L["NORMAL"] = "Normal"
+-- TODO: L["NORMAL"] = "Normal"
 L["INACTIVE"] = "Inaktiv"
 L["USE_CLASS_COLOR_TEXT"] = "Benutzt Klassenfarben für Texte"
 L["USE_CLASS_COLOR_TEXT_DESC"] = "Nur die Transparenz kann mit dem Farbwerkzeug gesetzt werden"
@@ -112,7 +114,7 @@ L["SHOW_GUILD_BUTTON"] = "Zeigt Gilden Taste"
 L["SHOW_SOCIAL_BUTTON"] = "Zeigt Freunde Taste"
 L["SHOW_CHARACTER_BUTTON"] = "Zeigt Charakter Taste"
 L["SHOW_SPELLBOOK_BUTTON"] = "Zeigt Zauberbuch Taste"
-L["SHOW_PROFESSIONS_BUTTON"] = "Zeigt " .. PROFESSIONS_BUTTON .. " Taste"
+L["SHOW_PROFESSIONS_BUTTON"] = "Zeigt " .. professionsButtonLabel .. " Taste"
 L["SHOW_TALENTS_BUTTON"] = "Zeigt Talente Taste"
 L["SHOW_ACHIEVEMENTS_BUTTON"] = "Zeigt Erfolge Taste"
 L["SHOW_QUESTS_BUTTON"] = "Zeigt Quests Taste"
@@ -124,9 +126,9 @@ L["SHOW_SHOP_BUTTON"] = "Zeigt Shop Taste"
 L["SHOW_HELP_BUTTON"] = "Zeigt Hilfe Taste"
 L["SHOW_HOUSING_BUTTON"] = "Zeigt Housing Taste"
 L["NO_INFO"] = "Keine Informationen"
-L["Alliance"] = FACTION_ALLIANCE
-L["Horde"] = FACTION_HORDE
-L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat" -- TODO: To Translate
+-- TODO: L["Alliance"] = FACTION_ALLIANCE
+-- TODO: L["Horde"] = FACTION_HORDE
+-- TODO: L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat"
 
 L["DURABILITY_WARNING_THRESHOLD"] = "Haltbarkeitswarnschwelle"
 L["SHOW_ITEM_LEVEL"] = "Gegenstandsstufe anzeigen"
@@ -154,7 +156,7 @@ L["CUSTOM"] = "Benutzerdefiniert"
 L["CUSTOM_TEXTURE"] = "Benutzerdefinierte Textur"
 L["HIDE_REST_ICON_MAX_LEVEL"] = "Verstecken auf Max Stufe"
 L["TEXTURE_SIZE"] = "Texturgröße"
-L["POSITION"] = "Position"
+-- TODO: L["POSITION"] = "Position"
 L["CUSTOM_TEXTURE_COLOR"] = "Benutzerdefinierte Farbe"
 L["COLOR"] = "Farbe"
 
@@ -173,18 +175,18 @@ L["SHORTEN_GOLD"] = "Gold abkürzen"
 L["TOGGLE_BAGS"] = "Taschen anzeigen"
 L["SESSION_TOTAL"] = "Sitzung total"
 L["DAILY_TOTAL"] = "Heute total"
-L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price" -- TODO: To Translate
-L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold" -- TODO: To Translate
+-- TODO: L["SHOW_TOKEN_PRICE"] = "Show " .. TOKEN_FILTER_LABEL .. " Price"
+-- TODO: L["SHOW_WARBAND_BANK_GOLD"] = "Show " .. ACCOUNT_BANK_PANEL_TITLE .. " Gold"
 L["GOLD_ROUNDED_VALUES"] = "Gold runden"
-L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold" -- TODO: To Translate
-L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold" -- TODO: To Translate
+-- TODO: L["HIDE_CHAR_UNDER_THRESHOLD"] = "Hide Characters Under Threshold"
+-- TODO: L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Threshold"
 
 -- Currency
 L["SHOW_XP_BAR_BELOW_MAX_LEVEL"] = "Erfahrungsleiste unter Levelcap anzeigen"
 L["CLASS_COLORS_XP_BAR"] = "Klassenfarbe für Erfahrungsleiste benutzen"
 L["SHOW_TOOLTIPS"] = "Tooltips anzeigen"
 L["TEXT_ON_RIGHT"] = "Text auf der rechten Seite"
-L["BAR_CURRENCY_SELECT"] = "Currencies displayed on the bar" -- TODO: To Translate
+-- TODO: L["BAR_CURRENCY_SELECT"] = "Currencies displayed on the bar"
 L["FIRST_CURRENCY"] = "Währung #1"
 L["SECOND_CURRENCY"] = "Währung #2"
 L["THIRD_CURRENCY"] = "Währung #3"
@@ -212,15 +214,15 @@ L["OPEN_REPUTATION"] = "Öffne " .. REPUTATION
 L["PARAGON_REWARD_AVAILABLE"] = "Paragonbelohnung verfügbar"
 L["CLASS_COLORS_REPUTATION"] = "Klassenfarben für die Rufleiste verwenden"
 L["REPUTATION_COLORS_REPUTATION"] = "Verwendet Ruffarben für die Rufleiste."
-L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation" -- TODO: To Translate
+-- TODO: L["SHOW_LAST_REPUTATION_GAINED"] = "Show last gained reputation"
 L["FLASH_PARAGON_REWARD"] = "Aufblitzen bei Paragonbelohnung"
 L["PROGRESS"] = "Fortschritt"
 L["RANK"] = "Rang"
-L["PARAGON"] = "Paragon" -- No Translate needed
+-- TODO: L["PARAGON"] = "Paragon"
 
 -- Tradeskills
 L["USE_CLASS_COLORS"] = "Klassenfarben benutzen"
-L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip" -- TODO: To Translate
+-- TODO: L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip"
 L["COOLDOWNS"] = "Abklingzeiten"
 L["TOGGLE_PROFESSION_FRAME"] = "Berufsfenster anzeigen"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Zauberbuch für Berufe anzeigen"
@@ -230,15 +232,18 @@ L["SET_LOADOUT"] = "Konfiguration auswählen"
 L["SET_LOOT_SPECIALIZATION"] = "Beute Spezialisierung auswählen"
 L["CURRENT_SPECIALIZATION"] = "Aktuelle Spezialisierung"
 L["CURRENT_LOOT_SPECIALIZATION"] = "Aktuelle Beute Spezialisierung"
+-- TODO: L["ENABLE_LOADOUT_SWITCHER"] = "Enable Loadout Switcher"
 L["TALENT_MINIMUM_WIDTH"] = "Minimale Breite für Talente"
 L["OPEN_ARTIFACT"] = "Artefakt öffen"
 L["REMAINING"] = "Verbleibend"
+-- TODO: L["KILLS_TO_LEVEL"] = "Kills to level"
+-- TODO: L["LAST_XP_GAIN"] = "Last xp gain"
 L["AVAILABLE_RANKS"] = "Verfügbare Ränge"
 L["ARTIFACT_KNOWLEDGE"] = "Artefaktwissen"
 
 L["SHOW_BUTTON_TEXT"] = "Zeige Tastentext"
 
--- Travel (Translation needed)
+-- Travel
 L["HEARTHSTONE"] = "Ruhestein"
 L["M_PLUS_TELEPORTS"] = "M+ Teleporter"
 L["ONLY_SHOW_CURRENT_SEASON"] = "Zeige nur aktuelle Season"
@@ -246,8 +251,8 @@ L["MYTHIC_PLUS_TELEPORTS"] = "Mythisch+ Teleporter"
 L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "M+ Teleportertext ausblenden"
 L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Zeige Mythisch+ Teleporter"
 L["USE_RANDOM_HEARTHSTONE"] = "Nutze zufälligen Ruhestein"
-local retrievingData = "Daten werden abgerufen..."
-L["RETRIEVING_DATA"] = retrievingData
+local retrievingData = "Retrieving data..."
+-- TODO: L["RETRIEVING_DATA"] = retrievingData
 L["EMPTY_HEARTHSTONES_LIST"] = "Wenn du '" .. retrievingData .. "' in der Liste unten siehst, wechsle einfach den Tab oder öffne dieses Menü erneut, um die Daten zu aktualisieren."
 L["HEARTHSTONES_SELECT"] = "Ruhesteine auswählen"
 L["HEARTHSTONES_SELECT_DESC"] = "Ruhesteinauswahl Beschreibung"
@@ -266,13 +271,13 @@ L["HIDE_BUTTON_DURING_OFF_SEASON"] = "Versteckt Taste ausserhalb der Saeson"
 L["HOME"] = "Zuhause"
 L["UNKNOWN_HOUSE"] = "Unbekanntes Haus"
 L["HOUSE"] = "Haus"
-L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
+-- TODO: L["PLOT"] = NEIGHBORHOOD_ROSTER_COLUMN_TITLE_PLOT
 L["SELECTED"] = "Ausgewählt"
 L["CHANGE_HOME"] = "Ändere Zuhause"
 L["NO_HOUSES_OWNED"] = "Kein eigenenes Haus"
 L["VISIT_SELECTED_HOME"] = "Besuche ausgewähltes Haus"
 
-L["CLASSIC"] = "Classic" -- No Translate needed
+-- TODO: L["CLASSIC"] = "Classic"
 L["Burning Crusade"] = true -- No Translate needed
 L["Wrath of the Lich King"] = true -- No Translate needed
 L["Cataclysm"] = true -- No Translate needed
@@ -299,14 +304,14 @@ L["PROFILE_IMPORTED_SUCCESSFULLY_AS"] = "Profil erfolgreich importiert als"
 L["COPY_EXPORT_STRING"] = "Kopiere die unten stehende Exportzeichenfolge:"
 L["PASTE_IMPORT_STRING"] = "Füge die Importzeichenfolge unten ein:"
 L["IMPORT_EXPORT_PROFILES_DESC"] = "Importiere oder Exportiere Deine Profile, um sie mit anderen Spielern zu teilen."
-L["PROFILE_IMPORT_EXPORT"] = "Profile Import/Export" -- No Translate needed
+-- TODO: L["PROFILE_IMPORT_EXPORT"] = "Profile Import/Export"
 L["EXPORT_PROFILE"] = "Profil Exportieren"
 L["EXPORT_PROFILE_DESC"] = "Exportiere Ihre aktuellen Profileinstellungen"
 L["IMPORT_PROFILE"] = "Profil Importieren"
 L["IMPORT_PROFILE_DESC"] = "Importiere ein Profil von einem anderen Spieler"
 
 -- Changelog
-L["DATE_FORMAT"] = "%month%-%day%-%year%" -- No Translate needed
+-- TODO: L["DATE_FORMAT"] = "%month%-%day%-%year%"
 L["IMPORTANT"] = "Wichtig"
 L["NEW"] = "Neu"
 L["IMPROVEMENT"] = "Verbesserung"
