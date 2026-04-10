@@ -175,8 +175,8 @@ L["SHORTEN_GOLD"] = "Raccourcir le montant d'or"
 L["TOGGLE_BAGS"] = "Ouvrir/Fermer les sacs"
 L["SESSION_TOTAL"] = "Total sur la session"
 L["DAILY_TOTAL"] = "Total quotidien"
-L["SHOW_TOKEN_PRICE"] = "Afficher le prix d'un " .. TOKEN_FILTER_LABEL
-L["SHOW_WARBAND_BANK_GOLD"] = "Afficher l'or de la " .. ACCOUNT_BANK_PANEL_TITLE
+L["SHOW_TOKEN_PRICE"] = "Afficher le prix d'un " .. TOKEN_FILTER_LABEL -- TODO: "Show Token Price"
+L["SHOW_WARBAND_BANK_GOLD"] = "Afficher l'or de la " .. ACCOUNT_BANK_PANEL_TITLE -- TODO: "Show Bank Gold"
 L["GOLD_ROUNDED_VALUES"] = "Valeurs arrondies à l'or"
 L["HIDE_CHAR_UNDER_THRESHOLD"] = "Masquer les personnages sous le seuil"
 L["HIDE_CHAR_UNDER_THRESHOLD_AMOUNT"] = "Seuil"
@@ -319,5 +319,5 @@ L["BUGFIX"] = "Corrections de bugs"
 L["CHANGELOG"] = "Historique de modifications"
 
 -- Vault Module
-L["GREAT_VAULT_DISABLED"] = DELVES_GREAT_VAULT_LABEL .. " est actuellement désactivée jusqu'au début de la prochaine saison."
+L["GREAT_VAULT_DISABLED"] = DELVES_GREAT_VAULT_LABEL .. " est actuellement désactivée jusqu'au début de la prochaine saison." -- TODO: "The Great Vault is currently disabled until the next season starts."
 L["MAX_LEVEL_DISCLAIMER"] = "Ce module ne s'affichera que lorsque vous atteindrez le niveau maximum."
