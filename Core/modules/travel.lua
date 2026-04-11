@@ -195,7 +195,8 @@ function TravelModule:OnInitialize()
             263489, -- Naaru's Embrace (Retail)
             260221, -- Naaru's Embrace (Classic)
             184871, -- Dark Portal (Classic)
-            206195 -- Path of the Naaru
+            206195, -- Path of the Naaru
+            257736, -- Lightcalled Hearthstone
         }
     end
 
