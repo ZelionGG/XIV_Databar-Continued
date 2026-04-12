@@ -1739,6 +1739,7 @@ function TravelModule:Refresh()
         local hearthButtonWidth = hideHearthText and iconSize or (hearthTextWidth + iconSize + db.general.barPadding)
 
         self.hearthButton:SetSize(hearthButtonWidth, xb:GetHeight())
+        self.hearthButton:ClearAllPoints()
         self.hearthButton:SetPoint("RIGHT")
 
         self.hearthText:SetPoint("RIGHT")
@@ -1788,6 +1789,7 @@ function TravelModule:Refresh()
             parentPoint, relPoint, xOff = "RIGHT", "RIGHT", 0  -- Stick to the right
         end
 
+        self.portButton:ClearAllPoints()
         self.portButton:SetPoint(parentPoint, parent, relPoint, xOff, 0)
 
         self.portText:SetPoint("RIGHT")
@@ -1843,10 +1845,12 @@ function TravelModule:Refresh()
 
             if hideMythicText then
                 self.mythicButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
+                self.mythicButton:ClearAllPoints()
                 self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicIcon:SetPoint("RIGHT", self.mythicButton, "RIGHT", 0, 0)
             else
                 self.mythicButton:SetSize(self.mythicText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
+                self.mythicButton:ClearAllPoints()
                 self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicText:SetPoint("RIGHT")
                 self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT", -(db.general.barPadding) + 5, 0)
@@ -1878,11 +1882,13 @@ function TravelModule:Refresh()
         end
 
         self.homeButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
+        self.homeButton:ClearAllPoints()
         self.homeButton:SetPoint(homeParentPoint, homeParentFrame, homeRelPoint,
                                  homeXOff, 0)
 
         self.homeIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\house_tp')
         self.homeIcon:SetSize(iconSize, iconSize)
+        self.homeIcon:ClearAllPoints()
         self.homeIcon:SetPoint("RIGHT", self.homeButton, "RIGHT", 0, 0)
 
         self:SetHomeColor()
@@ -1935,25 +1941,20 @@ function TravelModule:Refresh()
     end
 
     local totalWidth, hasPrev = 0, false
-    if self.hearthButton:IsVisible() then
-        totalWidth = totalWidth + self.hearthButton:GetWidth()
-        hasPrev = true
-    end
-    if self.portButton:IsVisible() then
+    local function AddShownButtonWidth(button)
+        if not button or not button:IsShown() then
+            return
+        end
+
         if hasPrev then totalWidth = totalWidth + db.general.barPadding end
-        totalWidth = totalWidth + self.portButton:GetWidth()
+        totalWidth = totalWidth + button:GetWidth()
         hasPrev = true
     end
 
-    if allowMythic and self.mythicButton and self.mythicButton:IsVisible() then
-        if hasPrev then totalWidth = totalWidth + db.general.barPadding end
-        totalWidth = totalWidth + self.mythicButton:GetWidth()
-        hasPrev = true
-    end
-    if compat.isMainline and self.homeButton and self.homeButton:IsVisible() then
-        if hasPrev then totalWidth = totalWidth + db.general.barPadding end
-        totalWidth = totalWidth + self.homeButton:GetWidth()
-    end
+    AddShownButtonWidth(self.hearthButton)
+    AddShownButtonWidth(self.portButton)
+    if allowMythic then AddShownButtonWidth(self.mythicButton) end
+    if compat.isMainline then AddShownButtonWidth(self.homeButton) end
 
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
 
