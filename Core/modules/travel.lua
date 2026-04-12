@@ -1653,10 +1653,7 @@ function TravelModule:Refresh()
     end
 
     if not xb.db.profile.randomizeHs then
-        -- Heartstone Randomizer
-        self.hearthButton:SetScript('PreClick', function()
-            -- end
-        end)
+        self.hearthButton:SetScript('PreClick', nil)
     else
         self.hearthButton:SetScript('PreClick', function()
             TravelModule:SetHearthColor()

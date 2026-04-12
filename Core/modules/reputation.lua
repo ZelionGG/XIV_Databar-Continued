@@ -820,7 +820,6 @@ function ReputationModule:RegisterFrameEvents()
     end
     self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
     self:RegisterEvent('QUEST_TURNED_IN', 'Refresh')
-    -- self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
     -- Refresh when currency frame visibility/width changes so we can re-anchor cleanly
     self:RegisterMessage('XIVBar_CurrencyFrameUpdated', 'Refresh')
