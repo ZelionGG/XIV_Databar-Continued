@@ -239,9 +239,6 @@ function CurrencyModule:Refresh()
             self.xpText:SetFont(xb:GetFont(db.text.fontSize))
             self.xpText:SetTextColor(xb:GetColor('normal'))
             self.xpText:SetText(string.upper(LEVEL .. ' ' .. UnitLevel("player") .. ' ' .. UnitClass('player')))
-        else
-            self.xpFrame:Hide()
-            self.moduleIconFrame:Hide()
         end
         return
     end
@@ -308,10 +305,12 @@ function CurrencyModule:Refresh()
             local icon = xb.constants.mediaPath .. 'datatexts\\garres'
             self.moduleIcon:SetTexture(icon)
             self.moduleIcon:SetSize(iconSize, iconSize)
+            self.moduleIcon:ClearAllPoints()
             self.moduleIcon:SetPoint('RIGHT')
             local mr, mg, mb = xb:GetColor('normal')
             self.moduleIcon:SetVertexColor(mr, mg, mb, 1)
             self.moduleIconFrame:SetSize(iconSize, xb:GetHeight())
+            self.moduleIconFrame:ClearAllPoints()
             self.moduleIconFrame:SetPoint('RIGHT', self.currencyFrame, 'RIGHT', 0, 0)
             self.moduleIconFrame:Show()
             self.currencyFrame:SetSize(iconSize, xb:GetHeight())
@@ -328,6 +327,7 @@ function CurrencyModule:Refresh()
                                                          buttonIndex)
                     if width > 0 then
                         iconsWidth = iconsWidth + width
+                        self.curButtons[buttonIndex]:ClearAllPoints()
                         if buttonIndex == 1 then
                             self.curButtons[1]:SetPoint('RIGHT')
                         elseif buttonIndex == 2 then
@@ -343,6 +343,7 @@ function CurrencyModule:Refresh()
                     local name, count, _, currencyID = GetBackpackCurrencyInfo(i)
                     if name then
                         iconsWidth = iconsWidth + self:StyleCurrencyFrame(currencyID, count, i)
+                        self.curButtons[i]:ClearAllPoints()
                         if i == 1 then
                             self.curButtons[1]:SetPoint('RIGHT')
                         elseif i == 2 then
