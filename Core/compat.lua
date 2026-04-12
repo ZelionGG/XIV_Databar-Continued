@@ -246,5 +246,8 @@ compat.features = {
     currency = {
         -- No currencies in Classic Era/TBC, we only keep the XP bar
         available = not compat.isClassicOrTBC,
+    },
+    travel = {
+        secondaryPorts = compat.isMainline,
     }
 }

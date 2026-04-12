@@ -8,6 +8,10 @@ local SystemModule = xb:NewModule("SystemModule", 'AceEvent-3.0', 'AceHook-3.0')
 local GetNumAddOns = C_AddOns.GetNumAddOns
 local GetAddOnInfo = C_AddOns.GetAddOnInfo
 
+local function IsUsableAnchor(frame)
+    return frame and frame:IsShown() and frame:GetWidth() > 0
+end
+
 function SystemModule:GetName()
     return SYSTEMOPTIONS_MENU;
 end
@@ -127,9 +131,10 @@ function SystemModule:Refresh()
     -- spacing toward gold: use configured module spacing
     local xOffset = db.general.moduleSpacing - 5
     local parentFrame = xb:GetFrame('goldFrame');
-    if not xb.db.profile.modules.gold.enabled then
-        if xb.db.profile.modules.travel.enabled then
-            parentFrame = xb:GetFrame('travelFrame');
+    if not xb.db.profile.modules.gold.enabled or not IsUsableAnchor(parentFrame) then
+        local travelFrame = xb:GetFrame('travelFrame');
+        if xb.db.profile.modules.travel.enabled and IsUsableAnchor(travelFrame) then
+            parentFrame = travelFrame;
         else
             relativeAnchorPoint = 'RIGHT'
             xOffset = 15
@@ -257,13 +262,13 @@ function SystemModule:RegisterFrameEvents()
     end)
 
     self:RegisterMessage('XIVBar_FrameHide', function(_, name)
-        if name == 'goldFrame' then
+        if name == 'goldFrame' or name == 'travelFrame' then
             self:Refresh()
         end
     end)
 
     self:RegisterMessage('XIVBar_FrameShow', function(_, name)
-        if name == 'goldFrame' then
+        if name == 'goldFrame' or name == 'travelFrame' then
             self:Refresh()
         end
     end)

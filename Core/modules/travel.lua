@@ -47,6 +47,10 @@ local function BuildMacro(id, name)
     return "/cast " .. name
 end
 
+local function SupportsSecondaryPorts()
+    return compat.features and compat.features.travel and compat.features.travel.secondaryPorts
+end
+
 --------------------------------------------------------------------------------
 -- UTILITY FUNCTIONS - Centralized logic to reduce code duplication
 --------------------------------------------------------------------------------
@@ -1662,14 +1666,17 @@ function TravelModule:Refresh()
 
     local db = xb.db.profile
     local allowMythic = compat.isMainline and db.enableMythicPortals
+    local supportsSecondaryPorts = SupportsSecondaryPorts()
     local currentSeason = self:GetCurrentSeason()
     if db.hideMythicInOffSeason and not currentSeason then
         allowMythic = false
     end
 
-    self:UpdatePortOptions()
+    if supportsSecondaryPorts then
+        self:UpdatePortOptions()
+    end
     local hasPortOptions = false
-    if self.portOptions then
+    if supportsSecondaryPorts and self.portOptions then
         for _, option in pairs(self.portOptions) do
             if option and option.portId and self:IsUsable(option.portId) then
                 hasPortOptions = true
@@ -1701,19 +1708,23 @@ function TravelModule:Refresh()
         if not select(1, self.hearthText:GetFont()) then
             self.hearthText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
         end
-        if not select(1, self.portText:GetFont()) then
+        if supportsSecondaryPorts and not select(1, self.portText:GetFont()) then
             self.portText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
         end
 
         self.hearthText:SetText(hideHearthText and '' or GetBindLocation())
         self.hearthText:SetShown(not hideHearthText)
 
-        local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
-        local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
-        self.portText:SetText(hidePortText and '' or combatPortText)
-        self.portText:SetShown(not hidePortText)
+        if supportsSecondaryPorts then
+            local combatPortItem = xb.db.char.portItem or self:FindFirstOption()
+            local combatPortText = combatPortItem and (combatPortItem.text or GetPortLabel(combatPortItem.portId)) or ''
+            self.portText:SetText(hidePortText and '' or combatPortText)
+            self.portText:SetShown(not hidePortText)
+        end
         self:SetHearthColor()
-        self:SetPortColor()
+        if supportsSecondaryPorts then
+            self:SetPortColor()
+        end
         if allowMythic then
             self:SetMythicColor()
         end
@@ -1949,11 +1960,16 @@ function TravelModule:Refresh()
     end
 
     AddShownButtonWidth(self.hearthButton)
-    AddShownButtonWidth(self.portButton)
+    if supportsSecondaryPorts then AddShownButtonWidth(self.portButton) end
     if allowMythic then AddShownButtonWidth(self.mythicButton) end
     if compat.isMainline then AddShownButtonWidth(self.homeButton) end
 
     self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
+
+    if totalWidth <= 0 then
+        self.hearthFrame:Hide()
+        return
+    end
 
     if xb:ApplyModuleFreePlacement('travel', self.hearthFrame) then
         self.hearthFrame:Show()
@@ -2204,6 +2220,7 @@ function TravelModule:GetConfig()
                 name = L["HIDE_PORT_BUTTON"],
                 order = 14,
                 type = "toggle",
+                hidden = function() return not SupportsSecondaryPorts() end,
                 get = function()
                     return xb.db.profile.hidePortButton;
                 end,
@@ -2217,6 +2234,7 @@ function TravelModule:GetConfig()
                 name = L["HIDE_PORT_TEXT"],
                 order = 14.5,
                 type = "toggle",
+                hidden = function() return not SupportsSecondaryPorts() end,
                 get = function()
                     return xb.db.profile.hidePortText;
                 end,

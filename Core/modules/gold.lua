@@ -9,6 +9,10 @@ local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
 local negativeSign = "|cffff0000- "
 
+local function IsUsableAnchor(frame)
+    return frame and frame:IsShown() and frame:GetWidth() > 0
+end
+
 local function shortenNumber(num)
     if num < 1000 then
         return tostring(num)
@@ -301,7 +305,7 @@ function GoldModule:Refresh()
     local relativeAnchorPoint = 'LEFT'
     local xOffset = db.general.moduleSpacing
     local parentFrame = xb:GetFrame('travelFrame')
-    if not xb.db.profile.modules.travel.enabled then
+    if not xb.db.profile.modules.travel.enabled or not IsUsableAnchor(parentFrame) then
         parentFrame = self.goldFrame:GetParent()
         relativeAnchorPoint = 'RIGHT'
         xOffset = 5
