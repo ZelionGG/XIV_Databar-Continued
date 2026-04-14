@@ -599,10 +599,13 @@ function TravelModule:UpdatePortOptions()
             end
         else
             if not self.portOptions[18960] then
-                self.portOptions[18960] = {
-                    portId = 18960,
-                    text = C_Map.GetMapInfo(1471).name
-                }
+                local mapInfo = C_Map.GetMapInfo(1471)
+                if mapInfo and mapInfo.name then
+                    self.portOptions[18960] = {
+                        portId = 18960,
+                        text = mapInfo.name
+                    }
+                end
             end
         end
     end
@@ -616,10 +619,12 @@ function TravelModule:UpdatePortOptions()
 
     if xb.constants.playerClass == 'SHAMAN' and not self.portOptions[556] then
         local spellInfo = GetSpellInfo(556)
-        self.portOptions[556] = {
-            portId = 556,
-            text = spellInfo.name
-        }
+        if spellInfo and spellInfo.name then
+            self.portOptions[556] = {
+                portId = 556,
+                text = spellInfo.name
+            }
+        end
     end
 
     if xb.constants.playerClass == 'MAGE' and not self.portOptions[193759] then
@@ -628,13 +633,17 @@ function TravelModule:UpdatePortOptions()
 
     if xb.constants.playerClass == 'MONK' and not self.portOptions[126892] then
         local spellInfo = GetSpellInfo(126892)
-        self.portOptions[126892] = {portId = 126892, text = spellInfo.name}
+        if spellInfo and spellInfo.name then
+            self.portOptions[126892] = {portId = 126892, text = spellInfo.name}
+        end
     end
 
     local _, race = UnitRace("player")
     if(race == "Harronir") and not self.portOptions[1238686] then
         local spellInfo = GetSpellInfo(1238686)
-        self.portOptions[1238686] = {portId = 1238686, text = spellInfo.name}
+        if spellInfo and spellInfo.name then
+            self.portOptions[1238686] = {portId = 1238686, text = spellInfo.name}
+        end
     end
 end
 
