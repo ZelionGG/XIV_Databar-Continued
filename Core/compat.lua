@@ -248,6 +248,6 @@ compat.features = {
         available = not compat.isClassicOrTBC,
     },
     travel = {
-        secondaryPorts = compat.isMainline,
+        secondaryPorts = compat.isMainline or compat.isMists,
     }
 }
