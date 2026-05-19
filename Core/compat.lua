@@ -155,16 +155,59 @@ end
 
 compat.SendBNetWhisper = TrySendBNetWhisper
 
+local function ResolveLFGMicroButton()
+    return _G.LFDMicroButton or _G.LFGMicroButton
+end
+
+local function ResolvePVPMicroButton()
+    return _G.PVPMicroButton
+end
+
+compat.ResolveLFGMicroButton = ResolveLFGMicroButton
+compat.ResolvePVPMicroButton = ResolvePVPMicroButton
+
+compat.ResolveMicroButton = function(key)
+    if key == 'lfg' then
+        return ResolveLFGMicroButton()
+    elseif key == 'pvp' then
+        return ResolvePVPMicroButton()
+    end
+    return nil
+end
+
+compat.GetMicroButtonMacro = function(key)
+    if key == 'lfg' then
+        return "/click LFDMicroButton\n/click LFGMicroButton"
+    elseif key == 'pvp' then
+        return "/click PVPMicroButton"
+    end
+
+    return nil
+end
+
 -- LFG toggle helper: Retail via PVEFrame, Classic via LFGMinimapFrame.
 -- Falls back to legacy toggles when needed.
 local function TryToggleLFG()
+    if compat.isMists and _G.PVEFrame_ToggleFrame then
+        _G.PVEFrame_ToggleFrame("GroupFinderFrame")
+        return
+    end
+
+    local microButton = ResolveLFGMicroButton()
+    if microButton and microButton.Click then
+        microButton:Click()
+        return
+    end
+
     local lfgFrame = _G.LFGMinimapFrame
     if lfgFrame and lfgFrame.Click then
         lfgFrame:Click()
         return
     end
 
-    if _G.PVEFrame_ToggleFrame then
+    if _G.ToggleLFGParentFrame then
+        _G.ToggleLFGParentFrame()
+    elseif _G.PVEFrame_ToggleFrame then
         _G.PVEFrame_ToggleFrame()
     elseif _G.ToggleLFGFrame then
         _G.ToggleLFGFrame()
@@ -175,6 +218,17 @@ compat.ToggleLFG = TryToggleLFG
 
 -- PVP toggle helper: legacy LFGMinimapFrame button, otherwise modern PVP UI.
 local function TryTogglePVP()
+    if compat.isMists and _G.TogglePVPFrame then
+        _G.TogglePVPFrame()
+        return
+    end
+
+    local microButton = ResolvePVPMicroButton()
+    if microButton and microButton.Click then
+        microButton:Click()
+        return
+    end
+
     local lfgFrame = _G.LFGMinimapFrame
     if lfgFrame and lfgFrame.Click then
         lfgFrame:Click()
