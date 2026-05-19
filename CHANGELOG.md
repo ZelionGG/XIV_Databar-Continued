@@ -1,9 +1,9 @@
 # XIV_Databar Continued
 
-## [5.5.1](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.5.1) (2026-04-23)
+## [5.5.2](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.5.2) (2026-05-20)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.5...5.5.1) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.5.1...5.5.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-### _Retail :_
+### _Classic :_
 
-- 🛠️ _**IMPROVEMENT** -_ TOC update for patch 12.0.5.
+- 🐞 _**BUGFIX** -_ Fixed **Micromenu** LFG and PvP button toggles across Vanilla, TBC Anniversary, and Mists.
