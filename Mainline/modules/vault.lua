@@ -27,6 +27,7 @@ local DEFAULT_WARNING_COLOR = {
 local DEFAULT_FLASH_INTERVAL = 0.75
 local FLASH_UPDATE_INTERVAL = 0.05
 local FLASH_CYCLE_RADIANS = math.pi * 2
+local WEEKLY_REWARDS_CLOSE_REFRESH_DELAY = 0.2
 
 local function GetVaultModuleDb()
     return xb.db.profile.modules.vault
@@ -146,12 +147,15 @@ function VaultModule:OnEnable()
     self.vaultFrame:Show()
     self:RegisterFrameEvents()
     self:RegisterEvent('WEEKLY_REWARDS_UPDATE', 'Refresh')
+    self:RegisterEvent('PLAYER_INTERACTION_MANAGER_FRAME_HIDE', 'HandlePlayerInteractionManagerFrameHide')
     self:Refresh()
 end
 
 -- Disable module and hide its frame.
 function VaultModule:OnDisable()
     self:UnregisterEvent('WEEKLY_REWARDS_UPDATE')
+    self:UnregisterEvent('PLAYER_INTERACTION_MANAGER_FRAME_HIDE')
+    self:CancelDeferredRefresh()
     self:StopFlashTicker()
     self.isMouseOverVault = false
     if self.vaultFrame then
@@ -272,6 +276,31 @@ function VaultModule:StopFlashTicker()
     self.warningFlashTickerInterval = nil
     self.warningFlashStartTime = nil
     self.warningFlashBlend = 1
+end
+
+function VaultModule:CancelDeferredRefresh()
+    if self.pendingRefreshTimer then
+        self.pendingRefreshTimer:Cancel()
+        self.pendingRefreshTimer = nil
+    end
+end
+
+function VaultModule:ScheduleDeferredRefresh(delay)
+    self:CancelDeferredRefresh()
+    self.pendingRefreshTimer = C_Timer.NewTimer(delay or 0, function()
+        self.pendingRefreshTimer = nil
+        if self:IsEnabled() then
+            self:Refresh()
+        end
+    end)
+end
+
+function VaultModule:HandlePlayerInteractionManagerFrameHide(_, interactionType)
+    if interactionType ~= Enum.PlayerInteractionType.WeeklyRewards then
+        return
+    end
+
+    self:ScheduleDeferredRefresh(WEEKLY_REWARDS_CLOSE_REFRESH_DELAY)
 end
 
 function VaultModule:UpdateFlashTicker()
@@ -455,6 +484,7 @@ function VaultModule:OnInitialize()
     self.warningFlashTicker = nil
     self.warningFlashTickerInterval = nil
     self.warningFlashStartTime = nil
+    self.pendingRefreshTimer = nil
     self.isMouseOverVault = false
 end
 
@@ -560,7 +590,7 @@ function VaultModule:Refresh()
     self.vaultFrame:SetSize(width, xb:GetHeight())
     self.text:SetPoint('LEFT', self.icon, 'RIGHT', 5, 0)
     self:UpdateFlashTicker()
-    self:ApplyVisualState(false)
+    self:ApplyVisualState(self.isMouseOverVault)
 
     if xb:ApplyModuleFreePlacement('vault', self.vaultFrame) then
         return
