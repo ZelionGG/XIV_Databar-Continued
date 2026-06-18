@@ -74,18 +74,6 @@ local function HasPendingVaultRewardWarning()
     return C_WeeklyRewards.HasAvailableRewards() == true
 end
 
-local function GetPendingVaultRewardMessage()
-    if not HasPendingVaultRewardWarning() then
-        return nil
-    end
-
-    if C_WeeklyRewards and C_WeeklyRewards.CanClaimRewards and C_WeeklyRewards.CanClaimRewards() then
-        return WEEKLY_REWARDS_CHOOSE_REWARD or DELVES_GREAT_VAULT_LABEL
-    end
-
-    return WEEKLY_REWARDS_RETURN_TO_CLAIM or WEEKLY_REWARDS_CHOOSE_REWARD or DELVES_GREAT_VAULT_LABEL
-end
-
 local function GetFlashInterval()
     local interval = GetVaultModuleDb().warningFlashInterval
     if type(interval) ~= 'number' or interval <= 0 then
@@ -412,10 +400,10 @@ function VaultModule:ShowTooltip()
 
     -- If the Great Vault is not disabled, show the tooltip with progress
     if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
-        local pendingMessage = GetPendingVaultRewardMessage()
-        if pendingMessage then
-            GameTooltip:AddLine('|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t ' .. pendingMessage,
+        if HasPendingVaultRewardWarning() then
+            GameTooltip:AddLine('|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t ' .. WEEKLY_REWARDS_UNCLAIMED_TITLE,
                 GetWarningColorRgb())
+            GameTooltip:AddLine(WEEKLY_REWARDS_UNCLAIMED_TEXT, GetWarningColorRgb())
             if IsWarningFlashEnabled() then
                 local snoozeLabel = L["VAULT_SNOOZE_FLASH"]
                 GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', snoozeLabel, r, g, b, 1, 1, 1)
