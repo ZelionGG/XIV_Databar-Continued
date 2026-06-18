@@ -15,7 +15,16 @@ if git diff --cached --name-only | grep -q '^locales/enUS.lua$'; then
   git diff --cached -- locales/enUS.lua > "$patch"
 
   if [ -s "$patch" ]; then
-    npx tsx scripts/sync-locales.ts --diff "$patch" || exit 1
+    set -- --diff "$patch"
+
+    staged_locales=$(git diff --cached --name-only -- 'locales/*.lua' | grep -v '^locales/enUS.lua$' || true)
+    if [ -n "$staged_locales" ]; then
+      for locale_file in $staged_locales; do
+        set -- "$@" --staged-locale "$locale_file"
+      done
+    fi
+
+    npx tsx scripts/sync-locales.ts "$@" || exit 1
     git add locales/
   fi
 fi

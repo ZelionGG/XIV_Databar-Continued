@@ -17,6 +17,109 @@ local TYPE_ORDER = {
     Enum.WeeklyRewardChestThresholdType.World,
 }
 
+local DEFAULT_WARNING_COLOR = {
+    r = 1,
+    g = 0.82,
+    b = 0,
+    a = 1,
+}
+
+local DEFAULT_FLASH_INTERVAL = 0.75
+local FLASH_UPDATE_INTERVAL = 0.05
+local FLASH_CYCLE_RADIANS = math.pi * 2
+local WEEKLY_REWARDS_CLOSE_REFRESH_DELAY = 0.2
+
+local function GetVaultModuleDb()
+    return xb.db.profile.modules.vault
+end
+
+local function IsRewardAlertEnabled()
+    return GetVaultModuleDb().rewardAlertEnabled ~= false
+end
+
+local function GetWarningColor()
+    local warningColor = GetVaultModuleDb().warningColor or DEFAULT_WARNING_COLOR
+    return warningColor.r or DEFAULT_WARNING_COLOR.r,
+        warningColor.g or DEFAULT_WARNING_COLOR.g,
+        warningColor.b or DEFAULT_WARNING_COLOR.b,
+        warningColor.a or DEFAULT_WARNING_COLOR.a
+end
+
+local function GetWarningColorRgb()
+    local red, green, blue = GetWarningColor()
+    return red, green, blue
+end
+
+local function GetBaseColor(isHover)
+    if isHover then
+        return unpack(xb:HoverColors())
+    end
+
+    return xb:GetColor('normal')
+end
+
+local function HasPendingVaultRewardWarning()
+    if not IsRewardAlertEnabled() then
+        return false
+    end
+
+    if not C_WeeklyRewards or not C_WeeklyRewards.HasAvailableRewards or not C_WeeklyRewards.IsWeeklyChestRetired then
+        return false
+    end
+
+    if C_WeeklyRewards.IsWeeklyChestRetired() then
+        return false
+    end
+
+    return C_WeeklyRewards.HasAvailableRewards() == true
+end
+
+local function GetFlashInterval()
+    local interval = GetVaultModuleDb().warningFlashInterval
+    if type(interval) ~= 'number' or interval <= 0 then
+        return DEFAULT_FLASH_INTERVAL
+    end
+    return interval
+end
+
+local function GetSnoozeDurationSeconds()
+    local minutes = GetVaultModuleDb().warningFlashSnoozeMinutes or 0
+    return math.max(0, minutes) * 60
+end
+
+local function FormatRemainingSnooze(seconds)
+    seconds = math.max(0, math.ceil(seconds or 0))
+    local minutes = math.floor(seconds / 60)
+    local remainder = seconds % 60
+
+    if minutes > 0 and remainder > 0 then
+        return string.format('%dm %02ds', minutes, remainder)
+    end
+
+    if minutes > 0 then
+        return string.format('%dm', minutes)
+    end
+
+    return string.format('%ds', remainder)
+end
+
+local function ShouldShowSnoozeChatMessage()
+    return GetVaultModuleDb().showSnoozeChatMessage ~= false
+end
+
+
+local function IsWarningFlashEnabled()
+    local db = GetVaultModuleDb()
+    return IsRewardAlertEnabled() and db.warningFlashEnabled
+end
+
+local function LerpColor(fromRed, fromGreen, fromBlue, fromAlpha, toRed, toGreen, toBlue, toAlpha, progress)
+    return fromRed + (toRed - fromRed) * progress,
+        fromGreen + (toGreen - fromGreen) * progress,
+        fromBlue + (toBlue - fromBlue) * progress,
+        fromAlpha + (toAlpha - fromAlpha) * progress
+end
+
 -- Enable module, build frames, and refresh layout.
 function VaultModule:OnEnable()
     local db = xb.db.profile
@@ -31,11 +134,18 @@ function VaultModule:OnEnable()
 
     self.vaultFrame:Show()
     self:RegisterFrameEvents()
+    self:RegisterEvent('WEEKLY_REWARDS_UPDATE', 'Refresh')
+    self:RegisterEvent('PLAYER_INTERACTION_MANAGER_FRAME_HIDE', 'HandlePlayerInteractionManagerFrameHide')
     self:Refresh()
 end
 
 -- Disable module and hide its frame.
 function VaultModule:OnDisable()
+    self:UnregisterEvent('WEEKLY_REWARDS_UPDATE')
+    self:UnregisterEvent('PLAYER_INTERACTION_MANAGER_FRAME_HIDE')
+    self:CancelDeferredRefresh()
+    self:StopFlashTicker()
+    self.isMouseOverVault = false
     if self.vaultFrame then
         self.vaultFrame:Hide()
     end
@@ -133,6 +243,146 @@ function VaultModule:GetName()
     return DELVES_GREAT_VAULT_LABEL
 end
 
+function VaultModule:IsWarningFlashSnoozed()
+    return self.warningFlashSnoozeUntil ~= nil and self.warningFlashSnoozeUntil > GetTime()
+end
+
+
+function VaultModule:ShouldFlashWarning()
+    return HasPendingVaultRewardWarning()
+    and IsWarningFlashEnabled()
+        and not self:IsWarningFlashSnoozed()
+        and self.vaultFrame
+        and self.vaultFrame:IsShown()
+end
+
+function VaultModule:StopFlashTicker()
+    if self.warningFlashTicker then
+        self.warningFlashTicker:Cancel()
+        self.warningFlashTicker = nil
+    end
+    self.warningFlashTickerInterval = nil
+    self.warningFlashStartTime = nil
+    self.warningFlashBlend = 1
+end
+
+function VaultModule:CancelDeferredRefresh()
+    if self.pendingRefreshTimer then
+        self.pendingRefreshTimer:Cancel()
+        self.pendingRefreshTimer = nil
+    end
+end
+
+function VaultModule:ScheduleDeferredRefresh(delay)
+    self:CancelDeferredRefresh()
+    self.pendingRefreshTimer = C_Timer.NewTimer(delay or 0, function()
+        self.pendingRefreshTimer = nil
+        if self:IsEnabled() then
+            self:Refresh()
+        end
+    end)
+end
+
+function VaultModule:HandlePlayerInteractionManagerFrameHide(_, interactionType)
+    if interactionType ~= Enum.PlayerInteractionType.WeeklyRewards then
+        return
+    end
+
+    self:ScheduleDeferredRefresh(WEEKLY_REWARDS_CLOSE_REFRESH_DELAY)
+end
+
+function VaultModule:UpdateFlashTicker()
+    if not self:ShouldFlashWarning() then
+        self:StopFlashTicker()
+        return
+    end
+
+    local interval = GetFlashInterval()
+    if self.warningFlashTicker and self.warningFlashTickerInterval == interval then
+        return
+    end
+
+    self:StopFlashTicker()
+    self.warningFlashTickerInterval = interval
+    self.warningFlashStartTime = GetTime()
+    self.warningFlashBlend = 1
+    self.warningFlashTicker = C_Timer.NewTicker(FLASH_UPDATE_INTERVAL, function()
+        if not self:ShouldFlashWarning() then
+            self:StopFlashTicker()
+            self:ApplyVisualState(self.isMouseOverVault)
+            return
+        end
+
+        local elapsed = GetTime() - self.warningFlashStartTime
+        local cycleDuration = interval * 2
+        local cycleProgress = (elapsed % cycleDuration) / cycleDuration
+        self.warningFlashBlend = 0.5 + 0.5 * math.cos(cycleProgress * FLASH_CYCLE_RADIANS)
+        self:ApplyVisualState(self.isMouseOverVault)
+    end)
+end
+
+function VaultModule:SnoozeWarningFlash()
+    if not IsWarningFlashEnabled() then
+        return
+    end
+
+    local snoozeSeconds = GetSnoozeDurationSeconds()
+    if snoozeSeconds <= 0 then
+        return
+    end
+
+    local snoozeUntil = GetTime() + snoozeSeconds
+    self.warningFlashSnoozeUntil = snoozeUntil
+    self:UpdateFlashTicker()
+    if ShouldShowSnoozeChatMessage() then
+        local message = L["VAULT_SNOOZE_CHAT_MESSAGE"]
+        local prefix = xb:CreateColorString('XIV Databar Continued:', { r = 0, g = 1, b = 0 })
+        local duration = xb:CreateColorString(FormatRemainingSnooze(snoozeSeconds), { r = 0.4, g = 0.6, b = 1.0 })
+        print(prefix .. ' ' .. string.format(message, duration))
+    end
+    if not self.isMouseOverVault then
+        self:ApplyVisualState(false)
+    end
+
+    C_Timer.After(snoozeSeconds, function()
+        if self.warningFlashSnoozeUntil == snoozeUntil then
+            self.warningFlashSnoozeUntil = nil
+            self:UpdateFlashTicker()
+            if not self.isMouseOverVault then
+                self:ApplyVisualState(false)
+            end
+        end
+    end)
+end
+
+function VaultModule:ApplyVisualState(isHover)
+    if HasPendingVaultRewardWarning() then
+        if self.warningFlashTicker then
+            local normalRed, normalGreen, normalBlue, normalAlpha = GetBaseColor(isHover)
+            local warningRed, warningGreen, warningBlue, warningAlpha = GetWarningColor()
+            local blend = self.warningFlashBlend or 1
+            local red, green, blue, alpha = LerpColor(normalRed, normalGreen, normalBlue, normalAlpha,
+                warningRed, warningGreen, warningBlue, warningAlpha, blend)
+            self.icon:SetVertexColor(red, green, blue, alpha)
+            self.text:SetTextColor(red, green, blue, alpha)
+            return
+        end
+
+        self.icon:SetVertexColor(GetWarningColor())
+        self.text:SetTextColor(GetWarningColor())
+        return
+    end
+
+    if isHover then
+        self.icon:SetVertexColor(unpack(xb:HoverColors()))
+        self.text:SetTextColor(unpack(xb:HoverColors()))
+        return
+    end
+
+    self.icon:SetVertexColor(xb:GetColor('normal'))
+    self.text:SetTextColor(xb:GetColor('normal'))
+end
+
 -- Render the Great Vault tooltip with compact rewards + M+ keystone line.
 function VaultModule:ShowTooltip()
     if not xb.db.profile.modules.vault.showTooltip then return end
@@ -150,12 +400,23 @@ function VaultModule:ShowTooltip()
 
     -- If the Great Vault is not disabled, show the tooltip with progress
     if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
+        if HasPendingVaultRewardWarning() then
+            GameTooltip:AddLine('|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16:16:0:0|t ' .. WEEKLY_REWARDS_UNCLAIMED_TITLE,
+                GetWarningColorRgb())
+            GameTooltip:AddLine(WEEKLY_REWARDS_UNCLAIMED_TEXT, GetWarningColorRgb())
+            if IsWarningFlashEnabled() then
+                local snoozeLabel = L["VAULT_SNOOZE_FLASH"]
+                GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', snoozeLabel, r, g, b, 1, 1, 1)
+            end
+            GameTooltip:AddLine(' ')
+        end
+
         local activitiesByType = CollectActivitiesByType()
         for _, typeId in ipairs(TYPE_ORDER) do
             local label = TYPE_LABELS[typeId]
             local activities = activitiesByType[typeId] or {}
             local summary = BuildSlotSummary(typeId, activities)
-            GameTooltip:AddDoubleLine(label or ' ', summary or (L["None"] or 'None'), r, g, b, 1, 1, 1)
+            GameTooltip:AddDoubleLine(label or ' ', summary or L["None"], r, g, b, 1, 1, 1)
         end
 
         local mapId = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
@@ -181,6 +442,17 @@ function VaultModule:GetDefaultOptions()
         enabled = true,
         showLabel = true,
         showTooltip = true,
+        rewardAlertEnabled = true,
+        showSnoozeChatMessage = true,
+        warningColor = {
+            r = DEFAULT_WARNING_COLOR.r,
+            g = DEFAULT_WARNING_COLOR.g,
+            b = DEFAULT_WARNING_COLOR.b,
+            a = DEFAULT_WARNING_COLOR.a,
+        },
+        warningFlashEnabled = true,
+        warningFlashInterval = DEFAULT_FLASH_INTERVAL,
+        warningFlashSnoozeMinutes = 30,
     }
 end
 
@@ -188,6 +460,20 @@ end
 function VaultModule:OnInitialize()
     self.mediaFolder = xb.constants.mediaPath .. 'vault\\'
     self.iconPath = self.mediaFolder .. 'vault.tga'
+    local moduleDb = GetVaultModuleDb()
+    if moduleDb.rewardAlertEnabled == nil then
+        moduleDb.rewardAlertEnabled = true
+    end
+    if moduleDb.showSnoozeChatMessage == nil then
+        moduleDb.showSnoozeChatMessage = true
+    end
+    self.warningFlashBlend = 1
+    self.warningFlashSnoozeUntil = nil
+    self.warningFlashTicker = nil
+    self.warningFlashTickerInterval = nil
+    self.warningFlashStartTime = nil
+    self.pendingRefreshTimer = nil
+    self.isMouseOverVault = false
 end
 
 -- Pick the anchor frame used to position the vault module.
@@ -220,22 +506,30 @@ end
 -- Register mouse handlers and click behavior.
 function VaultModule:RegisterFrameEvents()
     self.vaultFrame:EnableMouse(true)
-    self.vaultFrame:RegisterForClicks('AnyUp')
+    self.vaultFrame:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 
     self.vaultFrame:SetScript('OnEnter', function()
-        self.icon:SetVertexColor(unpack(xb:HoverColors()))
-        self.text:SetTextColor(unpack(xb:HoverColors()))
+        self.isMouseOverVault = true
+        self:ApplyVisualState(true)
         self:ShowTooltip()
     end)
 
     self.vaultFrame:SetScript('OnLeave', function()
-        self.icon:SetVertexColor(xb:GetColor('normal'))
-        self.text:SetTextColor(xb:GetColor('normal'))
+        self.isMouseOverVault = false
+        self:ApplyVisualState(false)
         GameTooltip:Hide()
     end)
 
     if(not C_WeeklyRewards.IsWeeklyChestRetired()) then
-        self.vaultFrame:SetScript('OnClick', function()
+        self.vaultFrame:SetScript('OnClick', function(_, button)
+            if button == 'RightButton' then
+                self:SnoozeWarningFlash()
+                if self.isMouseOverVault then
+                    self:ShowTooltip()
+                end
+                return
+            end
+
             if not WeeklyRewardsFrame or not WeeklyRewardsFrame:IsShown() then
                 if not C_AddOns.IsAddOnLoaded("Blizzard_WeeklyRewards") then
                     C_AddOns.LoadAddOn("Blizzard_WeeklyRewards")
@@ -257,6 +551,7 @@ function VaultModule:Refresh()
     if not self.vaultFrame then return end
     local db = xb.db.profile
     if not db.modules.vault.enabled then
+        self:StopFlashTicker()
         self:Disable()
         return
     end
@@ -265,10 +560,8 @@ function VaultModule:Refresh()
     self.icon:SetTexture(self.iconPath)
     self.icon:SetSize(iconSize, iconSize)
     self.icon:SetPoint('LEFT')
-    self.icon:SetVertexColor(xb:GetColor('normal'))
 
     self.text:SetFont(xb:GetFont(db.text.fontSize))
-    self.text:SetTextColor(xb:GetColor('normal'))
     if db.modules.vault.showLabel then
         self.text:SetText(DELVES_GREAT_VAULT_LABEL)
         self.text:Show()
@@ -284,6 +577,8 @@ function VaultModule:Refresh()
 
     self.vaultFrame:SetSize(width, xb:GetHeight())
     self.text:SetPoint('LEFT', self.icon, 'RIGHT', 5, 0)
+    self:UpdateFlashTicker()
+    self:ApplyVisualState(self.isMouseOverVault)
 
     if xb:ApplyModuleFreePlacement('vault', self.vaultFrame) then
         return
@@ -356,6 +651,114 @@ function VaultModule:GetConfig()
                     xb.db.profile.modules.vault.showTooltip = val
                     self:Refresh()
                 end
+            },
+            rewardAlertHeader = {
+                order = 4,
+                name = L["VAULT_REWARD_ALERTS"],
+                type = 'header'
+            },
+            rewardAlertEnabled = {
+                name = L["VAULT_ENABLE_REWARD_ALERT"],
+                order = 5,
+                type = 'toggle',
+                width = '1.2',
+                get = function()
+                    return IsRewardAlertEnabled()
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.vault.rewardAlertEnabled = val
+                    self:Refresh()
+                end,
+            },
+            warningColor = {
+                name = L["VAULT_ALERT_COLOR"],
+                order = 6,
+                type = 'color',
+                hasAlpha = true,
+                width = '1.2',
+                disabled = function()
+                    return not IsRewardAlertEnabled()
+                end,
+                get = function()
+                    return GetWarningColor()
+                end,
+                set = function(_, red, green, blue, alpha)
+                    xb.db.profile.modules.vault.warningColor = {
+                        r = red,
+                        g = green,
+                        b = blue,
+                        a = alpha,
+                    }
+                    self:Refresh()
+                end,
+            },
+            warningFlashEnabled = {
+                name = L["VAULT_FLASH_ALERT"],
+                order = 7,
+                type = 'toggle',
+                width = 'full',
+                disabled = function()
+                    return not IsRewardAlertEnabled()
+                end,
+                get = function()
+                    return xb.db.profile.modules.vault.warningFlashEnabled
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.vault.warningFlashEnabled = val
+                    self:Refresh()
+                end,
+            },
+            warningFlashInterval = {
+                name = L["VAULT_FLASH_INTERVAL"],
+                order = 8,
+                type = 'range',
+                min = 0.25,
+                max = 2,
+                step = 0.05,
+                width = 'full',
+                disabled = function()
+                    return not IsWarningFlashEnabled()
+                end,
+                get = function()
+                    return GetFlashInterval()
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.vault.warningFlashInterval = val
+                    self:Refresh()
+                end,
+            },
+            warningFlashSnoozeMinutes = {
+                name = L["VAULT_SNOOZE_MINUTES"],
+                order = 9,
+                type = 'range',
+                min = 1,
+                max = 180,
+                step = 1,
+                width = 'full',
+                disabled = function()
+                    return not IsWarningFlashEnabled()
+                end,
+                get = function()
+                    return xb.db.profile.modules.vault.warningFlashSnoozeMinutes
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.vault.warningFlashSnoozeMinutes = val
+                end,
+            },
+            showSnoozeChatMessage = {
+                name = L["VAULT_SNOOZE_CHAT"],
+                order = 10,
+                type = 'toggle',
+                width = 'full',
+                disabled = function()
+                    return not IsWarningFlashEnabled()
+                end,
+                get = function()
+                    return ShouldShowSnoozeChatMessage()
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.vault.showSnoozeChatMessage = val
+                end,
             },
         }
     }

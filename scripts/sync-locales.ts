@@ -69,6 +69,26 @@ const COMMENT_RE = /^\s*--/;
 const TO_TRANSLATE_RE = /--\s*(?:TODO:\s*)?To Translate\s*$/;
 const NO_TRANSLATE_RE = /--\s*@no-translate\s*$/;
 
+function getMultiArgValues(args: string[], flagName: string): string[] {
+  const values: string[] = [];
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] !== flagName) {
+      continue;
+    }
+
+    const value = args[i + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error(`Missing value for ${flagName}`);
+    }
+
+    values.push(value);
+    i++;
+  }
+
+  return values;
+}
+
 // ── Parsing helpers ────────────────────────────────────────────────────────────
 
 function extractValueString(rawLines: string[]): string {
@@ -353,7 +373,8 @@ function generateLocaleFile(
   baseElements: BaseElement[],
   baseEntries: Map<string, BaseEntry>,
   localeEntries: Map<string, LocaleEntry>,
-  changedBaseKeys: Set<string>
+  changedBaseKeys: Set<string>,
+  skipStaleForLocale: boolean
 ): { content: string; report: LocaleReport } {
   const outputLines: string[] = [];
   const report: LocaleReport = {
@@ -407,7 +428,7 @@ function generateLocaleFile(
     switch (localeEntry.status) {
       case "translated": {
         // If this key's base value changed in the diff, flag the translation as stale
-        if (changedBaseKeys.has(key)) {
+        if (changedBaseKeys.has(key) && !skipStaleForLocale) {
           outputLines.push(...formatStaleEntry(localeEntry, baseValue));
           report.staleKeys.push(key);
         } else {
@@ -434,7 +455,7 @@ function generateLocaleFile(
 
       case "stale-flagged": {
         // Update the TODO marker to the current base value
-        if (localeEntry.todoValue !== baseValue) {
+        if (localeEntry.todoValue !== baseValue && !skipStaleForLocale) {
           outputLines.push(...formatStaleEntry(localeEntry, baseValue));
           report.staleKeys.push(key);
         } else {
@@ -475,7 +496,27 @@ function main(): void {
   }
   const changedBaseKeys = diffPath ? parseBaseDiff(diffPath) : new Set<string>();
 
-  const fileArgs = args.filter((a, i) => !a.startsWith("--") && i !== diffIdx + 1);
+  const stagedLocaleCodes = new Set(
+    getMultiArgValues(args, "--staged-locale").map((filePath) => basename(filePath, ".lua"))
+  );
+
+  const consumedArgIndexes = new Set<number>();
+  if (dryRun) {
+    consumedArgIndexes.add(args.indexOf("--dry-run"));
+  }
+  if (diffIdx !== -1) {
+    consumedArgIndexes.add(diffIdx);
+    consumedArgIndexes.add(diffIdx + 1);
+  }
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--staged-locale") {
+      consumedArgIndexes.add(i);
+      consumedArgIndexes.add(i + 1);
+      i++;
+    }
+  }
+
+  const fileArgs = args.filter((arg, index) => !consumedArgIndexes.has(index) && !arg.startsWith("--"));
 
   const localesDir = join(process.cwd(), "locales");
   const basePath = join(localesDir, "enUS.lua");
@@ -516,7 +557,8 @@ function main(): void {
       baseElements,
       baseEntries,
       entries,
-      changedBaseKeys
+      changedBaseKeys,
+      stagedLocaleCodes.has(localeCode)
     );
 
     reports.push(report);
