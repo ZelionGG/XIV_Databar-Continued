@@ -4,6 +4,8 @@ local _G = _G
 local xb = XIVBar
 local L = XIVBar.L
 local compat = XIVBar.compat or {}
+local C_EquipmentSet = C_EquipmentSet
+local IsAddOnLoaded = (compat and compat.IsAddOnLoaded) or (C_AddOns and C_AddOns.IsAddOnLoaded) or _G.IsAddOnLoaded
 
 local ArmorModule = xb:NewModule("ArmorModule", 'AceEvent-3.0')
 
@@ -11,9 +13,32 @@ function ArmorModule:GetName()
     return AUCTION_CATEGORY_ARMOR
 end
 
+function ArmorModule:SkinFrame(frame, name)
+    if self.useElvUI then
+        if frame.StripTextures then
+            frame:StripTextures()
+        end
+        if frame.SetTemplate then
+            frame:SetTemplate("Transparent")
+        end
+
+        local close = _G[name .. "CloseButton"] or frame.CloseButton
+        if close and close.SetAlpha then
+            if _G.ElvUI then
+                _G.ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+            end
+
+            if _G.Tukui and _G.Tukui[1] and _G.Tukui[1].SkinCloseButton then
+                _G.Tukui[1].SkinCloseButton(close)
+            end
+            close:SetAlpha(1)
+        end
+    end
+end
+
 function ArmorModule:OnInitialize()
     self.iconPath = xb.constants.mediaPath .. 'datatexts\\repair'
-    self.durabilityLowest = 0
+    self.durabilityLowest = nil
     self.durabilityList = {
         [INVSLOT_HEAD] = {cur = 0, max = 0, pc = 0, text = HEADSLOT},
         [INVSLOT_SHOULDER] = {cur = 0, max = 0, pc = 0, text = SHOULDERSLOT},
@@ -32,6 +57,10 @@ function ArmorModule:OnInitialize()
         INVSLOT_MAINHAND, INVSLOT_OFFHAND
     }
     self.MapRects = {}
+    self.extraPadding = (xb.constants.popupPadding * 3)
+    self.optionTextExtra = 4
+    self.equipmentSetButtons = {}
+    self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
 end
 
 function ArmorModule:OnEnable()
@@ -43,12 +72,116 @@ function ArmorModule:OnEnable()
     self:CreateFrames()
     self:RegisterFrameEvents()
     self:RegisterCoordTicker()
+    self:RegisterEvent('UPDATE_INVENTORY_DURABILITY')
+    self:RegisterEvent('PLAYER_EQUIPMENT_CHANGED', 'ScheduleEquipmentRefresh')
+    self:RegisterEvent('EQUIPMENT_SWAP_FINISHED')
+    self:RegisterEvent('UNIT_INVENTORY_CHANGED')
+    self:RegisterEvent('PLAYER_ENTERING_WORLD')
     xb:Refresh()
 end
 
 function ArmorModule:OnDisable()
     self:UnregisterEvent('UPDATE_INVENTORY_DURABILITY')
+    self:UnregisterEvent('PLAYER_EQUIPMENT_CHANGED')
+    self:UnregisterEvent('EQUIPMENT_SWAP_FINISHED')
+    self:UnregisterEvent('UNIT_INVENTORY_CHANGED')
+    self:UnregisterEvent('PLAYER_ENTERING_WORLD')
+    self.equipmentFollowUpToken = (self.equipmentFollowUpToken or 0) + 1
+    self.pendingEquipmentSetID = nil
+    if self.equipmentRefreshTimer then
+        self.equipmentRefreshTimer:Cancel()
+        self.equipmentRefreshTimer = nil
+    end
+    if self.equipmentSetFallbackTimer then
+        self.equipmentSetFallbackTimer:Cancel()
+        self.equipmentSetFallbackTimer = nil
+    end
     self.armorFrame:Hide()
+end
+
+function ArmorModule:RefreshAfterEquipmentChange()
+    self.equipmentFollowUpToken = (self.equipmentFollowUpToken or 0) + 1
+    local token = self.equipmentFollowUpToken
+    local delays = {0, 0.15, 0.4, 0.8, 1.5}
+
+    for _, delay in ipairs(delays) do
+        C_Timer.After(delay, function()
+            if token ~= self.equipmentFollowUpToken or not self:IsEnabled() then
+                return
+            end
+            self:Refresh()
+            if GameTooltip:IsOwned(self.armorFrame) then
+                self:ShowTooltip()
+            end
+        end)
+    end
+end
+
+function ArmorModule:BeginEquipmentSetSwap(setID)
+    self.pendingEquipmentSetID = setID
+
+    if self.equipmentSetFallbackTimer then
+        self.equipmentSetFallbackTimer:Cancel()
+    end
+
+    self.equipmentSetFallbackTimer = C_Timer.NewTimer(2, function()
+        self.equipmentSetFallbackTimer = nil
+        if not self:IsEnabled() or self.pendingEquipmentSetID ~= setID then
+            return
+        end
+        self.pendingEquipmentSetID = nil
+        self:RefreshAfterEquipmentChange()
+    end)
+end
+
+function ArmorModule:EQUIPMENT_SWAP_FINISHED(_, success)
+    if self.equipmentSetFallbackTimer then
+        self.equipmentSetFallbackTimer:Cancel()
+        self.equipmentSetFallbackTimer = nil
+    end
+    self.pendingEquipmentSetID = nil
+
+    if success then
+        self:RefreshAfterEquipmentChange()
+    end
+end
+
+function ArmorModule:ScheduleEquipmentRefresh()
+    if self.pendingEquipmentSetID then
+        return
+    end
+
+    if self.equipmentRefreshTimer then
+        self.equipmentRefreshTimer:Cancel()
+    end
+
+    self.equipmentRefreshTimer = C_Timer.NewTimer(0.15, function()
+        self.equipmentRefreshTimer = nil
+        if self:IsEnabled() then
+            self:Refresh()
+        end
+    end)
+end
+
+function ArmorModule:UNIT_INVENTORY_CHANGED(_, unit)
+    if unit == 'player' then
+        self:ScheduleEquipmentRefresh()
+    end
+end
+
+function ArmorModule:PLAYER_ENTERING_WORLD()
+    C_Timer.After(0.5, function()
+        if self:IsEnabled() then
+            self:Refresh()
+        end
+    end)
+end
+
+function ArmorModule:GetSlotDurability(slotId)
+    if compat.isMainline then
+        return GetInventoryItemDurability(slotId)
+    end
+    return GetInventoryItemDurability('player', slotId)
 end
 
 function ArmorModule:CreateFrames()
@@ -56,29 +189,45 @@ function ArmorModule:CreateFrames()
     self.armorIcon = self.armorIcon or self.armorButton:CreateTexture(nil, 'OVERLAY')
     self.armorText = self.armorText or self.armorButton:CreateFontString(nil, 'OVERLAY')
     self.coordText = self.coordText or self.armorButton:CreateFontString(nil, 'OVERLAY')
+
+    local template = (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or
+                         (BackdropTemplateMixin and "BackdropTemplate")
+    self.equipmentSetPopup = self.equipmentSetPopup or CreateFrame('BUTTON', 'EquipmentSetPopup', self.armorButton, template)
+    self.equipmentSetPopup:SetFrameStrata('TOOLTIP')
+    xb:RegisterMouseoverHoldFrame(self.equipmentSetPopup, true)
+
+    if TooltipBackdropTemplateMixin then
+        self.equipmentSetPopup.layoutType = GameTooltip.layoutType
+        NineSlicePanelMixin.OnLoad(self.equipmentSetPopup.NineSlice)
+
+        if GameTooltip.layoutType then
+            self.equipmentSetPopup.NineSlice:SetCenterColor(GameTooltip.NineSlice:GetCenterColor())
+            self.equipmentSetPopup.NineSlice:SetBorderColor(GameTooltip.NineSlice:GetBorderColor())
+        end
+    else
+        local backdrop = GameTooltip:GetBackdrop()
+        if backdrop then
+            self.equipmentSetPopup:SetBackdrop(backdrop)
+            self.equipmentSetPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+            self.equipmentSetPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+        end
+    end
+
+    self.equipmentSetPopup:Hide()
 end
 
 function ArmorModule:RegisterFrameEvents()
     self.armorButton:EnableMouse(true)
-    self.armorButton:RegisterUnitEvent('UNIT_INVENTORY_CHANGED', 'player')
+    self.armorButton:RegisterForClicks('AnyUp')
 
     self.armorButton:SetScript('OnEnter', function()
         if InCombatLockdown() then
             return
         end
-        ArmorModule:SetArmorColor()
-        GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_' .. xb.miniTextPosition)
-        local r, g, b, _ = unpack(xb:HoverColors())
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. AUCTION_CATEGORY_ARMOR .. "|cFFFFFFFF]|r", r, g, b)
-        GameTooltip:AddLine(" ")
-
-        if compat.isMainline then
-            self:BuildTooltipMainline(r, g, b)
-        else
-            self:BuildTooltipClassic(r, g, b)
+        self:SetArmorColor()
+        if not self.equipmentSetPopup:IsVisible() then
+            self:ShowTooltip()
         end
-
-        GameTooltip:Show()
     end)
 
     self.armorButton:SetScript('OnLeave', function()
@@ -89,9 +238,25 @@ function ArmorModule:RegisterFrameEvents()
         GameTooltip:Hide()
     end)
 
-    self.armorButton:SetScript('OnEvent', function(_, event)
-        if event == 'UNIT_INVENTORY_CHANGED' then
-            self:Refresh()
+    self.armorButton:SetScript('OnClick', function(_, button)
+        GameTooltip:Hide()
+
+        if InCombatLockdown() then
+            return
+        end
+
+        if button == 'LeftButton' then
+            if not self.equipmentSetPopup:IsVisible() then
+                self:CreateEquipmentSetPopup()
+                xb:ShowPopup(self.equipmentSetPopup)
+                self:SetArmorColor()
+            else
+                xb:HidePopup(self.equipmentSetPopup)
+                self:SetArmorColor()
+                if xb:ShouldShowTooltip() then
+                    self:ShowTooltip()
+                end
+            end
         end
     end)
 
@@ -106,8 +271,180 @@ function ArmorModule:RegisterFrameEvents()
             self:Refresh()
         end
     end)
+end
 
-    self:RegisterEvent('UPDATE_INVENTORY_DURABILITY')
+function ArmorModule:CreateEquipmentSetPopup()
+    if not self.equipmentSetPopup then
+        return
+    end
+
+    local db = xb.db.profile
+    local iconSize = db.text.fontSize + db.general.barPadding
+    local popupWidth = self.armorFrame:GetWidth()
+    local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
+    local changedWidth = false
+    local r, g, b, _ = unpack(xb:HoverColors())
+
+    self.equipmentSetOptionString = self.equipmentSetOptionString or self.equipmentSetPopup:CreateFontString(nil, 'OVERLAY')
+    self.equipmentSetOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
+    self.equipmentSetOptionString:SetTextColor(r, g, b, 1)
+    self.equipmentSetOptionString:SetText(L["SET_EQUIPMENT_SET"])
+    self.equipmentSetOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
+    self.equipmentSetOptionString:SetPoint('CENTER')
+
+    for _, button in pairs(self.equipmentSetButtons) do
+        button.isSettable = false
+        button:Hide()
+    end
+
+    local setIDs = {}
+    if C_EquipmentSet and C_EquipmentSet.GetEquipmentSetIDs then
+        setIDs = C_EquipmentSet.GetEquipmentSetIDs() or {}
+    end
+
+    if #setIDs == 0 then
+        local button = self.equipmentSetButtons[1]
+        if button == nil then
+            button = CreateFrame('BUTTON', nil, self.equipmentSetPopup)
+            button.text = button:CreateFontString(nil, 'OVERLAY')
+            self.equipmentSetButtons[1] = button
+        end
+
+        if button.icon then
+            button.icon:Hide()
+        end
+
+        button.text:SetFont(xb:GetFont(db.text.fontSize))
+        button.text:SetTextColor(xb:GetColor('normal'))
+        button.text:SetText(L["NO_EQUIPMENT_SETS"])
+        button.text:ClearAllPoints()
+        button.text:SetPoint('LEFT')
+        button:SetSize(button.text:GetStringWidth(), iconSize)
+        button:EnableMouse(false)
+        button:SetScript('OnEnter', nil)
+        button:SetScript('OnLeave', nil)
+        button:SetScript('OnClick', nil)
+        button.isSettable = true
+        button:Show()
+
+        popupWidth = button.text:GetStringWidth()
+        changedWidth = true
+    else
+        for i, setID in ipairs(setIDs) do
+            local name, iconFileID, equipmentSetID = C_EquipmentSet.GetEquipmentSetInfo(setID)
+            if name then
+                local normalR, normalG, normalB = xb:GetColor('normal')
+                local button = self.equipmentSetButtons[i]
+                if button == nil then
+                    button = CreateFrame('BUTTON', nil, self.equipmentSetPopup)
+                    button.text = button:CreateFontString(nil, 'OVERLAY')
+                    button.icon = button:CreateTexture(nil, 'OVERLAY')
+                    self.equipmentSetButtons[i] = button
+                end
+
+                button.icon = button.icon or button:CreateTexture(nil, 'OVERLAY')
+
+                button.icon:SetTexture(iconFileID)
+                button.icon:SetSize(iconSize, iconSize)
+                button.icon:ClearAllPoints()
+                button.icon:SetPoint('LEFT')
+                button.icon:SetVertexColor(normalR, normalG, normalB)
+                button.icon:Show()
+
+                button.text:SetFont(xb:GetFont(db.text.fontSize))
+                button.text:SetTextColor(normalR, normalG, normalB)
+                button.text:SetText(name)
+                button.text:ClearAllPoints()
+                button.text:SetPoint('LEFT', button.icon, 'RIGHT', 5, 0)
+                local textWidth = iconSize + 5 + button.text:GetStringWidth()
+
+                button:SetID(equipmentSetID)
+                button:SetSize(textWidth, iconSize)
+                button.isSettable = true
+                button:EnableMouse(true)
+                button:RegisterForClicks('AnyUp')
+                button:Show()
+
+                button:SetScript('OnEnter', function()
+                    button.text:SetTextColor(r, g, b, 1)
+                end)
+
+                button:SetScript('OnLeave', function()
+                    button.text:SetTextColor(normalR, normalG, normalB)
+                end)
+
+                button:SetScript('OnClick', function(clickedButton, mouseButton)
+                    if InCombatLockdown() then
+                        return
+                    end
+
+                    if mouseButton == 'LeftButton' then
+                        ArmorModule:BeginEquipmentSetSwap(clickedButton:GetID())
+                        C_EquipmentSet.UseEquipmentSet(clickedButton:GetID())
+                    end
+
+                    xb:HidePopup(ArmorModule.equipmentSetPopup)
+                end)
+
+                if textWidth > popupWidth then
+                    popupWidth = textWidth
+                    changedWidth = true
+                end
+            end
+        end
+    end
+
+    for _, button in pairs(self.equipmentSetButtons) do
+        if button.isSettable then
+            button:SetPoint('LEFT', xb.constants.popupPadding, 0)
+            button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
+            button:SetPoint('RIGHT')
+            popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
+        end
+    end
+
+    if changedWidth then
+        popupWidth = popupWidth + self.extraPadding
+    end
+
+    if popupWidth < self.armorFrame:GetWidth() then
+        popupWidth = self.armorFrame:GetWidth()
+    end
+
+    if popupWidth < (self.equipmentSetOptionString:GetStringWidth() + self.extraPadding) then
+        popupWidth = (self.equipmentSetOptionString:GetStringWidth() + self.extraPadding)
+    end
+
+    self.equipmentSetPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
+    self.equipmentSetPopup:ClearAllPoints()
+    self.equipmentSetPopup:SetPoint(db.general.barPosition, self.armorFrame, xb.miniTextPosition, 0, 0)
+    self:SkinFrame(self.equipmentSetPopup, "SpecToolTip")
+    self.equipmentSetPopup:Hide()
+end
+
+function ArmorModule:ShowTooltip()
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
+
+    self:UpdateDurabilityText()
+
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:SetOwner(self.armorFrame, 'ANCHOR_' .. xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. AUCTION_CATEGORY_ARMOR .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
+
+    if compat.isMainline then
+        self:BuildTooltipMainline(r, g, b)
+    else
+        self:BuildTooltipClassic(r, g, b)
+    end
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["SET_EQUIPMENT_SET"], r, g, b, 1, 1, 1)
+    GameTooltip:Show()
 end
 
 function ArmorModule:BuildTooltipMainline(r, g, b)
@@ -157,16 +494,17 @@ end
 
 function ArmorModule:SetArmorColor()
     local db = xb.db.profile
-    if self.armorButton:IsMouseOver() then
+    local equipmentSetPopupVisible = self.equipmentSetPopup and self.equipmentSetPopup:IsVisible()
+    if self.armorButton:IsMouseOver() and not equipmentSetPopupVisible then
         self.armorText:SetTextColor(unpack(xb:HoverColors()))
         self.coordText:SetTextColor(unpack(xb:HoverColors()))
     else
         self.armorText:SetTextColor(xb:GetColor('normal'))
         self.coordText:SetTextColor(xb:GetColor('normal'))
-        if self.durabilityLowest > db.modules.armor.warningDurability then
-            self.armorIcon:SetVertexColor(xb:GetColor('normal'))
-        else
+        if self.durabilityLowest and self.durabilityLowest <= db.modules.armor.warningDurability then
             self.armorIcon:SetVertexColor(1, 0, 0, 1)
+        else
+            self.armorIcon:SetVertexColor(xb:GetColor('normal'))
         end
     end
 end
@@ -231,7 +569,16 @@ function ArmorModule:Refresh()
 end
 
 function ArmorModule:UPDATE_INVENTORY_DURABILITY()
-    self:Refresh()
+    if not self:IsEnabled() then
+        return
+    end
+
+    self:UpdateDurabilityText()
+    self:SetArmorColor()
+
+    if GameTooltip:IsOwned(self.armorFrame) then
+        self:ShowTooltip()
+    end
 end
 
 function ArmorModule:UpdateDurabilityText()
@@ -240,29 +587,44 @@ function ArmorModule:UpdateDurabilityText()
     local lowest = 101
 
     for _, slotId in ipairs(self.slotOrder) do
-        local curDur, maxDur = GetInventoryItemDurability(slotId)
+        local curDur, maxDur = self:GetSlotDurability(slotId)
         local v = self.durabilityList[slotId]
-        if curDur and maxDur then
+        if curDur and maxDur and maxDur > 0 then
             v.cur = curDur
             v.max = maxDur
             v.pc = math.floor((curDur / maxDur) * 100)
             if v.pc < lowest then
                 lowest = v.pc
             end
+        else
+            v.cur = 0
+            v.max = 0
+            v.pc = 101
         end
     end
 
-    self.durabilityLowest = lowest
-
-    if self.durabilityLowest <= db.warningDurability then
-        text = '|cFFFF0000' .. text .. self.durabilityLowest .. '%|r'
+    if lowest <= 100 then
+        self.durabilityLowest = lowest
     else
-        text = text .. self.durabilityLowest .. '%'
+        self.durabilityLowest = nil
+    end
+
+    if self.durabilityLowest then
+        if self.durabilityLowest <= db.warningDurability then
+            text = '|cFFFF0000' .. self.durabilityLowest .. '%|r'
+        else
+            text = self.durabilityLowest .. '%'
+        end
     end
 
     if db.showIlvl and _G.GetAverageItemLevel then
         local _, equippedIlvl = GetAverageItemLevel()
-        text = text .. ' ' .. math.floor(equippedIlvl) .. ' ilvl'
+        local ilvlText = math.floor(equippedIlvl) .. ' ilvl'
+        if text ~= '' then
+            text = text .. ' ' .. ilvlText
+        else
+            text = ilvlText
+        end
     end
 
     self.armorText:SetText(text)

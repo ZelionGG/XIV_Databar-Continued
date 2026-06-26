@@ -135,6 +135,8 @@ L["DISABLE_TOOLTIPS_IN_COMBAT"] = "Hide Tooltips in Combat"
 L["DURABILITY_WARNING_THRESHOLD"] = "Durability Warning Threshold"
 L["SHOW_ITEM_LEVEL"] = "Show Item Level"
 L["SHOW_COORDINATES"] = "Show Coordinates"
+L["SET_EQUIPMENT_SET"] = "Set Equipment"
+L["NO_EQUIPMENT_SETS"] = "No Equipment Sets"
 
 -- Master Volume
 L["MASTER_VOLUME"] = "Master Volume"
