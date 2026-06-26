@@ -135,6 +135,7 @@ L["SHOW_ITEM_LEVEL"] = "Afficher le niveau d'équipement"
 L["SHOW_COORDINATES"] = "Afficher les coordonnées"
 L["SET_EQUIPMENT_SET"] = "Choix de l'équipement"
 L["NO_EQUIPMENT_SETS"] = "Aucun ensemble d'équipement"
+L["CURRENT_EQUIPMENT_SET"] = "Ensemble d'équipement actif"
 
 -- Master Volume
 L["MASTER_VOLUME"] = "Volume principal"

@@ -137,6 +137,7 @@ L["SHOW_ITEM_LEVEL"] = "Show Item Level"
 L["SHOW_COORDINATES"] = "Show Coordinates"
 L["SET_EQUIPMENT_SET"] = "Set Equipment"
 L["NO_EQUIPMENT_SETS"] = "No Equipment Sets"
+L["CURRENT_EQUIPMENT_SET"] = "Current Set"
 
 -- Master Volume
 L["MASTER_VOLUME"] = "Master Volume"

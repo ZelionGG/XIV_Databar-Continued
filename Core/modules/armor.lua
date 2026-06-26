@@ -184,6 +184,26 @@ function ArmorModule:GetSlotDurability(slotId)
     return GetInventoryItemDurability('player', slotId)
 end
 
+function ArmorModule:GetCurrentEquipmentSet()
+    if not C_EquipmentSet or not C_EquipmentSet.GetEquipmentSetIDs or not C_EquipmentSet.GetEquipmentSetInfo then
+        return nil, nil
+    end
+
+    local setIDs = C_EquipmentSet.GetEquipmentSetIDs()
+    if not setIDs then
+        return nil, nil
+    end
+
+    for _, setID in ipairs(setIDs) do
+        local name, iconFileID, _, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
+        if isEquipped and name then
+            return name, iconFileID
+        end
+    end
+
+    return nil, nil
+end
+
 function ArmorModule:CreateFrames()
     self.armorButton = self.armorButton or CreateFrame('BUTTON', nil, self.armorFrame)
     self.armorIcon = self.armorIcon or self.armorButton:CreateTexture(nil, 'OVERLAY')
@@ -331,7 +351,7 @@ function ArmorModule:CreateEquipmentSetPopup()
         changedWidth = true
     else
         for i, setID in ipairs(setIDs) do
-            local name, iconFileID, equipmentSetID = C_EquipmentSet.GetEquipmentSetInfo(setID)
+            local name, iconFileID, equipmentSetID, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
             if name then
                 local normalR, normalG, normalB = xb:GetColor('normal')
                 local button = self.equipmentSetButtons[i]
@@ -348,43 +368,79 @@ function ArmorModule:CreateEquipmentSetPopup()
                 button.icon:SetSize(iconSize, iconSize)
                 button.icon:ClearAllPoints()
                 button.icon:SetPoint('LEFT')
-                button.icon:SetVertexColor(normalR, normalG, normalB)
+                button.icon:SetVertexColor(1, 1, 1, 1)
                 button.icon:Show()
 
                 button.text:SetFont(xb:GetFont(db.text.fontSize))
-                button.text:SetTextColor(normalR, normalG, normalB)
-                button.text:SetText(name)
                 button.text:ClearAllPoints()
                 button.text:SetPoint('LEFT', button.icon, 'RIGHT', 5, 0)
+
+                if isEquipped then
+                    local activeSetAlpha = 0.7
+                    local chevronR = math.min(normalR / activeSetAlpha, 1)
+                    local chevronG = math.min(normalG / activeSetAlpha, 1)
+                    local chevronB = math.min(normalB / activeSetAlpha, 1)
+                    local chevronCode = format(
+                        '|c%02X%02X%02X%02X',
+                        255,
+                        chevronR * 255,
+                        chevronG * 255,
+                        chevronB * 255
+                    )
+                    local hoverCode = format(
+                        '|c%02X%02X%02X%02X',
+                        255,
+                        r * 255,
+                        g * 255,
+                        b * 255
+                    )
+                    button.text:SetText(
+                        chevronCode .. '> |r' .. hoverCode .. name .. '|r' .. chevronCode .. ' <|r'
+                    )
+                    button.text:SetAlpha(activeSetAlpha)
+                    button.icon:SetAlpha(activeSetAlpha)
+                    button:EnableMouse(false)
+                    button:SetScript('OnEnter', nil)
+                    button:SetScript('OnLeave', nil)
+                    button:SetScript('OnClick', nil)
+                else
+                    button.text:SetText(name)
+                    button.text:SetTextColor(normalR, normalG, normalB, 1)
+                    button.text:SetAlpha(1)
+                    button.icon:SetAlpha(1)
+                    button:EnableMouse(true)
+                    button:RegisterForClicks('AnyUp')
+
+                    button:SetScript('OnEnter', function()
+                        button.text:SetTextColor(r, g, b, 1)
+                        button.text:SetAlpha(1)
+                    end)
+
+                    button:SetScript('OnLeave', function()
+                        button.text:SetTextColor(normalR, normalG, normalB, 1)
+                        button.text:SetAlpha(1)
+                    end)
+
+                    button:SetScript('OnClick', function(clickedButton, mouseButton)
+                        if InCombatLockdown() then
+                            return
+                        end
+
+                        if mouseButton == 'LeftButton' then
+                            ArmorModule:BeginEquipmentSetSwap(clickedButton:GetID())
+                            C_EquipmentSet.UseEquipmentSet(clickedButton:GetID())
+                        end
+
+                        xb:HidePopup(ArmorModule.equipmentSetPopup)
+                    end)
+                end
+
                 local textWidth = iconSize + 5 + button.text:GetStringWidth()
 
                 button:SetID(equipmentSetID)
                 button:SetSize(textWidth, iconSize)
                 button.isSettable = true
-                button:EnableMouse(true)
-                button:RegisterForClicks('AnyUp')
                 button:Show()
-
-                button:SetScript('OnEnter', function()
-                    button.text:SetTextColor(r, g, b, 1)
-                end)
-
-                button:SetScript('OnLeave', function()
-                    button.text:SetTextColor(normalR, normalG, normalB)
-                end)
-
-                button:SetScript('OnClick', function(clickedButton, mouseButton)
-                    if InCombatLockdown() then
-                        return
-                    end
-
-                    if mouseButton == 'LeftButton' then
-                        ArmorModule:BeginEquipmentSetSwap(clickedButton:GetID())
-                        C_EquipmentSet.UseEquipmentSet(clickedButton:GetID())
-                    end
-
-                    xb:HidePopup(ArmorModule.equipmentSetPopup)
-                end)
 
                 if textWidth > popupWidth then
                     popupWidth = textWidth
@@ -440,6 +496,20 @@ function ArmorModule:ShowTooltip()
         self:BuildTooltipMainline(r, g, b)
     else
         self:BuildTooltipClassic(r, g, b)
+    end
+
+    local currentSetName, currentSetIcon = self:GetCurrentEquipmentSet()
+    if currentSetName then
+        GameTooltip:AddLine(" ")
+        local setLabel = "|cFFFFFFFF" .. currentSetName .. "|r"
+        if currentSetIcon then
+            setLabel = format("|T%d:14:14:0:0|t ", currentSetIcon) .. setLabel
+        end
+        GameTooltip:AddDoubleLine(
+            L["CURRENT_EQUIPMENT_SET"],
+            setLabel,
+            r, g, b, 1, 1, 1
+        )
     end
 
     GameTooltip:AddLine(" ")
