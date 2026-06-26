@@ -102,6 +102,21 @@ local function NormalizeAnchor(anchor)
     return "CENTER"
 end
 
+XIVBar.ColumnRow = function(order, left, right, spacerWidth)
+    left.order = 1
+    left.width = left.width or 1.25
+    right.order = 2
+    right.width = right.width or 1.25
+    return {
+        type = "group", inline = true, name = "", order = order,
+        args = {
+            col1 = left,
+            spacer = { name = " ", type = "description", order = 1.5, width = spacerWidth or 0.12 },
+            col2 = right,
+        }
+    }
+end
+
 function XIVBar:SetupOptions()
     local options = {
         name = "XIV Bar Continued",
