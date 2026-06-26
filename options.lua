@@ -140,52 +140,6 @@ function XIVBar:SetupOptions()
         args = {}
     }
 
-    local profileSharingOptions = {
-        name = L["PROFILE_SHARING"],
-        type = "group",
-        args = {
-            header = {
-                order = 1,
-                type = "header",
-                name = L["PROFILE_IMPORT_EXPORT"],
-            },
-            desc = {
-                order = 2,
-                type = "description",
-                name = L["IMPORT_EXPORT_PROFILES_DESC"],
-                fontSize = "medium",
-            },
-            export = {
-                order = 3,
-                type = "execute",
-                name = L["EXPORT_PROFILE"],
-                desc = L["EXPORT_PROFILE_DESC"],
-                func = function()
-                    local exportString = XIVBar:ExportProfile()
-                    if exportString then
-                        local dialog = StaticPopup_Show("XIVBAR_EXPORT_PROFILE")
-                        if dialog then
-                            local eb = dialog.editBox or dialog.EditBox
-                            if eb then
-                                eb:SetText(exportString)
-                                eb:HighlightText()
-                            end
-                        end
-                    end
-                end,
-            },
-            import = {
-                order = 4,
-                type = "execute",
-                name = L["IMPORT_PROFILE"],
-                desc = L["IMPORT_PROFILE_DESC"],
-                func = function()
-                    StaticPopup_Show("XIVBAR_IMPORT_PROFILE")
-                end,
-            },
-        }
-    }
-
     self.freePlacementModuleOrder = {}
     self.freePlacementModuleMeta = {}
 
@@ -420,6 +374,46 @@ function XIVBar:SetupOptions()
 
     -- Get profile options
     local profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+    profileOptions.plugins = profileOptions.plugins or {}
+    profileOptions.plugins.XIVBarProfileSharing = {
+        sharingHeader = {
+            order = 90,
+            type = "header",
+            name = L["PROFILE_IMPORT_EXPORT"],
+        },
+        sharingDesc = {
+            order = 91,
+            type = "description",
+            name = L["IMPORT_EXPORT_PROFILES_DESC"],
+            fontSize = "medium",
+        },
+        importExportRow = XIVBar.ColumnRow(93, {
+            type = "execute",
+            name = L["EXPORT_PROFILE"],
+            desc = L["EXPORT_PROFILE_DESC"],
+            func = function()
+                local exportString = XIVBar:ExportProfile()
+                if exportString then
+                    local dialog = StaticPopup_Show("XIVBAR_EXPORT_PROFILE")
+                    if dialog then
+                        local eb = dialog.editBox or dialog.EditBox
+                        if eb then
+                            eb:SetText(exportString)
+                            eb:HighlightText()
+                        end
+                    end
+                end
+            end,
+        },
+        {
+            type = "execute",
+            name = L["IMPORT_PROFILE"],
+            desc = L["IMPORT_PROFILE_DESC"],
+            func = function()
+                StaticPopup_Show("XIVBAR_IMPORT_PROFILE")
+            end,
+        }),
+    }
 
     -- Register all options tables
     AceConfig:RegisterOptionsTable(AddOnName, options)
@@ -427,7 +421,6 @@ function XIVBar:SetupOptions()
     AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", modulesPositioningOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Changelog", changelogOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
-    AceConfig:RegisterOptionsTable(AddOnName .. "_ProfileSharing", profileSharingOptions)
 
     -- Add to Blizzard options
     local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
@@ -435,7 +428,6 @@ function XIVBar:SetupOptions()
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Bar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ProfileSharing", 'Profile Sharing', "XIV Bar Continued")
     self.optionsCategory = mainCategory
 end
 
