@@ -99,16 +99,168 @@ local function GetServerTimeString(optFormat, calendarTime)
     return date(ClockModule.timeFormats[optFormat], constructedServerTime)
 end
 
-local function FormatCalendarDateTime(calendarTime)
-    local timeFormat = xb.db.profile.modules.clock.timeFormat
+local function resolveDateFormatKey()
+    local dateFormat = xb.db.profile.modules.clock.dateFormat or "dayMonth"
+    return dateFormat
+end
 
+local function formatDateFromParts(day, month)
+    if resolveDateFormatKey() == "monthDay" then
+        return month .. "/" .. day
+    end
+    return day .. "/" .. month
+end
+
+local function formatDateAndTime(dateText, timeText)
+    if not dateText then
+        return timeText
+    end
+    if not timeText then
+        return dateText
+    end
+    if COMMUNITIES_CALENDAR_EVENT_FORMAT then
+        return string.format(COMMUNITIES_CALENDAR_EVENT_FORMAT, dateText, timeText)
+    end
+    return dateText .. " " .. timeText
+end
+
+local function FormatCalendarDateTime(calendarTime)
     if not calendarTime then
         return nil
     end
 
-    local dateText = calendarTime.monthDay .. "/" .. calendarTime.month
+    local timeFormat = xb.db.profile.modules.clock.timeFormat
+    local dateText = formatDateFromParts(calendarTime.monthDay, calendarTime.month)
     local timeText = GetServerTimeString(timeFormat, calendarTime)
-    return dateText .. " " .. timeText
+    return formatDateAndTime(dateText, timeText)
+end
+
+local function FormatTimestampDateTime(timestamp)
+    if not timestamp then
+        return nil
+    end
+
+    local timeFormat = xb.db.profile.modules.clock.timeFormat
+    local d = date("*t", timestamp)
+    local dateText = formatDateFromParts(d.day, d.month)
+    local timeText = date(ClockModule.timeFormats[timeFormat], timestamp)
+    return formatDateAndTime(dateText, timeText)
+end
+
+local function FormatLockoutResetDateTime(resetSeconds)
+    if not resetSeconds or resetSeconds <= 0 or not GetServerTime then
+        return nil
+    end
+    return FormatTimestampDateTime(GetServerTime() + resetSeconds)
+end
+
+local function formatLockoutLabel(entry)
+    local difficultyName = entry.difficultyName
+    if difficultyName and difficultyName ~= "" then
+        return string.format("%s (%s)", entry.name, difficultyName)
+    end
+    return entry.name
+end
+
+local function getDifficultySortOrder(entry)
+    local orderById = {
+        [7] = 0,
+        [17] = 0,
+        [1] = 1,
+        [3] = 1,
+        [4] = 1,
+        [14] = 1,
+        [2] = 2,
+        [5] = 2,
+        [6] = 2,
+        [15] = 2,
+        [8] = 3,
+        [16] = 3,
+        [23] = 3,
+    }
+    local difficultyId = entry.difficultyId
+    if difficultyId and orderById[difficultyId] then
+        return orderById[difficultyId]
+    end
+
+    local difficultyName = entry.difficultyName and string.lower(entry.difficultyName) or ""
+    if difficultyName:find("mythic", 1, true) or difficultyName:find("mythique", 1, true) then
+        return 3
+    end
+    if difficultyName:find("heroic", 1, true) or difficultyName:find("héroïque", 1, true)
+        or difficultyName:find("heroique", 1, true) then
+        return 2
+    end
+    if difficultyName:find("normal", 1, true) then
+        return 1
+    end
+    if difficultyName:find("looking for raid", 1, true) or difficultyName:find("recherche", 1, true) then
+        return 0
+    end
+    return 99
+end
+
+local function sortLockouts(a, b)
+    local nameA = a.name or ""
+    local nameB = b.name or ""
+    if nameA ~= nameB then
+        return nameA < nameB
+    end
+
+    local orderA = getDifficultySortOrder(a)
+    local orderB = getDifficultySortOrder(b)
+    if orderA ~= orderB then
+        return orderA < orderB
+    end
+
+    return formatLockoutLabel(a) < formatLockoutLabel(b)
+end
+
+local function formatLockoutDetail(entry)
+    local parts = {}
+    local opts = xb.db.profile.modules.clock
+    if opts.showBossesKilledInLockouts ~= false
+        and entry.isRaid and entry.numEncounters and entry.numEncounters > 0 and BOSSES_KILLED then
+        parts[#parts + 1] = string.format(BOSSES_KILLED, entry.encounterProgress or 0, entry.numEncounters)
+    end
+    local resetText = FormatLockoutResetDateTime(entry.reset)
+    if resetText then
+        parts[#parts + 1] = resetText
+    end
+    return table.concat(parts, " - ")
+end
+
+local function collectSavedLockouts()
+    local raids = {}
+    local dungeons = {}
+    if not GetNumSavedInstances or not GetSavedInstanceInfo then
+        return raids, dungeons
+    end
+
+    for i = 1, GetNumSavedInstances() do
+        local name, _, reset, difficultyId, locked, _, _, isRaid, _, difficultyName, numEncounters, encounterProgress =
+            GetSavedInstanceInfo(i)
+        if locked and name then
+            local entry = {
+                name = name,
+                isRaid = isRaid,
+                difficultyId = difficultyId,
+                difficultyName = difficultyName,
+                reset = reset,
+                numEncounters = numEncounters,
+                encounterProgress = encounterProgress,
+            }
+            if isRaid then
+                raids[#raids + 1] = entry
+            else
+                dungeons[#dungeons + 1] = entry
+            end
+        end
+    end
+
+    table.sort(raids, sortLockouts)
+    table.sort(dungeons, sortLockouts)
+    return raids, dungeons
 end
 
 function ClockModule:OnLeaveCombat()
@@ -169,11 +321,16 @@ function ClockModule:OnEnable()
     self:CreateClickFunctions()
     self:RegisterFrameEvents()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnLeaveCombat")
+    self:RegisterEvent("UPDATE_INSTANCE_INFO", "OnInstanceInfoUpdate")
+    if RequestRaidInfo then
+        RequestRaidInfo()
+    end
     self:Refresh()
 end
 
 function ClockModule:OnDisable()
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    self:UnregisterEvent("UPDATE_INSTANCE_INFO")
     self:UnregisterEvent("PLAYER_UPDATE_RESTING")
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -313,62 +470,8 @@ function ClockModule:RegisterFrameEvents()
     end)
 
     self.clockTextFrame:SetScript('OnEnter', function()
-        --[[ if InCombatLockdown() then
-            return;
-        end ]]
         ClockModule:SetClockColor()
-        if not xb:ShouldShowTooltip() then
-            GameTooltip:Hide()
-            return
-        end
-        GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 3)
-        local r, g, b, _ = unpack(xb:HoverColors())
-        GameTooltip:AddLine("|cFFFFFFFF[|r" .. TIMEMANAGER_TITLE .. "|cFFFFFFFF]|r", r, g, b)
-        GameTooltip:AddLine(" ")
-        local clockTime
-        if xb.db.profile.modules.clock.serverTime then
-            clockTime = time()
-        else
-            clockTime = GetServerTime()
-        end
-
-        local realmTime = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
-
-        GameTooltip:AddDoubleLine(L["LOCAL_TIME"],
-            date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), r, g, b, 1, 1, 1)
-        GameTooltip:AddDoubleLine(L["REALM_TIME"], realmTime, r, g, b, 1, 1, 1)
-        GameTooltip:AddLine(" ")
-
-        local today = GetCurrentCalendarTime()
-        local day = today.monthDay
-        local numDayEvents = GetNumDayEvents(0, day)
-        if numDayEvents > 0 then
-            GameTooltip:AddLine(EVENTS_LABEL)
-
-            for i = 1, numDayEvents do
-                local event = GetHolidayInfo(0, day, i)
-                if event then
-                    local startText = FormatCalendarDateTime(event.startTime)
-                    local endText = FormatCalendarDateTime(event.endTime)
-
-                    if startText and endText then
-                        GameTooltip:AddDoubleLine(event.name, startText .. " - " .. endText, r, g, b, 1, 1, 1)
-                    elseif startText then
-                        GameTooltip:AddDoubleLine(event.name, startText, r, g, b, 1, 1, 1)
-                    else
-                        GameTooltip:AddDoubleLine(event.name, "", r, g, b, 1, 1, 1)
-                    end
-                end
-            end
-
-            GameTooltip:AddLine(" ")
-        end
-
-        if ToggleCalendar and type(ToggleCalendar) == "function" then
-            GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["OPEN_CALENDAR"], r, g, b, 1, 1, 1)
-        end
-        GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["OPEN_CLOCK"], r, g, b, 1, 1, 1)
-        GameTooltip:Show()
+        ClockModule:ShowTooltip()
     end)
 
     self.clockTextFrame:SetScript('OnLeave', function()
@@ -408,6 +511,109 @@ function ClockModule:SetClockColor()
     end
 end
 
+function ClockModule:BuildLockoutTooltip(r, g, b)
+    local opts = xb.db.profile.modules.clock
+    if not opts.showLockoutsInTooltip then
+        return
+    end
+
+    local raids, dungeons = collectSavedLockouts()
+    local hasRaids = #raids > 0
+    local hasDungeons = #dungeons > 0
+
+    if not hasRaids and not hasDungeons then
+        return
+    end
+
+    local sections = {}
+    if hasRaids then
+        sections[#sections + 1] = { RAIDS, raids }
+    end
+    if hasDungeons then
+        sections[#sections + 1] = { DUNGEONS, dungeons }
+    end
+
+    GameTooltip:AddLine(L["CLOCK_LOCKOUTS_HEADER"])
+
+    for i, section in ipairs(sections) do
+        GameTooltip:AddLine("-- " .. section[1] .. " --", 1, 0.502, 0)
+        for _, entry in ipairs(section[2]) do
+            GameTooltip:AddDoubleLine(formatLockoutLabel(entry), formatLockoutDetail(entry), r, g, b, 1, 1, 1)
+        end
+        if i < #sections then
+            GameTooltip:AddLine(" ")
+        end
+    end
+
+    GameTooltip:AddLine(" ")
+end
+
+function ClockModule:ShowTooltip()
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
+
+    GameTooltip:SetOwner(self.clockTextFrame, 'ANCHOR_' .. xb.miniTextPosition, 0, 3)
+    GameTooltip:ClearLines()
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. TIMEMANAGER_TITLE .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
+
+    local clockTime
+    if xb.db.profile.modules.clock.serverTime then
+        clockTime = time()
+    else
+        clockTime = GetServerTime()
+    end
+
+    local realmTime = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
+
+    GameTooltip:AddDoubleLine(L["LOCAL_TIME"],
+        date(self.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L["REALM_TIME"], realmTime, r, g, b, 1, 1, 1)
+    GameTooltip:AddLine(" ")
+
+    local today = GetCurrentCalendarTime()
+    local day = today.monthDay
+    local numDayEvents = GetNumDayEvents(0, day)
+    if numDayEvents > 0 then
+        GameTooltip:AddLine(EVENTS_LABEL)
+
+        for i = 1, numDayEvents do
+            local event = GetHolidayInfo(0, day, i)
+            if event then
+                local startText = FormatCalendarDateTime(event.startTime)
+                local endText = FormatCalendarDateTime(event.endTime)
+
+                if startText and endText then
+                    GameTooltip:AddDoubleLine(event.name, startText .. " - " .. endText, r, g, b, 1, 1, 1)
+                elseif startText then
+                    GameTooltip:AddDoubleLine(event.name, startText, r, g, b, 1, 1, 1)
+                else
+                    GameTooltip:AddDoubleLine(event.name, "", r, g, b, 1, 1, 1)
+                end
+            end
+        end
+
+        GameTooltip:AddLine(" ")
+    end
+
+    self:BuildLockoutTooltip(r, g, b)
+
+    if ToggleCalendar and type(ToggleCalendar) == "function" then
+        GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["OPEN_CALENDAR"], r, g, b, 1, 1, 1)
+    end
+    GameTooltip:AddDoubleLine('<' .. L["RIGHT_CLICK"] .. '>', L["OPEN_CLOCK"], r, g, b, 1, 1, 1)
+    GameTooltip:Show()
+end
+
+function ClockModule:OnInstanceInfoUpdate()
+    if self.clockTextFrame and GameTooltip:IsOwned(self.clockTextFrame) then
+        self:ShowTooltip()
+    end
+end
+
 function ClockModule:UpdateResting()
     if not self.restIcon or not self.restIconFrame then return end
     if not xb.db.profile.modules.clock.showRestIcon then
@@ -440,6 +646,12 @@ function ClockModule:OnRestingUpdate()
     self:UpdateResting()
 end
 
+function ClockModule:RefreshTooltipIfShown()
+    if self.clockTextFrame and GameTooltip:IsOwned(self.clockTextFrame) then
+        self:ShowTooltip()
+    end
+end
+
 function ClockModule:UnregisterFrameEvents()
 end
 
@@ -450,9 +662,12 @@ function ClockModule:GetDefaultOptions()
     return 'clock', {
         enabled = true,
         timeFormat = 'twelveAmPm',
+        dateFormat = 'dayMonth',
         fontSize = 20,
         serverTime = false,
         hideEventText = false,
+        showLockoutsInTooltip = true,
+        showBossesKilledInLockouts = true,
         showRestIcon = true,
         restIconTextureMode = "default",
         restIconCustomTexture = nil,
@@ -514,9 +729,26 @@ function ClockModule:GetConfig()
                     xb.db.profile.modules.clock.hideEventText = val;
                 end
             },
-            timeFormat = {
-                name = L["TIME_FORMAT"],
+            formatRow = XIVBar.ColumnRow(3, {
+                name = L["DATE_FORMAT"],
                 order = 3,
+                type = "select",
+                values = {
+                    dayMonth = L["CLOCK_DATE_DAY_MONTH"],
+                    monthDay = L["CLOCK_DATE_MONTH_DAY"],
+                },
+                style = "dropdown",
+                get = function()
+                    return xb.db.profile.modules.clock.dateFormat or "locale";
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.clock.dateFormat = val;
+                    self:RefreshTooltipIfShown();
+                end,
+            },
+            {
+                name = L["TIME_FORMAT"],
+                order = 3.1,
                 type = "select",
                 values = { -- TODO: WTF is with this not accepting a variable?
                     twelveAmPm = '08:00 AM (12 Hour)',
@@ -533,8 +765,9 @@ function ClockModule:GetConfig()
                 set = function(_, val)
                     xb.db.profile.modules.clock.timeFormat = val;
                     self:Refresh();
+                    self:RefreshTooltipIfShown();
                 end
-            },
+            }),
             fontSize = {
                 name = FONT_SIZE,
                 type = 'range',
@@ -550,6 +783,32 @@ function ClockModule:GetConfig()
                     self:Refresh();
                 end
             },
+            lockoutRow = XIVBar.ColumnRow(4.5, {
+                name = L["CLOCK_SHOW_LOCKOUTS"],
+                order = 4.5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.clock.showLockoutsInTooltip;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.clock.showLockoutsInTooltip = val;
+                end
+            },
+            {
+                name = L["CLOCK_SHOW_BOSSES_KILLED"],
+                order = 4.7,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.clock.showBossesKilledInLockouts ~= false;
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.clock.showBossesKilledInLockouts = val;
+                    self:RefreshTooltipIfShown();
+                end,
+                hidden = function()
+                    return not xb.db.profile.modules.clock.showLockoutsInTooltip;
+                end,
+            }),
             restIconHeader = {
                 name = L["REST_ICON"],
                 order = 5,
