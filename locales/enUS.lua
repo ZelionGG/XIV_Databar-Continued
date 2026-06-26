@@ -142,6 +142,9 @@ L["NO_EQUIPMENT_SETS"] = "No Equipment Sets"
 L["MASTER_VOLUME"] = "Master Volume"
 L["VOLUME_STEP"] = "Volume step"
 L["ENABLE_MOUSE_WHEEL"] = "Enable Mouse Wheel"
+L["CURRENT_AUDIO_OUTPUT"] = "Current Output"
+L["SET_AUDIO_OUTPUT"] = "Set Audio Output"
+L["NO_AUDIO_OUTPUT_DEVICES"] = "No Audio Output Devices"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"

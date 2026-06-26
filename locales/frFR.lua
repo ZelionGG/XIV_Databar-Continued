@@ -140,6 +140,9 @@ L["NO_EQUIPMENT_SETS"] = "Aucun ensemble d'équipement"
 L["MASTER_VOLUME"] = "Volume principal"
 L["VOLUME_STEP"] = "Incrément de volume"
 L["ENABLE_MOUSE_WHEEL"] = "Activer le réglage par molette"
+L["CURRENT_AUDIO_OUTPUT"] = "Sortie actuelle"
+L["SET_AUDIO_OUTPUT"] = "Choisir la sortie audio"
+L["NO_AUDIO_OUTPUT_DEVICES"] = "Aucun périphérique audio"
 
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"
