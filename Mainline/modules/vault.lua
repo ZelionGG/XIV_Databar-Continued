@@ -537,9 +537,9 @@ function VaultModule:RegisterFrameEvents()
             end
             if WeeklyRewardsFrame then
                 if WeeklyRewardsFrame:IsShown() then
-                    WeeklyRewardsFrame:Hide()
+                    HideUIPanel(WeeklyRewardsFrame)
                 else
-                    WeeklyRewardsFrame:Show()
+                    ShowUIPanel(WeeklyRewardsFrame)
                 end
             end
         end)
