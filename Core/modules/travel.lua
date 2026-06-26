@@ -1449,6 +1449,7 @@ function TravelModule:ShowHomeTooltip()
     GameTooltip:ClearLines()
     local r, g, b, _ = unpack(xb:HoverColors())
     GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["HOME"] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
     -- Cooldown display (similar to hearth/port tooltip)
     local visitCd = self:GetHousingCooldown()
     local cdText = self:FormatCooldown(visitCd)
@@ -2115,6 +2116,7 @@ function TravelModule:ShowTooltip()
         GameTooltip:ClearLines()
         local r, g, b, _ = unpack(xb:HoverColors())
         GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["TRAVEL_COOLDOWNS"] .. "|cFFFFFFFF]|r", r, g, b)
+        GameTooltip:AddLine(" ")
 
         -- Show hearthstone cooldown using utility function
         local hearthstoneId = 6948 -- Regular Hearthstone ID
