@@ -417,17 +417,31 @@ function TravelModule:CreateMythicFrames()
 
     self.mythicButton.mythicFunction = function()
         if not InCombatLockdown() then
-            ToggleDropDownMenu(1, nil, self.mythicPopup, self.mythicButton, 0, 0)
+            local wasOpen = TravelModule:IsMythicDropdownOpen()
+            ToggleDropDownMenu(1, nil, TravelModule.mythicPopup, TravelModule.mythicButton, 0, 0)
+            if wasOpen then
+                TravelModule:ShowMythicTooltip()
+            else
+                GameTooltip:Hide()
+            end
         end
     end
 
+    TravelModule:HookMythicDropdownClose()
+
     self.mythicButton:SetScript('OnEnter', function()
         TravelModule:SetMythicColor()
-        if InCombatLockdown() then return end
+        if not InCombatLockdown() then
+            TravelModule:ShowMythicTooltip()
+        end
     end)
 
     self.mythicButton:SetScript('OnLeave', function()
         TravelModule:SetMythicColor()
+        if TravelModule.mythicTooltipTimer then
+            TravelModule.mythicTooltipTimer:Cancel()
+            TravelModule.mythicTooltipTimer = nil
+        end
         GameTooltip:Hide()
     end)
 end
@@ -1477,20 +1491,17 @@ function TravelModule:ShowHomeTooltip()
     end
 end
 
-function TravelModule:CreateMythicPopup()
+function TravelModule:GetMythicTeleportGroups()
     if not compat.isMainline then
-        return
+        return {}
     end
-    -- Get the current season
+
     local currentSeason = self:GetCurrentSeason()
     local showCurrentSeasonOnly = xb.db.profile.curSeasonOnly and currentSeason ~= nil
     local showUnknownTeleports = xb.db.profile.showUnknownTeleports ~= false
-
-    -- Create popup menu
     local filteredTeleports = {}
 
     if showCurrentSeasonOnly then
-        -- Use current season if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
 
@@ -1502,7 +1513,6 @@ function TravelModule:CreateMythicPopup()
             end
         end
     else
-        -- If no current season, show all expansions
         local expansions = {}
         for key, expansion in pairs(xb.MythicTeleports) do
             local isSeason = type(expansion) == "table" and expansion.start_date ~= nil
@@ -1511,14 +1521,12 @@ function TravelModule:CreateMythicPopup()
             end
         end
 
-        -- Sort expansions by order (reverse chronological)
         table.sort(expansions, function(a, b)
             local orderA = a.data.order or 0
             local orderB = b.data.order or 0
             return orderA > orderB
         end)
 
-        -- Process each expansion
         for _, expansion in ipairs(expansions) do
             if expansion.data.teleports then
                 local teleports = {}
@@ -1530,7 +1538,6 @@ function TravelModule:CreateMythicPopup()
                     end
                 end
 
-                -- Sort alphabetically by dungeon name
                 table.sort(teleports, function(a, b)
                     return a.dungeonName < b.dungeonName
                 end)
@@ -1544,9 +1551,7 @@ function TravelModule:CreateMythicPopup()
             end
         end
 
-        -- Add current season at the bottom if available
         if currentSeason and xb.MythicTeleports[currentSeason] then
-            -- Insert a separator before the current season group for spacing
             table.insert(filteredTeleports, { teleports = "SEPARATOR" })
 
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
@@ -1559,6 +1564,115 @@ function TravelModule:CreateMythicPopup()
             end
         end
     end
+
+    return filteredTeleports
+end
+
+function TravelModule:GetMythicSharedCooldown()
+    for _, group in ipairs(self:GetMythicTeleportGroups()) do
+        if group.teleports ~= "SEPARATOR" then
+            for _, teleport in ipairs(group.teleports) do
+                if teleport.isKnown then
+                    return self:GetRemainingCooldown(teleport.knownId, true)
+                end
+            end
+        end
+    end
+    return 0
+end
+
+function TravelModule:IsMythicDropdownOpen()
+    if not self.mythicPopup then
+        return false
+    end
+
+    for i = 1, 2 do
+        local list = _G["DropDownList" .. i]
+        if list and list:IsShown() and list.dropdown == self.mythicPopup then
+            return true
+        end
+    end
+
+    return false
+end
+
+function TravelModule:TryShowMythicTooltipAfterDropdownClose()
+    if not self.mythicButton or InCombatLockdown() then
+        return
+    end
+
+    if not self.mythicButton:IsMouseOver() or self:IsMythicDropdownOpen() then
+        return
+    end
+
+    self:ShowMythicTooltip()
+end
+
+function TravelModule:HookMythicDropdownClose()
+    if self.mythicDropdownCloseHooked then
+        return
+    end
+    self.mythicDropdownCloseHooked = true
+
+    for i = 1, 2 do
+        local list = _G["DropDownList" .. i]
+        if list then
+            list:HookScript("OnHide", function(frame)
+                if frame.dropdown == TravelModule.mythicPopup then
+                    C_Timer.After(0, function()
+                        TravelModule:TryShowMythicTooltipAfterDropdownClose()
+                    end)
+                end
+            end)
+        end
+    end
+end
+
+function TravelModule:ShowMythicTooltip()
+    if not self.mythicButton or self:IsMythicDropdownOpen() then
+        return
+    end
+
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
+
+    GameTooltip:SetOwner(self.mythicButton, 'ANCHOR_' .. xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["MYTHIC_PLUS_TELEPORTS"] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
+
+    local cdString = self:FormatCooldown(self:GetMythicSharedCooldown())
+    GameTooltip:AddDoubleLine(L["COOLDOWNS"], cdString, r, g, b, 1, 1, 1)
+    GameTooltip:AddLine(L["MYTHIC_TELEPORT_SHARED_CD"], r, g, b, true)
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<' .. L["LEFT_CLICK"] .. '>', L["SHOW_MYTHIC_TELEPORT_POPUP"], r, g, b, 1, 1, 1)
+    GameTooltip:Show()
+
+    if not self.mythicTooltipTimer then
+        self.mythicTooltipTimer = C_Timer.NewTicker(1, function()
+            if GameTooltip:IsOwned(self.mythicButton) and not self:IsMythicDropdownOpen() then
+                self:ShowMythicTooltip()
+            else
+                if self.mythicTooltipTimer then
+                    self.mythicTooltipTimer:Cancel()
+                    self.mythicTooltipTimer = nil
+                end
+            end
+        end)
+    end
+end
+
+function TravelModule:CreateMythicPopup()
+    if not compat.isMainline then
+        return
+    end
+
+    local showCurrentSeasonOnly = xb.db.profile.curSeasonOnly and self:GetCurrentSeason() ~= nil
+    local filteredTeleports = self:GetMythicTeleportGroups()
 
     -- Function to add title and separator to the menu
     local function AddMenuHeader(level)
