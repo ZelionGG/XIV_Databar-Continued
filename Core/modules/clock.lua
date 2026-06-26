@@ -142,8 +142,10 @@ local function FormatTimestampDateTime(timestamp)
 
     local timeFormat = xb.db.profile.modules.clock.timeFormat
     local d = date("*t", timestamp)
+    d.sec = 0
+    local truncated = time(d)
     local dateText = formatDateFromParts(d.day, d.month)
-    local timeText = date(ClockModule.timeFormats[timeFormat], timestamp)
+    local timeText = date(ClockModule.timeFormats[timeFormat], truncated)
     return formatDateAndTime(dateText, timeText)
 end
 
@@ -306,6 +308,8 @@ function ClockModule:OnInitialize()
 
     self.elapsed = 0
 
+    self.instanceInfoReady = false
+
     self.functions = {}
 end
 
@@ -322,8 +326,11 @@ function ClockModule:OnEnable()
     self:RegisterFrameEvents()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnLeaveCombat")
     self:RegisterEvent("UPDATE_INSTANCE_INFO", "OnInstanceInfoUpdate")
+    self.instanceInfoReady = false
     if RequestRaidInfo then
         RequestRaidInfo()
+    else
+        self.instanceInfoReady = true
     end
     self:Refresh()
 end
@@ -517,6 +524,10 @@ function ClockModule:BuildLockoutTooltip(r, g, b)
         return
     end
 
+    if not self.instanceInfoReady then
+        return
+    end
+
     local raids, dungeons = collectSavedLockouts()
     local hasRaids = #raids > 0
     local hasDungeons = #dungeons > 0
@@ -599,6 +610,10 @@ function ClockModule:ShowTooltip()
         GameTooltip:AddLine(" ")
     end
 
+    if not self.instanceInfoReady and RequestRaidInfo then
+        RequestRaidInfo()
+    end
+
     self:BuildLockoutTooltip(r, g, b)
 
     if ToggleCalendar and type(ToggleCalendar) == "function" then
@@ -609,6 +624,7 @@ function ClockModule:ShowTooltip()
 end
 
 function ClockModule:OnInstanceInfoUpdate()
+    self.instanceInfoReady = true
     if self.clockTextFrame and GameTooltip:IsOwned(self.clockTextFrame) then
         self:ShowTooltip()
     end
