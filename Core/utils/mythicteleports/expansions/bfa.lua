@@ -16,7 +16,7 @@ xb.MythicTeleports.BFA = {
             dungeonId = 1672, -- Freehold
         },
         SoB = {
-            teleportId = 464256, -- Siege of Boralus Teleport
+            teleportId = {464256,445418}, -- Siege of Boralus Teleport
             dungeonId = 1700, -- Siege of Boralus
         },
         UR = {
