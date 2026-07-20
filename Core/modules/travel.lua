@@ -144,6 +144,10 @@ function TravelModule:OnInitialize()
         profile.hideAdditionalTooltipText = true
     end
 
+    if xb.db and xb.db.char and xb.db.char.portItem == nil then
+        xb.db.char.portItem = self:FindFirstOption()
+    end
+
     self.hearthstones = {
         556,       -- Astral Recall
         6948,      -- Hearthstone
@@ -2239,8 +2243,8 @@ function TravelModule:RefreshHearthstonesList()
 end
 
 function TravelModule:GetDefaultOptions()
-    local firstItem = self:FindFirstOption()
-    xb.db.char.portItem = xb.db.char.portItem or firstItem
+    -- Do not touch xb.db here: GetDefaultOptions runs during SetupOptions before
+    -- AceDB:RegisterDefaults is finalized. portItem is backfilled in OnInitialize.
     return 'travel', {
         enabled = true,
         hideHearthstoneButton = false,
