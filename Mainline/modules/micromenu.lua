@@ -342,8 +342,7 @@ function MenuModule:Refresh()
     for name, frame in pairs(self.text) do
         frame:SetFont(xb:GetFont(xb.db.profile.text.smallFontSize))
         frame:SetPoint('CENTER', self.frames[name], xb.miniTextPosition)
-        self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g,
-            xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
+        self.bgTexture[name]:SetColorTexture(xb:GetColor('barColor'))
         self.bgTexture[name]:SetPoint('CENTER', frame, 'CENTER')
         if xb.db.profile.modules.microMenu.hideSocialText then
             frame:Hide()

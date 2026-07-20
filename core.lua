@@ -278,6 +278,8 @@ function XIVBar:GetColor(name)
         r, g, b = self:GetClassColors()
     elseif name == 'barColor' and profile.useCC then
         r, g, b = self:GetClassColors()
+    elseif name == 'hover' and profile.useHoverCC then
+        r, g, b = self:GetClassColors()
     end
 
     return r, g, b, a
