@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- BROKER MODULE
--- Displays third-party LibDataBroker-1.1 data objects on the XIV bar
+-- Displays third-party LibDataBroker-1.1 data objects as independent bar pieces
 --------------------------------------------------------------------------------
 
 local AddOnName = ...
@@ -31,6 +31,18 @@ local function IsDisplayable(name, dataobj)
     return DISPLAY_TYPES[dataobj.type] == true
 end
 
+local function SanitizeFrameToken(name)
+    return (tostring(name):gsub("[^%w]", "_"))
+end
+
+local function PlacementKey(name)
+    return "Broker:" .. name
+end
+
+local function FrameNameFor(name)
+    return "brokerPiece_" .. SanitizeFrameToken(name)
+end
+
 local function GetBrokerText(name, dataobj)
     if dataobj.text and dataobj.text ~= "" then
         return dataobj.text
@@ -45,46 +57,100 @@ local function GetBrokerText(name, dataobj)
     return name
 end
 
+local function DefaultShowText(dataobj)
+    return dataobj.type ~= "launcher"
+end
+
 function BrokerModule:GetName()
     return L["BROKER"] or "Broker"
-end
-
-function BrokerModule:OnInitialize()
-    self.slots = {}
-    self.slotsByName = {}
-    self.optionsTable = nil
-
-    LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated", "OnDataObjectCreated")
-    LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged", "OnAttributeChanged")
-end
-
-function BrokerModule:OnEnable()
-    if self.brokerFrame == nil then
-        self.brokerFrame = CreateFrame("FRAME", nil, xb:GetFrame("bar"))
-        xb:RegisterFrame("brokerFrame", self.brokerFrame)
-    end
-
-    self.brokerFrame:Show()
-    self:Refresh()
-end
-
-function BrokerModule:OnDisable()
-    if self.brokerFrame then
-        self.brokerFrame:Hide()
-    end
-    for _, slot in pairs(self.slots) do
-        slot:Hide()
-    end
 end
 
 function BrokerModule:GetDb()
     return xb.db and xb.db.profile and xb.db.profile.modules and xb.db.profile.modules.Broker
 end
 
+function BrokerModule:GetObjectSettings(name, create)
+    local db = self:GetDb()
+    if not db then
+        return nil
+    end
+    db.objects = db.objects or {}
+    if create and type(db.objects[name]) ~= "table" then
+        local dataobj = LDB:GetDataObjectByName(name)
+        db.objects[name] = {
+            enabled = false,
+            showIcon = true,
+            showText = dataobj and DefaultShowText(dataobj) or true,
+        }
+    end
+    return db.objects[name]
+end
+
+function BrokerModule:MigrateDb()
+    local db = self:GetDb()
+    if not db then
+        return
+    end
+
+    db.objects = db.objects or {}
+
+    if type(db.enabledObjects) == "table" then
+        for name, enabled in pairs(db.enabledObjects) do
+            if enabled then
+                local dataobj = LDB:GetDataObjectByName(name)
+                local settings = db.objects[name]
+                if type(settings) ~= "table" then
+                    settings = {
+                        enabled = true,
+                        showIcon = true,
+                        showText = dataobj and DefaultShowText(dataobj) or true,
+                    }
+                    db.objects[name] = settings
+                else
+                    settings.enabled = true
+                    if settings.showIcon == nil then
+                        settings.showIcon = true
+                    end
+                    if settings.showText == nil then
+                        settings.showText = dataobj and DefaultShowText(dataobj) or true
+                    end
+                end
+            end
+        end
+        db.enabledObjects = nil
+    end
+end
+
 function BrokerModule:NotifyOptionsChange()
     local registry = LibStub("AceConfigRegistry-3.0", true)
     if registry then
         registry:NotifyChange(AddOnName .. "_Modules")
+    end
+end
+
+function BrokerModule:OnInitialize()
+    self.pieces = {}
+    self.registeredCallbacks = {}
+    self.activeObjects = {}
+    self.optionsTable = nil
+    self:MigrateDb()
+
+    LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated", "OnDataObjectCreated")
+end
+
+function BrokerModule:OnEnable()
+    self:MigrateDb()
+    self:SyncPieces()
+    self:Refresh()
+end
+
+function BrokerModule:OnDisable()
+    local names = {}
+    for name in pairs(self.pieces) do
+        table.insert(names, name)
+    end
+    for _, name in ipairs(names) do
+        self:DisableObject(name)
     end
 end
 
@@ -96,141 +162,235 @@ function BrokerModule:OnDataObjectCreated(_, name, dataobj)
     self:RebuildPluginOptions()
     self:NotifyOptionsChange()
 
+    local settings = self:GetObjectSettings(name, false)
     local db = self:GetDb()
-    if db and db.enabled and db.enabledObjects and db.enabledObjects[name] then
+    if db and db.enabled and settings and settings.enabled then
+        self:EnableObject(name)
         self:Refresh()
     end
 end
 
 function BrokerModule:OnAttributeChanged(_, name, key, _value, dataobj)
+    local piece = self.pieces[name]
+    if not piece or not piece:IsShown() then
+        return
+    end
+
     if not IsDisplayable(name, dataobj) then
         return
     end
 
-    local db = self:GetDb()
-    if not db or not db.enabled or not db.enabledObjects or not db.enabledObjects[name] then
-        return
-    end
+    piece.dataobj = dataobj
 
-    local slot = self.slotsByName[name]
-    if not slot or not slot:IsShown() then
-        if key == "type" or key == "text" or key == "icon" or key == "label" or key == "value" or key == "suffix" then
-            self:Refresh()
+    if key == "text" or key == "value" or key == "suffix" or key == "label" or key == "icon"
+        or key == "iconCoords" or key == "iconR" or key == "iconG" or key == "iconB"
+        or key == "type" then
+        local oldWidth = piece:GetWidth()
+        self:UpdatePieceContent(piece)
+        if not InCombatLockdown() and abs(piece:GetWidth() - oldWidth) > 0.5 then
+            self:RefreshLayoutOnly()
         end
-        return
-    end
-
-    if key == "text" or key == "value" or key == "suffix" or key == "label" then
-        self:UpdateSlotContent(slot, name, dataobj)
-        if not InCombatLockdown() then
-            self:LayoutSlots()
-        end
-    elseif key == "icon" or key == "iconCoords" or key == "iconR" or key == "iconG" or key == "iconB" then
-        self:UpdateSlotIcon(slot, dataobj)
-    elseif key == "type" then
-        self:Refresh()
     end
 end
 
-function BrokerModule:AcquireSlot(name)
-    local slot = self.slotsByName[name]
-    if slot then
-        return slot
+function BrokerModule:CreatePiece(name, dataobj)
+    local bar = xb:GetFrame("bar")
+    if not bar then
+        return nil
     end
 
-    slot = CreateFrame("BUTTON", nil, self.brokerFrame)
-    slot.icon = slot:CreateTexture(nil, "OVERLAY")
-    slot.text = slot:CreateFontString(nil, "OVERLAY")
-    slot:EnableMouse(true)
-    slot:RegisterForClicks("AnyUp")
-    slot:Hide()
+    local frameName = FrameNameFor(name)
+    local piece = CreateFrame("BUTTON", nil, bar)
+    piece.icon = piece:CreateTexture(nil, "OVERLAY")
+    piece.text = piece:CreateFontString(nil, "OVERLAY")
+    piece.brokerName = name
+    piece.dataobj = dataobj
+    piece.placementKey = PlacementKey(name)
+    piece.frameName = frameName
+    piece:EnableMouse(true)
+    piece:RegisterForClicks("AnyUp")
+    piece:EnableMouseWheel(true)
+    piece:Hide()
 
-    slot:SetScript("OnEnter", function(button)
-        if button.text then
+    piece:SetScript("OnEnter", function(button)
+        if button.text and button.text:IsShown() then
             button.text:SetTextColor(unpack(xb:HoverColors()))
         end
         self:ShowBrokerTooltip(button)
     end)
 
-    slot:SetScript("OnLeave", function(button)
-        if button.text then
+    piece:SetScript("OnLeave", function(button)
+        if button.text and button.text:IsShown() then
             button.text:SetTextColor(xb:GetColor("normal"))
         end
         self:HideBrokerTooltip(button)
     end)
 
-    slot:SetScript("OnClick", function(button, mouseButton)
-        local dataobj = button.dataobj
-        if dataobj and dataobj.OnClick then
-            dataobj.OnClick(button, mouseButton)
+    piece:SetScript("OnClick", function(button, mouseButton)
+        local obj = button.dataobj
+        if obj and obj.OnClick then
+            obj.OnClick(button, mouseButton)
         end
     end)
 
-    self.slotsByName[name] = slot
-    table.insert(self.slots, slot)
-    return slot
-end
-
-function BrokerModule:UpdateSlotIcon(slot, dataobj)
-    local db = xb.db.profile
-    local iconSize = db.text.fontSize
-
-    if dataobj.icon then
-        slot.icon:SetTexture(dataobj.icon)
-        slot.icon:Show()
-        if dataobj.iconCoords then
-            slot.icon:SetTexCoord(unpack(dataobj.iconCoords))
-        else
-            slot.icon:SetTexCoord(0, 1, 0, 1)
+    piece:SetScript("OnMouseWheel", function(button, delta)
+        local obj = button.dataobj
+        if obj and obj.OnMouseWheel then
+            obj.OnMouseWheel(button, delta)
         end
-        local r = dataobj.iconR or 1
-        local g = dataobj.iconG or 1
-        local b = dataobj.iconB or 1
-        slot.icon:SetVertexColor(r, g, b, 1)
-        slot.icon:SetSize(iconSize, iconSize)
-        slot.icon:ClearAllPoints()
-        slot.icon:SetPoint("LEFT")
-    else
-        slot.icon:Hide()
-    end
+    end)
+
+    xb:RegisterFrame(frameName, piece)
+    return piece
 end
 
-function BrokerModule:UpdateSlotContent(slot, name, dataobj)
+function BrokerModule:GetDisplayName(name, dataobj)
+    local label = dataobj and dataobj.label
+    if label and label ~= "" then
+        return string.format("%s: %s", L["BROKER"] or "Broker", label)
+    end
+    return string.format("%s: %s", L["BROKER"] or "Broker", name)
+end
+
+function BrokerModule:EnableObject(name)
+    local dataobj = LDB:GetDataObjectByName(name)
+    if not IsDisplayable(name, dataobj) then
+        return false
+    end
+
+    local settings = self:GetObjectSettings(name, true)
+    if not settings then
+        return false
+    end
+    settings.enabled = true
+    if settings.showIcon == nil then
+        settings.showIcon = true
+    end
+    if settings.showText == nil then
+        settings.showText = DefaultShowText(dataobj)
+    end
+
+    local piece = self.pieces[name]
+    if not piece then
+        piece = self:CreatePiece(name, dataobj)
+        if not piece then
+            return false
+        end
+        self.pieces[name] = piece
+    else
+        piece.dataobj = dataobj
+    end
+
+    if not self.activeObjects[name] then
+        if xb.RegisterDynamicFreePlacement then
+            xb:RegisterDynamicFreePlacement(
+                piece.placementKey,
+                piece.frameName,
+                self:GetDisplayName(name, dataobj),
+                self
+            )
+        end
+
+        if not self.registeredCallbacks[name] then
+            LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged_" .. name, "OnAttributeChanged")
+            self.registeredCallbacks[name] = true
+        end
+
+        self.activeObjects[name] = true
+    end
+
+    self:UpdatePieceContent(piece)
+    piece:Show()
+    return true
+end
+
+function BrokerModule:DisableObject(name)
+    local piece = self.pieces[name]
+    if not piece then
+        return
+    end
+
+    if self.registeredCallbacks[name] then
+        LDB.UnregisterCallback(self, "LibDataBroker_AttributeChanged_" .. name)
+        self.registeredCallbacks[name] = nil
+    end
+
+    if self.activeObjects[name] and xb.UnregisterDynamicFreePlacement then
+        xb:UnregisterDynamicFreePlacement(piece.placementKey)
+    end
+    self.activeObjects[name] = nil
+
+    piece:Hide()
+    piece:ClearAllPoints()
+end
+
+function BrokerModule:UpdatePieceContent(piece)
+    local name = piece.brokerName
+    local dataobj = piece.dataobj or LDB:GetDataObjectByName(name)
+    if not dataobj then
+        return
+    end
+    piece.dataobj = dataobj
+
+    local settings = self:GetObjectSettings(name, false) or {}
+    local showIcon = settings.showIcon ~= false and dataobj.icon ~= nil
+    local showText = settings.showText == true
     local db = xb.db.profile
     local iconSize = db.text.fontSize
     local text = GetBrokerText(name, dataobj)
 
-    slot.text:SetFont(xb:GetFont(db.text.fontSize))
-    slot.text:SetText(text)
-    if not slot:IsMouseOver() then
-        slot.text:SetTextColor(xb:GetColor("normal"))
+    if not showText and not showIcon then
+        -- Avoid empty invisible hitbox: fall back to label/name text
+        showText = true
+        text = (dataobj.label and dataobj.label ~= "") and dataobj.label or name
     end
 
-    self:UpdateSlotIcon(slot, dataobj)
+    piece.text:SetFont(xb:GetFont(db.text.fontSize))
+    if showText then
+        piece.text:SetText(text)
+        if not piece:IsMouseOver() then
+            piece.text:SetTextColor(xb:GetColor("normal"))
+        end
+        piece.text:Show()
+    else
+        piece.text:SetText("")
+        piece.text:Hide()
+    end
 
-    local width = 0
-    if slot.icon:IsShown() then
-        width = width + iconSize
-        slot.text:ClearAllPoints()
-        if text and text ~= "" then
-            slot.text:SetPoint("LEFT", slot.icon, "RIGHT", 3, 0)
-            width = width + 3 + slot.text:GetStringWidth()
-            slot.text:Show()
+    if showIcon and dataobj.icon then
+        piece.icon:SetTexture(dataobj.icon)
+        if dataobj.iconCoords then
+            piece.icon:SetTexCoord(unpack(dataobj.iconCoords))
         else
-            slot.text:Hide()
+            piece.icon:SetTexCoord(0, 1, 0, 1)
+        end
+        piece.icon:SetVertexColor(dataobj.iconR or 1, dataobj.iconG or 1, dataobj.iconB or 1, 1)
+        piece.icon:SetSize(iconSize, iconSize)
+        piece.icon:ClearAllPoints()
+        piece.icon:SetPoint("LEFT")
+        piece.icon:Show()
+
+        piece.text:ClearAllPoints()
+        if showText then
+            piece.text:SetPoint("LEFT", piece.icon, "RIGHT", 3, 0)
         end
     else
-        slot.text:ClearAllPoints()
-        slot.text:SetPoint("LEFT")
-        if text and text ~= "" then
-            width = slot.text:GetStringWidth()
-            slot.text:Show()
-        else
-            slot.text:Hide()
-        end
+        piece.icon:Hide()
+        piece.text:ClearAllPoints()
+        piece.text:SetPoint("LEFT")
     end
 
-    slot:SetSize(math.max(width, 1), xb:GetHeight())
+    local width = 0
+    if piece.icon:IsShown() then
+        width = width + iconSize
+        if showText then
+            width = width + 3 + piece.text:GetStringWidth()
+        end
+    elseif showText then
+        width = piece.text:GetStringWidth()
+    end
+
+    piece:SetSize(math.max(width, 1), xb:GetHeight())
 end
 
 function BrokerModule:ShowBrokerTooltip(button)
@@ -284,97 +444,60 @@ function BrokerModule:HideBrokerTooltip(button)
     GameTooltip:Hide()
 end
 
-function BrokerModule:GetEnabledBrokerNames()
-    local db = self:GetDb()
+function BrokerModule:GetActiveNames()
     local names = {}
-    if not db or not db.enabledObjects then
+    local db = self:GetDb()
+    if not db or not db.objects then
         return names
     end
 
-    for name, enabled in pairs(db.enabledObjects) do
-        if enabled then
-            local dataobj = LDB:GetDataObjectByName(name)
-            if IsDisplayable(name, dataobj) then
-                table.insert(names, name)
-            end
+    for name, settings in pairs(db.objects) do
+        if settings and settings.enabled and self.pieces[name] and IsDisplayable(name, LDB:GetDataObjectByName(name)) then
+            table.insert(names, name)
         end
     end
-
     table.sort(names)
     return names
 end
 
-function BrokerModule:LayoutSlots()
-    local names = self:GetEnabledBrokerNames()
-    local gap = 5
-    local totalWidth = 0
-    local previous
-
-    for _, slot in pairs(self.slots) do
-        slot:Hide()
+function BrokerModule:SyncPieces()
+    local db = self:GetDb()
+    if not db or not db.enabled then
+        return
     end
 
-    for _, name in ipairs(names) do
-        local dataobj = LDB:GetDataObjectByName(name)
-        local slot = self:AcquireSlot(name)
-        slot.brokerName = name
-        slot.dataobj = dataobj
-        self:UpdateSlotContent(slot, name, dataobj)
-
-        slot:ClearAllPoints()
-        if previous then
-            slot:SetPoint("LEFT", previous, "RIGHT", gap, 0)
-            totalWidth = totalWidth + gap
-        else
-            slot:SetPoint("LEFT", self.brokerFrame, "LEFT", 0, 0)
+    db.objects = db.objects or {}
+    for name, settings in pairs(db.objects) do
+        if settings and settings.enabled then
+            self:EnableObject(name)
+        elseif self.pieces[name] then
+            self:DisableObject(name)
         end
-
-        totalWidth = totalWidth + slot:GetWidth()
-        slot:Show()
-        previous = slot
     end
-
-    if totalWidth <= 0 then
-        self.brokerFrame:SetSize(1, xb:GetHeight())
-        self.brokerFrame:Hide()
-        return false
-    end
-
-    self.brokerFrame:SetSize(totalWidth, xb:GetHeight())
-    self.brokerFrame:Show()
-    return true
 end
 
-function BrokerModule:Refresh()
-    local db = self:GetDb()
-    if self.brokerFrame == nil then
-        return
-    end
+function BrokerModule:LayoutLegacyCluster()
+    local names = self:GetActiveNames()
+    local gap = 5
+    local previous
+    local firstPiece
 
-    if not db or not db.enabled then
-        self:Disable()
-        return
-    end
-
-    if InCombatLockdown() then
-        for name, slot in pairs(self.slotsByName) do
-            if slot:IsShown() then
-                local dataobj = LDB:GetDataObjectByName(name)
-                if dataobj then
-                    slot.dataobj = dataobj
-                    self:UpdateSlotContent(slot, name, dataobj)
-                end
+    for _, name in ipairs(names) do
+        local piece = self.pieces[name]
+        if piece then
+            self:UpdatePieceContent(piece)
+            piece:ClearAllPoints()
+            if previous then
+                piece:SetPoint("LEFT", previous, "RIGHT", gap, 0)
+            else
+                firstPiece = piece
             end
+            piece:Show()
+            previous = piece
         end
-        return
     end
 
-    local hasSlots = self:LayoutSlots()
-    if not hasSlots then
-        return
-    end
-
-    if xb:ApplyModuleFreePlacement("Broker", self.brokerFrame) then
+    if not firstPiece then
         return
     end
 
@@ -392,13 +515,56 @@ function BrokerModule:Refresh()
             if not (travelDb and travelDb.enabled) or not IsUsableAnchor(parentFrame) then
                 relativeAnchorPoint = "RIGHT"
                 xOffset = 15
-                parentFrame = self.brokerFrame:GetParent()
+                parentFrame = firstPiece:GetParent()
             end
         end
     end
 
-    self.brokerFrame:ClearAllPoints()
-    self.brokerFrame:SetPoint("RIGHT", parentFrame, relativeAnchorPoint, -xOffset, 0)
+    firstPiece:SetPoint("RIGHT", parentFrame, relativeAnchorPoint, -xOffset, 0)
+end
+
+function BrokerModule:RefreshLayoutOnly()
+    local names = self:GetActiveNames()
+    if #names == 0 then
+        return
+    end
+
+    if xb:IsFreePlacementEnabled() then
+        for _, name in ipairs(names) do
+            local piece = self.pieces[name]
+            if piece then
+                piece:Show()
+                xb:ApplyModuleFreePlacement(piece.placementKey, piece)
+            end
+        end
+        return
+    end
+
+    self:LayoutLegacyCluster()
+end
+
+function BrokerModule:Refresh()
+    local db = self:GetDb()
+    if not db or not db.enabled then
+        self:Disable()
+        return
+    end
+
+    if InCombatLockdown() then
+        for _, piece in pairs(self.pieces) do
+            if piece:IsShown() then
+                local dataobj = LDB:GetDataObjectByName(piece.brokerName)
+                if dataobj then
+                    piece.dataobj = dataobj
+                    self:UpdatePieceContent(piece)
+                end
+            end
+        end
+        return
+    end
+
+    self:SyncPieces()
+    self:RefreshLayoutOnly()
 end
 
 function BrokerModule:RebuildPluginOptions()
@@ -424,31 +590,75 @@ function BrokerModule:RebuildPluginOptions()
             label = dataobj.label
         end
         local typeLabel = dataobj.type or ""
-        args[name] = {
-            name = label,
-            desc = string.format("%s (%s)", name, typeLabel),
+        local groupKey = "obj_" .. SanitizeFrameToken(name)
+
+        args[groupKey] = {
+            name = string.format("%s (%s)", label, typeLabel),
             order = order,
-            type = "toggle",
-            width = "full",
-            get = function()
-                local moduleDb = self:GetDb()
-                return moduleDb and moduleDb.enabledObjects and moduleDb.enabledObjects[name] == true
-            end,
-            set = function(_, val)
-                local moduleDb = self:GetDb()
-                if not moduleDb then
-                    return
-                end
-                moduleDb.enabledObjects = moduleDb.enabledObjects or {}
-                if val then
-                    moduleDb.enabledObjects[name] = true
-                else
-                    moduleDb.enabledObjects[name] = nil
-                end
-                if moduleDb.enabled then
-                    self:Refresh()
-                end
-            end,
+            type = "group",
+            inline = true,
+            args = {
+                enabled = {
+                    name = ENABLE,
+                    order = 1,
+                    type = "toggle",
+                    width = "full",
+                    get = function()
+                        local settings = self:GetObjectSettings(name, false)
+                        return settings and settings.enabled == true
+                    end,
+                    set = function(_, val)
+                        local moduleDb = self:GetDb()
+                        if not moduleDb then
+                            return
+                        end
+                        local settings = self:GetObjectSettings(name, true)
+                        settings.enabled = val and true or false
+                        if moduleDb.enabled then
+                            if val then
+                                self:EnableObject(name)
+                            else
+                                self:DisableObject(name)
+                            end
+                            self:Refresh()
+                        end
+                    end,
+                },
+                showIcon = {
+                    name = L["BROKER_SHOW_ICON"],
+                    order = 2,
+                    type = "toggle",
+                    get = function()
+                        local settings = self:GetObjectSettings(name, true)
+                        return settings.showIcon ~= false
+                    end,
+                    set = function(_, val)
+                        local settings = self:GetObjectSettings(name, true)
+                        settings.showIcon = val and true or false
+                        if self.pieces[name] then
+                            self:UpdatePieceContent(self.pieces[name])
+                            self:Refresh()
+                        end
+                    end,
+                },
+                showText = {
+                    name = L["BROKER_SHOW_TEXT"],
+                    order = 3,
+                    type = "toggle",
+                    get = function()
+                        local settings = self:GetObjectSettings(name, true)
+                        return settings.showText == true
+                    end,
+                    set = function(_, val)
+                        local settings = self:GetObjectSettings(name, true)
+                        settings.showText = val and true or false
+                        if self.pieces[name] then
+                            self:UpdatePieceContent(self.pieces[name])
+                            self:Refresh()
+                        end
+                    end,
+                },
+            },
         }
         order = order + 1
     end
@@ -468,7 +678,7 @@ end
 function BrokerModule:GetDefaultOptions()
     return "Broker", {
         enabled = false,
-        enabledObjects = {},
+        objects = {},
     }
 end
 

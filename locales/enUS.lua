@@ -151,6 +151,8 @@ L["NO_AUDIO_OUTPUT_DEVICES"] = "No Audio Output Devices"
 L["BROKER"] = "Broker"
 L["BROKER_PLUGINS"] = "DataBroker Plugins"
 L["BROKER_NONE_AVAILABLE"] = "No DataBroker plugins detected. Enable a LibDataBroker plugin addon to list it here."
+L["BROKER_SHOW_ICON"] = "Show Icon"
+L["BROKER_SHOW_TEXT"] = "Show Text"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"
