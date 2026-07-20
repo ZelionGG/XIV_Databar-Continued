@@ -21,14 +21,62 @@ local function IsUsableAnchor(frame)
     return frame and frame:IsShown() and frame:GetWidth() > 0
 end
 
-local function IsDisplayable(name, dataobj)
+local function NormalizeBrokerType(brokerType)
+    if type(brokerType) ~= "string" then
+        return nil
+    end
+    return string.lower((brokerType:gsub("^%s+", ""):gsub("%s+$", "")))
+end
+
+local function IsBrokerCandidate(name, dataobj)
     if not name or not dataobj then
         return false
     end
     if name == AddOnName then
         return false
     end
-    return DISPLAY_TYPES[dataobj.type] == true
+    local brokerType = NormalizeBrokerType(dataobj.type)
+    return brokerType and DISPLAY_TYPES[brokerType] == true
+end
+
+local function IsTypeFilterEnabled(module, key)
+    -- Prefer in-memory mirrors so option toggles apply even if AceDB readback lags
+    if module[key] ~= nil then
+        return module[key] and true or false
+    end
+    local db = module.GetDb and module:GetDb()
+    if not db or db[key] == nil then
+        return true
+    end
+    return db[key] and true or false
+end
+
+local function IsTypeAllowed(dataobj)
+    local brokerType = dataobj and NormalizeBrokerType(dataobj.type)
+    if not brokerType or not DISPLAY_TYPES[brokerType] then
+        return false
+    end
+
+    if brokerType == "data source" then
+        return IsTypeFilterEnabled(BrokerModule, "showDataSources")
+    end
+    if brokerType == "launcher" then
+        return IsTypeFilterEnabled(BrokerModule, "showLaunchers")
+    end
+    return false
+end
+
+local function IsDisplayable(name, dataobj)
+    return IsBrokerCandidate(name, dataobj) and IsTypeAllowed(dataobj)
+end
+
+local function HasVisibleBrokerPlugins()
+    for name, dataobj in LDB:DataObjectIterator() do
+        if IsDisplayable(name, dataobj) then
+            return true
+        end
+    end
+    return false
 end
 
 local function SanitizeFrameToken(name)
@@ -58,7 +106,7 @@ local function GetBrokerText(name, dataobj)
 end
 
 local function DefaultShowText(dataobj)
-    return dataobj.type ~= "launcher"
+    return NormalizeBrokerType(dataobj and dataobj.type) ~= "launcher"
 end
 
 function BrokerModule:GetName()
@@ -121,11 +169,44 @@ function BrokerModule:MigrateDb()
     end
 end
 
+function BrokerModule:SyncTypeFilterMirrors()
+    local db = self:GetDb()
+    if not db then
+        self.showDataSources = true
+        self.showLaunchers = true
+        return
+    end
+    self.showDataSources = db.showDataSources ~= false
+    self.showLaunchers = db.showLaunchers ~= false
+end
+
 function BrokerModule:NotifyOptionsChange()
+    local appName = AddOnName .. "_Modules"
     local registry = LibStub("AceConfigRegistry-3.0", true)
     if registry then
-        registry:NotifyChange(AddOnName .. "_Modules")
+        registry:NotifyChange(appName)
     end
+end
+
+function BrokerModule:ApplyTypeFilter()
+    self:SyncTypeFilterMirrors()
+
+    local moduleDb = self:GetDb()
+    if moduleDb and moduleDb.enabled then
+        if not self:IsEnabled() then
+            self:Enable()
+        else
+            self:SyncPieces()
+            self:RefreshLayoutOnly()
+        end
+    else
+        self:SyncPieces()
+    end
+
+    -- Keep all candidates registered; visibility is via hidden() so Blizzard Settings
+    -- and AceConfigDialog both drop filtered groups on the next feed/refresh.
+    self:RebuildPluginOptions()
+    self:NotifyOptionsChange()
 end
 
 function BrokerModule:OnInitialize()
@@ -134,12 +215,14 @@ function BrokerModule:OnInitialize()
     self.activeObjects = {}
     self.optionsTable = nil
     self:MigrateDb()
+    self:SyncTypeFilterMirrors()
 
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated", "OnDataObjectCreated")
 end
 
 function BrokerModule:OnEnable()
     self:MigrateDb()
+    self:SyncTypeFilterMirrors()
     self:SyncPieces()
     self:Refresh()
 end
@@ -463,21 +546,57 @@ end
 function BrokerModule:SyncPieces()
     local db = self:GetDb()
     if not db or not db.enabled then
+        local toDisable = {}
+        for name in pairs(self.pieces) do
+            table.insert(toDisable, name)
+        end
+        for _, name in ipairs(toDisable) do
+            self:DisableObject(name)
+        end
         return
     end
 
     db.objects = db.objects or {}
+
+    -- Hide anything that should not be visible (type filter, object off, missing LDB)
+    local toDisable = {}
+    for name in pairs(self.pieces) do
+        local dataobj = LDB:GetDataObjectByName(name)
+        local settings = db.objects[name]
+        local shouldShow = settings and settings.enabled and IsDisplayable(name, dataobj)
+        if not shouldShow then
+            table.insert(toDisable, name)
+        end
+    end
+    for _, name in ipairs(toDisable) do
+        self:DisableObject(name)
+    end
+
     for name, settings in pairs(db.objects) do
-        if settings and settings.enabled then
+        local dataobj = LDB:GetDataObjectByName(name)
+        if settings and settings.enabled and IsDisplayable(name, dataobj) then
             self:EnableObject(name)
-        elseif self.pieces[name] then
-            self:DisableObject(name)
+        end
+    end
+end
+
+function BrokerModule:HideInactivePieces(activeSet)
+    for name, piece in pairs(self.pieces) do
+        if not activeSet[name] then
+            piece:Hide()
+            piece:ClearAllPoints()
         end
     end
 end
 
 function BrokerModule:LayoutLegacyCluster()
     local names = self:GetActiveNames()
+    local activeSet = {}
+    for _, name in ipairs(names) do
+        activeSet[name] = true
+    end
+    self:HideInactivePieces(activeSet)
+
     local gap = 5
     local previous
     local firstPiece
@@ -525,6 +644,12 @@ end
 
 function BrokerModule:RefreshLayoutOnly()
     local names = self:GetActiveNames()
+    local activeSet = {}
+    for _, name in ipairs(names) do
+        activeSet[name] = true
+    end
+    self:HideInactivePieces(activeSet)
+
     if #names == 0 then
         return
     end
@@ -577,7 +702,7 @@ function BrokerModule:RebuildPluginOptions()
     local names = {}
 
     for name, dataobj in LDB:DataObjectIterator() do
-        if IsDisplayable(name, dataobj) then
+        if IsBrokerCandidate(name, dataobj) then
             table.insert(names, name)
         end
     end
@@ -589,7 +714,7 @@ function BrokerModule:RebuildPluginOptions()
         if dataobj.label and dataobj.label ~= "" then
             label = dataobj.label
         end
-        local typeLabel = dataobj.type or ""
+        local typeLabel = NormalizeBrokerType(dataobj.type) or dataobj.type or ""
         local groupKey = "obj_" .. SanitizeFrameToken(name)
 
         args[groupKey] = {
@@ -597,6 +722,9 @@ function BrokerModule:RebuildPluginOptions()
             order = order,
             type = "group",
             inline = true,
+            hidden = function()
+                return not IsDisplayable(name, LDB:GetDataObjectByName(name))
+            end,
             args = {
                 enabled = {
                     name = ENABLE,
@@ -663,14 +791,15 @@ function BrokerModule:RebuildPluginOptions()
         order = order + 1
     end
 
-    if order == 1 then
-        args.none = {
-            name = L["BROKER_NONE_AVAILABLE"],
-            order = 1,
-            type = "description",
-            fontSize = "medium",
-        }
-    end
+    args.none = {
+        name = L["BROKER_NONE_AVAILABLE"],
+        order = 0,
+        type = "description",
+        fontSize = "medium",
+        hidden = function()
+            return HasVisibleBrokerPlugins()
+        end,
+    }
 
     self.optionsTable.args.plugins.args = args
 end
@@ -678,6 +807,8 @@ end
 function BrokerModule:GetDefaultOptions()
     return "Broker", {
         enabled = false,
+        showDataSources = true,
+        showLaunchers = true,
         objects = {},
     }
 end
@@ -709,6 +840,50 @@ function BrokerModule:GetConfig()
                     end
                 end,
             },
+            showDataSources = {
+                name = L["BROKER_SHOW_DATA_SOURCES"],
+                order = 0.1,
+                type = "toggle",
+                width = "full",
+                disabled = function()
+                    local moduleDb = self:GetDb()
+                    return not (moduleDb and moduleDb.enabled)
+                end,
+                get = function()
+                    return IsTypeFilterEnabled(self, "showDataSources")
+                end,
+                set = function(_, val)
+                    local moduleDb = self:GetDb()
+                    if not moduleDb then
+                        return
+                    end
+                    moduleDb.showDataSources = val and true or false
+                    self.showDataSources = moduleDb.showDataSources
+                    self:ApplyTypeFilter()
+                end,
+            },
+            showLaunchers = {
+                name = L["BROKER_SHOW_LAUNCHERS"],
+                order = 0.2,
+                type = "toggle",
+                width = "full",
+                disabled = function()
+                    local moduleDb = self:GetDb()
+                    return not (moduleDb and moduleDb.enabled)
+                end,
+                get = function()
+                    return IsTypeFilterEnabled(self, "showLaunchers")
+                end,
+                set = function(_, val)
+                    local moduleDb = self:GetDb()
+                    if not moduleDb then
+                        return
+                    end
+                    moduleDb.showLaunchers = val and true or false
+                    self.showLaunchers = moduleDb.showLaunchers
+                    self:ApplyTypeFilter()
+                end,
+            },
             plugins = {
                 name = L["BROKER_PLUGINS"],
                 order = 1,
@@ -719,6 +894,7 @@ function BrokerModule:GetConfig()
         },
     }
 
+    self:SyncTypeFilterMirrors()
     self:RebuildPluginOptions()
     return self.optionsTable
 end
