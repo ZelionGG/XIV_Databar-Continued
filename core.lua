@@ -44,6 +44,9 @@ function XIVBar:OnInitialize()
     self.fontFlags = {'', 'OUTLINE', 'THICKOUTLINE', 'MONOCHROME'}
 
     self:SetupOptions()
+    -- Module defaults are appended in SetupOptions; re-register so AceDB copies them
+    -- into already-initialized sections and strips them correctly on logout.
+    self.db:RegisterDefaults(self.defaults)
 
     self.timerRefresh = false
 
@@ -53,7 +56,7 @@ function XIVBar:OnInitialize()
 end
 
 -- Bump when the setup prompt must be shown again (e.g. after changing who gets it).
-local PROFILE_SETUP_VERSION = 3
+local PROFILE_SETUP_VERSION = 4
 
 function XIVBar:GetCharacterProfileKey()
     return self.constants.playerName .. " - " .. self.constants.playerRealm

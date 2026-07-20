@@ -661,40 +661,48 @@ StaticPopupDialogs["XIVBAR_PROFILE_SETUP"] = {
     wide = true,
     wideText = true,
     normalSizedSubText = true,
-    button1 = L["PROFILE_SETUP_NEW_BLANK"],
-    button2 = L["PROFILE_SETUP_KEEP_CURRENT"],
-    button3 = L["PROFILE_SETUP_NEW_FROM_SHARED"],
+    -- Keep current is primary: Create blank was previously button1 and wiped settings via ResetProfile.
+    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button2 = L["PROFILE_SETUP_NEW_FROM_SHARED"],
+    button3 = L["PROFILE_SETUP_NEW_BLANK"],
     OnShow = function(self)
         local pending = XIVBar.profileSetupPending
         local preferred = (pending and pending.preferred) or "Default"
         StyleProfileSetupDialog(self, L["PROFILE_SETUP_TEXT"]:format(preferred))
 
         local hasShared = XIVBar:GetSharedProfileForCopy() ~= nil
-        local button3 = self.button3 or self.Button3 or (self.GetButton3 and self:GetButton3())
-        if button3 then
+        local button2 = self.button2 or self.Button2 or (self.GetButton2 and self:GetButton2())
+        if button2 then
             if hasShared then
-                button3:SetText(L["PROFILE_SETUP_NEW_FROM_SHARED"])
-                button3:Show()
+                button2:SetText(L["PROFILE_SETUP_NEW_FROM_SHARED"])
+                button2:Show()
             else
-                button3:Hide()
+                button2:Hide()
             end
         end
     end,
     OnAccept = function()
-        -- Blank personal profile.
-        XIVBar:CreatePersonalProfileFromSetup(false)
-    end,
-    OnCancel = function()
         -- Keep the current shared Default profile.
         XIVBar:MarkProfileSetupDone()
     end,
-    OnAlt = function()
+    OnCancel = function()
         -- Personal profile copied from the shared/Default profile.
-        XIVBar:CreatePersonalProfileFromSetup(true)
+        if XIVBar:GetSharedProfileForCopy() then
+            XIVBar:CreatePersonalProfileFromSetup(true)
+        else
+            XIVBar:MarkProfileSetupDone()
+        end
+    end,
+    OnAlt = function()
+        -- Blank personal profile (destructive; least prominent button).
+        XIVBar:CreatePersonalProfileFromSetup(false)
     end,
     OnHide = function(self)
         CleanupProfileSetupDialog(self)
-        -- Do not flag on escape/dismiss; prompt again next login until a button is used.
+        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep current.
+        if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
+            XIVBar:MarkProfileSetupDone()
+        end
     end,
     timeout = 0,
     whileDead = true,
@@ -709,22 +717,25 @@ StaticPopupDialogs["XIVBAR_PROFILE_NEWCHAR"] = {
     wide = true,
     wideText = true,
     normalSizedSubText = true,
-    button1 = L["PROFILE_NEWCHAR_USE_SHARED"],
-    button2 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button2 = L["PROFILE_NEWCHAR_USE_SHARED"],
     OnShow = function(self)
         StyleProfileSetupDialog(self, L["PROFILE_NEWCHAR_TEXT"])
     end,
     OnAccept = function()
-        -- Join the shared Default profile (live share).
-        XIVBar:UseSharedDefaultFromSetup()
-    end,
-    OnCancel = function()
         -- Keep the blank personal Name - Realm profile.
         XIVBar:MarkProfileSetupDone()
     end,
+    OnCancel = function()
+        -- Join the shared Default profile (live share).
+        XIVBar:UseSharedDefaultFromSetup()
+    end,
     OnHide = function(self)
         CleanupProfileSetupDialog(self)
-        -- Do not flag on escape/dismiss; prompt again next login until a button is used.
+        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep personal.
+        if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
+            XIVBar:MarkProfileSetupDone()
+        end
     end,
     timeout = 0,
     whileDead = true,
