@@ -1108,7 +1108,8 @@ function TravelModule:GetTeleportInfo(teleportData)
     end
 
     if not dungeonName then
-        dungeonName = type(dungeonId) == "number" and ("Dungeon " .. tostring(dungeonId)) or "Unknown dungeon"
+        dungeonName = teleportData.name
+            or (type(dungeonId) == "number" and ("Dungeon " .. tostring(dungeonId)) or "Unknown dungeon")
     end
 
     if knownId then
