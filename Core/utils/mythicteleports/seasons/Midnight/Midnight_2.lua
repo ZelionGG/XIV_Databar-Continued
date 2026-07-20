@@ -15,6 +15,8 @@ xb.MythicTeleports.MIDNIGHT_2 = {
         "MIDNIGHT.TBV",
         "MIDNIGHT.VSA",
         "MIDNIGHT.AoFa",
+        -- DF dungeons
+        "DF.RLP",
         -- BFA dungeons
         "BFA.ToSet",
         "BFA.KR",
