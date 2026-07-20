@@ -147,6 +147,11 @@ L["CURRENT_AUDIO_OUTPUT"] = "Current Output"
 L["SET_AUDIO_OUTPUT"] = "Set Audio Output"
 L["NO_AUDIO_OUTPUT_DEVICES"] = "No Audio Output Devices"
 
+-- Broker
+L["BROKER"] = "Broker"
+L["BROKER_PLUGINS"] = "DataBroker Plugins"
+L["BROKER_NONE_AVAILABLE"] = "No DataBroker plugins detected. Enable a LibDataBroker plugin addon to list it here."
+
 -- Clock
 L["TIME_FORMAT"] = "Time Format"
 L["CLOCK_DATE_FORMAT"] = "Date Format"

@@ -54,6 +54,7 @@ XIVBar.defaults = {
 
 XIVBar.freePlacementFrameMap = {
     armor = "armorFrame",
+    Broker = "brokerFrame",
     clock = "clockFrame",
     currency = "currencyFrame",
     gold = "goldFrame",
@@ -69,6 +70,7 @@ XIVBar.freePlacementFrameMap = {
 
 XIVBar.freePlacementDefaultAnchor = {
     armor = "LEFT",
+    Broker = "RIGHT",
     clock = "CENTER",
     currency = "LEFT",
     gold = "RIGHT",
