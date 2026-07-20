@@ -329,6 +329,14 @@ L["EXPORT_PROFILE_DESC"] = "Exporter les paramètres du profil actuel"
 L["IMPORT_PROFILE"] = "Importer un profil"
 L["IMPORT_PROFILE_DESC"] = "Importer un profil d'un autre joueur"
 
+L["PROFILE_SETUP_HEADER"] = "XIV_Databar Continued"
+L["PROFILE_SETUP_TEXT"] = "Le système de profils a été migré : ce personnage utilise encore l'ancien profil partagé Default.\n\nChoisissez comment ce personnage doit continuer :\n- |cffffd100Créer un profil vide :|r profil personnel avec les réglages par défaut\n- |cffffd100Garder le profil actuel :|r rester sur le profil partagé Default\n- |cffffd100Copier le profil partagé :|r profil personnel basé sur vos réglages partagés actuels\n\nVous pourrez aussi gérer les profils plus tard dans les paramètres Profiles.\n\nProfil actuel : %s"
+L["PROFILE_SETUP_NEW_BLANK"] = "Créer un profil vide"
+L["PROFILE_SETUP_NEW_FROM_SHARED"] = "Copier le profil partagé"
+L["PROFILE_SETUP_KEEP_CURRENT"] = "Garder le profil actuel"
+L["PROFILE_NEWCHAR_TEXT"] = "Ce personnage démarre avec un profil personnel vide.\n\n- |cffffd100Utiliser le profil partagé :|r rejoindre le profil Default (réglages synchronisés)\n- |cffffd100Garder le profil actuel :|r garder le profil personnel vide de ce personnage\n\nVous pourrez changer ça plus tard dans les paramètres Profiles."
+L["PROFILE_NEWCHAR_USE_SHARED"] = "Utiliser le profil partagé"
+
 -- Changelog
 L["CHANGELOG_DATE_FORMAT"] = "%day%/%month%/%year%"
 L["IMPORTANT"] = "Important" -- @no-translate

@@ -331,6 +331,14 @@ L["EXPORT_PROFILE_DESC"] = "Export your current profile settings"
 L["IMPORT_PROFILE"] = "Import Profile"
 L["IMPORT_PROFILE_DESC"] = "Import a profile from another player"
 
+L["PROFILE_SETUP_HEADER"] = "XIV_Databar Continued"
+L["PROFILE_SETUP_TEXT"] = "The profile system has been migrated: this character is still using the legacy shared Default profile.\n\nChoose how this character should continue:\n- |cffffd100Create blank profile:|r personal profile with default settings\n- |cffffd100Keep current profile:|r stay on the shared Default profile\n- |cffffd100Copy shared profile:|r personal profile based on your current shared settings\n\nYou can also manage profiles later in the Profiles settings.\n\nCurrent profile: %s"
+L["PROFILE_SETUP_NEW_BLANK"] = "Create blank profile"
+L["PROFILE_SETUP_NEW_FROM_SHARED"] = "Copy shared profile"
+L["PROFILE_SETUP_KEEP_CURRENT"] = "Keep current profile"
+L["PROFILE_NEWCHAR_TEXT"] = "This character starts with a blank personal profile.\n\n- |cffffd100Use shared profile:|r join the shared Default profile (settings stay in sync)\n- |cffffd100Keep current profile:|r keep this character's blank personal profile\n\nYou can change this later in the Profiles settings."
+L["PROFILE_NEWCHAR_USE_SHARED"] = "Use shared profile"
+
 -- Changelog
 L["CHANGELOG_DATE_FORMAT"] = "%month%-%day%-%year%"
 L["IMPORTANT"] = "Important"

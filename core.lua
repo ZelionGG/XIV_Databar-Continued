@@ -34,7 +34,9 @@ XIVBar.constants = {
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
 
 function XIVBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, "Default")
+    -- Omit default profile so new characters get a per-character "Name - Realm" profile.
+    -- Existing profileKeys (e.g. "Default") are preserved by AceDB.
+    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
     self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold',
                       self.constants.mediaPath .. "homizio_bold.ttf")
     self.frames = {}
@@ -48,6 +50,104 @@ function XIVBar:OnInitialize()
     self:RegisterChatCommand('xivc', 'ToggleConfig')
     self:RegisterChatCommand('xivbar', 'ToggleConfig')
     self:RegisterChatCommand('xbc', 'ToggleConfig')
+end
+
+-- Bump when the setup prompt must be shown again (e.g. after changing who gets it).
+local PROFILE_SETUP_VERSION = 3
+
+function XIVBar:GetCharacterProfileKey()
+    return self.constants.playerName .. " - " .. self.constants.playerRealm
+end
+
+function XIVBar:HasCompletedProfileSetup()
+    return (self.db.char.profileSetupVersion or 0) >= PROFILE_SETUP_VERSION
+end
+
+function XIVBar:MarkProfileSetupDone()
+    self.db.char.profileSetupVersion = PROFILE_SETUP_VERSION
+    -- Clear the early boolean flag that could silently suppress the Default prompt.
+    self.db.char.profileSetupDone = nil
+    self.profileSetupPending = nil
+end
+
+function XIVBar:HasDefaultProfile()
+    return self.db.profiles and rawget(self.db.profiles, "Default") ~= nil
+end
+
+function XIVBar:GetSharedProfileForCopy()
+    local pending = self.profileSetupPending
+    local charKey = (pending and pending.charKey) or self:GetCharacterProfileKey()
+    local candidate = pending and pending.preferred
+    if candidate and candidate ~= charKey then
+        return candidate
+    end
+    if self:HasDefaultProfile() then
+        return "Default"
+    end
+    return nil
+end
+
+-- copyShared: nil/false = blank personal profile; true = personal profile copied from shared/Default.
+function XIVBar:CreatePersonalProfileFromSetup(copyShared)
+    local pending = self.profileSetupPending
+    local charKey = (pending and pending.charKey) or self:GetCharacterProfileKey()
+    local baseProfile = copyShared and self:GetSharedProfileForCopy() or nil
+
+    self:MarkProfileSetupDone()
+
+    if self.db:GetCurrentProfile() ~= charKey then
+        self.db:SetProfile(charKey)
+    end
+
+    if copyShared and baseProfile and baseProfile ~= charKey then
+        self.db:CopyProfile(baseProfile, true)
+    else
+        self.db:ResetProfile()
+    end
+end
+
+function XIVBar:UseSharedDefaultFromSetup()
+    self:MarkProfileSetupDone()
+    if self.db:GetCurrentProfile() ~= "Default" then
+        self.db:SetProfile("Default")
+    end
+end
+
+function XIVBar:MaybeShowProfileSetupPrompt()
+    if not self.db or self:HasCompletedProfileSetup() then
+        return
+    end
+
+    local charKey = self:GetCharacterProfileKey()
+    local current = self.db:GetCurrentProfile()
+
+    if current == "Default" then
+        -- Legacy shared profile: full migration dialog.
+        self.profileSetupPending = {
+            mode = "migrate",
+            preferred = "Default",
+            sourceProfile = current,
+            charKey = charKey,
+            isLegacyDefault = true,
+        }
+        StaticPopup_Show("XIVBAR_PROFILE_SETUP")
+        return
+    end
+
+    if current == charKey and self:HasDefaultProfile() then
+        -- New character on a blank personal profile: offer shared Default or stay fresh.
+        self.profileSetupPending = {
+            mode = "newchar",
+            preferred = "Default",
+            sourceProfile = current,
+            charKey = charKey,
+        }
+        StaticPopup_Show("XIVBAR_PROFILE_NEWCHAR")
+        return
+    end
+
+    -- Custom profile, or first character with no Default yet.
+    self:MarkProfileSetupDone()
 end
 
 function XIVBar:CreateMainBar()
@@ -235,6 +335,12 @@ function XIVBar:OnEnable()
     self.db.RegisterCallback(self, 'OnProfileChanged', 'Refresh')
     self.db.RegisterCallback(self, 'OnProfileReset', 'Refresh')
 
+    C_Timer.After(1, function()
+        if XIVBar and XIVBar.db then
+            XIVBar:MaybeShowProfileSetupPrompt()
+        end
+    end)
+
     if not self.timerRefresh then
         C_Timer.After(5, function()
             self:Refresh()
@@ -277,6 +383,8 @@ function XIVBar:GetColor(name)
     if name == 'normal' and profile.useTextCC then
         r, g, b = self:GetClassColors()
     elseif name == 'barColor' and profile.useCC then
+        r, g, b = self:GetClassColors()
+    elseif name == 'hover' and profile.useHoverCC then
         r, g, b = self:GetClassColors()
     end
 

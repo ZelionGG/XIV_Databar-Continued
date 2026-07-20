@@ -576,6 +576,165 @@ StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
     preferredIndex = 3,
 }
 
+local PROFILE_SETUP_DIALOG_WIDTH = 560
+local PROFILE_SETUP_TEXT_WIDTH = 540
+local PROFILE_SETUP_TEXT_PAD = 10
+
+local function SetDialogTextWidth(fontString, width)
+    if not fontString then
+        return
+    end
+    if fontString.SetDesiredWidth then
+        fontString:SetDesiredWidth(width)
+    else
+        fontString:SetWidth(width)
+    end
+end
+
+local function StyleProfileSetupDialog(dialog, bodyText)
+    dialog:SetWidth(PROFILE_SETUP_DIALOG_WIDTH)
+
+    local text = dialog.Text or dialog.text
+    local subText = dialog.SubText
+
+    if text then
+        if text.SetFontObject then
+            text:SetFontObject(GameFontNormalHuge)
+        end
+        text:SetTextColor(1, 0.82, 0)
+        text:SetJustifyH("CENTER")
+        text:SetText(L["PROFILE_SETUP_HEADER"])
+        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
+    end
+
+    if subText then
+        -- Retail/GameDialog: body goes in SubText under the header.
+        subText:SetText(bodyText)
+        subText:Show()
+        subText:SetJustifyH("CENTER")
+        SetDialogTextWidth(subText, PROFILE_SETUP_TEXT_WIDTH)
+        if subText.SetFontObject then
+            subText:SetFontObject(GameFontHighlight)
+        end
+    elseif text then
+        -- Classic-style StaticPopup: custom header + body below.
+        if not dialog.xivProfileHeader then
+            local header = dialog:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
+            header:SetJustifyH("CENTER")
+            header:SetTextColor(1, 0.82, 0)
+            dialog.xivProfileHeader = header
+        end
+
+        local header = dialog.xivProfileHeader
+        header:ClearAllPoints()
+        header:SetPoint("TOP", dialog, "TOP", 0, -18)
+        header:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
+        header:SetText(L["PROFILE_SETUP_HEADER"])
+        header:Show()
+
+        text:SetFontObject(GameFontHighlight)
+        text:SetTextColor(1, 1, 1)
+        text:SetJustifyH("CENTER")
+        text:SetText(bodyText)
+        text:ClearAllPoints()
+        text:SetPoint("TOP", header, "BOTTOM", 0, -12)
+        text:SetPoint("LEFT", dialog, "LEFT", PROFILE_SETUP_TEXT_PAD, 0)
+        text:SetPoint("RIGHT", dialog, "RIGHT", -PROFILE_SETUP_TEXT_PAD, 0)
+        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
+    end
+
+    if dialog.SetMinimumWidth then
+        dialog:SetMinimumWidth(PROFILE_SETUP_DIALOG_WIDTH)
+    end
+    if dialog.Resize then
+        dialog:Resize()
+    end
+end
+
+local function CleanupProfileSetupDialog(dialog)
+    if dialog.xivProfileHeader then
+        dialog.xivProfileHeader:Hide()
+    end
+end
+
+StaticPopupDialogs["XIVBAR_PROFILE_SETUP"] = {
+    text = L["PROFILE_SETUP_HEADER"],
+    subText = " ",
+    wide = true,
+    wideText = true,
+    normalSizedSubText = true,
+    button1 = L["PROFILE_SETUP_NEW_BLANK"],
+    button2 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button3 = L["PROFILE_SETUP_NEW_FROM_SHARED"],
+    OnShow = function(self)
+        local pending = XIVBar.profileSetupPending
+        local preferred = (pending and pending.preferred) or "Default"
+        StyleProfileSetupDialog(self, L["PROFILE_SETUP_TEXT"]:format(preferred))
+
+        local hasShared = XIVBar:GetSharedProfileForCopy() ~= nil
+        local button3 = self.button3 or self.Button3 or (self.GetButton3 and self:GetButton3())
+        if button3 then
+            if hasShared then
+                button3:SetText(L["PROFILE_SETUP_NEW_FROM_SHARED"])
+                button3:Show()
+            else
+                button3:Hide()
+            end
+        end
+    end,
+    OnAccept = function()
+        -- Blank personal profile.
+        XIVBar:CreatePersonalProfileFromSetup(false)
+    end,
+    OnCancel = function()
+        -- Keep the current shared Default profile.
+        XIVBar:MarkProfileSetupDone()
+    end,
+    OnAlt = function()
+        -- Personal profile copied from the shared/Default profile.
+        XIVBar:CreatePersonalProfileFromSetup(true)
+    end,
+    OnHide = function(self)
+        CleanupProfileSetupDialog(self)
+        -- Do not flag on escape/dismiss; prompt again next login until a button is used.
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    noCancelOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["XIVBAR_PROFILE_NEWCHAR"] = {
+    text = L["PROFILE_SETUP_HEADER"],
+    subText = " ",
+    wide = true,
+    wideText = true,
+    normalSizedSubText = true,
+    button1 = L["PROFILE_NEWCHAR_USE_SHARED"],
+    button2 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    OnShow = function(self)
+        StyleProfileSetupDialog(self, L["PROFILE_NEWCHAR_TEXT"])
+    end,
+    OnAccept = function()
+        -- Join the shared Default profile (live share).
+        XIVBar:UseSharedDefaultFromSetup()
+    end,
+    OnCancel = function()
+        -- Keep the blank personal Name - Realm profile.
+        XIVBar:MarkProfileSetupDone()
+    end,
+    OnHide = function(self)
+        CleanupProfileSetupDialog(self)
+        -- Do not flag on escape/dismiss; prompt again next login until a button is used.
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    noCancelOnEscape = true,
+    preferredIndex = 3,
+}
+
 function XIVBar:GetGeneralOptions()
     return {
         name = GENERAL_LABEL,
@@ -672,11 +831,11 @@ function XIVBar:GetColorOptions()
                 order = 1,
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
-                    if not self.db.profile.color.useCC then
-                        self:SetColor('barColor', r, g, b, a)
+                    if self.db.profile.color.useCC then
+                        local c = self.db.profile.color.barColor
+                        self:SetColor('barColor', c.r, c.g, c.b, a)
                     else
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        self:SetColor('barColor', cr, cg, cb, a)
+                        self:SetColor('barColor', r, g, b, a)
                     end
                 end,
                 get = function()
@@ -689,9 +848,8 @@ function XIVBar:GetColorOptions()
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
-                    XIVBar:SetColor('barColor', self:GetClassColors());
-                    self.db.profile.color.useCC = val;
-                    self:Refresh();
+                    self.db.profile.color.useCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useCC
@@ -717,10 +875,11 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
                     if self.db.profile.color.useTextCC then
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        r, g, b = cr, cg, cb
+                        local c = self.db.profile.color.normal
+                        XIVBar:SetColor('normal', c.r, c.g, c.b, a)
+                    else
+                        XIVBar:SetColor('normal', r, g, b, a)
                     end
-                    XIVBar:SetColor('normal', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('normal') end
             },
@@ -730,10 +889,8 @@ function XIVBar:GetTextColorOptions()
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
-                    if val then
-                        XIVBar:SetColor("normal", self:GetClassColors())
-                    end
                     self.db.profile.color.useTextCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useTextCC
@@ -747,10 +904,11 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
                     if self.db.profile.color.useHoverCC then
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        r, g, b = cr, cg, cb
+                        local c = self.db.profile.color.hover
+                        XIVBar:SetColor('hover', c.r, c.g, c.b, a)
+                    else
+                        XIVBar:SetColor('hover', r, g, b, a)
                     end
-                    XIVBar:SetColor('hover', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('hover') end
             },
@@ -759,11 +917,8 @@ function XIVBar:GetTextColorOptions()
                 type = "toggle",
                 order = 4,
                 set = function(_, val)
-                    if val then
-                        XIVBar:SetColor("hover", self:GetClassColors())
-                    end
-                    self.db.profile.color.useHoverCC = val;
-                    self:Refresh();
+                    self.db.profile.color.useHoverCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useHoverCC
