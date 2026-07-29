@@ -127,6 +127,11 @@ local function DefaultShowText(dataobj)
     return NormalizeBrokerType(dataobj and dataobj.type) ~= "launcher"
 end
 
+local function IsObjectEnabled(name)
+    local settings = DataBrokersModule:GetObjectSettings(name, false)
+    return settings and settings.enabled == true
+end
+
 function DataBrokersModule:GetName()
     return L["DATABROKERS"] or "DataBrokers"
 end
@@ -439,7 +444,10 @@ function DataBrokersModule:UpdatePieceContent(piece)
     local showIcon = settings.showIcon ~= false and dataobj.icon ~= nil
     local showText = settings.showText == true
     local db = xb.db.profile
-    local iconSize = db.text.fontSize
+    local moduleDb = self:GetDb()
+    local iconSize = settings.iconSize
+        or (moduleDb and moduleDb.iconSize)
+        or db.text.fontSize
     local text = GetBrokerText(name, dataobj)
 
     if not showText and not showIcon then
@@ -794,12 +802,16 @@ function DataBrokersModule:RebuildPluginOptions()
                             end
                             self:Refresh()
                         end
+                        self:NotifyOptionsChange()
                     end,
                 },
                 showIcon = {
                     name = L["DATABROKERS_SHOW_ICON"],
                     order = 2,
                     type = "toggle",
+                    hidden = function()
+                        return not IsObjectEnabled(name)
+                    end,
                     get = function()
                         local settings = self:GetObjectSettings(name, true)
                         return settings.showIcon ~= false
@@ -817,6 +829,9 @@ function DataBrokersModule:RebuildPluginOptions()
                     name = L["DATABROKERS_SHOW_TEXT"],
                     order = 3,
                     type = "toggle",
+                    hidden = function()
+                        return not IsObjectEnabled(name)
+                    end,
                     get = function()
                         local settings = self:GetObjectSettings(name, true)
                         return settings.showText == true
@@ -824,6 +839,32 @@ function DataBrokersModule:RebuildPluginOptions()
                     set = function(_, val)
                         local settings = self:GetObjectSettings(name, true)
                         settings.showText = val and true or false
+                        if self.pieces[name] then
+                            self:UpdatePieceContent(self.pieces[name])
+                            self:Refresh()
+                        end
+                    end,
+                },
+                iconSize = {
+                    name = L["DATABROKERS_ICON_SIZE"],
+                    order = 4,
+                    type = "range",
+                    min = 8,
+                    max = 40,
+                    step = 1,
+                    hidden = function()
+                        return not IsObjectEnabled(name)
+                    end,
+                    get = function()
+                        local settings = self:GetObjectSettings(name, true)
+                        local moduleDb = self:GetDb()
+                        return settings.iconSize
+                            or (moduleDb and moduleDb.iconSize)
+                            or 12
+                    end,
+                    set = function(_, val)
+                        local settings = self:GetObjectSettings(name, true)
+                        settings.iconSize = val
                         if self.pieces[name] then
                             self:UpdatePieceContent(self.pieces[name])
                             self:Refresh()
@@ -853,6 +894,7 @@ function DataBrokersModule:GetDefaultOptions()
         enabled = false,
         showDataSources = true,
         showLaunchers = true,
+        iconSize = 12,
         objects = {},
     }
 end
@@ -882,6 +924,7 @@ function DataBrokersModule:GetConfig()
                     else
                         self:Disable()
                     end
+                    self:NotifyOptionsChange()
                 end,
             },
             showDataSources = {
@@ -928,11 +971,39 @@ function DataBrokersModule:GetConfig()
                     self:ApplyTypeFilter()
                 end,
             },
+            iconSize = {
+                name = L["DATABROKERS_ICON_SIZE"],
+                order = 0.3,
+                type = "range",
+                min = 8,
+                max = 40,
+                step = 1,
+                disabled = function()
+                    local moduleDb = self:GetDb()
+                    return not (moduleDb and moduleDb.enabled)
+                end,
+                get = function()
+                    local moduleDb = self:GetDb()
+                    return (moduleDb and moduleDb.iconSize) or 12
+                end,
+                set = function(_, val)
+                    local moduleDb = self:GetDb()
+                    if not moduleDb then
+                        return
+                    end
+                    moduleDb.iconSize = val
+                    self:Refresh()
+                end,
+            },
             plugins = {
                 name = L["DATABROKERS_PLUGINS"],
                 order = 1,
                 type = "group",
                 inline = true,
+                disabled = function()
+                    local moduleDb = self:GetDb()
+                    return not (moduleDb and moduleDb.enabled)
+                end,
                 args = {},
             },
         },
