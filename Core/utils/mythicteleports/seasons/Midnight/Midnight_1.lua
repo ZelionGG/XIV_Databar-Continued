@@ -8,11 +8,11 @@ xb.MythicTeleports.MIDNIGHT_1 = {
         EU = "2026-03-25",
         default = "2026-03-25"
     },
-    --[[ end_date = {
-        US = "2026-03-24",
-        EU = "2026-03-25",
-        default = "2026-03-25"
-    }, ]]
+    end_date = {
+        US = "2026-08-11",
+        EU = "2026-08-12",
+        default = "2026-08-12"
+    },
     teleports = {
         -- TWW dungeons
         "MIDNIGHT.MAGI",
