@@ -154,6 +154,7 @@ L["DATABROKERS_ICON_SIZE"] = "Taille des icônes"
 L["DATABROKERS_SHOW_TEXT"] = "Afficher le texte"
 L["DATABROKERS_SHOW_DATA_SOURCES"] = "Afficher les Data Sources"
 L["DATABROKERS_SHOW_LAUNCHERS"] = "Afficher les Launchers"
+L["DATABROKERS_OTHER"] = "Autres"
 
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"

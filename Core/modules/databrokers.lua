@@ -721,14 +721,24 @@ function DataBrokersModule:Refresh()
 end
 
 function DataBrokersModule:RebuildPluginOptions()
-    if not self.optionsTable or not self.optionsTable.args or not self.optionsTable.args.plugins then
+    if not self.optionsTable or not self.optionsTable.args then
         return
     end
 
-    local args = {}
-    local order = 1
-    local names = {}
+    local rootArgs = self.optionsTable.args
 
+    -- Drop previous dynamically generated source groups / empty notice
+    local staleKeys = {}
+    for key in pairs(rootArgs) do
+        if type(key) == "string" and (key == "none" or string.sub(key, 1, 4) == "src_") then
+            table.insert(staleKeys, key)
+        end
+    end
+    for _, key in ipairs(staleKeys) do
+        rootArgs[key] = nil
+    end
+
+    local names = {}
     for name, dataobj in LDB:DataObjectIterator() do
         if IsBrokerCandidate(name, dataobj) then
             table.insert(names, name)
@@ -756,20 +766,68 @@ function DataBrokersModule:RebuildPluginOptions()
         return a < b
     end)
 
+    local sourceOrder = 10
+    local sourceMeta = {}
+    local brokerOrder = {}
+
+    local function IsModuleDisabled()
+        local moduleDb = DataBrokersModule:GetDb()
+        return not (moduleDb and moduleDb.enabled)
+    end
+
     for _, name in ipairs(names) do
         local dataobj = LDB:GetDataObjectByName(name)
         local label = GetBrokerLabel(name, dataobj)
         local source = GetBrokerSource(dataobj)
         local typeLabel = NormalizeBrokerType(dataobj.type) or dataobj.type or ""
         local groupKey = "obj_" .. SanitizeFrameToken(name)
-        local groupName
-        if source and source ~= label then
-            groupName = string.format("%s | %s (%s)", source, label, typeLabel)
+        local groupName = string.format("%s (%s)", label, typeLabel)
+
+        local sourceKey, sourceName
+        if source then
+            sourceName = source
+            sourceKey = "src_" .. SanitizeFrameToken(source)
         else
-            groupName = string.format("%s (%s)", label, typeLabel)
+            sourceName = L["DATABROKERS_OTHER"] or "Other"
+            sourceKey = "src_other"
         end
 
-        args[groupKey] = {
+        local meta = sourceMeta[sourceKey]
+        if not meta then
+            meta = {
+                name = sourceName,
+                order = sourceOrder,
+                brokers = {},
+            }
+            sourceOrder = sourceOrder + 1
+            sourceMeta[sourceKey] = meta
+            brokerOrder[sourceKey] = 1
+        end
+        table.insert(meta.brokers, name)
+
+        local order = brokerOrder[sourceKey]
+        brokerOrder[sourceKey] = order + 1
+
+        if not rootArgs[sourceKey] then
+            local brokersForHidden = meta.brokers
+            rootArgs[sourceKey] = {
+                name = meta.name,
+                order = meta.order,
+                type = "group",
+                disabled = IsModuleDisabled,
+                hidden = function()
+                    for _, brokerName in ipairs(brokersForHidden) do
+                        if IsDisplayable(brokerName, LDB:GetDataObjectByName(brokerName)) then
+                            return false
+                        end
+                    end
+                    return true
+                end,
+                args = {},
+            }
+        end
+
+        rootArgs[sourceKey].args[groupKey] = {
             name = groupName,
             order = order,
             type = "group",
@@ -873,20 +931,17 @@ function DataBrokersModule:RebuildPluginOptions()
                 },
             },
         }
-        order = order + 1
     end
 
-    args.none = {
+    rootArgs.none = {
         name = L["DATABROKERS_NONE_AVAILABLE"],
-        order = 0,
+        order = 1000,
         type = "description",
         fontSize = "medium",
         hidden = function()
             return HasVisibleBrokerPlugins()
         end,
     }
-
-    self.optionsTable.args.plugins.args = args
 end
 
 function DataBrokersModule:GetDefaultOptions()
@@ -903,6 +958,7 @@ function DataBrokersModule:GetConfig()
     self.optionsTable = {
         name = self:GetName(),
         type = "group",
+        childGroups = "tree",
         args = {
             enable = {
                 name = ENABLE,
@@ -994,17 +1050,6 @@ function DataBrokersModule:GetConfig()
                     moduleDb.iconSize = val
                     self:Refresh()
                 end,
-            },
-            plugins = {
-                name = L["DATABROKERS_PLUGINS"],
-                order = 1,
-                type = "group",
-                inline = true,
-                disabled = function()
-                    local moduleDb = self:GetDb()
-                    return not (moduleDb and moduleDb.enabled)
-                end,
-                args = {},
             },
         },
     }
