@@ -23,6 +23,14 @@
 - 🆕 _**NEW** -_ Added Midnight Season 2 Mythic+ teleports to the **Travel** module.
 - 🆕 _**NEW** -_ Added Mythic+ season date ranges, a Next season group, and temporary dungeon name fallbacks in the **Travel** Mythic+ Teleports menu.
 
+### _TBC Anniversary :_
+
+- 🛠️ _**IMPROVEMENT** -_ TOC update for patch 2.5.6.
+
+### _Classic SoD :_
+
+- 🛠️ _**IMPROVEMENT** -_ TOC update for patch 1.15.9.
+
 ### _Classic :_
 
 - 🐞 _**BUGFIX** -_ Fixed **Armor** durability API usage and hid equipment-set UI on flavors without equipment sets.
