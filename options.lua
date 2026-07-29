@@ -173,8 +173,6 @@ function XIVBar:SetupOptions()
         end
     end
 
-    local modulesPositioningOptions = self:GetModulesPositionningOptions()
-
     local function orange(string)
         if type(string) ~= "string" then string = tostring(string) end
         string = XIVBar:CreateColorString(string, {r = 0.859, g = 0.388, b = 0.203})
@@ -411,7 +409,9 @@ function XIVBar:SetupOptions()
     -- Register all options tables
     AceConfig:RegisterOptionsTable(AddOnName, options)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Modules", moduleOptions)
-    AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", modulesPositioningOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", function()
+        return self:GetModulesPositionningOptions()
+    end)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Changelog", changelogOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
 
@@ -1388,6 +1388,74 @@ function XIVBar:ApplyModuleFreePlacement(moduleKey, frame)
     frame:SetPoint(anchor, bar, anchor, xOffset, 0)
 
     placement.captured = true
+    return true
+end
+
+function XIVBar:NotifyModulesPositioningChange()
+    local registry = LibStub("AceConfigRegistry-3.0", true)
+    if registry then
+        registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+    end
+end
+
+function XIVBar:RegisterDynamicFreePlacement(moduleKey, frameName, displayName, ownerModule)
+    if type(moduleKey) ~= "string" or type(frameName) ~= "string" then
+        return false
+    end
+
+    self.freePlacementFrameMap = self.freePlacementFrameMap or {}
+    self.freePlacementDefaultAnchor = self.freePlacementDefaultAnchor or {}
+    self.freePlacementModuleMeta = self.freePlacementModuleMeta or {}
+    self.freePlacementModuleOrder = self.freePlacementModuleOrder or {}
+
+    self.freePlacementFrameMap[moduleKey] = frameName
+    self.freePlacementDefaultAnchor[moduleKey] = self.freePlacementDefaultAnchor[moduleKey] or "RIGHT"
+    self.freePlacementModuleMeta[moduleKey] = {
+        displayName = displayName or moduleKey,
+        frameName = frameName,
+        module = ownerModule,
+        dynamic = true,
+    }
+
+    local alreadyListed = false
+    for _, key in ipairs(self.freePlacementModuleOrder) do
+        if key == moduleKey then
+            alreadyListed = true
+            break
+        end
+    end
+    if not alreadyListed then
+        table.insert(self.freePlacementModuleOrder, moduleKey)
+    end
+
+    self:NotifyModulesPositioningChange()
+    return true
+end
+
+function XIVBar:UnregisterDynamicFreePlacement(moduleKey)
+    if type(moduleKey) ~= "string" then
+        return false
+    end
+
+    if self.freePlacementFrameMap then
+        self.freePlacementFrameMap[moduleKey] = nil
+    end
+    if self.freePlacementDefaultAnchor then
+        self.freePlacementDefaultAnchor[moduleKey] = nil
+    end
+    if self.freePlacementModuleMeta then
+        self.freePlacementModuleMeta[moduleKey] = nil
+    end
+
+    if self.freePlacementModuleOrder then
+        for i = #self.freePlacementModuleOrder, 1, -1 do
+            if self.freePlacementModuleOrder[i] == moduleKey then
+                table.remove(self.freePlacementModuleOrder, i)
+            end
+        end
+    end
+
+    self:NotifyModulesPositioningChange()
     return true
 end
 

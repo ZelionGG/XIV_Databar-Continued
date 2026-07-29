@@ -145,6 +145,17 @@ L["CURRENT_AUDIO_OUTPUT"] = "Sortie actuelle"
 L["SET_AUDIO_OUTPUT"] = "Choisir la sortie audio"
 L["NO_AUDIO_OUTPUT_DEVICES"] = "Aucun périphérique audio"
 
+-- DataBrokers
+L["DATABROKERS"] = "DataBrokers"
+L["DATABROKERS_PLUGINS"] = "Plugins DataBroker"
+L["DATABROKERS_NONE_AVAILABLE"] = "Aucun plugin DataBroker détecté. Activez un addon LibDataBroker pour le voir ici."
+L["DATABROKERS_SHOW_ICON"] = "Afficher l'icône"
+L["DATABROKERS_ICON_SIZE"] = "Taille des icônes"
+L["DATABROKERS_SHOW_TEXT"] = "Afficher le texte"
+L["DATABROKERS_SHOW_DATA_SOURCES"] = "Afficher les Data Sources"
+L["DATABROKERS_SHOW_LAUNCHERS"] = "Afficher les Launchers"
+L["DATABROKERS_OTHER"] = "Autres"
+
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"
 L["USE_SERVER_TIME"] = "Utiliser l'heure du serveur"
@@ -326,11 +337,11 @@ L["IMPORT_PROFILE"] = "Importer un profil"
 L["IMPORT_PROFILE_DESC"] = "Importer un profil d'un autre joueur"
 
 L["PROFILE_SETUP_HEADER"] = "XIV_Databar Continued"
-L["PROFILE_SETUP_TEXT"] = "Le système de profils a été migré : ce personnage utilise encore l'ancien profil partagé Default.\n\nChoisissez comment ce personnage doit continuer :\n- |cffffd100Créer un profil vide :|r profil personnel avec les réglages par défaut\n- |cffffd100Garder le profil actuel :|r rester sur le profil partagé Default\n- |cffffd100Copier le profil partagé :|r profil personnel basé sur vos réglages partagés actuels\n\nVous pourrez aussi gérer les profils plus tard dans les paramètres Profiles.\n\nProfil actuel : %s"
+L["PROFILE_SETUP_TEXT"] = "Le système de profils a été migré : ce personnage utilise encore l'ancien profil partagé Default.\n\nChoisissez comment ce personnage doit continuer :\n- |cffffd100Garder le profil actuel :|r rester sur le profil partagé Default (recommandé)\n- |cffffd100Copier le profil partagé :|r profil personnel basé sur vos réglages partagés actuels\n- |cffffd100Créer un profil vide :|r profil personnel avec les réglages par défaut (réinitialise ce personnage)\n\nVous pourrez aussi gérer les profils plus tard dans les paramètres Profiles.\n\nProfil actuel : %s"
 L["PROFILE_SETUP_NEW_BLANK"] = "Créer un profil vide"
 L["PROFILE_SETUP_NEW_FROM_SHARED"] = "Copier le profil partagé"
 L["PROFILE_SETUP_KEEP_CURRENT"] = "Garder le profil actuel"
-L["PROFILE_NEWCHAR_TEXT"] = "Ce personnage démarre avec un profil personnel vide.\n\n- |cffffd100Utiliser le profil partagé :|r rejoindre le profil Default (réglages synchronisés)\n- |cffffd100Garder le profil actuel :|r garder le profil personnel vide de ce personnage\n\nVous pourrez changer ça plus tard dans les paramètres Profiles."
+L["PROFILE_NEWCHAR_TEXT"] = "Ce personnage démarre avec un profil personnel vide.\n\n- |cffffd100Garder le profil actuel :|r garder le profil personnel vide de ce personnage\n- |cffffd100Utiliser le profil partagé :|r rejoindre le profil Default (réglages synchronisés)\n\nVous pourrez changer ça plus tard dans les paramètres Profiles."
 L["PROFILE_NEWCHAR_USE_SHARED"] = "Utiliser le profil partagé"
 
 -- Changelog
