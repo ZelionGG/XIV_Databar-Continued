@@ -147,14 +147,14 @@ L["CURRENT_AUDIO_OUTPUT"] = "Current Output"
 L["SET_AUDIO_OUTPUT"] = "Set Audio Output"
 L["NO_AUDIO_OUTPUT_DEVICES"] = "No Audio Output Devices"
 
--- Broker
-L["BROKER"] = "Broker"
-L["BROKER_PLUGINS"] = "DataBroker Plugins"
-L["BROKER_NONE_AVAILABLE"] = "No DataBroker plugins detected. Enable a LibDataBroker plugin addon to list it here."
-L["BROKER_SHOW_ICON"] = "Show Icon"
-L["BROKER_SHOW_TEXT"] = "Show Text"
-L["BROKER_SHOW_DATA_SOURCES"] = "Show Data Sources"
-L["BROKER_SHOW_LAUNCHERS"] = "Show Launchers"
+-- DataBrokers
+L["DATABROKERS"] = "DataBrokers"
+L["DATABROKERS_PLUGINS"] = "DataBroker Plugins"
+L["DATABROKERS_NONE_AVAILABLE"] = "No DataBroker plugins detected. Enable a LibDataBroker plugin addon to list it here."
+L["DATABROKERS_SHOW_ICON"] = "Show Icon"
+L["DATABROKERS_SHOW_TEXT"] = "Show Text"
+L["DATABROKERS_SHOW_DATA_SOURCES"] = "Show Data Sources"
+L["DATABROKERS_SHOW_LAUNCHERS"] = "Show Launchers"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"

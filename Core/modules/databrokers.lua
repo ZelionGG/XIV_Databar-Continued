@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- BROKER MODULE
+-- DATABROKERS MODULE
 -- Displays third-party LibDataBroker-1.1 data objects as independent bar pieces
 --------------------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ local xb = XIVBar
 local L = XIVBar.L
 local LDB = LibStub("LibDataBroker-1.1")
 
-local BrokerModule = xb:NewModule("BrokerModule", "AceEvent-3.0")
+local DataBrokersModule = xb:NewModule("DataBrokersModule", "AceEvent-3.0")
 
 local DISPLAY_TYPES = {
     ["data source"] = true,
@@ -58,10 +58,10 @@ local function IsTypeAllowed(dataobj)
     end
 
     if brokerType == "data source" then
-        return IsTypeFilterEnabled(BrokerModule, "showDataSources")
+        return IsTypeFilterEnabled(DataBrokersModule, "showDataSources")
     end
     if brokerType == "launcher" then
-        return IsTypeFilterEnabled(BrokerModule, "showLaunchers")
+        return IsTypeFilterEnabled(DataBrokersModule, "showLaunchers")
     end
     return false
 end
@@ -84,7 +84,7 @@ local function SanitizeFrameToken(name)
 end
 
 local function PlacementKey(name)
-    return "Broker:" .. name
+    return "DataBrokers:" .. name
 end
 
 local function FrameNameFor(name)
@@ -105,19 +105,37 @@ local function GetBrokerText(name, dataobj)
     return name
 end
 
+local function GetBrokerLabel(name, dataobj)
+    if dataobj and dataobj.label and dataobj.label ~= "" then
+        return dataobj.label
+    end
+    return name
+end
+
+local function GetBrokerSource(dataobj)
+    if not dataobj then
+        return nil
+    end
+    local source = dataobj.parent or dataobj.tocname
+    if type(source) == "string" and source ~= "" then
+        return source
+    end
+    return nil
+end
+
 local function DefaultShowText(dataobj)
     return NormalizeBrokerType(dataobj and dataobj.type) ~= "launcher"
 end
 
-function BrokerModule:GetName()
-    return L["BROKER"] or "Broker"
+function DataBrokersModule:GetName()
+    return L["DATABROKERS"] or "DataBrokers"
 end
 
-function BrokerModule:GetDb()
-    return xb.db and xb.db.profile and xb.db.profile.modules and xb.db.profile.modules.Broker
+function DataBrokersModule:GetDb()
+    return xb.db and xb.db.profile and xb.db.profile.modules and xb.db.profile.modules.dataBrokers
 end
 
-function BrokerModule:GetObjectSettings(name, create)
+function DataBrokersModule:GetObjectSettings(name, create)
     local db = self:GetDb()
     if not db then
         return nil
@@ -134,7 +152,7 @@ function BrokerModule:GetObjectSettings(name, create)
     return db.objects[name]
 end
 
-function BrokerModule:MigrateDb()
+function DataBrokersModule:MigrateDb()
     local db = self:GetDb()
     if not db then
         return
@@ -169,7 +187,7 @@ function BrokerModule:MigrateDb()
     end
 end
 
-function BrokerModule:SyncTypeFilterMirrors()
+function DataBrokersModule:SyncTypeFilterMirrors()
     local db = self:GetDb()
     if not db then
         self.showDataSources = true
@@ -180,7 +198,7 @@ function BrokerModule:SyncTypeFilterMirrors()
     self.showLaunchers = db.showLaunchers ~= false
 end
 
-function BrokerModule:NotifyOptionsChange()
+function DataBrokersModule:NotifyOptionsChange()
     local appName = AddOnName .. "_Modules"
     local registry = LibStub("AceConfigRegistry-3.0", true)
     if registry then
@@ -188,7 +206,7 @@ function BrokerModule:NotifyOptionsChange()
     end
 end
 
-function BrokerModule:ApplyTypeFilter()
+function DataBrokersModule:ApplyTypeFilter()
     self:SyncTypeFilterMirrors()
 
     local moduleDb = self:GetDb()
@@ -209,7 +227,7 @@ function BrokerModule:ApplyTypeFilter()
     self:NotifyOptionsChange()
 end
 
-function BrokerModule:OnInitialize()
+function DataBrokersModule:OnInitialize()
     self.pieces = {}
     self.registeredCallbacks = {}
     self.activeObjects = {}
@@ -220,14 +238,14 @@ function BrokerModule:OnInitialize()
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated", "OnDataObjectCreated")
 end
 
-function BrokerModule:OnEnable()
+function DataBrokersModule:OnEnable()
     self:MigrateDb()
     self:SyncTypeFilterMirrors()
     self:SyncPieces()
     self:Refresh()
 end
 
-function BrokerModule:OnDisable()
+function DataBrokersModule:OnDisable()
     local names = {}
     for name in pairs(self.pieces) do
         table.insert(names, name)
@@ -237,7 +255,7 @@ function BrokerModule:OnDisable()
     end
 end
 
-function BrokerModule:OnDataObjectCreated(_, name, dataobj)
+function DataBrokersModule:OnDataObjectCreated(_, name, dataobj)
     if not IsDisplayable(name, dataobj) then
         return
     end
@@ -253,7 +271,7 @@ function BrokerModule:OnDataObjectCreated(_, name, dataobj)
     end
 end
 
-function BrokerModule:OnAttributeChanged(_, name, key, _value, dataobj)
+function DataBrokersModule:OnAttributeChanged(_, name, key, _value, dataobj)
     local piece = self.pieces[name]
     if not piece or not piece:IsShown() then
         return
@@ -276,7 +294,7 @@ function BrokerModule:OnAttributeChanged(_, name, key, _value, dataobj)
     end
 end
 
-function BrokerModule:CreatePiece(name, dataobj)
+function DataBrokersModule:CreatePiece(name, dataobj)
     local bar = xb:GetFrame("bar")
     if not bar then
         return nil
@@ -327,15 +345,17 @@ function BrokerModule:CreatePiece(name, dataobj)
     return piece
 end
 
-function BrokerModule:GetDisplayName(name, dataobj)
-    local label = dataobj and dataobj.label
-    if label and label ~= "" then
-        return string.format("%s: %s", L["BROKER"] or "Broker", label)
+function DataBrokersModule:GetDisplayName(name, dataobj)
+    local label = GetBrokerLabel(name, dataobj)
+    local source = GetBrokerSource(dataobj)
+    local moduleName = L["DATABROKERS"] or "DataBrokers"
+    if source then
+        return string.format("%s: (%s) %s", moduleName, source, label)
     end
-    return string.format("%s: %s", L["BROKER"] or "Broker", name)
+    return string.format("%s: %s", moduleName, label)
 end
 
-function BrokerModule:EnableObject(name)
+function DataBrokersModule:EnableObject(name)
     local dataobj = LDB:GetDataObjectByName(name)
     if not IsDisplayable(name, dataobj) then
         return false
@@ -387,7 +407,7 @@ function BrokerModule:EnableObject(name)
     return true
 end
 
-function BrokerModule:DisableObject(name)
+function DataBrokersModule:DisableObject(name)
     local piece = self.pieces[name]
     if not piece then
         return
@@ -407,7 +427,7 @@ function BrokerModule:DisableObject(name)
     piece:ClearAllPoints()
 end
 
-function BrokerModule:UpdatePieceContent(piece)
+function DataBrokersModule:UpdatePieceContent(piece)
     local name = piece.brokerName
     local dataobj = piece.dataobj or LDB:GetDataObjectByName(name)
     if not dataobj then
@@ -476,7 +496,7 @@ function BrokerModule:UpdatePieceContent(piece)
     piece:SetSize(math.max(width, 1), xb:GetHeight())
 end
 
-function BrokerModule:ShowBrokerTooltip(button)
+function DataBrokersModule:ShowBrokerTooltip(button)
     if not xb:ShouldShowTooltip() then
         return
     end
@@ -512,7 +532,7 @@ function BrokerModule:ShowBrokerTooltip(button)
     end
 end
 
-function BrokerModule:HideBrokerTooltip(button)
+function DataBrokersModule:HideBrokerTooltip(button)
     local dataobj = button.dataobj
     if dataobj and dataobj.OnLeave then
         dataobj.OnLeave(button)
@@ -527,7 +547,7 @@ function BrokerModule:HideBrokerTooltip(button)
     GameTooltip:Hide()
 end
 
-function BrokerModule:GetActiveNames()
+function DataBrokersModule:GetActiveNames()
     local names = {}
     local db = self:GetDb()
     if not db or not db.objects then
@@ -543,7 +563,7 @@ function BrokerModule:GetActiveNames()
     return names
 end
 
-function BrokerModule:SyncPieces()
+function DataBrokersModule:SyncPieces()
     local db = self:GetDb()
     if not db or not db.enabled then
         local toDisable = {}
@@ -580,7 +600,7 @@ function BrokerModule:SyncPieces()
     end
 end
 
-function BrokerModule:HideInactivePieces(activeSet)
+function DataBrokersModule:HideInactivePieces(activeSet)
     for name, piece in pairs(self.pieces) do
         if not activeSet[name] then
             piece:Hide()
@@ -589,7 +609,7 @@ function BrokerModule:HideInactivePieces(activeSet)
     end
 end
 
-function BrokerModule:LayoutLegacyCluster()
+function DataBrokersModule:LayoutLegacyCluster()
     local names = self:GetActiveNames()
     local activeSet = {}
     for _, name in ipairs(names) do
@@ -642,7 +662,7 @@ function BrokerModule:LayoutLegacyCluster()
     firstPiece:SetPoint("RIGHT", parentFrame, relativeAnchorPoint, -xOffset, 0)
 end
 
-function BrokerModule:RefreshLayoutOnly()
+function DataBrokersModule:RefreshLayoutOnly()
     local names = self:GetActiveNames()
     local activeSet = {}
     for _, name in ipairs(names) do
@@ -668,7 +688,7 @@ function BrokerModule:RefreshLayoutOnly()
     self:LayoutLegacyCluster()
 end
 
-function BrokerModule:Refresh()
+function DataBrokersModule:Refresh()
     local db = self:GetDb()
     if not db or not db.enabled then
         self:Disable()
@@ -692,7 +712,7 @@ function BrokerModule:Refresh()
     self:RefreshLayoutOnly()
 end
 
-function BrokerModule:RebuildPluginOptions()
+function DataBrokersModule:RebuildPluginOptions()
     if not self.optionsTable or not self.optionsTable.args or not self.optionsTable.args.plugins then
         return
     end
@@ -706,19 +726,43 @@ function BrokerModule:RebuildPluginOptions()
             table.insert(names, name)
         end
     end
-    table.sort(names)
+    table.sort(names, function(a, b)
+        local dataobjA = LDB:GetDataObjectByName(a)
+        local dataobjB = LDB:GetDataObjectByName(b)
+        local sourceA = GetBrokerSource(dataobjA)
+        local sourceB = GetBrokerSource(dataobjB)
+        if sourceA ~= sourceB then
+            if not sourceA then
+                return false
+            end
+            if not sourceB then
+                return true
+            end
+            return sourceA < sourceB
+        end
+        local labelA = GetBrokerLabel(a, dataobjA)
+        local labelB = GetBrokerLabel(b, dataobjB)
+        if labelA ~= labelB then
+            return labelA < labelB
+        end
+        return a < b
+    end)
 
     for _, name in ipairs(names) do
         local dataobj = LDB:GetDataObjectByName(name)
-        local label = name
-        if dataobj.label and dataobj.label ~= "" then
-            label = dataobj.label
-        end
+        local label = GetBrokerLabel(name, dataobj)
+        local source = GetBrokerSource(dataobj)
         local typeLabel = NormalizeBrokerType(dataobj.type) or dataobj.type or ""
         local groupKey = "obj_" .. SanitizeFrameToken(name)
+        local groupName
+        if source then
+            groupName = string.format("(%s) %s (%s)", source, label, typeLabel)
+        else
+            groupName = string.format("%s (%s)", label, typeLabel)
+        end
 
         args[groupKey] = {
-            name = string.format("%s (%s)", label, typeLabel),
+            name = groupName,
             order = order,
             type = "group",
             inline = true,
@@ -753,7 +797,7 @@ function BrokerModule:RebuildPluginOptions()
                     end,
                 },
                 showIcon = {
-                    name = L["BROKER_SHOW_ICON"],
+                    name = L["DATABROKERS_SHOW_ICON"],
                     order = 2,
                     type = "toggle",
                     get = function()
@@ -770,7 +814,7 @@ function BrokerModule:RebuildPluginOptions()
                     end,
                 },
                 showText = {
-                    name = L["BROKER_SHOW_TEXT"],
+                    name = L["DATABROKERS_SHOW_TEXT"],
                     order = 3,
                     type = "toggle",
                     get = function()
@@ -792,7 +836,7 @@ function BrokerModule:RebuildPluginOptions()
     end
 
     args.none = {
-        name = L["BROKER_NONE_AVAILABLE"],
+        name = L["DATABROKERS_NONE_AVAILABLE"],
         order = 0,
         type = "description",
         fontSize = "medium",
@@ -804,8 +848,8 @@ function BrokerModule:RebuildPluginOptions()
     self.optionsTable.args.plugins.args = args
 end
 
-function BrokerModule:GetDefaultOptions()
-    return "Broker", {
+function DataBrokersModule:GetDefaultOptions()
+    return "dataBrokers", {
         enabled = false,
         showDataSources = true,
         showLaunchers = true,
@@ -813,7 +857,7 @@ function BrokerModule:GetDefaultOptions()
     }
 end
 
-function BrokerModule:GetConfig()
+function DataBrokersModule:GetConfig()
     self.optionsTable = {
         name = self:GetName(),
         type = "group",
@@ -841,7 +885,7 @@ function BrokerModule:GetConfig()
                 end,
             },
             showDataSources = {
-                name = L["BROKER_SHOW_DATA_SOURCES"],
+                name = L["DATABROKERS_SHOW_DATA_SOURCES"],
                 order = 0.1,
                 type = "toggle",
                 width = "full",
@@ -863,7 +907,7 @@ function BrokerModule:GetConfig()
                 end,
             },
             showLaunchers = {
-                name = L["BROKER_SHOW_LAUNCHERS"],
+                name = L["DATABROKERS_SHOW_LAUNCHERS"],
                 order = 0.2,
                 type = "toggle",
                 width = "full",
@@ -885,7 +929,7 @@ function BrokerModule:GetConfig()
                 end,
             },
             plugins = {
-                name = L["BROKER_PLUGINS"],
+                name = L["DATABROKERS_PLUGINS"],
                 order = 1,
                 type = "group",
                 inline = true,
