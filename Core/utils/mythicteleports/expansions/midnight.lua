@@ -23,5 +23,26 @@ xb.MythicTeleports.MIDNIGHT = {
             teleportId = 1254400,
             dungeonId = 2739
         },
+        MR = { -- Murder Row
+            teleportId = 1286809,
+            dungeonId = 3090
+        },
+        DoN = { -- Den of Nalorakk
+            teleportId = 1286807,
+            dungeonId = 3051
+        },
+        TBV = { -- The Blinding Vale
+            teleportId = 1286801,
+            dungeonId = 3102
+        },
+        VSA = { -- Voidscar Arena
+            teleportId = 1286804,
+            dungeonId = 3106
+        },
+        AoFa = { -- Altar of Fangs
+            teleportId = 1286812,
+            dungeonId = 3191,
+            name = "Altar of Fangs", -- Temporary fallback
+        },
     }
 }

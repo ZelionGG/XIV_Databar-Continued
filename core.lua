@@ -34,7 +34,15 @@ XIVBar.constants = {
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
 
 function XIVBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, "Default")
+    -- Capture before AceDB creates a profile for a brand-new install.
+    local sv = _G.XIVBarDB
+    self._hadPriorInstall = type(sv) == "table"
+        and type(sv.profiles) == "table"
+        and next(sv.profiles) ~= nil
+
+    -- Omit default profile so new characters get a per-character "Name - Realm" profile.
+    -- Existing profileKeys (e.g. "Default") are preserved by AceDB.
+    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
     self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold',
                       self.constants.mediaPath .. "homizio_bold.ttf")
     self.frames = {}
@@ -42,12 +50,260 @@ function XIVBar:OnInitialize()
     self.fontFlags = {'', 'OUTLINE', 'THICKOUTLINE', 'MONOCHROME'}
 
     self:SetupOptions()
+    -- Module defaults are appended in SetupOptions; re-register so AceDB copies them
+    -- into already-initialized sections and strips them correctly on logout.
+    self.db:RegisterDefaults(self.defaults)
 
     self.timerRefresh = false
 
     self:RegisterChatCommand('xivc', 'ToggleConfig')
     self:RegisterChatCommand('xivbar', 'ToggleConfig')
     self:RegisterChatCommand('xbc', 'ToggleConfig')
+
+    -- Defer so the chat frame is ready (OnInitialize is too early for reliable chat).
+    local function printStartupChatMessages()
+        if self.PrintLoadMessage then
+            self:PrintLoadMessage()
+        end
+        if self.MaybeAnnounceAddonUpdate then
+            self:MaybeAnnounceAddonUpdate()
+        end
+    end
+    if C_Timer and C_Timer.After then
+        C_Timer.After(2, printStartupChatMessages)
+    else
+        printStartupChatMessages()
+    end
+end
+
+local function AddChatMessage(message)
+    if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
+        DEFAULT_CHAT_FRAME:AddMessage(message)
+    else
+        print(message)
+    end
+end
+
+function XIVBar:GetChatPrefix()
+    return "|cffffd100XIV Databar|r |cffb0b0b0Continued|r"
+end
+
+function XIVBar.ColorizeCommands(_, text)
+    if type(text) ~= "string" then return text end
+    local out = {}
+    local index = 1
+    while true do
+        local startPos, endPos, cmd = text:find("(/%w+)", index)
+        if not startPos then
+            table.insert(out, text:sub(index))
+            break
+        end
+        table.insert(out, text:sub(index, startPos - 1))
+        table.insert(out, "|cffffd100" .. cmd .. "|r")
+        index = endPos + 1
+    end
+    return table.concat(out)
+end
+
+function XIVBar:PrintLoadMessage()
+    if not (self.db and self.db.profile and self.db.profile.general) then return end
+    if self.db.profile.general.disableLoginMessage then return end
+
+    local prefix = self:GetChatPrefix()
+    local body = self:ColorizeCommands(
+        L["ADDON_LOADED_MSG"] or "loaded, type /xivc to open settings."
+    )
+    AddChatMessage(prefix .. " " .. body)
+end
+
+function XIVBar:OpenChangelogCategory()
+    local settings = _G["Settings"]
+    local openLegacyCategory = _G["InterfaceOptionsFrame_OpenToCategory"]
+    local category = self.changelogCategory or self.optionsCategory or "XIV Databar Continued"
+
+    if settings and settings.OpenToCategory then
+        settings.OpenToCategory(category)
+    elseif openLegacyCategory then
+        openLegacyCategory(category)
+    end
+end
+
+function XIVBar:ScheduleOpenChangelogAfterCombat()
+    if self._changelogOpenAfterCombat then return end
+    self._changelogOpenAfterCombat = true
+
+    local frame = self._changelogCombatFrame
+    if not frame then
+        frame = CreateFrame("Frame")
+        self._changelogCombatFrame = frame
+    end
+
+    frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    frame:SetScript("OnEvent", function(eventFrame, event)
+        if event ~= "PLAYER_REGEN_ENABLED" then return end
+        eventFrame:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        eventFrame:SetScript("OnEvent", nil)
+        self._changelogOpenAfterCombat = nil
+        if self.OpenChangelogCategory then
+            self:OpenChangelogCategory()
+        end
+    end)
+end
+
+function XIVBar:HandleChangelogChatLink()
+    local currentVersion = C_AddOns.GetAddOnMetadata(AddOnName, "Version") or ""
+    if self.db and self.db.profile and self.db.profile.general then
+        self.db.profile.general.lastChangelogAnnounce = currentVersion
+    end
+
+    if InCombatLockdown() then
+        AddChatMessage(self:GetChatPrefix() .. ": " ..
+            (L["CHANGELOG_AFTER_COMBAT"] or "Changelog will open after combat ends"))
+        self:ScheduleOpenChangelogAfterCombat()
+        return
+    end
+
+    self:OpenChangelogCategory()
+end
+
+function XIVBar:MaybeAnnounceAddonUpdate()
+    if not (self.db and self.db.profile and self.db.profile.general) then return end
+
+    local currentVersion = C_AddOns.GetAddOnMetadata(AddOnName, "Version") or ""
+    -- Hotfix tags (e.g. 5.6.1-fix1): seed silently, no [Open Changelog] announce.
+    if currentVersion:lower():find("fix", 1, true) then
+        self.db.profile.general.lastChangelogAnnounce = currentVersion
+        return
+    end
+
+    local lastAnnounce = self.db.profile.general.lastChangelogAnnounce or ""
+
+    if lastAnnounce == "" then
+        -- Brand-new install: seed silently. Existing profiles: fall through and announce.
+        if not self._hadPriorInstall then
+            self.db.profile.general.lastChangelogAnnounce = currentVersion
+            return
+        end
+    elseif lastAnnounce == currentVersion then
+        return
+    end
+
+    local versionText = "|cffffd100" .. currentVersion .. "|r"
+    local linkText = "|cffdb6233[" .. (L["OPEN_CHANGELOG"] or "Open Changelog") .. "]|r"
+    local link = "|Hxivcchangelog:1|h" .. linkText .. "|h"
+    local body = (L["UPDATE_ANNOUNCE"] or "got updated to %s,"):format(versionText)
+    AddChatMessage(self:GetChatPrefix() .. " " .. body .. " " .. link)
+end
+
+if not XIVBar._XIVC_ChangelogChatLinkHooked then
+    XIVBar._XIVC_ChangelogChatLinkHooked = true
+    hooksecurefunc("SetItemRef", function(link)
+        if type(link) ~= "string" then return end
+        local linkType = strsplit(":", link, 2)
+        if linkType ~= "xivcchangelog" then return end
+
+        if XIVBar and XIVBar.HandleChangelogChatLink then
+            XIVBar:HandleChangelogChatLink()
+        end
+    end)
+end
+
+-- Bump when the setup prompt must be shown again (e.g. after changing who gets it).
+local PROFILE_SETUP_VERSION = 4
+
+function XIVBar:GetCharacterProfileKey()
+    return self.constants.playerName .. " - " .. self.constants.playerRealm
+end
+
+function XIVBar:HasCompletedProfileSetup()
+    return (self.db.char.profileSetupVersion or 0) >= PROFILE_SETUP_VERSION
+end
+
+function XIVBar:MarkProfileSetupDone()
+    self.db.char.profileSetupVersion = PROFILE_SETUP_VERSION
+    -- Clear the early boolean flag that could silently suppress the Default prompt.
+    self.db.char.profileSetupDone = nil
+    self.profileSetupPending = nil
+end
+
+function XIVBar:HasDefaultProfile()
+    return self.db.profiles and rawget(self.db.profiles, "Default") ~= nil
+end
+
+function XIVBar:GetSharedProfileForCopy()
+    local pending = self.profileSetupPending
+    local charKey = (pending and pending.charKey) or self:GetCharacterProfileKey()
+    local candidate = pending and pending.preferred
+    if candidate and candidate ~= charKey then
+        return candidate
+    end
+    if self:HasDefaultProfile() then
+        return "Default"
+    end
+    return nil
+end
+
+-- copyShared: nil/false = blank personal profile; true = personal profile copied from shared/Default.
+function XIVBar:CreatePersonalProfileFromSetup(copyShared)
+    local pending = self.profileSetupPending
+    local charKey = (pending and pending.charKey) or self:GetCharacterProfileKey()
+    local baseProfile = copyShared and self:GetSharedProfileForCopy() or nil
+
+    self:MarkProfileSetupDone()
+
+    if self.db:GetCurrentProfile() ~= charKey then
+        self.db:SetProfile(charKey)
+    end
+
+    if copyShared and baseProfile and baseProfile ~= charKey then
+        self.db:CopyProfile(baseProfile, true)
+    else
+        self.db:ResetProfile()
+    end
+end
+
+function XIVBar:UseSharedDefaultFromSetup()
+    self:MarkProfileSetupDone()
+    if self.db:GetCurrentProfile() ~= "Default" then
+        self.db:SetProfile("Default")
+    end
+end
+
+function XIVBar:MaybeShowProfileSetupPrompt()
+    if not self.db or self:HasCompletedProfileSetup() then
+        return
+    end
+
+    local charKey = self:GetCharacterProfileKey()
+    local current = self.db:GetCurrentProfile()
+
+    if current == "Default" then
+        -- Legacy shared profile: full migration dialog.
+        self.profileSetupPending = {
+            mode = "migrate",
+            preferred = "Default",
+            sourceProfile = current,
+            charKey = charKey,
+            isLegacyDefault = true,
+        }
+        StaticPopup_Show("XIVBAR_PROFILE_SETUP")
+        return
+    end
+
+    if current == charKey and self:HasDefaultProfile() then
+        -- New character on a blank personal profile: offer shared Default or stay fresh.
+        self.profileSetupPending = {
+            mode = "newchar",
+            preferred = "Default",
+            sourceProfile = current,
+            charKey = charKey,
+        }
+        StaticPopup_Show("XIVBAR_PROFILE_NEWCHAR")
+        return
+    end
+
+    -- Custom profile, or first character with no Default yet.
+    self:MarkProfileSetupDone()
 end
 
 function XIVBar:CreateMainBar()
@@ -235,6 +491,12 @@ function XIVBar:OnEnable()
     self.db.RegisterCallback(self, 'OnProfileChanged', 'Refresh')
     self.db.RegisterCallback(self, 'OnProfileReset', 'Refresh')
 
+    C_Timer.After(1, function()
+        if XIVBar and XIVBar.db then
+            XIVBar:MaybeShowProfileSetupPrompt()
+        end
+    end)
+
     if not self.timerRefresh then
         C_Timer.After(5, function()
             self:Refresh()
@@ -278,9 +540,39 @@ function XIVBar:GetColor(name)
         r, g, b = self:GetClassColors()
     elseif name == 'barColor' and profile.useCC then
         r, g, b = self:GetClassColors()
+    elseif name == 'hover' and profile.useHoverCC then
+        r, g, b = self:GetClassColors()
     end
 
     return r, g, b, a
+end
+
+-- Pass nil year for SHORTDATENOYEAR (calendar/lockout dates without year).
+function XIVBar:FormatLocalizedDate(day, month, year)
+    day, month = tonumber(day), tonumber(month)
+    if not (day and month) then
+        return nil
+    end
+    if year ~= nil then
+        year = tonumber(year)
+        if not year then
+            return nil
+        end
+        return FormatShortDate(day, month, year)
+    end
+    return FormatShortDate(day, month)
+end
+
+-- Accept YYYY-MM-DD or YYYY/MM/DD
+function XIVBar:FormatLocalizedDateString(dateString)
+    if type(dateString) ~= "string" then
+        return dateString
+    end
+    local y, m, d = dateString:match("^(%d%d%d%d)[%-%/](%d%d)[%-%/](%d%d)$")
+    if not y then
+        return dateString
+    end
+    return self:FormatLocalizedDate(d, m, y) or dateString
 end
 
 function XIVBar:HoverColors()

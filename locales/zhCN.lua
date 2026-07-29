@@ -147,7 +147,6 @@ L["VOLUME_STEP"] = "音量调节"
 
 -- Clock
 L["TIME_FORMAT"] = "时间格式"
--- TODO: L["CLOCK_DATE_FORMAT"] = "Date Format"
 L["USE_SERVER_TIME"] = "使用服务器时间"
 L["NEW_EVENT"] = "新事件!"
 L["LOCAL_TIME"] = "本地时间"
@@ -158,8 +157,6 @@ L["HIDE_EVENT_TEXT"] = "隐藏事件文字"
 -- TODO: L["CLOCK_SHOW_LOCKOUTS"] = "Show Lockouts in Tooltip"
 -- TODO: L["CLOCK_SHOW_BOSSES_KILLED"] = "Show Bosses Defeated"
 -- TODO: L["CLOCK_LOCKOUTS_HEADER"] = "Lockouts"
--- TODO: L["CLOCK_DATE_DAY_MONTH"] = "Day/Month (1/7)"
--- TODO: L["CLOCK_DATE_MONTH_DAY"] = "Month/Day (7/1)"
 -- TODO: L["REST_ICON"] = "Rest Icon"
 -- TODO: L["SHOW_REST_ICON"] = "Show Rest Icon"
 -- TODO: L["TEXTURE"] = "Texture"
@@ -325,7 +322,6 @@ L["Midnight"] = true
 -- TODO: L["IMPORT_PROFILE_DESC"] = "Import a profile from another player"
 
 -- Changelog
-L["CHANGELOG_DATE_FORMAT"] = "%year%年%month%月%day%日"
 L["IMPORTANT"] = "重要"
 L["NEW"] = "新增"
 L["IMPROVEMENT"] = "改善"

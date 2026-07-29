@@ -145,9 +145,19 @@ L["CURRENT_AUDIO_OUTPUT"] = "Sortie actuelle"
 L["SET_AUDIO_OUTPUT"] = "Choisir la sortie audio"
 L["NO_AUDIO_OUTPUT_DEVICES"] = "Aucun périphérique audio"
 
+-- DataBrokers
+L["DATABROKERS"] = "DataBrokers"
+L["DATABROKERS_PLUGINS"] = "Plugins DataBroker"
+L["DATABROKERS_NONE_AVAILABLE"] = "Aucun plugin DataBroker détecté. Activez un addon LibDataBroker pour le voir ici."
+L["DATABROKERS_SHOW_ICON"] = "Afficher l'icône"
+L["DATABROKERS_ICON_SIZE"] = "Taille des icônes"
+L["DATABROKERS_SHOW_TEXT"] = "Afficher le texte"
+L["DATABROKERS_SHOW_DATA_SOURCES"] = "Afficher les Data Sources"
+L["DATABROKERS_SHOW_LAUNCHERS"] = "Afficher les Launchers"
+L["DATABROKERS_OTHER"] = "Autres"
+
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"
-L["CLOCK_DATE_FORMAT"] = "Format de date"
 L["USE_SERVER_TIME"] = "Utiliser l'heure du serveur"
 L["NEW_EVENT"] = "Nouvel événement"
 L["LOCAL_TIME"] = "Heure locale"
@@ -158,8 +168,6 @@ L["HIDE_EVENT_TEXT"] = "Cacher le texte d'événement"
 L["CLOCK_SHOW_LOCKOUTS"] = "Afficher les verrouillages dans l'infobulle"
 L["CLOCK_SHOW_BOSSES_KILLED"] = "Afficher les boss vaincus"
 L["CLOCK_LOCKOUTS_HEADER"] = "Verrouillages"
-L["CLOCK_DATE_DAY_MONTH"] = "Jour/Mois (1/7)"
-L["CLOCK_DATE_MONTH_DAY"] = "Mois/Jour (7/1)"
 L["REST_ICON"] = "Icône de repos"
 L["SHOW_REST_ICON"] = "Afficher l'icône de repos"
 L["TEXTURE"] = "Texture" -- @no-translate
@@ -261,6 +269,9 @@ L["M_PLUS_TELEPORTS"] = "Téléportations M+"
 L["ONLY_SHOW_CURRENT_SEASON"] = "N'afficher que les téléportations de la saison courante."
 L["MYTHIC_PLUS_TELEPORTS"] = "Téléportations Mythique+"
 L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Masquer le texte des téléportations M+"
+L["SHOW_SEASON_DATES"] = "Afficher les dates de saison"
+L["SEASON_DATE_RANGE"] = "Du %s au %s"
+L["SEASON_DATE_FROM"] = "À partir du %s"
 L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Montrer les téléportations Mythique+"
 L["MYTHIC_TELEPORT_SHARED_CD"] = "Temps de recharge partagé de 8 h (se réinitialise après avoir terminé un donjon Mythique+)"
 L["SHOW_MYTHIC_TELEPORT_POPUP"] = "Afficher le menu de téléportation"
@@ -304,6 +315,7 @@ L["Dragonflight"] = true
 L["The War Within"] = true
 L["Midnight"] = true
 L["CURRENT_SEASON"] = "Saison courante"
+L["NEXT_SEASON"] = "Prochaine saison"
 
 -- Profile Import/Export
 L["PROFILE_SHARING"] = "Partage de profil"
@@ -324,8 +336,21 @@ L["EXPORT_PROFILE_DESC"] = "Exporter les paramètres du profil actuel"
 L["IMPORT_PROFILE"] = "Importer un profil"
 L["IMPORT_PROFILE_DESC"] = "Importer un profil d'un autre joueur"
 
+L["PROFILE_SETUP_HEADER"] = "XIV_Databar Continued"
+L["PROFILE_SETUP_TEXT"] = "Le système de profils a été migré : ce personnage utilise encore l'ancien profil partagé Default.\n\nChoisissez comment ce personnage doit continuer :\n- |cffffd100Garder le profil actuel :|r rester sur le profil partagé Default (recommandé)\n- |cffffd100Copier le profil partagé :|r profil personnel basé sur vos réglages partagés actuels\n- |cffffd100Créer un profil vide :|r profil personnel avec les réglages par défaut (réinitialise ce personnage)\n\nVous pourrez aussi gérer les profils plus tard dans les paramètres Profiles.\n\nProfil actuel : %s"
+L["PROFILE_SETUP_NEW_BLANK"] = "Créer un profil vide"
+L["PROFILE_SETUP_NEW_FROM_SHARED"] = "Copier le profil partagé"
+L["PROFILE_SETUP_KEEP_CURRENT"] = "Garder le profil actuel"
+L["PROFILE_NEWCHAR_TEXT"] = "Ce personnage démarre avec un profil personnel vide.\n\n- |cffffd100Garder le profil actuel :|r garder le profil personnel vide de ce personnage\n- |cffffd100Utiliser le profil partagé :|r rejoindre le profil Default (réglages synchronisés)\n\nVous pourrez changer ça plus tard dans les paramètres Profiles."
+L["PROFILE_NEWCHAR_USE_SHARED"] = "Utiliser le profil partagé"
+
+L["DISABLE_LOGIN_MESSAGE"] = "Désactiver le message de connexion"
+L["ADDON_LOADED_MSG"] = "chargé, tapez /xivc pour ouvrir les options."
+L["UPDATE_ANNOUNCE"] = "a été mis à jour vers %s,"
+L["OPEN_CHANGELOG"] = "Ouvrir les notes de mise à jour"
+L["CHANGELOG_AFTER_COMBAT"] = "Les notes de mise à jour s'ouvriront après le combat"
+
 -- Changelog
-L["CHANGELOG_DATE_FORMAT"] = "%day%/%month%/%year%"
 L["IMPORTANT"] = "Important" -- @no-translate
 L["NEW"] = "Nouveau"
 L["IMPROVEMENT"] = "Améliorations"

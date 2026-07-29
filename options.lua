@@ -29,6 +29,8 @@ XIVBar.defaults = {
             enableFreePlacement = false,
             freePlacementInitialized = false,
             modulePlacements = {},
+            disableLoginMessage = false,
+            lastChangelogAnnounce = "",
         },
         color = {
             barColor = {r = 0.094, g = 0.094, b = 0.094, a = 0.75},
@@ -119,7 +121,7 @@ end
 
 function XIVBar:SetupOptions()
     local options = {
-        name = "XIV Bar Continued",
+        name = "XIV Databar Continued",
         handler = XIVBar,
         type = 'group',
         args = {
@@ -173,8 +175,6 @@ function XIVBar:SetupOptions()
         end
     end
 
-    local modulesPositioningOptions = self:GetModulesPositionningOptions()
-
     local function orange(string)
         if type(string) ~= "string" then string = tostring(string) end
         string = XIVBar:CreateColorString(string, {r = 0.859, g = 0.388, b = 0.203})
@@ -194,14 +194,7 @@ function XIVBar:SetupOptions()
 
     for version, data in pairs(XIVBar.Changelog) do
         local versionString = data.version_string
-        local dateTable = {strsplit("/", data.release_date)}
-        local dateString = data.release_date
-        if #dateTable == 3 then
-            dateString = L["CHANGELOG_DATE_FORMAT"]
-            dateString = gsub(dateString, "%%year%%", dateTable[1])
-            dateString = gsub(dateString, "%%month%%", dateTable[2])
-            dateString = gsub(dateString, "%%day%%", dateTable[3])
-        end
+        local dateString = XIVBar:FormatLocalizedDateString(data.release_date)
 
         changelogOptions.args[tostring(version)] = {
             order = 10000 - version,
@@ -418,17 +411,20 @@ function XIVBar:SetupOptions()
     -- Register all options tables
     AceConfig:RegisterOptionsTable(AddOnName, options)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Modules", moduleOptions)
-    AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", modulesPositioningOptions)
+    AceConfig:RegisterOptionsTable(AddOnName .. "_ModulesPositioning", function()
+        return self:GetModulesPositionningOptions()
+    end)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Changelog", changelogOptions)
     AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
 
     -- Add to Blizzard options
-    local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
+    local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Databar Continued")
+    local _, changelogCategory = AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Databar Continued")
     self.optionsCategory = mainCategory
+    self.changelogCategory = changelogCategory
 end
 
 function XIVBar:ExportProfile()
@@ -574,6 +570,176 @@ StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
     preferredIndex = 3,
 }
 
+local PROFILE_SETUP_DIALOG_WIDTH = 560
+local PROFILE_SETUP_TEXT_WIDTH = 540
+local PROFILE_SETUP_TEXT_PAD = 10
+
+local function SetDialogTextWidth(fontString, width)
+    if not fontString then
+        return
+    end
+    if fontString.SetDesiredWidth then
+        fontString:SetDesiredWidth(width)
+    else
+        fontString:SetWidth(width)
+    end
+end
+
+local function StyleProfileSetupDialog(dialog, bodyText)
+    dialog:SetWidth(PROFILE_SETUP_DIALOG_WIDTH)
+
+    local text = dialog.Text or dialog.text
+    local subText = dialog.SubText
+
+    if text then
+        if text.SetFontObject then
+            text:SetFontObject(GameFontNormalHuge)
+        end
+        text:SetTextColor(1, 0.82, 0)
+        text:SetJustifyH("CENTER")
+        text:SetText(L["PROFILE_SETUP_HEADER"])
+        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
+    end
+
+    if subText then
+        -- Retail/GameDialog: body goes in SubText under the header.
+        subText:SetText(bodyText)
+        subText:Show()
+        subText:SetJustifyH("CENTER")
+        SetDialogTextWidth(subText, PROFILE_SETUP_TEXT_WIDTH)
+        if subText.SetFontObject then
+            subText:SetFontObject(GameFontHighlight)
+        end
+    elseif text then
+        -- Classic-style StaticPopup: custom header + body below.
+        if not dialog.xivProfileHeader then
+            local header = dialog:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
+            header:SetJustifyH("CENTER")
+            header:SetTextColor(1, 0.82, 0)
+            dialog.xivProfileHeader = header
+        end
+
+        local header = dialog.xivProfileHeader
+        header:ClearAllPoints()
+        header:SetPoint("TOP", dialog, "TOP", 0, -18)
+        header:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
+        header:SetText(L["PROFILE_SETUP_HEADER"])
+        header:Show()
+
+        text:SetFontObject(GameFontHighlight)
+        text:SetTextColor(1, 1, 1)
+        text:SetJustifyH("CENTER")
+        text:SetText(bodyText)
+        text:ClearAllPoints()
+        text:SetPoint("TOP", header, "BOTTOM", 0, -12)
+        text:SetPoint("LEFT", dialog, "LEFT", PROFILE_SETUP_TEXT_PAD, 0)
+        text:SetPoint("RIGHT", dialog, "RIGHT", -PROFILE_SETUP_TEXT_PAD, 0)
+        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
+    end
+
+    if dialog.SetMinimumWidth then
+        dialog:SetMinimumWidth(PROFILE_SETUP_DIALOG_WIDTH)
+    end
+    if dialog.Resize then
+        dialog:Resize()
+    end
+end
+
+local function CleanupProfileSetupDialog(dialog)
+    if dialog.xivProfileHeader then
+        dialog.xivProfileHeader:Hide()
+    end
+end
+
+StaticPopupDialogs["XIVBAR_PROFILE_SETUP"] = {
+    text = L["PROFILE_SETUP_HEADER"],
+    subText = " ",
+    wide = true,
+    wideText = true,
+    normalSizedSubText = true,
+    -- Keep current is primary: Create blank was previously button1 and wiped settings via ResetProfile.
+    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button2 = L["PROFILE_SETUP_NEW_FROM_SHARED"],
+    button3 = L["PROFILE_SETUP_NEW_BLANK"],
+    OnShow = function(self)
+        local pending = XIVBar.profileSetupPending
+        local preferred = (pending and pending.preferred) or "Default"
+        StyleProfileSetupDialog(self, L["PROFILE_SETUP_TEXT"]:format(preferred))
+
+        local hasShared = XIVBar:GetSharedProfileForCopy() ~= nil
+        local button2 = self.button2 or self.Button2 or (self.GetButton2 and self:GetButton2())
+        if button2 then
+            if hasShared then
+                button2:SetText(L["PROFILE_SETUP_NEW_FROM_SHARED"])
+                button2:Show()
+            else
+                button2:Hide()
+            end
+        end
+    end,
+    OnAccept = function()
+        -- Keep the current shared Default profile.
+        XIVBar:MarkProfileSetupDone()
+    end,
+    OnCancel = function()
+        -- Personal profile copied from the shared/Default profile.
+        if XIVBar:GetSharedProfileForCopy() then
+            XIVBar:CreatePersonalProfileFromSetup(true)
+        else
+            XIVBar:MarkProfileSetupDone()
+        end
+    end,
+    OnAlt = function()
+        -- Blank personal profile (destructive; least prominent button).
+        XIVBar:CreatePersonalProfileFromSetup(false)
+    end,
+    OnHide = function(self)
+        CleanupProfileSetupDialog(self)
+        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep current.
+        if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
+            XIVBar:MarkProfileSetupDone()
+        end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    noCancelOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["XIVBAR_PROFILE_NEWCHAR"] = {
+    text = L["PROFILE_SETUP_HEADER"],
+    subText = " ",
+    wide = true,
+    wideText = true,
+    normalSizedSubText = true,
+    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
+    button2 = L["PROFILE_NEWCHAR_USE_SHARED"],
+    OnShow = function(self)
+        StyleProfileSetupDialog(self, L["PROFILE_NEWCHAR_TEXT"])
+    end,
+    OnAccept = function()
+        -- Keep the blank personal Name - Realm profile.
+        XIVBar:MarkProfileSetupDone()
+    end,
+    OnCancel = function()
+        -- Join the shared Default profile (live share).
+        XIVBar:UseSharedDefaultFromSetup()
+    end,
+    OnHide = function(self)
+        CleanupProfileSetupDialog(self)
+        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep personal.
+        if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
+            XIVBar:MarkProfileSetupDone()
+        end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    noCancelOnEscape = true,
+    preferredIndex = 3,
+}
+
 function XIVBar:GetGeneralOptions()
     return {
         name = GENERAL_LABEL,
@@ -670,11 +836,11 @@ function XIVBar:GetColorOptions()
                 order = 1,
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
-                    if not self.db.profile.color.useCC then
-                        self:SetColor('barColor', r, g, b, a)
+                    if self.db.profile.color.useCC then
+                        local c = self.db.profile.color.barColor
+                        self:SetColor('barColor', c.r, c.g, c.b, a)
                     else
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        self:SetColor('barColor', cr, cg, cb, a)
+                        self:SetColor('barColor', r, g, b, a)
                     end
                 end,
                 get = function()
@@ -687,9 +853,8 @@ function XIVBar:GetColorOptions()
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
-                    XIVBar:SetColor('barColor', self:GetClassColors());
-                    self.db.profile.color.useCC = val;
-                    self:Refresh();
+                    self.db.profile.color.useCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useCC
@@ -715,10 +880,11 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
                     if self.db.profile.color.useTextCC then
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        r, g, b = cr, cg, cb
+                        local c = self.db.profile.color.normal
+                        XIVBar:SetColor('normal', c.r, c.g, c.b, a)
+                    else
+                        XIVBar:SetColor('normal', r, g, b, a)
                     end
-                    XIVBar:SetColor('normal', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('normal') end
             },
@@ -728,10 +894,8 @@ function XIVBar:GetTextColorOptions()
                 type = "toggle",
                 order = 2,
                 set = function(_, val)
-                    if val then
-                        XIVBar:SetColor("normal", self:GetClassColors())
-                    end
                     self.db.profile.color.useTextCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useTextCC
@@ -745,10 +909,11 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(_, r, g, b, a)
                     if self.db.profile.color.useHoverCC then
-                        local cr, cg, cb, _ = self:GetClassColors()
-                        r, g, b = cr, cg, cb
+                        local c = self.db.profile.color.hover
+                        XIVBar:SetColor('hover', c.r, c.g, c.b, a)
+                    else
+                        XIVBar:SetColor('hover', r, g, b, a)
                     end
-                    XIVBar:SetColor('hover', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('hover') end
             },
@@ -757,11 +922,8 @@ function XIVBar:GetTextColorOptions()
                 type = "toggle",
                 order = 4,
                 set = function(_, val)
-                    if val then
-                        XIVBar:SetColor("hover", self:GetClassColors())
-                    end
-                    self.db.profile.color.useHoverCC = val;
-                    self:Refresh();
+                    self.db.profile.color.useHoverCC = val
+                    self:Refresh()
                 end,
                 get = function()
                     return self.db.profile.color.useHoverCC
@@ -954,6 +1116,17 @@ function XIVBar:GetPositioningOptions()
                 set = function(_, val)
                     self.db.profile.general.disableTooltipsInCombat = val
                     self:Refresh()
+                end
+            },
+            disableLoginMessage = {
+                name = L["DISABLE_LOGIN_MESSAGE"] or "Disable login message",
+                type = "toggle",
+                order = 10.7,
+                get = function()
+                    return self.db.profile.general.disableLoginMessage
+                end,
+                set = function(_, val)
+                    self.db.profile.general.disableLoginMessage = not not val
                 end
             },
             spacingHeader = {
@@ -1229,6 +1402,74 @@ function XIVBar:ApplyModuleFreePlacement(moduleKey, frame)
     frame:SetPoint(anchor, bar, anchor, xOffset, 0)
 
     placement.captured = true
+    return true
+end
+
+function XIVBar:NotifyModulesPositioningChange()
+    local registry = LibStub("AceConfigRegistry-3.0", true)
+    if registry then
+        registry:NotifyChange(AddOnName .. "_ModulesPositioning")
+    end
+end
+
+function XIVBar:RegisterDynamicFreePlacement(moduleKey, frameName, displayName, ownerModule)
+    if type(moduleKey) ~= "string" or type(frameName) ~= "string" then
+        return false
+    end
+
+    self.freePlacementFrameMap = self.freePlacementFrameMap or {}
+    self.freePlacementDefaultAnchor = self.freePlacementDefaultAnchor or {}
+    self.freePlacementModuleMeta = self.freePlacementModuleMeta or {}
+    self.freePlacementModuleOrder = self.freePlacementModuleOrder or {}
+
+    self.freePlacementFrameMap[moduleKey] = frameName
+    self.freePlacementDefaultAnchor[moduleKey] = self.freePlacementDefaultAnchor[moduleKey] or "RIGHT"
+    self.freePlacementModuleMeta[moduleKey] = {
+        displayName = displayName or moduleKey,
+        frameName = frameName,
+        module = ownerModule,
+        dynamic = true,
+    }
+
+    local alreadyListed = false
+    for _, key in ipairs(self.freePlacementModuleOrder) do
+        if key == moduleKey then
+            alreadyListed = true
+            break
+        end
+    end
+    if not alreadyListed then
+        table.insert(self.freePlacementModuleOrder, moduleKey)
+    end
+
+    self:NotifyModulesPositioningChange()
+    return true
+end
+
+function XIVBar:UnregisterDynamicFreePlacement(moduleKey)
+    if type(moduleKey) ~= "string" then
+        return false
+    end
+
+    if self.freePlacementFrameMap then
+        self.freePlacementFrameMap[moduleKey] = nil
+    end
+    if self.freePlacementDefaultAnchor then
+        self.freePlacementDefaultAnchor[moduleKey] = nil
+    end
+    if self.freePlacementModuleMeta then
+        self.freePlacementModuleMeta[moduleKey] = nil
+    end
+
+    if self.freePlacementModuleOrder then
+        for i = #self.freePlacementModuleOrder, 1, -1 do
+            if self.freePlacementModuleOrder[i] == moduleKey then
+                table.remove(self.freePlacementModuleOrder, i)
+            end
+        end
+    end
+
+    self:NotifyModulesPositioningChange()
     return true
 end
 

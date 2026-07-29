@@ -16,7 +16,7 @@ xb.MythicTeleports.BFA = {
             dungeonId = 1672, -- Freehold
         },
         SoB = {
-            teleportId = 464256, -- Siege of Boralus Teleport
+            teleportId = {464256,445418}, -- Siege of Boralus Teleport
             dungeonId = 1700, -- Siege of Boralus
         },
         UR = {
@@ -34,6 +34,14 @@ xb.MythicTeleports.BFA = {
         TML = {
             teleportId = {467555, 467553}, -- The MOTHERLODE!! Teleport
             dungeonId = 1707, -- The MOTHERLODE!!
+        },
+        ToSet = {
+            teleportId = 1286828, -- Temple of Sethraliss Teleport
+            dungeonId = 1694, -- Temple of Sethraliss
+        },
+        KR = {
+            teleportId = 1286831, -- King's Rest Teleport
+            dungeonId = 1785, -- King's Rest
         }
     }
 }
