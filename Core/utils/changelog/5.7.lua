@@ -57,11 +57,15 @@ XIVBar.Changelog[5700] = {
         ["zhTW"] = {},
         ["enUS"] = {
             "[Global] Localized dates now use Blizzard's default function for consistent calendar formatting.",
-            "[Global] Class color toggles no longer overwrite saved custom colors; disabling a class-color flag restores the previous RGB."
+            "[Global] Class color toggles no longer overwrite saved custom colors; disabling a class-color flag restores the previous RGB.",
+            "[TBC Anniversary] TOC update for patch 2.5.6.",
+            "[Classic SoD] TOC update for patch 1.15.9."
         },
         ["frFR"] = {
             "[Global] Les dates localisées utilisent désormais la fonction par défaut de Blizzard pour un formatage calendaire cohérent.",
-            "[Global] Les options de couleur de classe n'écrasent plus les couleurs personnalisées sauvegardées ; désactiver une option de couleur de classe restaure le RVB précédent."
+            "[Global] Les options de couleur de classe n'écrasent plus les couleurs personnalisées sauvegardées ; désactiver une option de couleur de classe restaure le RVB précédent.",
+            "[TBC Anniversary] Mise à jour TOC pour la mise à jour 2.5.6.",
+            "[Classic SoD] Mise à jour TOC pour la mise à jour 1.15.9."
         },
         ["koKR"] = {},
         ["ruRU"] = {}
