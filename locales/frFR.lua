@@ -147,7 +147,6 @@ L["NO_AUDIO_OUTPUT_DEVICES"] = "Aucun périphérique audio"
 
 -- Clock
 L["TIME_FORMAT"] = "Format de l'heure"
-L["CLOCK_DATE_FORMAT"] = "Format de date"
 L["USE_SERVER_TIME"] = "Utiliser l'heure du serveur"
 L["NEW_EVENT"] = "Nouvel événement"
 L["LOCAL_TIME"] = "Heure locale"
@@ -158,8 +157,6 @@ L["HIDE_EVENT_TEXT"] = "Cacher le texte d'événement"
 L["CLOCK_SHOW_LOCKOUTS"] = "Afficher les verrouillages dans l'infobulle"
 L["CLOCK_SHOW_BOSSES_KILLED"] = "Afficher les boss vaincus"
 L["CLOCK_LOCKOUTS_HEADER"] = "Verrouillages"
-L["CLOCK_DATE_DAY_MONTH"] = "Jour/Mois (1/7)"
-L["CLOCK_DATE_MONTH_DAY"] = "Mois/Jour (7/1)"
 L["REST_ICON"] = "Icône de repos"
 L["SHOW_REST_ICON"] = "Afficher l'icône de repos"
 L["TEXTURE"] = "Texture" -- @no-translate
@@ -333,7 +330,6 @@ L["PROFILE_NEWCHAR_TEXT"] = "Ce personnage démarre avec un profil personnel vid
 L["PROFILE_NEWCHAR_USE_SHARED"] = "Utiliser le profil partagé"
 
 -- Changelog
-L["CHANGELOG_DATE_FORMAT"] = "%day%/%month%/%year%"
 L["IMPORTANT"] = "Important" -- @no-translate
 L["NEW"] = "Nouveau"
 L["IMPROVEMENT"] = "Améliorations"

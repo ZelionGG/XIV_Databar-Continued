@@ -194,14 +194,7 @@ function XIVBar:SetupOptions()
 
     for version, data in pairs(XIVBar.Changelog) do
         local versionString = data.version_string
-        local dateTable = {strsplit("/", data.release_date)}
-        local dateString = data.release_date
-        if #dateTable == 3 then
-            dateString = L["CHANGELOG_DATE_FORMAT"]
-            dateString = gsub(dateString, "%%year%%", dateTable[1])
-            dateString = gsub(dateString, "%%month%%", dateTable[2])
-            dateString = gsub(dateString, "%%day%%", dateTable[3])
-        end
+        local dateString = XIVBar:FormatLocalizedDateString(data.release_date)
 
         changelogOptions.args[tostring(version)] = {
             order = 10000 - version,

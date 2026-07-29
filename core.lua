@@ -394,6 +394,34 @@ function XIVBar:GetColor(name)
     return r, g, b, a
 end
 
+-- Pass nil year for SHORTDATENOYEAR (calendar/lockout dates without year).
+function XIVBar:FormatLocalizedDate(day, month, year)
+    day, month = tonumber(day), tonumber(month)
+    if not (day and month) then
+        return nil
+    end
+    if year ~= nil then
+        year = tonumber(year)
+        if not year then
+            return nil
+        end
+        return FormatShortDate(day, month, year)
+    end
+    return FormatShortDate(day, month)
+end
+
+-- Accept YYYY-MM-DD or YYYY/MM/DD
+function XIVBar:FormatLocalizedDateString(dateString)
+    if type(dateString) ~= "string" then
+        return dateString
+    end
+    local y, m, d = dateString:match("^(%d%d%d%d)[%-%/](%d%d)[%-%/](%d%d)$")
+    if not y then
+        return dateString
+    end
+    return self:FormatLocalizedDate(d, m, y) or dateString
+end
+
 function XIVBar:HoverColors()
     local colors
     local profile = self.db.profile.color

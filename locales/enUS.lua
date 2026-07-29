@@ -149,7 +149,6 @@ L["NO_AUDIO_OUTPUT_DEVICES"] = "No Audio Output Devices"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"
-L["CLOCK_DATE_FORMAT"] = "Date Format"
 L["USE_SERVER_TIME"] = "Use Server Time"
 L["NEW_EVENT"] = "New Event!"
 L["LOCAL_TIME"] = "Local Time"
@@ -160,8 +159,6 @@ L["HIDE_EVENT_TEXT"] = "Hide Event Text"
 L["CLOCK_SHOW_LOCKOUTS"] = "Show Lockouts in Tooltip"
 L["CLOCK_SHOW_BOSSES_KILLED"] = "Show Bosses Defeated"
 L["CLOCK_LOCKOUTS_HEADER"] = "Lockouts"
-L["CLOCK_DATE_DAY_MONTH"] = "Day/Month (1/7)"
-L["CLOCK_DATE_MONTH_DAY"] = "Month/Day (7/1)"
 L["REST_ICON"] = "Rest Icon"
 L["SHOW_REST_ICON"] = "Show Rest Icon"
 L["TEXTURE"] = "Texture"
@@ -335,7 +332,6 @@ L["PROFILE_NEWCHAR_TEXT"] = "This character starts with a blank personal profile
 L["PROFILE_NEWCHAR_USE_SHARED"] = "Use shared profile"
 
 -- Changelog
-L["CHANGELOG_DATE_FORMAT"] = "%month%-%day%-%year%"
 L["IMPORTANT"] = "Important"
 L["NEW"] = "New"
 L["IMPROVEMENT"] = "Improvement"

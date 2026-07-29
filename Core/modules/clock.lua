@@ -99,18 +99,6 @@ local function GetServerTimeString(optFormat, calendarTime)
     return date(ClockModule.timeFormats[optFormat], constructedServerTime)
 end
 
-local function resolveDateFormatKey()
-    local dateFormat = xb.db.profile.modules.clock.dateFormat or "dayMonth"
-    return dateFormat
-end
-
-local function formatDateFromParts(day, month)
-    if resolveDateFormatKey() == "monthDay" then
-        return month .. "/" .. day
-    end
-    return day .. "/" .. month
-end
-
 local function formatDateAndTime(dateText, timeText)
     if not dateText then
         return timeText
@@ -130,7 +118,7 @@ local function FormatCalendarDateTime(calendarTime)
     end
 
     local timeFormat = xb.db.profile.modules.clock.timeFormat
-    local dateText = formatDateFromParts(calendarTime.monthDay, calendarTime.month)
+    local dateText = xb:FormatLocalizedDate(calendarTime.monthDay, calendarTime.month)
     local timeText = GetServerTimeString(timeFormat, calendarTime)
     return formatDateAndTime(dateText, timeText)
 end
@@ -143,7 +131,7 @@ local function FormatTimestampDateTime(timestamp)
     local timeFormat = xb.db.profile.modules.clock.timeFormat
     local truncated = math.ceil(timestamp / 60) * 60
     local d = date("*t", truncated)
-    local dateText = formatDateFromParts(d.day, d.month)
+    local dateText = xb:FormatLocalizedDate(d.day, d.month)
     local timeText = date(ClockModule.timeFormats[timeFormat], truncated)
     return formatDateAndTime(dateText, timeText)
 end
@@ -691,7 +679,6 @@ function ClockModule:GetDefaultOptions()
     return 'clock', {
         enabled = true,
         timeFormat = 'twelveAmPm',
-        dateFormat = 'dayMonth',
         fontSize = 20,
         serverTime = false,
         hideEventText = false,
@@ -758,26 +745,9 @@ function ClockModule:GetConfig()
                     xb.db.profile.modules.clock.hideEventText = val;
                 end
             },
-            formatRow = XIVBar.ColumnRow(3, {
-                name = L["CLOCK_DATE_FORMAT"],
-                order = 3,
-                type = "select",
-                values = {
-                    dayMonth = L["CLOCK_DATE_DAY_MONTH"],
-                    monthDay = L["CLOCK_DATE_MONTH_DAY"],
-                },
-                style = "dropdown",
-                get = function()
-                    return xb.db.profile.modules.clock.dateFormat or "locale";
-                end,
-                set = function(_, val)
-                    xb.db.profile.modules.clock.dateFormat = val;
-                    self:RefreshTooltipIfShown();
-                end,
-            },
-            {
+            timeFormat = {
                 name = L["TIME_FORMAT"],
-                order = 3.1,
+                order = 3,
                 type = "select",
                 values = { -- TODO: WTF is with this not accepting a variable?
                     twelveAmPm = '08:00 AM (12 Hour)',
@@ -796,7 +766,7 @@ function ClockModule:GetConfig()
                     self:Refresh();
                     self:RefreshTooltipIfShown();
                 end
-            }),
+            },
             fontSize = {
                 name = FONT_SIZE,
                 type = 'range',
