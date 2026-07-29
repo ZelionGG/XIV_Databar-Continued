@@ -43,7 +43,7 @@ XIVBar.defaults = {
                 r = RAID_CLASS_COLORS[XIVBar.constants.playerClass].r,
                 g = RAID_CLASS_COLORS[XIVBar.constants.playerClass].g,
                 b = RAID_CLASS_COLORS[XIVBar.constants.playerClass].b,
-                a = RAID_CLASS_COLORS[XIVBar.constants.playerClass].a
+                a = 1
             }
         },
         text = {fontSize = 12, smallFontSize = 11, font = 'Homizio Bold'},
