@@ -286,7 +286,7 @@ function XIVBar:MaybeShowProfileSetupPrompt()
             charKey = charKey,
             isLegacyDefault = true,
         }
-        StaticPopup_Show("XIVBAR_PROFILE_SETUP")
+        self:ShowProfileSetupDialog("migrate")
         return
     end
 
@@ -298,7 +298,7 @@ function XIVBar:MaybeShowProfileSetupPrompt()
             sourceProfile = current,
             charKey = charKey,
         }
-        StaticPopup_Show("XIVBAR_PROFILE_NEWCHAR")
+        self:ShowProfileSetupDialog("newchar")
         return
     end
 

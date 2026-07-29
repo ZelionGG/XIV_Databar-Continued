@@ -572,173 +572,241 @@ StaticPopupDialogs["XIVBAR_IMPORT_PROFILE"] = {
 
 local PROFILE_SETUP_DIALOG_WIDTH = 560
 local PROFILE_SETUP_TEXT_WIDTH = 540
-local PROFILE_SETUP_TEXT_PAD = 10
+local PROFILE_SETUP_BUTTON_GAP = 10
+local PROFILE_SETUP_TOP_PAD = 20
+local PROFILE_SETUP_TITLE_BODY_GAP = 16
+local PROFILE_SETUP_BODY_SEP_GAP = 14
+local PROFILE_SETUP_SEP_FOOTER_GAP = 10
+local PROFILE_SETUP_FOOTER_BUTTON_GAP = 24
+local PROFILE_SETUP_BODY_BUTTON_GAP = 24
+local PROFILE_SETUP_BOTTOM_PAD = 20
+local PROFILE_SETUP_BUTTON_HEIGHT = 24
+local PROFILE_SETUP_SEP_HEIGHT = 1
+local PROFILE_SETUP_SEP_WIDTH = 400
+local PROFILE_SETUP_ACCENT = "|cff40E0D0%s|r"
 
-local function SetDialogTextWidth(fontString, width)
-    if not fontString then
+local function ApplyProfileSetupBackdrop(frame)
+    if not frame.SetBackdrop then
         return
     end
-    if fontString.SetDesiredWidth then
-        fontString:SetDesiredWidth(width)
-    else
-        fontString:SetWidth(width)
-    end
+    frame:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    })
+    frame:SetBackdropColor(0, 0, 0, 1)
 end
 
-local function StyleProfileSetupDialog(dialog, bodyText)
-    dialog:SetWidth(PROFILE_SETUP_DIALOG_WIDTH)
-
-    local text = dialog.Text or dialog.text
-    local subText = dialog.SubText
-
-    if text then
-        if text.SetFontObject then
-            text:SetFontObject(GameFontNormalHuge)
-        end
-        text:SetTextColor(1, 0.82, 0)
-        text:SetJustifyH("CENTER")
-        text:SetText(L["PROFILE_SETUP_HEADER"])
-        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
-    end
-
-    if subText then
-        -- Retail/GameDialog: body goes in SubText under the header.
-        subText:SetText(bodyText)
-        subText:Show()
-        subText:SetJustifyH("CENTER")
-        SetDialogTextWidth(subText, PROFILE_SETUP_TEXT_WIDTH)
-        if subText.SetFontObject then
-            subText:SetFontObject(GameFontHighlight)
-        end
-    elseif text then
-        -- Classic-style StaticPopup: custom header + body below.
-        if not dialog.xivProfileHeader then
-            local header = dialog:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
-            header:SetJustifyH("CENTER")
-            header:SetTextColor(1, 0.82, 0)
-            dialog.xivProfileHeader = header
-        end
-
-        local header = dialog.xivProfileHeader
-        header:ClearAllPoints()
-        header:SetPoint("TOP", dialog, "TOP", 0, -18)
-        header:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
-        header:SetText(L["PROFILE_SETUP_HEADER"])
-        header:Show()
-
-        text:SetFontObject(GameFontHighlight)
-        text:SetTextColor(1, 1, 1)
-        text:SetJustifyH("CENTER")
-        text:SetText(bodyText)
-        text:ClearAllPoints()
-        text:SetPoint("TOP", header, "BOTTOM", 0, -12)
-        text:SetPoint("LEFT", dialog, "LEFT", PROFILE_SETUP_TEXT_PAD, 0)
-        text:SetPoint("RIGHT", dialog, "RIGHT", -PROFILE_SETUP_TEXT_PAD, 0)
-        SetDialogTextWidth(text, PROFILE_SETUP_TEXT_WIDTH)
-    end
-
-    if dialog.SetMinimumWidth then
-        dialog:SetMinimumWidth(PROFILE_SETUP_DIALOG_WIDTH)
-    end
-    if dialog.Resize then
-        dialog:Resize()
-    end
-end
-
-local function CleanupProfileSetupDialog(dialog)
-    if dialog.xivProfileHeader then
-        dialog.xivProfileHeader:Hide()
-    end
-end
-
-StaticPopupDialogs["XIVBAR_PROFILE_SETUP"] = {
-    text = L["PROFILE_SETUP_HEADER"],
-    subText = " ",
-    wide = true,
-    wideText = true,
-    normalSizedSubText = true,
-    -- Keep current is primary: Create blank was previously button1 and wiped settings via ResetProfile.
-    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
-    button2 = L["PROFILE_SETUP_NEW_FROM_SHARED"],
-    button3 = L["PROFILE_SETUP_NEW_BLANK"],
-    OnShow = function(self)
-        local pending = XIVBar.profileSetupPending
-        local preferred = (pending and pending.preferred) or "Default"
-        StyleProfileSetupDialog(self, L["PROFILE_SETUP_TEXT"]:format(preferred))
-
-        local hasShared = XIVBar:GetSharedProfileForCopy() ~= nil
-        local button2 = self.button2 or self.Button2 or (self.GetButton2 and self:GetButton2())
-        if button2 then
-            if hasShared then
-                button2:SetText(L["PROFILE_SETUP_NEW_FROM_SHARED"])
-                button2:Show()
-            else
-                button2:Hide()
-            end
-        end
-    end,
-    OnAccept = function()
-        -- Keep the current shared Default profile.
-        XIVBar:MarkProfileSetupDone()
-    end,
-    OnCancel = function()
-        -- Personal profile copied from the shared/Default profile.
-        if XIVBar:GetSharedProfileForCopy() then
-            XIVBar:CreatePersonalProfileFromSetup(true)
+local function LayoutProfileSetupButtons(frame, specs)
+    local visible = {}
+    for i, button in ipairs(frame.buttons) do
+        local spec = specs[i]
+        if spec and spec.show ~= false then
+            button:SetText(spec.text)
+            button:SetScript("OnClick", function()
+                if spec.onClick then
+                    spec.onClick()
+                end
+                frame:Hide()
+            end)
+            local width = math.max(120, button:GetTextWidth() + 24)
+            button:SetWidth(width)
+            button:Show()
+            visible[#visible + 1] = button
         else
-            XIVBar:MarkProfileSetupDone()
+            button:Hide()
+            button:SetScript("OnClick", nil)
         end
-    end,
-    OnAlt = function()
-        -- Blank personal profile (destructive; least prominent button).
-        XIVBar:CreatePersonalProfileFromSetup(false)
-    end,
-    OnHide = function(self)
-        CleanupProfileSetupDialog(self)
-        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep current.
-        if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
-            XIVBar:MarkProfileSetupDone()
-        end
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    noCancelOnEscape = true,
-    preferredIndex = 3,
-}
+    end
 
-StaticPopupDialogs["XIVBAR_PROFILE_NEWCHAR"] = {
-    text = L["PROFILE_SETUP_HEADER"],
-    subText = " ",
-    wide = true,
-    wideText = true,
-    normalSizedSubText = true,
-    button1 = L["PROFILE_SETUP_KEEP_CURRENT"],
-    button2 = L["PROFILE_NEWCHAR_USE_SHARED"],
-    OnShow = function(self)
-        StyleProfileSetupDialog(self, L["PROFILE_NEWCHAR_TEXT"])
-    end,
-    OnAccept = function()
-        -- Keep the blank personal Name - Realm profile.
-        XIVBar:MarkProfileSetupDone()
-    end,
-    OnCancel = function()
-        -- Join the shared Default profile (live share).
-        XIVBar:UseSharedDefaultFromSetup()
-    end,
-    OnHide = function(self)
-        CleanupProfileSetupDialog(self)
-        -- Escape does not call OnCancel (noCancelOnEscape); treat dismiss as keep personal.
+    local totalWidth = 0
+    for i, button in ipairs(visible) do
+        totalWidth = totalWidth + button:GetWidth()
+        if i > 1 then
+            totalWidth = totalWidth + PROFILE_SETUP_BUTTON_GAP
+        end
+    end
+
+    local x = -totalWidth / 2
+    for _, button in ipairs(visible) do
+        button:ClearAllPoints()
+        button:SetPoint("LEFT", frame.buttonContainer, "CENTER", x, 0)
+        x = x + button:GetWidth() + PROFILE_SETUP_BUTTON_GAP
+    end
+end
+
+local function ResizeProfileSetupFrame(frame)
+    local height = PROFILE_SETUP_TOP_PAD
+        + frame.title:GetStringHeight()
+        + PROFILE_SETUP_TITLE_BODY_GAP
+        + frame.body:GetStringHeight()
+
+    if frame.footer:IsShown() then
+        height = height
+            + PROFILE_SETUP_BODY_SEP_GAP
+            + PROFILE_SETUP_SEP_HEIGHT
+            + PROFILE_SETUP_SEP_FOOTER_GAP
+            + frame.footer:GetStringHeight()
+            + PROFILE_SETUP_FOOTER_BUTTON_GAP
+    else
+        height = height + PROFILE_SETUP_BODY_BUTTON_GAP
+    end
+
+    height = height + PROFILE_SETUP_BUTTON_HEIGHT + PROFILE_SETUP_BOTTOM_PAD
+    frame:SetHeight(height)
+end
+
+local function CreateProfileSetupFrame()
+    local compat = XIVBar.compat
+    local useElvUI = XIVBar.db.profile.general.useElvUI
+        and (compat.IsAddOnLoaded('ElvUI') or compat.IsAddOnLoaded('Tukui'))
+
+    local template = BackdropTemplateMixin and "BackdropTemplate" or nil
+    local frame = CreateFrame("Frame", "XIVBarProfileSetupFrame", UIParent, template)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetFrameLevel(100)
+    frame:SetWidth(PROFILE_SETUP_DIALOG_WIDTH)
+    frame:SetPoint("TOP", UIParent, "TOP", 0, -120)
+    frame:EnableMouse(true)
+    frame:SetMovable(true)
+    frame:SetClampedToScreen(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    frame:Hide()
+
+    if useElvUI then
+        if frame.StripTextures then
+            frame:StripTextures()
+        end
+        if frame.SetTemplate then
+            frame:SetTemplate("Transparent")
+        end
+    else
+        ApplyProfileSetupBackdrop(frame)
+    end
+
+    local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
+    title:SetPoint("TOP", 0, -PROFILE_SETUP_TOP_PAD)
+    title:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
+    title:SetJustifyH("CENTER")
+    title:SetTextColor(1, 0.82, 0)
+    frame.title = title
+
+    local body = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    body:SetPoint("TOP", title, "BOTTOM", 0, -PROFILE_SETUP_TITLE_BODY_GAP)
+    body:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
+    body:SetJustifyH("CENTER")
+    body:SetTextColor(1, 1, 1)
+    frame.body = body
+
+    local separator = frame:CreateTexture(nil, "ARTWORK")
+    separator:SetColorTexture(1, 1, 1, 0.25)
+    separator:SetSize(PROFILE_SETUP_SEP_WIDTH, PROFILE_SETUP_SEP_HEIGHT)
+    separator:SetPoint("TOP", body, "BOTTOM", 0, -PROFILE_SETUP_BODY_SEP_GAP)
+    frame.separator = separator
+
+    local footer = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    footer:SetPoint("TOP", separator, "BOTTOM", 0, -PROFILE_SETUP_SEP_FOOTER_GAP)
+    footer:SetWidth(PROFILE_SETUP_TEXT_WIDTH)
+    footer:SetJustifyH("CENTER")
+    footer:SetTextColor(1, 1, 1)
+    frame.footer = footer
+
+    local buttonContainer = CreateFrame("Frame", nil, frame)
+    buttonContainer:SetPoint("BOTTOM", 0, PROFILE_SETUP_BOTTOM_PAD)
+    buttonContainer:SetSize(PROFILE_SETUP_TEXT_WIDTH, PROFILE_SETUP_BUTTON_HEIGHT)
+    frame.buttonContainer = buttonContainer
+
+    local elvSkins = _G.ElvUI and _G.ElvUI[1] and _G.ElvUI[1]:GetModule('Skins', true)
+
+    frame.buttons = {}
+    for i = 1, 3 do
+        local button = CreateFrame("Button", nil, buttonContainer, "UIPanelButtonTemplate")
+        button:SetSize(120, PROFILE_SETUP_BUTTON_HEIGHT)
+        if useElvUI and elvSkins and elvSkins.HandleButton then
+            elvSkins:HandleButton(button)
+        end
+        frame.buttons[i] = button
+    end
+
+    frame:SetScript("OnHide", function()
+        -- Escape / dismiss: treat as keep current (same as former noCancelOnEscape).
         if XIVBar.db and not XIVBar:HasCompletedProfileSetup() then
             XIVBar:MarkProfileSetupDone()
         end
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    noCancelOnEscape = true,
-    preferredIndex = 3,
-}
+    end)
+
+    table.insert(UISpecialFrames, frame:GetName())
+    return frame
+end
+
+function XIVBar:ShowProfileSetupDialog(mode)
+    local frame = self.profileSetupFrame
+    if not frame then
+        frame = CreateProfileSetupFrame()
+        self.profileSetupFrame = frame
+    end
+
+    frame.title:SetText(L["PROFILE_SETUP_HEADER"])
+
+    if mode == "migrate" then
+        local pending = self.profileSetupPending
+        local preferred = (pending and pending.preferred) or "Default"
+        frame.body:SetText(L["PROFILE_SETUP_TEXT"])
+        frame.footer:SetText(L["PROFILE_SETUP_CURRENT"]:format(PROFILE_SETUP_ACCENT:format(preferred)))
+        frame.separator:Show()
+        frame.footer:Show()
+
+        local hasShared = self:GetSharedProfileForCopy() ~= nil
+        LayoutProfileSetupButtons(frame, {
+            {
+                text = PROFILE_SETUP_ACCENT:format(L["PROFILE_SETUP_KEEP_CURRENT"]),
+                onClick = function()
+                    XIVBar:MarkProfileSetupDone()
+                end,
+            },
+            {
+                text = L["PROFILE_SETUP_NEW_FROM_SHARED"],
+                show = hasShared,
+                onClick = function()
+                    XIVBar:CreatePersonalProfileFromSetup(true)
+                end,
+            },
+            {
+                text = L["PROFILE_SETUP_NEW_BLANK"],
+                onClick = function()
+                    XIVBar:CreatePersonalProfileFromSetup(false)
+                end,
+            },
+        })
+    else
+        frame.body:SetText(L["PROFILE_NEWCHAR_TEXT"])
+        frame.separator:Hide()
+        frame.footer:Hide()
+        LayoutProfileSetupButtons(frame, {
+            {
+                text = PROFILE_SETUP_ACCENT:format(L["PROFILE_SETUP_KEEP_CURRENT"]),
+                onClick = function()
+                    XIVBar:MarkProfileSetupDone()
+                end,
+            },
+            {
+                text = L["PROFILE_NEWCHAR_USE_SHARED"],
+                onClick = function()
+                    XIVBar:UseSharedDefaultFromSetup()
+                end,
+            },
+        })
+    end
+
+    ResizeProfileSetupFrame(frame)
+    frame:Show()
+    frame:Raise()
+end
 
 function XIVBar:GetGeneralOptions()
     return {
