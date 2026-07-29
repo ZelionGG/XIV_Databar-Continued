@@ -85,7 +85,7 @@ local function AddChatMessage(message)
 end
 
 function XIVBar:GetChatPrefix()
-    return "|cffffd100XIV Databar Continued|r"
+    return "|cffffd100XIV Databar|r |cffb0b0b0Continued|r"
 end
 
 function XIVBar.ColorizeCommands(_, text)
