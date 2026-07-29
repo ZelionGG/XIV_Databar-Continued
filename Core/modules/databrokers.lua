@@ -814,7 +814,6 @@ function DataBrokersModule:RebuildPluginOptions()
                 name = meta.name,
                 order = meta.order,
                 type = "group",
-                disabled = IsModuleDisabled,
                 hidden = function()
                     for _, brokerName in ipairs(brokersForHidden) do
                         if IsDisplayable(brokerName, LDB:GetDataObjectByName(brokerName)) then
@@ -832,6 +831,7 @@ function DataBrokersModule:RebuildPluginOptions()
             order = order,
             type = "group",
             inline = true,
+            disabled = IsModuleDisabled,
             hidden = function()
                 return not IsDisplayable(name, LDB:GetDataObjectByName(name))
             end,
