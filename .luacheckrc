@@ -129,6 +129,7 @@ read_globals = {
     'FONT_COLOR_CODE_CLOSE',
     'FONT_SIZE',
     'format',
+    'FormatShortDate',
     'FPS_ABBR',
     'FRIENDS_TEXTURE_AFK',
     'FRIENDS_TEXTURE_DND',

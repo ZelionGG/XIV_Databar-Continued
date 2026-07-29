@@ -158,7 +158,6 @@ L["BROKER_SHOW_LAUNCHERS"] = "Show Launchers"
 
 -- Clock
 L["TIME_FORMAT"] = "Time Format"
-L["CLOCK_DATE_FORMAT"] = "Date Format"
 L["USE_SERVER_TIME"] = "Use Server Time"
 L["NEW_EVENT"] = "New Event!"
 L["LOCAL_TIME"] = "Local Time"
@@ -169,8 +168,6 @@ L["HIDE_EVENT_TEXT"] = "Hide Event Text"
 L["CLOCK_SHOW_LOCKOUTS"] = "Show Lockouts in Tooltip"
 L["CLOCK_SHOW_BOSSES_KILLED"] = "Show Bosses Defeated"
 L["CLOCK_LOCKOUTS_HEADER"] = "Lockouts"
-L["CLOCK_DATE_DAY_MONTH"] = "Day/Month (1/7)"
-L["CLOCK_DATE_MONTH_DAY"] = "Month/Day (7/1)"
 L["REST_ICON"] = "Rest Icon"
 L["SHOW_REST_ICON"] = "Show Rest Icon"
 L["TEXTURE"] = "Texture"
@@ -272,6 +269,9 @@ L["M_PLUS_TELEPORTS"] = "M+ Teleports"
 L["ONLY_SHOW_CURRENT_SEASON"] = "Only show current season"
 L["MYTHIC_PLUS_TELEPORTS"] = "Mythic+ Teleports"
 L["HIDE_M_PLUS_TELEPORTS_TEXT"] = "Hide M+ Teleports text"
+L["SHOW_SEASON_DATES"] = "Show season dates"
+L["SEASON_DATE_RANGE"] = "From %s to %s"
+L["SEASON_DATE_FROM"] = "From %s"
 L["SHOW_MYTHIC_PLUS_TELEPORTS"] = "Show Mythic+ Teleports"
 L["MYTHIC_TELEPORT_SHARED_CD"] = "Shared 8-hour cooldown (resets after completing a Mythic+ dungeon)"
 L["SHOW_MYTHIC_TELEPORT_POPUP"] = "Show Teleport Popup"
@@ -315,6 +315,7 @@ L["Dragonflight"] = true
 L["The War Within"] = true
 L["Midnight"] = true
 L["CURRENT_SEASON"] = "Current season"
+L["NEXT_SEASON"] = "Next season"
 
 -- Profile Import/Export
 L["PROFILE_SHARING"] = "Profile Sharing"
@@ -344,7 +345,6 @@ L["PROFILE_NEWCHAR_TEXT"] = "This character starts with a blank personal profile
 L["PROFILE_NEWCHAR_USE_SHARED"] = "Use shared profile"
 
 -- Changelog
-L["CHANGELOG_DATE_FORMAT"] = "%month%-%day%-%year%"
 L["IMPORTANT"] = "Important"
 L["NEW"] = "New"
 L["IMPROVEMENT"] = "Improvement"
