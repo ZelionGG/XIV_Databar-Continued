@@ -119,7 +119,7 @@ end
 
 function XIVBar:SetupOptions()
     local options = {
-        name = "XIV Bar Continued",
+        name = "XIV Databar Continued",
         handler = XIVBar,
         type = 'group',
         args = {
@@ -416,11 +416,11 @@ function XIVBar:SetupOptions()
     AceConfig:RegisterOptionsTable(AddOnName .. "_Profiles", profileOptions)
 
     -- Add to Blizzard options
-    local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Bar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Bar Continued")
+    local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Databar Continued")
+    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Databar Continued")
     self.optionsCategory = mainCategory
 end
 
