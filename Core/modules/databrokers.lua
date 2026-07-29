@@ -635,7 +635,8 @@ function DataBrokersModule:LayoutLegacyCluster()
             self:UpdatePieceContent(piece)
             piece:ClearAllPoints()
             if previous then
-                piece:SetPoint("LEFT", previous, "RIGHT", gap, 0)
+                -- Grow leftward away from system/gold/travel anchors
+                piece:SetPoint("RIGHT", previous, "LEFT", -gap, 0)
             else
                 firstPiece = piece
             end
