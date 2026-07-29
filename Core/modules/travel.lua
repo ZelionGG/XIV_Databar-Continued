@@ -248,6 +248,33 @@ function TravelModule:GetCurrentSeason()
     return currentSeason
 end
 
+function TravelModule:GetNextSeason()
+    local currentDate = date("%Y-%m-%d")
+    local nextSeason = nil
+    local earliestDate = nil
+
+    local portal = self:GetSeasonPortal()
+
+    xb.MythicTeleports = xb.MythicTeleports or {}
+    local seasons = xb.MythicTeleports
+
+    -- Find the soonest upcoming season (start > today)
+    for seasonKey, seasonData in pairs(seasons) do
+        if type(seasonData) == "table" and seasonData.start_date then
+            local startDate = seasonData.start_date[portal] or seasonData.start_date.default
+
+            if startDate and startDate > currentDate then
+                if earliestDate == nil or startDate < earliestDate then
+                    earliestDate = startDate
+                    nextSeason = seasonKey
+                end
+            end
+        end
+    end
+
+    return nextSeason
+end
+
 function TravelModule:GetSeasonPortal()
     local portal = C_CVar.GetCVar("portal")
     if portal ~= "US" and portal ~= "EU" then
@@ -1614,9 +1641,27 @@ function TravelModule:GetMythicTeleportGroups()
             end
         end
 
-        if currentSeason and xb.MythicTeleports[currentSeason] then
-            table.insert(filteredTeleports, { teleports = "SEPARATOR" })
+        local nextSeason = self:GetNextSeason()
+        local hasNext = nextSeason and xb.MythicTeleports[nextSeason]
+        local hasCurrent = currentSeason and xb.MythicTeleports[currentSeason]
 
+        if hasNext or hasCurrent then
+            table.insert(filteredTeleports, { teleports = "SEPARATOR" })
+        end
+
+        if hasNext then
+            local teleports = self:CollectTeleports(xb.MythicTeleports[nextSeason].teleports, showUnknownTeleports)
+
+            if #teleports > 0 then
+                table.insert(filteredTeleports, {
+                    name = L["NEXT_SEASON"],
+                    seasonKey = nextSeason,
+                    teleports = teleports
+                })
+            end
+        end
+
+        if hasCurrent then
             local teleports = self:CollectTeleports(xb.MythicTeleports[currentSeason].teleports, showUnknownTeleports)
 
             if #teleports > 0 then

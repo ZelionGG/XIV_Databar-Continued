@@ -304,6 +304,7 @@ L["Dragonflight"] = true
 L["The War Within"] = true
 L["Midnight"] = true
 L["CURRENT_SEASON"] = "Saison courante"
+L["NEXT_SEASON"] = "Prochaine saison"
 
 -- Profile Import/Export
 L["PROFILE_SHARING"] = "Partage de profil"
