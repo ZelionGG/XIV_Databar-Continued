@@ -354,8 +354,8 @@ function DataBrokersModule:GetDisplayName(name, dataobj)
     local label = GetBrokerLabel(name, dataobj)
     local source = GetBrokerSource(dataobj)
     local moduleName = L["DATABROKERS"] or "DataBrokers"
-    if source then
-        return string.format("%s: (%s) %s", moduleName, source, label)
+    if source and source ~= label then
+        return string.format("%s: %s | %s", moduleName, source, label)
     end
     return string.format("%s: %s", moduleName, label)
 end
@@ -763,8 +763,8 @@ function DataBrokersModule:RebuildPluginOptions()
         local typeLabel = NormalizeBrokerType(dataobj.type) or dataobj.type or ""
         local groupKey = "obj_" .. SanitizeFrameToken(name)
         local groupName
-        if source then
-            groupName = string.format("(%s) %s (%s)", source, label, typeLabel)
+        if source and source ~= label then
+            groupName = string.format("%s | %s (%s)", source, label, typeLabel)
         else
             groupName = string.format("%s (%s)", label, typeLabel)
         end
