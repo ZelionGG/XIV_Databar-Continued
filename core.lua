@@ -544,7 +544,7 @@ function XIVBar:GetColor(name)
         r, g, b = self:GetClassColors()
     end
 
-    return r, g, b, a
+    return r, g, b, a or 1
 end
 
 -- Pass nil year for SHORTDATENOYEAR (calendar/lockout dates without year).
@@ -578,15 +578,16 @@ end
 function XIVBar:HoverColors()
     local colors
     local profile = self.db.profile.color
+    local hoverAlpha = profile.hover.a or 1
     -- use self-picked color for hover color
     if not profile.useHoverCC then
         colors = {
-            profile.hover.r, profile.hover.g, profile.hover.b, profile.hover.a
+            profile.hover.r, profile.hover.g, profile.hover.b, hoverAlpha
         }
         -- use class color for hover color
     else
         local r, g, b = self:GetClassColors()
-        colors = {r, g, b, profile.hover.a}
+        colors = {r, g, b, hoverAlpha}
     end
     return colors
 end
