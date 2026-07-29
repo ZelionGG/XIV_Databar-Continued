@@ -29,6 +29,8 @@ XIVBar.defaults = {
             enableFreePlacement = false,
             freePlacementInitialized = false,
             modulePlacements = {},
+            disableLoginMessage = false,
+            lastChangelogAnnounce = "",
         },
         color = {
             barColor = {r = 0.094, g = 0.094, b = 0.094, a = 0.75},
@@ -419,9 +421,10 @@ function XIVBar:SetupOptions()
     local _, mainCategory = AceConfigDialog:AddToBlizOptions(AddOnName, "XIV Databar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Modules", L["MODULES"], "XIV Databar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_ModulesPositioning", L["MODULES_POSITIONING"], "XIV Databar Continued")
-    AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Databar Continued")
+    local _, changelogCategory = AceConfigDialog:AddToBlizOptions(AddOnName .. "_Changelog", L["CHANGELOG"], "XIV Databar Continued")
     AceConfigDialog:AddToBlizOptions(AddOnName .. "_Profiles", 'Profiles', "XIV Databar Continued")
     self.optionsCategory = mainCategory
+    self.changelogCategory = changelogCategory
 end
 
 function XIVBar:ExportProfile()
@@ -1113,6 +1116,17 @@ function XIVBar:GetPositioningOptions()
                 set = function(_, val)
                     self.db.profile.general.disableTooltipsInCombat = val
                     self:Refresh()
+                end
+            },
+            disableLoginMessage = {
+                name = L["DISABLE_LOGIN_MESSAGE"] or "Disable login message",
+                type = "toggle",
+                order = 10.7,
+                get = function()
+                    return self.db.profile.general.disableLoginMessage
+                end,
+                set = function(_, val)
+                    self.db.profile.general.disableLoginMessage = not not val
                 end
             },
             spacingHeader = {

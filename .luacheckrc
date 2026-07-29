@@ -111,6 +111,7 @@ read_globals = {
     'CURRENCY',
     'date',
     'DEFAULT_AFK_MESSAGE',
+    'DEFAULT_CHAT_FRAME',
     'DEFAULT_DND_MESSAGE',
     'DELVES_GREAT_VAULT_LABEL',
     'DifficultyUtil',

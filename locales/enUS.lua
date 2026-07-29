@@ -346,6 +346,12 @@ L["PROFILE_SETUP_KEEP_CURRENT"] = "Keep current profile"
 L["PROFILE_NEWCHAR_TEXT"] = "This character starts with a blank personal profile.\n\n- |cffffd100Keep current profile:|r keep this character's blank personal profile\n- |cffffd100Use shared profile:|r join the shared Default profile (settings stay in sync)\n\nYou can change this later in the Profiles settings."
 L["PROFILE_NEWCHAR_USE_SHARED"] = "Use shared profile"
 
+L["DISABLE_LOGIN_MESSAGE"] = "Disable login message"
+L["ADDON_LOADED_MSG"] = "loaded, type /xivc to open settings."
+L["UPDATE_ANNOUNCE"] = "got updated to %s,"
+L["OPEN_CHANGELOG"] = "Open Changelog"
+L["CHANGELOG_AFTER_COMBAT"] = "Changelog will open after combat ends"
+
 -- Changelog
 L["IMPORTANT"] = "Important"
 L["NEW"] = "New"
