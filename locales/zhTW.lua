@@ -337,7 +337,8 @@ L["CURRENT_SEASON"] = true
 -- TODO: L["IMPORT_PROFILE_DESC"] = "Import a profile from another player"
 
 -- TODO: L["PROFILE_SETUP_HEADER"] = "XIV_Databar Continued"
--- TODO: L["PROFILE_SETUP_TEXT"] = "The profile system has been migrated: this character is still using the legacy shared Default profile.\n\nChoose how this character should continue:\n- |cffffd100Keep current profile:|r stay on the shared Default profile (recommended)\n- |cffffd100Copy shared profile:|r personal profile based on your current shared settings\n- |cffffd100Create blank profile:|r personal profile with default settings (resets this character)\n\nYou can also manage profiles later in the Profiles settings.\n\nCurrent profile: %s"
+-- TODO: L["PROFILE_SETUP_TEXT"] = "The profile system has been migrated: this character is still using the legacy shared Default profile.\n\nChoose how this character should continue:\n- |cffffd100Keep current profile:|r stay on the shared Default profile (recommended)\n- |cffffd100Copy shared profile:|r personal profile based on your current shared settings\n- |cffffd100Create blank profile:|r personal profile with default settings (resets this character)\n\nYou can also manage profiles later in the Profiles settings."
+-- TODO: L["PROFILE_SETUP_CURRENT"] = "Current profile: %s"
 -- TODO: L["PROFILE_SETUP_NEW_BLANK"] = "Create blank profile"
 -- TODO: L["PROFILE_SETUP_NEW_FROM_SHARED"] = "Copy shared profile"
 -- TODO: L["PROFILE_SETUP_KEEP_CURRENT"] = "Keep current profile"

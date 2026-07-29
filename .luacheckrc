@@ -320,6 +320,7 @@ read_globals = {
     'UIDROPDOWNMENU_MAXBUTTONS',
     'UIParent',
     'UIParent_UpdateTopFramePositions',
+    'UISpecialFrames',
     'UnitClass',
     'UnitFactionGroup',
     'UnitLevel',
