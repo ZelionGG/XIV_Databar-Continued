@@ -248,6 +248,62 @@ function TravelModule:GetCurrentSeason()
     return currentSeason
 end
 
+function TravelModule:GetSeasonPortal()
+    local portal = C_CVar.GetCVar("portal")
+    if portal ~= "US" and portal ~= "EU" then
+        return "default"
+    end
+    return portal
+end
+
+function TravelModule:GetSeasonPortalDates(seasonData)
+    if type(seasonData) ~= "table" or not seasonData.start_date then
+        return nil, nil
+    end
+
+    local portal = self:GetSeasonPortal()
+    local startDate = seasonData.start_date[portal] or seasonData.start_date.default
+    local endDate = seasonData.end_date and (seasonData.end_date[portal] or seasonData.end_date.default) or nil
+    return startDate, endDate
+end
+
+-- Convert ISO YYYY-MM-DD to a client-locale display string via FormatShortDate.
+function TravelModule:FormatSeasonIsoDate(isoDate)
+    return xb:FormatLocalizedDateString(isoDate)
+end
+
+function TravelModule:FormatSeasonDateRange(seasonKey)
+    if not seasonKey or not xb.MythicTeleports or not xb.MythicTeleports[seasonKey] then
+        return nil
+    end
+
+    local startDate, endDate = self:GetSeasonPortalDates(xb.MythicTeleports[seasonKey])
+    if not startDate then
+        return nil
+    end
+
+    local startDisplay = self:FormatSeasonIsoDate(startDate)
+    if endDate then
+        return string.format(L["SEASON_DATE_RANGE"], startDisplay, self:FormatSeasonIsoDate(endDate))
+    end
+    return string.format(L["SEASON_DATE_FROM"], startDisplay)
+end
+
+function TravelModule:FormatSeasonGroupLabel(name, seasonKey)
+    if not name then
+        return name
+    end
+    if not xb.db.profile.showSeasonDates or not seasonKey then
+        return name
+    end
+
+    local range = self:FormatSeasonDateRange(seasonKey)
+    if not range then
+        return name
+    end
+    return string.format("%s (%s)", name, range)
+end
+
 -- Skin Support for ElvUI/TukUI
 -- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI interfere with tooltips
@@ -1514,6 +1570,7 @@ function TravelModule:GetMythicTeleportGroups()
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
                     name = L["CURRENT_SEASON"],
+                    seasonKey = currentSeason,
                     teleports = teleports
                 })
             end
@@ -1565,6 +1622,7 @@ function TravelModule:GetMythicTeleportGroups()
             if #teleports > 0 then
                 table.insert(filteredTeleports, {
                     name = L["CURRENT_SEASON"],
+                    seasonKey = currentSeason,
                     teleports = teleports
                 })
             end
@@ -1692,6 +1750,18 @@ function TravelModule:CreateMythicPopup()
         info.notClickable, info.notCheckable = true, true
         UIDropDownMenu_AddButton(info, level)
 
+        if showCurrentSeasonOnly then
+            local currentSeason = self:GetCurrentSeason()
+            local range = currentSeason and self:FormatSeasonDateRange(currentSeason)
+            if range then
+                -- Gold date line under the title (NORMAL_FONT_COLOR / quest gold)
+                local dateInfo = UIDropDownMenu_CreateInfo()
+                dateInfo.text = '|cFFFFD100' .. range .. '|r'
+                dateInfo.notClickable, dateInfo.notCheckable = true, true
+                UIDropDownMenu_AddButton(dateInfo, level)
+            end
+        end
+
         -- Separator
         local separator = UIDropDownMenu_CreateInfo()
         separator.text = ""
@@ -1723,7 +1793,8 @@ function TravelModule:CreateMythicPopup()
                         UIDropDownMenu_AddButton(sep, level)
                     elseif expData.teleports and next(expData.teleports) then
                         local info = UIDropDownMenu_CreateInfo()
-                        info.text, info.checked = expData.name, false
+                        info.text = self:FormatSeasonGroupLabel(expData.name, expData.seasonKey)
+                        info.checked = false
                         info.menuList, info.hasArrow = expData.teleports, true
                         info.notCheckable = true
                         info.value = expData.teleports
@@ -2257,6 +2328,7 @@ function TravelModule:GetDefaultOptions()
         hideMythicText = false,
         hideMythicInOffSeason = false,
         curSeasonOnly = false,
+        showSeasonDates = false,
         showUnknownTeleports = true,
         randomizeHs = false
     }
@@ -2461,6 +2533,23 @@ function TravelModule:GetConfig()
                 end,
                 set = function(_, val)
                     xb.db.profile.curSeasonOnly = val;
+                    self:Refresh();
+                end,
+                width = 1.2
+            },
+            showSeasonDates = {
+                name = L["SHOW_SEASON_DATES"],
+                order = 25.5,
+                type = "toggle",
+                hidden = function() return not compat.isMainline end,
+                disabled = function()
+                    return xb.db.profile.curSeasonOnly
+                end,
+                get = function()
+                    return xb.db.profile.showSeasonDates;
+                end,
+                set = function(_, val)
+                    xb.db.profile.showSeasonDates = val;
                     self:Refresh();
                 end,
                 width = 1.2
