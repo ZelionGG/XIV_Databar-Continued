@@ -189,6 +189,7 @@ read_globals = {
     'GetSpecializationInfoForSpecID',
     'GetSpellCooldown',
     'GetSpellInfo',
+    'GetSpellTexture',
     'GetTalentTabInfo',
     'GetTime',
     'GetXPExhaustion',
