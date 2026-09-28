@@ -111,6 +111,7 @@ function MenuModule:OnInitialize()
         { key = 'char',   binding = 'TOGGLECHARACTER0',       label = CHARACTER_BUTTON },
         { key = 'spell',  binding = 'TOGGLESPELLBOOK',        label = SPELLBOOK },
         { key = 'talent', binding = 'TOGGLETALENTS',          label = TALENTS_BUTTON },
+        { key = 'legacy', binding = 'TOGGLELEGACYSYSTEM',     label = _G.LEGACY_BUTTON or "Legacy", feature = features.legacy },
         { key = 'ach',    binding = 'TOGGLEACHIEVEMENT',      label = ACHIEVEMENTS,        feature = features.achievements },
         { key = 'quest',  binding = 'TOGGLEQUESTLOG',         label = QUEST_LOG },
         { key = 'lfg',    binding = 'TOGGLEGROUPFINDER',      label = DUNGEONS_BUTTON },
@@ -408,7 +409,15 @@ function MenuModule:CreateFrames()
         },
         {
             key = 'talent', frameName = 'XIVBar_TalentButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            micro = TalentMicroButton,
+            -- Forever's TalentMicroButton stays disabled until a talent point is earned,
+            -- so a secure click on it does nothing. Open the talent frame directly.
+            micro = not compat.isForever and TalentMicroButton or nil,
+        },
+        {
+            key = 'legacy', frameName = 'XIVBar_LegacyButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
+            resolveMicro = function()
+                return _G.LegacyMicroButton
+            end,
         },
         {
             key = 'ach', frameName = 'XIVBar_AchievementButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -420,7 +429,10 @@ function MenuModule:CreateFrames()
         },
         {
             key = 'lfg', frameName = 'XIVBar_LFGButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            macro = compat.GetMicroButtonMacro and compat.GetMicroButtonMacro('lfg') or nil,
+            resolveMicro = compat.isForever and function()
+                return _G.LFDMicroButton
+            end or nil,
+            macro = not compat.isForever and compat.GetMicroButtonMacro and compat.GetMicroButtonMacro('lfg') or nil,
         },
         --[[ {
             key = 'lfg', frameName = 'XIVBar_LFGButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -428,7 +440,8 @@ function MenuModule:CreateFrames()
         }, ]]
         {
             key = 'journal', frameName = 'XIVBar_JournalButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
-            micro = EJMicroButton,
+            -- EJMicroButton:OnClick returns immediately unless CanShowEncounterJournal().
+            micro = not compat.isForever and EJMicroButton or nil,
         },
         {
             key = 'pvp', frameName = 'XIVBar_PVPButton', template = 'SecureActionButtonTemplate,SecureHandlerStateTemplate',
@@ -449,7 +462,8 @@ function MenuModule:CreateFrames()
     }
 
     for _, cfg in ipairs(buttons) do
-        local enabled = mm[cfg.key]
+        -- buttonInfoByKey only contains buttons this flavor actually supports.
+        local enabled = mm[cfg.key] and self.buttonInfoByKey[cfg.key]
         if enabled then
             local frame = CreateFrame('BUTTON', cfg.frameName or cfg.key, parentFrame, cfg.template)
             self.frames[cfg.key] = frame
@@ -501,18 +515,20 @@ function MenuModule:CreateFrames()
         end
     end
 
-    -- Sélection d'onglet sécurisée pour Spell/Talent via PlayerSpellsMicroButton
-    if self.frames.spell then
+    -- Sélection d'onglet sécurisée pour Spell/Talent via PlayerSpellsMicroButton.
+    -- Forever opens those frames itself (spellbookOnly / ToggleClassTalentFrame).
+    -- Tab 1 is ClassSpecializations, not talents, so forcing it closes the talent view.
+    if not compat.isForever and self.frames.spell then
         self.frames.spell:HookScript('PostClick', function()
             self.playerSpellsTargetTab = 3 -- Spellbook
         end)
     end
-    if self.frames.talent then
+    if not compat.isForever and self.frames.talent then
         self.frames.talent:HookScript('PostClick', function()
             self.playerSpellsTargetTab = 1 -- Talents
         end)
     end
-    if not self.playerSpellsHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
+    if not compat.isForever and not self.playerSpellsHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
         self.playerSpellsHooked = true
         PlayerSpellsFrame:HookScript('OnShow', function()
             local tab = self.playerSpellsTargetTab
@@ -544,6 +560,9 @@ function MenuModule:ApplyCombatState()
                 frame:SetAttribute('_onstate-combatlock', string.format([[if newstate == 'combat' then
                         self:SetAttribute('*type1', nil)
                         self:EnableMouse(false)
+                    elseif self:GetAttribute('featureLocked') then
+                        self:SetAttribute('*type1', nil)
+                        self:EnableMouse(true)
                     else
                         self:SetAttribute('*type1', '%s')
                         self:EnableMouse(true)
@@ -586,6 +605,86 @@ function MenuModule:IconDefaults(name)
     self.icons[name]:SetPoint('CENTER')
     self.icons[name]:SetSize(self.iconSize, self.iconSize)
     self.icons[name]:SetVertexColor(xb:GetColor('normal'))
+    if name == "talent" or name == "legacy" then
+        self:ApplyMicroButtonLock(name, false)
+    end
+end
+
+-- Talents and Legacy stay disabled until Blizzard's own micro button enables
+-- them (talent point earned, or the Legacy track unlocked). Reuse that state
+-- instead of guessing a level.
+function MenuModule:GetMicroButtonLockText(name)
+    local micro
+    if name == "talent" then
+        micro = _G.TalentMicroButton
+    elseif name == "legacy" then
+        micro = _G.LegacyMicroButton
+    end
+    if not micro or not micro.IsEnabled then
+        return nil
+    end
+    if micro.UpdateMicroButton then
+        micro:UpdateMicroButton()
+    end
+    if micro:IsEnabled() then
+        return nil
+    end
+    if micro.minLevel and _G.FEATURE_BECOMES_AVAILABLE_AT_LEVEL then
+        return format(_G.FEATURE_BECOMES_AVAILABLE_AT_LEVEL, micro.minLevel)
+    end
+    local tip = micro.disabledTooltip
+    if type(tip) == "function" then
+        tip = tip(micro)
+    end
+    if type(tip) == "string" then
+        return tip
+    end
+    return ""
+end
+
+function MenuModule:ApplyMicroButtonLock(name, hovering)
+    local lockText = self:GetMicroButtonLockText(name)
+    local locked = lockText ~= nil
+    local icon = self.icons[name]
+    if icon then
+        if icon.SetDesaturated then
+            icon:SetDesaturated(locked)
+        end
+        if locked and not icon.SetDesaturated then
+            local c = xb.db.profile.color.inactive
+            icon:SetVertexColor(c.r, c.g, c.b, c.a)
+        elseif hovering and not locked then
+            icon:SetVertexColor(unpack(xb:HoverColors()))
+        else
+            icon:SetVertexColor(xb:GetColor('normal'))
+        end
+    end
+
+    local frame = self.frames[name]
+    if frame and not InCombatLockdown() then
+        if locked then
+            frame:SetAttribute("featureLocked", true)
+            frame:SetAttribute("*type1", nil)
+        elseif frame:GetAttribute("featureLocked") then
+            frame:SetAttribute("featureLocked", nil)
+            local actionType = self.actionTypes and self.actionTypes[name]
+            if actionType then
+                frame:SetAttribute("*type1", actionType)
+            end
+        end
+    end
+    return lockText
+end
+
+function MenuModule:UpdateLockedMicroButtons()
+    if InCombatLockdown() then
+        self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+            self:UpdateLockedMicroButtons()
+            self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        end)
+    end
+    self:ApplyMicroButtonLock("talent", false)
+    self:ApplyMicroButtonLock("legacy", false)
 end
 
 function MenuModule:RegisterFrameEvents()
@@ -594,7 +693,10 @@ function MenuModule:RegisterFrameEvents()
 
         if frame['Click'] ~= nil then
             frame:RegisterForClicks("AnyUp")
-            if self.functions[name] ~= nil then
+            -- A tainted OnClick on a SecureActionButton that already clicks a
+            -- Blizzard micro button taints ToggleCharacter. Forever then errors
+            -- on secret health values when the character panel hides.
+            if self.functions[name] ~= nil and not self.actionTypes[name] then
                 frame:SetScript('OnClick', self.functions[name])
             end
         end
@@ -621,6 +723,11 @@ function MenuModule:RegisterFrameEvents()
     self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
     self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
     self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
+    self:RegisterEvent('PLAYER_LEVEL_CHANGED', 'UpdateLockedMicroButtons')
+    self:RegisterEvent('PLAYER_TALENT_UPDATE', 'UpdateLockedMicroButtons')
+    if compat.isForever then
+        self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'UpdateLockedMicroButtons')
+    end
 end
 
 function MenuModule:UnregisterFrameEvents()
@@ -629,6 +736,11 @@ function MenuModule:UnregisterFrameEvents()
     self:UnregisterEvent('BN_FRIEND_ACCOUNT_ONLINE')
     self:UnregisterEvent('BN_FRIEND_ACCOUNT_OFFLINE')
     self:UnregisterEvent('FRIENDLIST_UPDATE')
+    self:UnregisterEvent('PLAYER_LEVEL_CHANGED')
+    self:UnregisterEvent('PLAYER_TALENT_UPDATE')
+    if compat.isForever then
+        self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED')
+    end
 end
 
 function MenuModule:UpdateGuildMOTD(_, motd)
@@ -724,7 +836,11 @@ function MenuModule:DefaultHover(name)
             return;
         end
         if self.icons[name] ~= nil then
-            self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
+            if name == "talent" or name == "legacy" then
+                self:ApplyMicroButtonLock(name, true)
+            else
+                self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
+            end
             self.tipHover = (name == 'social')
             self.gtipHover = (name == 'guild')
         end
@@ -738,7 +854,11 @@ function MenuModule:DefaultLeave(name)
             return;
         end
         if self.icons[name] ~= nil then
-            self.icons[name]:SetVertexColor(xb:GetColor('normal'))
+            if name == "talent" or name == "legacy" then
+                self:ApplyMicroButtonLock(name, false)
+            else
+                self.icons[name]:SetVertexColor(xb:GetColor('normal'))
+            end
         end
         GameTooltip:Hide()
     end
@@ -806,17 +926,30 @@ function MenuModule:ShowButtonTooltip(name)
         return
     end
 
-    if not xb.db.profile.modules.microMenu.showAccessibilityTooltips then
+    local lockText = self:GetMicroButtonLockText(name)
+    local showLock = lockText and lockText ~= ""
+    local showAccessibility = xb.db.profile.modules.microMenu.showAccessibilityTooltips
+    if not showAccessibility and not showLock then
         return
     end
 
-    local text = self:GetButtonTooltipText(name)
-    if not text then
+    local text = showAccessibility and self:GetButtonTooltipText(name)
+    if not text and not showLock then
         return
     end
     GameTooltip:SetOwner(frame, 'ANCHOR_' .. xb.miniTextPosition)
     GameTooltip:ClearLines()
-    GameTooltip:AddLine(text)
+    if text then
+        GameTooltip:AddLine(text)
+    end
+    if showLock then
+        local color = _G.RED_FONT_COLOR
+        if color then
+            GameTooltip:AddLine(lockText, color.r, color.g, color.b, true)
+        else
+            GameTooltip:AddLine(lockText, 1, 0.1, 0.1, true)
+        end
+    end
     GameTooltip:Show()
 end
 
@@ -1277,6 +1410,36 @@ function MenuModule:CreateClickFunctions()
         end
     end; -- char
 
+    self.functions.social = function(_, button)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" and compat and compat.ToggleFriends then
+            compat.ToggleFriends()
+        end
+    end; -- social
+
+    self.functions.talent = function(_, button)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" and compat and compat.ToggleTalents then
+            if self:GetMicroButtonLockText("talent") then
+                return
+            end
+            compat.ToggleTalents()
+        end
+    end; -- talent
+
+    self.functions.journal = function(_, button)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" and compat and compat.ToggleJournal then
+            compat.ToggleJournal()
+        end
+    end; -- journal
+
     self.functions.lfg = function(_, button)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
             return;
@@ -1317,6 +1480,7 @@ function MenuModule:GetDefaultOptions()
         char = true,
         spell = true,
         talent = true,
+        legacy = features.legacy and true or false,
         ach = features.achievements and true or false,
         quest = true,
         lfg = true,
@@ -1641,6 +1805,19 @@ function MenuModule:GetConfig()
                             self:Refresh();
                         end
                     },
+                    legacy = features.legacy and {
+                        name = L["SHOW_LEGACY_BUTTON"],
+                        order = 7.5,
+                        type = "toggle",
+                        get = function()
+                            return xb.db.profile.modules.microMenu.legacy;
+                        end,
+                        set = function(_, val)
+                            xb.db.profile.modules.microMenu.legacy = val;
+                            self:UpdateMenu();
+                            self:Refresh();
+                        end
+                    } or nil,
                     ach = features.achievements and {
                         name = L["SHOW_ACHIEVEMENTS_BUTTON"],
                         order = 8,
