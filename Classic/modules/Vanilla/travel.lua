@@ -11,6 +11,27 @@ local function SupportsMagePorts()
         and xb.constants.playerClass == 'MAGE'
 end
 
+-- Classic Era still has the item globals. Forever 1.60.1 only exposes C_Item.
+local function IsUsableItemCompat(itemID)
+    if IsUsableItem then
+        return IsUsableItem(itemID)
+    end
+    if C_Item and C_Item.IsUsableItem then
+        return C_Item.IsUsableItem(itemID)
+    end
+    return false
+end
+
+local function ItemOwned(itemID)
+    if C_Item and C_Item.GetItemCount then
+        return (C_Item.GetItemCount(itemID) or 0) > 0
+    end
+    if GetItemCount then
+        return (GetItemCount(itemID) or 0) > 0
+    end
+    return false
+end
+
 function TravelModule:GetName()
     return L["TRAVEL"];
 end
@@ -100,7 +121,10 @@ function TravelModule:RegisterFrameEvents()
     self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
     self.hearthButton:EnableMouse(true)
     self.hearthButton:RegisterForClicks('AnyUp')
-    self.hearthButton:SetAttribute('type', 'macro')
+    -- Mouse-up clicks are dropped when ActionButtonUseKeyDown is on and the
+    -- click is not flagged as a secure mouse press.
+    self.hearthButton:SetAttribute("useOnKeyDown", false)
+    self:BindHearthAction()
 
     self.hearthButton:SetScript('OnEnter', function()
         TravelModule:SetHearthColor()
@@ -416,35 +440,70 @@ function TravelModule:ShowMageTooltip()
     end
 end
 
+local HEARTH_SPELL_ID = 8690
+
+local function KnownHearthSpell()
+    local spellBook = _G.C_SpellBook
+    if spellBook and spellBook.IsSpellInSpellBook and spellBook.IsSpellInSpellBook(HEARTH_SPELL_ID) then
+        return true
+    end
+    return IsPlayerSpell and IsPlayerSpell(HEARTH_SPELL_ID)
+end
+
+local function HearthSpellName()
+    if C_Spell and C_Spell.GetSpellName then
+        return C_Spell.GetSpellName(HEARTH_SPELL_ID)
+    end
+    if GetSpellInfo then
+        local spellInfo = GetSpellInfo(HEARTH_SPELL_ID)
+        return type(spellInfo) == "table" and spellInfo.name or spellInfo
+    end
+end
+
+local function HearthItemID(hearthstones)
+    if C_Container and C_Container.PlayerHasHearthstone then
+        local id = C_Container.PlayerHasHearthstone()
+        if id and id ~= 0 then
+            return id
+        end
+    end
+    for _, id in ipairs(hearthstones) do
+        if IsUsableItemCompat(id) or ItemOwned(id) then
+            return id
+        end
+    end
+    return hearthstones[#hearthstones]
+end
+
+function TravelModule:BindHearthAction()
+    local button = self.hearthButton
+    local macro = "/use item:" .. HearthItemID(self.hearthstones)
+    if KnownHearthSpell() then
+        local spellName = HearthSpellName()
+        if spellName then
+            macro = macro .. "\n/cast " .. spellName
+        end
+    end
+    button:SetAttribute("type", "macro")
+    button:SetAttribute("*type1", "macro")
+    button:SetAttribute("item", nil)
+    button:SetAttribute("macrotext", macro)
+    button:SetAttribute("*macrotext1", macro)
+end
+
 function TravelModule:SetHearthColor()
     if InCombatLockdown() then
         return;
     end
 
+    self:BindHearthAction()
+
     if self.hearthButton:IsMouseOver() then
         self.hearthText:SetTextColor(unpack(xb:HoverColors()))
     else
         self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
-        for _, v in ipairs(self.hearthstones) do
-            if IsUsableItem(v) then
-                if C_Container.GetItemCooldown(v) == 0 then
-                    local hearthName = GetItemInfo(v)
-                    if hearthName ~= nil then
-                        self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
-                        break
-                    end
-                end
-            end -- if toy/item
-            if IsPlayerSpell(v) then
-                if GetSpellCooldown(v) == 0 then
-                    local spellInfo = GetSpellInfo(v)
-                    local hearthName = spellInfo and spellInfo.name
-                    self.hearthButton:SetAttribute("macrotext", "/cast " .. hearthName)
-                end
-            end -- if is spell
-        end -- for hearthstones
         self.hearthText:SetTextColor(xb:GetColor('normal'))
-    end -- else
+    end
 end
 
 function TravelModule:Refresh()
