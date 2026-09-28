@@ -16,6 +16,7 @@ ignore = {
 
 globals = {
     'StaticPopupDialogs',
+    'SetDesaturation',
 }
 
 read_globals = {
@@ -148,6 +149,7 @@ read_globals = {
     'GetBindingKey',
     'GetBindingText',
     'GetBindLocation',
+    'GetBuildInfo',
     'GetCoinTextureString',
     'GetCVar',
     'GetExpansionLevel',
@@ -189,6 +191,7 @@ read_globals = {
     'GetSpecializationInfoForSpecID',
     'GetSpellCooldown',
     'GetSpellInfo',
+    'GetSpellTexture',
     'GetTalentTabInfo',
     'GetTime',
     'GetXPExhaustion',

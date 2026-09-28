@@ -1,17 +1,22 @@
 # XIV_Databar Continued
 
-## [5.7.2](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.7.2) (2026-08-16)
+## [5.8](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.8) (2026-09-28)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.7.1...5.7.2) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.7.2...5.8) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-> **Version 5.7.2 - Less Chat Spam**
+> **Version 5.8 - Mage Portals & Forever**
 >
-> Sorry for the chat spam in 5.7. This update disables the login chat tip by default, and marks the changelog as read on the first load after a version change instead of requiring a click on **Open Changelog**.
-> It also updates the German translation (thank you **DlargeX**).
+> At long last, Mages get a **Travel** button for their teleports and portals.
+> This is also the first release for Forever. It is an early port, please share feedback and bug reports, it will help me a lot.
 
 ### _Global :_
 
-- 🛠️ _**IMPROVEMENT** -_ Sorry for the inconvenience: the login tip and repeating **Open Changelog** announce in 5.7 were too noisy.
-- 🛠️ _**IMPROVEMENT** -_ The login chat tip is now disabled by default. Re-enable it by unchecking **Disable login message** under **Behavior**.
-- 🛠️ _**IMPROVEMENT** -_ The version update chat announcement now marks the changelog as read on first load, instead of repeating until **Open Changelog** is clicked.
-- 🛠️ _**IMPROVEMENT** -_ Updated German translation (thank you **DlargeX**).
+- 🆕 _**NEW** -_ Added a **Mage Portals** button to **Travel**. Left-click casts the favorite spell, right-click picks another. It only shows for Mages who know at least one teleport or portal.
+
+### _Retail :_
+
+- 🛠️ _**IMPROVEMENT** -_ The **M+ Teleports** icon in **Travel** now lines up with the other travel icons.
+
+### _Forever :_
+
+- 🔥 _**IMPORTANT** -_ Early support for Forever. If something errors, looks wrong, or is missing, please report it, it will help me a lot.

@@ -1,7 +1,9 @@
-## Interface: 50504
+## Interface: 120100
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
+## IconTexture: Interface\Addons\XIV_Databar_Continued\icon.png
+## AddonCompartmentFunc: XIV_Databar_Continued_OnAddonCompartmentClick
 
 ## Notes: Adds a databar. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, |cffbab86cKozoaku|r, and now |cffFF0000ZelionGG|r.
 ## SavedVariables: XIVBarDB
@@ -14,7 +16,6 @@
 ## X-Wago-ID: WqKQVaGx
 
 embeds.xml
-Classic\embeds.xml
 
 locales\locales.xml
 core.lua
@@ -22,8 +23,10 @@ options.lua
 Core\compat.lua
 Core\utils\addons.lua
 Core\utils\mageportals.lua
+Core\modules\load_modules.xml
 
 Core\utils\changelog\Load_Changelog.xml
+Core\utils\mythicteleports\expansions.xml
+Core\utils\mythicteleports\seasons.xml
 
-Core\modules\load_modules.xml
-Classic\modules\load_modules_classic.xml
+Mainline\modules\load_modules.xml

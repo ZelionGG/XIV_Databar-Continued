@@ -21,6 +21,7 @@ core.lua
 options.lua
 Core\compat.lua
 Core\utils\addons.lua
+Core\utils\mageportals.lua
 
 Core\utils\changelog\Load_Changelog.xml
 

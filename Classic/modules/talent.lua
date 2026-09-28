@@ -10,7 +10,50 @@ local TalentModule = xb:NewModule("TalentModule", 'AceEvent-3.0')
   local GetSpecialization = GetSpecialization or GetPrimaryTalentTree
 
   local IsAddOnLoaded = (compat and compat.IsAddOnLoaded) or (C_AddOns and C_AddOns.IsAddOnLoaded) or _G.IsAddOnLoaded
-  local isVanilla = compat.isClassicOrTBC
+  local isVanilla = compat.isClassicOrTBC or compat.isForever
+
+-- Classic Era still has the legacy talent globals. Forever 1.60.1 does not.
+-- C_SpecializationInfo.GetSpecializationInfo inserts role and primaryStat
+-- before pointsSpent, so the fallback remaps to the GetTalentTabInfo order.
+local function GetTalentTabCount()
+    if GetNumTalentTabs then
+        return GetNumTalentTabs()
+    end
+    if C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID then
+        local classID = select(3, UnitClass("player"))
+        return C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0
+    end
+    return 0
+end
+
+local function GetTalentTabInfoCompat(index, isInspect, isPet, groupIndex)
+    if GetTalentTabInfo then
+        return GetTalentTabInfo(index, isInspect, isPet, groupIndex)
+    end
+    if not (C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo) then
+        return nil
+    end
+    local specId, name, description, icon, _, _, pointsSpent, background, previewPointsSpent, isUnlocked =
+        C_SpecializationInfo.GetSpecializationInfo(index, isInspect or false, isPet or false, nil, nil, groupIndex)
+    return specId, name, description, icon, pointsSpent, background, previewPointsSpent, isUnlocked
+end
+
+local function GetTalentGroupCount()
+    if GetNumTalentGroups then
+        return GetNumTalentGroups()
+    end
+    return 1
+end
+
+local function GetActiveTalentGroupCompat()
+    if GetActiveTalentGroup then
+        return GetActiveTalentGroup()
+    end
+    if C_SpecializationInfo and C_SpecializationInfo.GetActiveSpecGroup then
+        return C_SpecializationInfo.GetActiveSpecGroup()
+    end
+    return 1
+end
 
   function TalentModule:GetName()
       return TALENTS
@@ -82,8 +125,9 @@ function TalentModule:OnEnable()
 
     if isVanilla then
         local highestPoints = 0
-        for i = 1, GetNumTalentTabs() do
-            local _, _, _, _, pointsSpent = GetTalentTabInfo(i)
+        for i = 1, GetTalentTabCount() do
+            local _, _, _, _, pointsSpent = GetTalentTabInfoCompat(i)
+            pointsSpent = tonumber(pointsSpent) or 0
             if pointsSpent > highestPoints then
                 highestPoints = pointsSpent
                 self.currentSpecID = i
@@ -131,15 +175,14 @@ function TalentModule:OnDisable()
 end
 
 local function GetVanillaActiveSpec()
-    local active = GetActiveTalentGroup()
+    local active = GetActiveTalentGroupCompat()
     local highestPoints1, name1, activeTab1 = 0, "", 1
     local highestPoints2, name2, activeTab2 = 0, "", 1
 
-    local numSpecs = GetNumTalentGroups()
+    local numSpecs = GetTalentGroupCount()
 
-    for i = 1, GetNumTalentTabs() do
-        local tabID, _, _, _, pointsSpent = GetTalentTabInfo(i, false, false, 1)
-        local _, name = GetSpecializationInfoForSpecID(tabID)
+    for i = 1, GetTalentTabCount() do
+        local _, name, _, _, pointsSpent = GetTalentTabInfoCompat(i, false, false, 1)
         pointsSpent = tonumber(pointsSpent) or 0
         if pointsSpent > highestPoints1 then
             highestPoints1 = pointsSpent
@@ -149,9 +192,8 @@ local function GetVanillaActiveSpec()
     end
 
     if numSpecs > 1 then
-        for i = 1, GetNumTalentTabs() do
-            local tabID, _, _, _, pointsSpent = GetTalentTabInfo(i, false, false, 2)
-            local _, name = GetSpecializationInfoForSpecID(tabID)
+        for i = 1, GetTalentTabCount() do
+            local _, name, _, _, pointsSpent = GetTalentTabInfoCompat(i, false, false, 2)
             pointsSpent = tonumber(pointsSpent) or 0
             if pointsSpent > highestPoints2 then
                 highestPoints2 = pointsSpent
@@ -385,6 +427,12 @@ function TalentModule:RegisterFrameEvents()
         end
 
         if button == 'LeftButton' then
+            if self:GetTalentLockText() ~= nil then
+                if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
+                    self:ShowTooltip()
+                end
+                return
+            end
             if not self.specPopup:IsVisible() then
                 if self.lootSpecPopup then
                     xb:HidePopup(self.lootSpecPopup)
@@ -559,17 +607,16 @@ function TalentModule:CreateSpecPopupVanilla()
     local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
     local changedWidth = false
 
-    local numSpecs = GetNumTalentGroups()
+    local numSpecs = GetTalentGroupCount()
     for i = 1, numSpecs do
         local name = "Not set"
         local activeTab = 1
         local highestPoints = 0
-        for tabIndex = 1, GetNumTalentTabs() do
-            local tabID, _, _, _, pointsSpent = GetTalentTabInfo(tabIndex, false, false, i)
+        for tabIndex = 1, GetTalentTabCount() do
+            local _, specName, _, _, pointsSpent = GetTalentTabInfoCompat(tabIndex, false, false, i)
             pointsSpent = tonumber(pointsSpent) or 0
             if pointsSpent > highestPoints then
                 highestPoints = pointsSpent
-                local _, specName = GetSpecializationInfoForSpecID(tabID)
                 name = specName or "Not set"
                 activeTab = tabIndex
             end
@@ -619,6 +666,8 @@ function TalentModule:CreateSpecPopupVanilla()
                     SetActiveTalentGroup(i)
                 elseif SetActiveSpecGroup then
                     SetActiveSpecGroup(i)
+                elseif C_SpecializationInfo and C_SpecializationInfo.SetActiveSpecGroup then
+                    C_SpecializationInfo.SetActiveSpecGroup(i)
                 end
             end
             TalentModule.specPopup:Hide()
@@ -779,6 +828,30 @@ function TalentModule:CreateLootSpecPopup()
     self.lootSpecPopup:Hide()
 end
 
+function TalentModule:GetTalentLockText()
+    local micro = _G.TalentMicroButton
+    if not micro or not micro.IsEnabled then
+        return nil
+    end
+    if micro.UpdateMicroButton then
+        micro:UpdateMicroButton()
+    end
+    if micro:IsEnabled() then
+        return nil
+    end
+    if micro.minLevel and _G.FEATURE_BECOMES_AVAILABLE_AT_LEVEL then
+        return format(_G.FEATURE_BECOMES_AVAILABLE_AT_LEVEL, micro.minLevel)
+    end
+    local tip = micro.disabledTooltip
+    if type(tip) == "function" then
+        tip = tip(micro)
+    end
+    if type(tip) == "string" then
+        return tip
+    end
+    return ""
+end
+
 function TalentModule:ShowTooltip()
     if not xb.db.profile.modules.talent.showTooltip then
         return
@@ -789,14 +862,31 @@ function TalentModule:ShowTooltip()
     end
 
     local r, g, b, _ = unpack(xb:HoverColors())
-    local name
+    local lockText = self:GetTalentLockText()
+    if lockText ~= nil then
+        GameTooltip:SetOwner(self.talentFrame, 'ANCHOR_' .. xb.miniTextPosition)
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("|cFFFFFFFF[|r" .. SPECIALIZATION .. "|cFFFFFFFF]|r", r, g, b)
+        if lockText ~= "" then
+            GameTooltip:AddLine(" ")
+            local color = _G.RED_FONT_COLOR
+            if color then
+                GameTooltip:AddLine(lockText, color.r, color.g, color.b, true)
+            else
+                GameTooltip:AddLine(lockText, 1, 0.1, 0.1, true)
+            end
+        end
+        GameTooltip:Show()
+        return
+    end
 
-    if self.currentLootSpecID == 0 then
-        local _, specName = GetSpecializationInfo(self.currentSpecID)
-        name = specName or ''
-    else
-        local _, specName = GetSpecializationInfoByID(self.currentLootSpecID)
-        name = specName or ''
+    local name = ''
+    if not isVanilla then
+        if self.currentLootSpecID == 0 and GetSpecializationInfo then
+            name = select(2, GetSpecializationInfo(self.currentSpecID)) or ''
+        elseif GetSpecializationInfoByID then
+            name = select(2, GetSpecializationInfoByID(self.currentLootSpecID)) or ''
+        end
     end
 
     GameTooltip:SetOwner(self.talentFrame, 'ANCHOR_' .. xb.miniTextPosition)

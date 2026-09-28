@@ -533,11 +533,7 @@ function MenuModule:CreateIcons()
     for name, frame in pairs(self.frames) do
         if frame['Click'] ~= nil then -- Odd way of checking if it's a button
             self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
-            if name == 'house' then
-                self.icons[name]:SetTexture(xb.constants.mediaPath .. 'datatexts\\house')
-            else
-                self.icons[name]:SetTexture(self.mediaFolder .. name)
-            end
+            self.icons[name]:SetTexture(self.mediaFolder .. name)
         end
     end
 end
@@ -556,11 +552,7 @@ function MenuModule:IconDefaults(name)
         return;
     end
     self.icons[name]:SetPoint('CENTER')
-    if name == 'house' then
-        self.icons[name]:SetSize(self.iconSize * 0.7, self.iconSize * 0.7)
-    else
-        self.icons[name]:SetSize(self.iconSize, self.iconSize)
-    end
+    self.icons[name]:SetSize(self.iconSize, self.iconSize)
     self.icons[name]:SetVertexColor(xb:GetColor('normal'))
 end
 
