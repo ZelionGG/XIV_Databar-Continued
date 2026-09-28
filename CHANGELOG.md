@@ -13,6 +13,10 @@
 
 - 🆕 _**NEW** -_ Added a **Mage Portals** button to **Travel**. Left-click casts the favorite spell, right-click picks another. It only shows for Mages who know at least one teleport or portal.
 
+### _Retail :_
+
+- 🛠️ _**IMPROVEMENT** -_ The **M+ Teleports** icon in **Travel** now lines up with the other travel icons.
+
 ### _Forever :_
 
 - 🔥 _**IMPORTANT** -_ Early support for Forever. If something errors, looks wrong, or is missing, please report it, it will help me a lot.

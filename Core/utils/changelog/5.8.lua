@@ -47,8 +47,12 @@ XIVBar.Changelog[5800] = {
     improvment = {
         ["zhCN"] = {},
         ["zhTW"] = {},
-        ["enUS"] = {},
-        ["frFR"] = {},
+        ["enUS"] = {
+            "[Retail] The [M+ Teleports] icon in [Travel] now correctly aligns with the other travel icons.",
+        },
+        ["frFR"] = {
+            "[Retail] L'icône [Téléportations M+] du module [Voyage] s'aligne désormais correctement avec les autres icônes.",
+        },
         ["koKR"] = {},
         ["ruRU"] = {}
     },
