@@ -1,8 +1,8 @@
 --------------------------------------------------------------------------------
 -- Mage teleport / portal spell IDs by game flavor.
--- Add a `forever` table later; GetFlavorKey() only needs a new compat branch.
 -- Spell IDs are from Wowhead (classic/retail spell pages). Labels come from the
 -- client via GetSpellName, so destination names stay localized.
+-- Forever V1 reuses Classic capitals; extra destinations can be added later.
 --------------------------------------------------------------------------------
 
 ---@class XIVBar
@@ -82,7 +82,7 @@ MagePortals.classic = classicDestinations
 MagePortals.tbc = BuildFlavorList(classicDestinations, tbcDestinations)
 MagePortals.mop = BuildFlavorList(classicDestinations, tbcDestinations, mopDestinations)
 MagePortals.mainline = BuildFlavorList(classicDestinations, tbcDestinations, mopDestinations, mainlineDestinations)
--- MagePortals.forever = { ... }
+MagePortals.forever = classicDestinations
 
 function MagePortals:GetFlavorKey()
     if not compat then
@@ -96,6 +96,9 @@ function MagePortals:GetFlavorKey()
     end
     if compat.isTBC then
         return "tbc"
+    end
+    if compat.isForever then
+        return "forever"
     end
     return "classic"
 end

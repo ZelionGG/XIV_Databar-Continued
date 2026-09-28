@@ -22,7 +22,7 @@ local function GetMaxLevel()
 end
 
 local function ShouldUseSelectedCurrencies()
-    return not compat.isClassicOrTBC
+    return not compat.isClassicOrTBC and not compat.isForever
 end
 
 function CurrencyModule:GetName()
@@ -298,7 +298,7 @@ function CurrencyModule:Refresh()
         self:SendMessage('XIVBar_CurrencyFrameUpdated', self.currencyFrame:IsVisible(), self.currencyFrame:GetWidth())
         self.xpFrame:SetAllPoints()
         self.xpFrame:Show()
-    elseif not compat.isClassicOrTBC then
+    elseif not compat.isClassicOrTBC and not compat.isForever then
         -- Check if 'icon only' mode is enabled
         if db.modules.currency.showOnlyModuleIcon then
             -- Show only the module icon
