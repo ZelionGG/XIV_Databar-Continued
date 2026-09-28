@@ -2507,12 +2507,12 @@ function TravelModule:Refresh()
             self.mythicText:SetText(hideMythicText and '' or L["M_PLUS_TELEPORTS"])
             self.mythicText:SetShown(not hideMythicText)
 
-            self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'microbar\\lfg')
-            self.mythicIcon:SetSize(iconSize + 8, iconSize + 8)
+            self.mythicIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\mythic')
+            self.mythicIcon:SetSize(iconSize, iconSize)
             self.mythicIcon:ClearAllPoints()
 
             if hideMythicText then
-                self.mythicButton:SetSize(iconSize + db.general.barPadding, xb:GetHeight())
+                self.mythicButton:SetSize(iconSize, xb:GetHeight())
                 self.mythicButton:ClearAllPoints()
                 self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicIcon:SetPoint("RIGHT", self.mythicButton, "RIGHT", 0, 0)
@@ -2521,7 +2521,7 @@ function TravelModule:Refresh()
                 self.mythicButton:ClearAllPoints()
                 self.mythicButton:SetPoint(parentPoint, parentFrame, relPoint, xOff, 0)
                 self.mythicText:SetPoint("RIGHT")
-                self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT", -(db.general.barPadding) + 5, 0)
+                self.mythicIcon:SetPoint("RIGHT", self.mythicText, "LEFT", -(db.general.barPadding), 0)
             end
 
             self:SetMythicColor()
