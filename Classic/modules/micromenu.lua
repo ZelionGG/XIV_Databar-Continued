@@ -714,10 +714,13 @@ function MenuModule:RegisterFrameEvents()
 
         if frame['Click'] ~= nil then
             frame:RegisterForClicks("AnyUp")
-            -- A tainted OnClick on a SecureActionButton that already clicks a
-            -- Blizzard micro button taints ToggleCharacter. Forever then errors
-            -- on secret health values when the character panel hides.
-            if self.functions[name] ~= nil and not self.actionTypes[name] then
+            -- Forever: a tainted OnClick on a SecureActionButton that already
+            -- clicks a Blizzard micro button taints ToggleCharacter, then
+            -- CharacterFrame:OnHide errors on secret health values.
+            -- Other Classic clients still need the Lua handler. Secure /click
+            -- forwarding does not reliably open LFG, PvP, or the character panel.
+            local skipTaintedClick = compat.isForever and self.actionTypes[name]
+            if self.functions[name] ~= nil and not skipTaintedClick then
                 frame:SetScript('OnClick', self.functions[name])
             end
         end
@@ -1445,6 +1448,17 @@ function MenuModule:CreateClickFunctions()
             compat.ToggleFriends()
         end
     end; -- social
+
+    -- GuildMicroButton stays hidden while useClassicGuildUI is set, so a secure
+    -- click on it never runs. Same opener as the TOGGLEGUILDTAB binding.
+    self.functions.guild = function(_, button)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" and _G.ToggleGuildFrame then
+            _G.ToggleGuildFrame()
+        end
+    end; -- guild
 
     self.functions.talent = function(_, button)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
