@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001, 50504, 20506, 11509
 ## Title: XIV_Databar Continued
 ## Author: ZelionGG
 ## Version: @project-version@
@@ -16,6 +16,7 @@
 ## X-Wago-ID: WqKQVaGx
 
 embeds.xml
+Classic\embeds.xml [AllowLoadGameType vanilla, tbc, mists, camelot]
 
 locales\locales.xml
 core.lua
@@ -26,7 +27,10 @@ Core\utils\mageportals.lua
 Core\modules\load_modules.xml
 
 Core\utils\changelog\Load_Changelog.xml
-Core\utils\mythicteleports\expansions.xml
-Core\utils\mythicteleports\seasons.xml
 
-Mainline\modules\load_modules.xml
+Core\utils\mythicteleports\expansions.xml [AllowLoadGameType standard]
+Core\utils\mythicteleports\seasons.xml [AllowLoadGameType standard]
+
+Mainline\modules\load_modules.xml [AllowLoadGameType standard]
+Classic\modules\load_modules_vanilla.xml [AllowLoadGameType vanilla, camelot]
+Classic\modules\load_modules_classic.xml [AllowLoadGameType tbc, mists]

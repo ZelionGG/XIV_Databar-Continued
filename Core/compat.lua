@@ -219,8 +219,17 @@ local function ShowVanillaGroupFinder(categoryID)
     return true
 end
 
--- LFG toggle helper: Retail via PVEFrame, Classic via LFGMinimapFrame.
--- Falls back to legacy toggles when needed.
+local function IsVanillaGroupFinder()
+    local style = _G.Enum and _G.Enum.PremadeGroupFinderStyle
+    local info = _G.C_LFGList
+    return style and info and info.GetPremadeGroupFinderStyle
+        and info.GetPremadeGroupFinderStyle() == style.Vanilla
+end
+
+-- LFGMicroButton and PVPMicroButton on Anniversary Classic have no OnClick.
+-- They toggle from OnMouseUp only when the cursor is over the Blizzard button,
+-- so a secure /click or :Click() does nothing.
+-- TBC/Vanilla open the on-demand vanilla finder. Wrath and later use PVEFrame.
 local function TryToggleLFG()
     if compat.isForever then
         local lfdButton = _G.LFDMicroButton
@@ -230,60 +239,68 @@ local function TryToggleLFG()
         return
     end
 
-    if compat.isMists and _G.PVEFrame_ToggleFrame then
-        _G.PVEFrame_ToggleFrame("GroupFinderFrame")
+    if IsVanillaGroupFinder() then
+        if _G.UIParentLoadAddOn then
+            _G.UIParentLoadAddOn("Blizzard_GroupFinder_VanillaStyle")
+        end
+        if _G.ToggleLFGParentFrame then
+            _G.ToggleLFGParentFrame()
+            return
+        end
+    end
+
+    if _G.PVEFrame_ToggleFrame then
+        if compat.isMists then
+            _G.PVEFrame_ToggleFrame("GroupFinderFrame")
+        else
+            _G.PVEFrame_ToggleFrame()
+        end
+        return
+    end
+
+    if _G.ToggleLFGFrame then
+        _G.ToggleLFGFrame()
+        return
+    end
+
+    local lfgFrame = _G.LFGMinimapFrame
+    if lfgFrame and lfgFrame.Click then
+        lfgFrame:Click()
         return
     end
 
     local microButton = ResolveLFGMicroButton()
     if microButton and microButton.Click then
         microButton:Click()
-        return
-    end
-
-    local lfgFrame = _G.LFGMinimapFrame
-    if lfgFrame and lfgFrame.Click then
-        lfgFrame:Click()
-        return
-    end
-
-    if _G.ToggleLFGParentFrame then
-        _G.ToggleLFGParentFrame()
-    elseif _G.PVEFrame_ToggleFrame then
-        _G.PVEFrame_ToggleFrame()
-    elseif _G.ToggleLFGFrame then
-        _G.ToggleLFGFrame()
     end
 end
 
 compat.ToggleLFG = TryToggleLFG
 
--- PVP toggle helper: legacy LFGMinimapFrame button, otherwise modern PVP UI.
+-- PVP toggle helper. Wrath and later define TogglePVPFrame.
+-- TBC Anniversary's keybind is ToggleCharacter("PVPFrame"); Vanilla uses HonorFrame.
+-- PVPMicroButton:Click() does not reach that path.
 local function TryTogglePVP()
     if compat.isForever and ShowVanillaGroupFinder(FOREVER_BATTLEGROUND_CATEGORY_ID) then
         return
     end
 
-    if compat.isMists and _G.TogglePVPFrame then
-        _G.TogglePVPFrame()
-        return
-    end
-
-    local microButton = ResolvePVPMicroButton()
-    if microButton and microButton.Click then
-        microButton:Click()
-        return
-    end
-
-    local lfgFrame = _G.LFGMinimapFrame
-    if lfgFrame and lfgFrame.Click then
-        lfgFrame:Click()
-        return
-    end
-
     if _G.TogglePVPFrame then
         _G.TogglePVPFrame()
-    elseif _G.PVPUIFrame_ToggleFrame then
+        return
+    end
+
+    if _G.ToggleCharacter and _G.PVPFrame then
+        _G.ToggleCharacter("PVPFrame")
+        return
+    end
+
+    if _G.ToggleCharacter and _G.HonorFrame then
+        _G.ToggleCharacter("HonorFrame")
+        return
+    end
+
+    if _G.PVPUIFrame_ToggleFrame then
         _G.PVPUIFrame_ToggleFrame()
     elseif _G.PVEFrame_ToggleFrame then
         _G.PVEFrame_ToggleFrame()
@@ -391,7 +408,7 @@ compat.features = {
         -- Blizzard_EncounterJournal does not load on Forever: AllowLoadGameType
         -- is standard/classic, and the journal UI itself is cata, mists, mainline.
         journal = (compat.isMainline or compat.isClassicProgression) and not compat.isForever,
-        shop = not compat.isClassicOrTBC and not compat.isForever,
+        shop = not compat.isClassicOrTBC,
     },
     currency = {
         -- No currencies in Classic Era/TBC/Forever V1, we only keep the XP bar

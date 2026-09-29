@@ -617,20 +617,21 @@ function MenuModule:IconDefaults(name)
     self.icons[name]:SetPoint('CENTER')
     self.icons[name]:SetSize(self.iconSize, self.iconSize)
     self.icons[name]:SetVertexColor(xb:GetColor('normal'))
-    if name == "talent" or name == "legacy" then
+    if name == "talent" or name == "legacy" or name == "shop" then
         self:ApplyMicroButtonLock(name, false)
     end
 end
 
--- Talents and Legacy stay disabled until Blizzard's own micro button enables
--- them (talent point earned, or the Legacy track unlocked). Reuse that state
--- instead of guessing a level.
+-- Talents, Legacy and the Shop stay disabled until Blizzard's own micro button
+-- enables them. Reuse that state instead of guessing a level.
 function MenuModule:GetMicroButtonLockText(name)
     local micro
     if name == "talent" then
         micro = _G.TalentMicroButton
     elseif name == "legacy" then
         micro = _G.LegacyMicroButton
+    elseif name == "shop" then
+        micro = _G.StoreMicroButton
     end
     if not micro or not micro.IsEnabled then
         return nil
@@ -661,11 +662,16 @@ function MenuModule:ApplyMicroButtonLock(name, hovering)
     if icon then
         if icon.SetDesaturated then
             icon:SetDesaturated(locked)
+        elseif icon.SetDesaturation then
+            icon:SetDesaturation(locked and 1 or 0)
         end
-        if locked and not icon.SetDesaturated then
-            local c = xb.db.profile.color.inactive
-            icon:SetVertexColor(c.r, c.g, c.b, c.a)
-        elseif hovering and not locked then
+        if locked then
+            -- Flat microbar icons barely show SetDesaturated, and the default
+            -- normal color is already grey, so darken it instead.
+            local r, g, b, a = xb:GetColor('normal')
+            local shade = 0.55
+            icon:SetVertexColor(r * shade, g * shade, b * shade, a or 1)
+        elseif hovering then
             icon:SetVertexColor(unpack(xb:HoverColors()))
         else
             icon:SetVertexColor(xb:GetColor('normal'))
@@ -697,6 +703,9 @@ function MenuModule:UpdateLockedMicroButtons()
     end
     self:ApplyMicroButtonLock("talent", false)
     self:ApplyMicroButtonLock("legacy", false)
+    if features.shop then
+        self:ApplyMicroButtonLock("shop", false)
+    end
 end
 
 function MenuModule:RegisterFrameEvents()
@@ -705,10 +714,13 @@ function MenuModule:RegisterFrameEvents()
 
         if frame['Click'] ~= nil then
             frame:RegisterForClicks("AnyUp")
-            -- A tainted OnClick on a SecureActionButton that already clicks a
-            -- Blizzard micro button taints ToggleCharacter. Forever then errors
-            -- on secret health values when the character panel hides.
-            if self.functions[name] ~= nil and not self.actionTypes[name] then
+            -- Forever: a tainted OnClick on a SecureActionButton that already
+            -- clicks a Blizzard micro button taints ToggleCharacter, then
+            -- CharacterFrame:OnHide errors on secret health values.
+            -- Other Classic clients still need the Lua handler. Secure /click
+            -- forwarding does not reliably open LFG, PvP, or the character panel.
+            local skipTaintedClick = compat.isForever and self.actionTypes[name]
+            if self.functions[name] ~= nil and not skipTaintedClick then
                 frame:SetScript('OnClick', self.functions[name])
             end
         end
@@ -740,6 +752,9 @@ function MenuModule:RegisterFrameEvents()
     if compat.isForever then
         self:RegisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED', 'UpdateLockedMicroButtons')
     end
+    if features.shop then
+        self:RegisterEvent('STORE_STATUS_CHANGED', 'UpdateLockedMicroButtons')
+    end
 end
 
 function MenuModule:UnregisterFrameEvents()
@@ -752,6 +767,9 @@ function MenuModule:UnregisterFrameEvents()
     self:UnregisterEvent('PLAYER_TALENT_UPDATE')
     if compat.isForever then
         self:UnregisterEvent('MAJOR_FACTION_RENOWN_LEVEL_CHANGED')
+    end
+    if features.shop then
+        self:UnregisterEvent('STORE_STATUS_CHANGED')
     end
 end
 
@@ -848,7 +866,7 @@ function MenuModule:DefaultHover(name)
             return;
         end
         if self.icons[name] ~= nil then
-            if name == "talent" or name == "legacy" then
+            if name == "talent" or name == "legacy" or name == "shop" then
                 self:ApplyMicroButtonLock(name, true)
             else
                 self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
@@ -866,7 +884,7 @@ function MenuModule:DefaultLeave(name)
             return;
         end
         if self.icons[name] ~= nil then
-            if name == "talent" or name == "legacy" then
+            if name == "talent" or name == "legacy" or name == "shop" then
                 self:ApplyMicroButtonLock(name, false)
             else
                 self.icons[name]:SetVertexColor(xb:GetColor('normal'))
@@ -1430,6 +1448,17 @@ function MenuModule:CreateClickFunctions()
             compat.ToggleFriends()
         end
     end; -- social
+
+    -- GuildMicroButton stays hidden while useClassicGuildUI is set, so a secure
+    -- click on it never runs. Same opener as the TOGGLEGUILDTAB binding.
+    self.functions.guild = function(_, button)
+        if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
+            return;
+        end
+        if button == "LeftButton" and _G.ToggleGuildFrame then
+            _G.ToggleGuildFrame()
+        end
+    end; -- guild
 
     self.functions.talent = function(_, button)
         if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then
