@@ -298,7 +298,13 @@ end
 function TradeskillModule:StyleTradeskillFrame(prefix)
     local db = xb.db.profile
     local iconSize = db.text.fontSize + db.general.barPadding
-    local icon = xb.constants.mediaPath .. 'profession\\' .. self.profIcons[self[prefix].id]
+    -- A Classic skill line does not always resolve to a profession id, and profIcons then
+    -- yields nil: fall back to the icon the API reported for the profession itself.
+    local iconName = self.profIcons[self[prefix].id]
+    local icon = self[prefix].defIcon or (xb.constants.mediaPath .. 'profession\\major')
+    if iconName then
+        icon = xb.constants.mediaPath .. 'profession\\' .. iconName
+    end
 
     local textHeight = floor((xb:GetHeight() - 4) / 2)
     if self[prefix].lvl == self[prefix].maxLvl then
@@ -437,7 +443,8 @@ function TradeskillModule:ShowGameTooltip()
     GameTooltip:AddLine(' ')
 
     local function AddGameTooltipProfessionRow(prefix)
-        local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
+        local defIcon = self[prefix].defIcon or "Interface\\Icons\\INV_Misc_QuestionMark"
+        local left = "|T" .. defIcon .. ":0|t " .. (self[prefix].name or '')
         local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
         GameTooltip:AddDoubleLine(left, right, 1, 1, 1, 1, 1, 1)
     end
@@ -567,7 +574,8 @@ function TradeskillModule:AcquireTooltip()
 end
 
 function TradeskillModule:AddTooltipProfessionRow(tooltip, prefix)
-    local left = "|T" .. self[prefix].defIcon .. ":0|t " .. self[prefix].name
+    local defIcon = self[prefix].defIcon or "Interface\\Icons\\INV_Misc_QuestionMark"
+    local left = "|T" .. defIcon .. ":0|t " .. (self[prefix].name or '')
     local right = "|cFFFFFFFF" .. self[prefix].lvl .. "|r / " .. self[prefix].maxLvl
     local lineRow = tooltip:AddRow(left, right)
     lineRow:SetScript("OnEnter", function()
