@@ -391,7 +391,7 @@ compat.features = {
         -- Blizzard_EncounterJournal does not load on Forever: AllowLoadGameType
         -- is standard/classic, and the journal UI itself is cata, mists, mainline.
         journal = (compat.isMainline or compat.isClassicProgression) and not compat.isForever,
-        shop = not compat.isClassicOrTBC and not compat.isForever,
+        shop = not compat.isClassicOrTBC,
     },
     currency = {
         -- No currencies in Classic Era/TBC/Forever V1, we only keep the XP bar
