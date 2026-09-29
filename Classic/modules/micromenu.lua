@@ -662,11 +662,16 @@ function MenuModule:ApplyMicroButtonLock(name, hovering)
     if icon then
         if icon.SetDesaturated then
             icon:SetDesaturated(locked)
+        elseif icon.SetDesaturation then
+            icon:SetDesaturation(locked and 1 or 0)
         end
-        if locked and not icon.SetDesaturated then
-            local c = xb.db.profile.color.inactive
-            icon:SetVertexColor(c.r, c.g, c.b, c.a)
-        elseif hovering and not locked then
+        if locked then
+            -- Flat microbar icons barely show SetDesaturated, and the default
+            -- normal color is already grey, so darken it instead.
+            local r, g, b, a = xb:GetColor('normal')
+            local shade = 0.55
+            icon:SetVertexColor(r * shade, g * shade, b * shade, a or 1)
+        elseif hovering then
             icon:SetVertexColor(unpack(xb:HoverColors()))
         else
             icon:SetVertexColor(xb:GetColor('normal'))
