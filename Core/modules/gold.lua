@@ -7,6 +7,9 @@ local compat = XIVBar.compat or {}
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
+-- Retail and Forever dropped the global. Classic still has it.
+local GetCoinTextureString = (C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString) or _G.GetCoinTextureString
+
 local negativeSign = "|cffff0000- "
 
 local function IsUsableAnchor(frame)
@@ -47,7 +50,7 @@ local function moneyWithTexture(amount, isNegative)
 
     local totalCopper = (tonumber(amount) or 0) * 10000 + (tonumber(silverStr) or 0) * 100 +
         (tonumber(copperStr) or 0)
-    local amountStringTexture = C_CurrencyInfo.GetCoinTextureString(totalCopper)
+    local amountStringTexture = GetCoinTextureString(totalCopper)
 
     if shortThousands then
         local shortGold = shortenNumber(tonumber(amount))
@@ -59,6 +62,21 @@ end
 
 local function moneyWithTextureSigned(amount)
     return moneyWithTexture(math.abs(amount), amount < 0)
+end
+
+local function shouldListCharacterMoney(currentMoney)
+    local money = abs(currentMoney or 0)
+    local gold = floor(money / 10000)
+    local db = xb.db.profile.modules.gold
+    local hasMoney = (db.showSmallCoins and money > 0) or gold > 0
+    if not hasMoney then
+        return false
+    end
+    if db.hideCharUnderThreshold then
+        local hideThreshold = tonumber(db.hideCharUnderThresholdAmount) or 0
+        return gold >= hideThreshold
+    end
+    return true
 end
 
 local function ConvertDateToNumber(month, day, year)
@@ -419,11 +437,8 @@ function GoldModule:ShowTooltipClassic()
 
     GameTooltip:AddLine(" ")
 
-    local hideThreshold = tonumber(xb.db.profile.modules.gold.hideCharUnderThresholdAmount) or 0
-
     local totalGold = 0
     for charName, goldData in pairs(store) do
-        local gold = floor(abs(goldData.currentMoney / 10000))
         local charClass = goldData.class
         local cc_r, cc_g, cc_b = 1, 1, 1
         if charClass then
@@ -431,7 +446,7 @@ function GoldModule:ShowTooltipClassic()
             cc_g = RAID_CLASS_COLORS[charClass].g
             cc_b = RAID_CLASS_COLORS[charClass].b
         end
-        if gold > 0 and ((xb.db.profile.modules.gold.hideCharUnderThreshold and gold >= hideThreshold) or not xb.db.profile.modules.gold.hideCharUnderThreshold) then
+        if shouldListCharacterMoney(goldData.currentMoney) then
             GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), cc_r, cc_g, cc_b, 1, 1, 1)
         end
         totalGold = totalGold + goldData.currentMoney
@@ -493,15 +508,12 @@ function GoldModule:ShowTooltipMainline()
         totalGold = warbandBankGold
     end
 
-    local hideThreshold = tonumber(xb.db.profile.modules.gold.hideCharUnderThresholdAmount) or 0
-
     for characterName, goldData in pairs(getGoldStore()) do
         local realm = goldData.realm or currentRealm
         if not realmCharacters[realm] then
             realmCharacters[realm] = {}
         end
-        local gold = floor(abs(goldData.currentMoney / 10000))
-        if gold > 0 and ((xb.db.profile.modules.gold.hideCharUnderThreshold and gold >= hideThreshold) or not xb.db.profile.modules.gold.hideCharUnderThreshold) then
+        if shouldListCharacterMoney(goldData.currentMoney) then
             table.insert(realmCharacters[realm], {
                 name = characterName:match("^([^-]+)"),
                 gold = goldData.currentMoney,
