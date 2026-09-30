@@ -228,6 +228,7 @@ read_globals = {
     'IsInInstance',
     'IsPlayerSpell',
     'IsResting',
+    'issecretvalue',
     'IsShiftKeyDown',
     'IsSpellKnown',
     'IsUsableItem',
