@@ -147,6 +147,7 @@ local function IsCataClassic()
     return LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3)
 end
 
+-- Classic Era still has the legacy skill line globals. Forever 1.60.1 does not.
 local function GetProfessionInfoCompat(index)
     if compat.isMainline then
         return GetProfessionInfo(index)
@@ -156,7 +157,7 @@ local function GetProfessionInfoCompat(index)
         return GetProfessionInfo(index)
     end
 
-    if LibAddonCompat then
+    if LibAddonCompat and GetNumSkillLines then
         return LibAddonCompat:GetProfessionInfo(index)
     end
 
@@ -172,7 +173,7 @@ local function GetProfessionsCompat()
         return GetProfessions()
     end
 
-    if LibAddonCompat then
+    if LibAddonCompat and GetNumSkillLines then
         return LibAddonCompat:GetProfessions()
     end
 

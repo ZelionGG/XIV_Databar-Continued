@@ -173,6 +173,7 @@ read_globals = {
     'GetNetStats',
     'GetNumGuildMembers',
     'GetNumSavedInstances',
+    'GetNumSkillLines',
     'GetNumSpecializations',
     'GetNumTalentGroups',
     'GetNumTalentTabs',
