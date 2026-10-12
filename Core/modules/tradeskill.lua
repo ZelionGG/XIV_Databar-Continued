@@ -65,7 +65,10 @@ function TradeskillModule:OnInitialize()
         [773] = 'inscription',
         [197] = 'tailoring',
         [393] = 'skinning',
-        [185] = 'cooking'
+        [185] = 'cooking',
+        [356] = 'fishing',
+        [794] = 'archaeology',
+        [129] = 'firstaid'
     }
 end
 
