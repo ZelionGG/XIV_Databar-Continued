@@ -95,7 +95,6 @@ function TalentModule:OnEnable()
     self.talentFrame:Show()
 
     if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-        self.loadoutName = self:GetCurrentLoadoutName()
         self:CreateLoadoutFrames()
     end
     self:CreateTalentFrames()
@@ -127,26 +126,44 @@ function TalentModule:DisableTalentLoadout()
     end
 end
 
-function TalentModule:GetCurrentLoadoutName()
-    local curSpecID = select(1, GetSpecializationInfo(self.currentSpecID))
-
-    local configs = C_ClassTalents.GetConfigIDsBySpecID(curSpecID);
-    local total = #configs;
-    local loadoutName;
-
-    if total == 0 then
-        self.loadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT;
-    else
-        local selectedID = C_ClassTalents.GetLastSelectedSavedConfigID(curSpecID);
-        if selectedID then
-            local info = C_Traits.GetConfigInfo(selectedID);
-            loadoutName = info and info.name;
-        end
-
-        if loadoutName then
-            self.loadoutName = loadoutName
+local function SavedConfigContains(savedIDs, configID)
+    if not configID then
+        return false
+    end
+    for i = 1, #savedIDs do
+        if savedIDs[i] == configID then
+            return true
         end
     end
+    return false
+end
+
+local function SavedConfigName(configID)
+    if not configID then
+        return nil
+    end
+    local info = C_Traits.GetConfigInfo(configID)
+    return info and info.name
+end
+
+function TalentModule:GetCurrentLoadoutName()
+    local curSpecID = select(1, GetSpecializationInfo(self.currentSpecID))
+    local savedIDs = (curSpecID and C_ClassTalents.GetConfigIDsBySpecID(curSpecID)) or {}
+    local loadoutName
+
+    local activeID = C_ClassTalents.GetActiveConfigID()
+    if SavedConfigContains(savedIDs, activeID) then
+        loadoutName = SavedConfigName(activeID)
+    end
+
+    if not loadoutName and curSpecID then
+        local selectedID = C_ClassTalents.GetLastSelectedSavedConfigID(curSpecID)
+        if SavedConfigContains(savedIDs, selectedID) then
+            loadoutName = SavedConfigName(selectedID)
+        end
+    end
+
+    self.loadoutName = loadoutName or TALENT_FRAME_DROP_DOWN_DEFAULT
 end
 
 function TalentModule:Refresh()
@@ -275,6 +292,7 @@ function TalentModule:CreateLoadoutFrames()
     self.loadoutIcon = self.loadoutIcon or self.loadoutFrame:CreateTexture(nil, 'OVERLAY')
     self.loadoutText = self.loadoutText or self.loadoutFrame:CreateFontString(nil, 'OVERLAY')
 
+    local createdPopup = not self.loadoutPopup
     local template = (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or
                          (BackdropTemplateMixin and "BackdropTemplate")
     self.loadoutPopup = self.loadoutPopup or CreateFrame('BUTTON', 'loadoutPopup', self.loadoutFrame, template)
@@ -296,6 +314,10 @@ function TalentModule:CreateLoadoutFrames()
             self.loadoutPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
             self.loadoutPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
         end
+    end
+
+    if createdPopup then
+        self.loadoutPopup:Hide()
     end
 end
 
@@ -477,9 +499,8 @@ function TalentModule:CreateLoadoutPopup()
     end
 
     local curSpecID = select(1, GetSpecializationInfo(self.currentSpecID))
-
-    local configs = C_ClassTalents.GetConfigIDsBySpecID(curSpecID);
-    local total = #configs;
+    local configs = (curSpecID and C_ClassTalents.GetConfigIDsBySpecID(curSpecID)) or {}
+    local total = #configs
     local db = xb.db.profile
     local iconSize = db.text.fontSize + db.general.barPadding
     self.loadoutOptionString = self.loadoutOptionString or self.loadoutPopup:CreateFontString(nil, 'OVERLAY')
@@ -493,60 +514,73 @@ function TalentModule:CreateLoadoutPopup()
     local popupWidth = self.loadoutPopup:GetWidth()
     local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
     local changedWidth = false
+    local wasShown = self.loadoutPopup:IsShown()
+
     for i = 1, total do
-        if self.loadoutButtons[i] == nil then
-            local configInfo = C_Traits.GetConfigInfo(configs[i])
-            local loadoutID = configInfo.ID
-            local configName = configInfo.name
+        local configInfo = C_Traits.GetConfigInfo(configs[i])
+        local button = self.loadoutButtons[i]
+        if configInfo then
+            if not button then
+                button = CreateFrame('BUTTON', nil, self.loadoutPopup)
+                button.text = button:CreateFontString(nil, 'OVERLAY')
+                button.text:SetPoint('LEFT')
+                button:EnableMouse(true)
+                button:RegisterForClicks('AnyUp')
+                button:SetScript('OnEnter', function()
+                    button.text:SetTextColor(r, g, b, 1)
+                end)
+                button:SetScript('OnLeave', function()
+                    button.text:SetTextColor(xb:GetColor('normal'))
+                end)
+                button:SetScript('OnClick', function(clickedButton, mouseButton)
+                    if InCombatLockdown() then
+                        return;
+                    end
+                    if mouseButton == 'LeftButton' then
+                        local autoApply = true;
+                        local result = C_ClassTalents.LoadConfig(clickedButton:GetID(), autoApply)
+                        if result ~= 0 then
+                            local specID = select(1, GetSpecializationInfo(TalentModule.currentSpecID))
+                            if specID then
+                                C_ClassTalents.UpdateLastSelectedSavedConfigID(specID, clickedButton:GetID());
+                            end
+                            TalentModule:Refresh()
+                        end
+                    end
+                    TalentModule.loadoutPopup:Hide()
+                end)
+                self.loadoutButtons[i] = button
+            end
 
-            local button = CreateFrame('BUTTON', nil, self.loadoutPopup)
-            local buttonText = button:CreateFontString(nil, 'OVERLAY')
-
-            buttonText:SetFont(xb:GetFont(db.text.fontSize))
-            buttonText:SetTextColor(xb:GetColor('normal'))
-            buttonText:SetText(configName)
-            buttonText:SetPoint('LEFT')
-            local textWidth = iconSize + 5 + buttonText:GetStringWidth()
-
-            button:SetID(loadoutID)
+            button.text:SetFont(xb:GetFont(db.text.fontSize))
+            button.text:SetTextColor(xb:GetColor('normal'))
+            button.text:SetText(configInfo.name or "")
+            local textWidth = iconSize + 5 + button.text:GetStringWidth()
+            button:SetID(configInfo.ID)
             button:SetSize(textWidth, iconSize)
             button.isSettable = true
-
-            button:EnableMouse(true)
-            button:RegisterForClicks('AnyUp')
-
-            button:SetScript('OnEnter', function()
-                buttonText:SetTextColor(r, g, b, 1)
-            end)
-
-            button:SetScript('OnLeave', function()
-                buttonText:SetTextColor(xb:GetColor('normal'))
-            end)
-
-            button:SetScript('OnClick', function(clickedButton, mouseButton)
-                if InCombatLockdown() then
-                    return;
-                end
-                if mouseButton == 'LeftButton' then
-                    local autoApply = true;
-                    local result = C_ClassTalents.LoadConfig(clickedButton:GetID(), autoApply)
-                    if result ~= 0 then
-                        C_ClassTalents.UpdateLastSelectedSavedConfigID(curSpecID, clickedButton:GetID());
-                    end
-                end
-                TalentModule.loadoutPopup:Hide()
-            end)
-
-            self.loadoutButtons[i] = button
+            button:Show()
 
             if textWidth > popupWidth then
                 popupWidth = textWidth
                 changedWidth = true
             end
-        end -- if nil
-    end -- for ipairs portOptions
-    for _, button in pairs(self.loadoutButtons) do
-        if button.isSettable then
+        elseif button then
+            button.isSettable = false
+            button:Hide()
+        end
+    end
+
+    local extraIndex = total + 1
+    while self.loadoutButtons[extraIndex] do
+        self.loadoutButtons[extraIndex].isSettable = false
+        self.loadoutButtons[extraIndex]:Hide()
+        extraIndex = extraIndex + 1
+    end
+
+    for i = 1, extraIndex - 1 do
+        local button = self.loadoutButtons[i]
+        if button and button.isSettable then
             button:SetPoint('LEFT', xb.constants.popupPadding, 0)
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
             button:SetPoint('RIGHT')
@@ -554,7 +588,7 @@ function TalentModule:CreateLoadoutPopup()
         else
             button:Hide()
         end
-    end -- for id/button in portButtons
+    end
     if changedWidth then
         popupWidth = popupWidth + self.extraPadding
     end
@@ -571,7 +605,9 @@ function TalentModule:CreateLoadoutPopup()
     self.loadoutPopup:ClearAllPoints()
     self.loadoutPopup:SetPoint(db.general.barPosition, self.loadoutFrame, xb.miniTextPosition, 0, 0)
     self:SkinFrame(self.loadoutPopup, "SpecToolTip")
-    self.loadoutPopup:Hide()
+    if not wasShown then
+        self.loadoutPopup:Hide()
+    end
 end
 
 function TalentModule:CreateSpecPopup()
