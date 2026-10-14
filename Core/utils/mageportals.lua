@@ -281,6 +281,10 @@ function MagePortals:GetFirstKnown()
     return teleports[1] or portals[1]
 end
 
+local function IsPlainNumber(value)
+    return type(value) == "number" and not (issecretvalue and issecretvalue(value))
+end
+
 function MagePortals:GetCooldownRemaining(spellId)
     if not spellId then
         return 0
@@ -299,8 +303,12 @@ function MagePortals:GetCooldownRemaining(spellId)
         startTime, duration = GetSpellCooldown(spellId)
     end
 
+    if not IsPlainNumber(startTime) or not IsPlainNumber(duration) then
+        return 0
+    end
+
     -- Ignore the GCD (about 1.5s). Teleports/portals do not share a category CD.
-    if type(startTime) == "number" and type(duration) == "number" and duration > 2 then
+    if duration > 2 then
         return math.max(0, startTime + duration - GetTime())
     end
     return 0
