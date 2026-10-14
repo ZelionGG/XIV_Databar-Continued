@@ -116,6 +116,7 @@ end
 
 function TalentModule:EnableTalentLoadout()
     self:CreateLoadoutFrames()
+    self:RegisterLoadoutFrameScripts()
     self:Refresh()
     self.loadoutFrame:Show()
 end
@@ -164,6 +165,24 @@ function TalentModule:GetCurrentLoadoutName()
     end
 
     self.loadoutName = loadoutName or TALENT_FRAME_DROP_DOWN_DEFAULT
+end
+
+function TalentModule:OnTraitConfigUpdated()
+    local pending = self.pendingLoadout
+    if pending and pending.specID and pending.targetID then
+        C_ClassTalents.UpdateLastSelectedSavedConfigID(pending.specID, pending.targetID)
+    end
+    self.pendingLoadout = nil
+    self:Refresh()
+end
+
+function TalentModule:OnConfigCommitFailed()
+    local pending = self.pendingLoadout
+    self.pendingLoadout = nil
+    if pending and pending.specID and pending.previousID then
+        C_ClassTalents.UpdateLastSelectedSavedConfigID(pending.specID, pending.previousID)
+    end
+    self:Refresh()
 end
 
 function TalentModule:Refresh()
@@ -355,68 +374,75 @@ function TalentModule:CreateTalentFrames()
     self:CreateLootSpecPopup()
 end
 
+function TalentModule:RegisterLoadoutFrameScripts()
+    if not self.loadoutFrame then
+        return
+    end
+
+    self.loadoutFrame:EnableMouse(true)
+    self.loadoutFrame:RegisterForClicks('AnyUp')
+
+    self.loadoutFrame:SetScript('OnEnter', function()
+        if InCombatLockdown() then
+            return
+        end
+        self.loadoutText:SetTextColor(unpack(xb:HoverColors()))
+        if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
+            if (not self.loadoutPopup:IsVisible()) then
+                self:ShowTooltip()
+            end
+        end
+    end)
+
+    self.loadoutFrame:SetScript('OnLeave', function()
+        if InCombatLockdown() then
+            return
+        end
+        self.loadoutText:SetTextColor(xb:GetColor('normal'))
+        if xb.db.profile.modules.talent.showTooltip then
+            GameTooltip:Hide()
+        end
+    end)
+
+    self.loadoutFrame:SetScript('OnClick', function(_, button)
+        GameTooltip:Hide()
+
+        if InCombatLockdown() then
+            return
+        end
+
+        if button == 'LeftButton' then
+            if not self.loadoutPopup:IsVisible() then
+                self:CreateLoadoutPopup()
+                xb:ShowPopup(self.loadoutPopup)
+                xb:HidePopup(self.specPopup)
+                xb:HidePopup(self.lootSpecPopup)
+            else
+                xb:HidePopup(self.loadoutPopup)
+                if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
+                    self:ShowTooltip()
+                end
+            end
+        end
+    end)
+end
+
 function TalentModule:RegisterFrameEvents()
     self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Refresh')
     self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
     self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
-    self:RegisterEvent('TRAIT_CONFIG_UPDATED', 'Refresh');
+    self:RegisterEvent('TRAIT_CONFIG_UPDATED', 'OnTraitConfigUpdated');
     self:RegisterEvent('TRAIT_CONFIG_LIST_UPDATED', 'Refresh');
     self:RegisterEvent('TRAIT_CONFIG_DELETED', 'Refresh');
     self:RegisterEvent('TRAIT_CONFIG_CREATED', 'Refresh');
-    self:RegisterEvent('CONFIG_COMMIT_FAILED', 'Refresh');
+    self:RegisterEvent('CONFIG_COMMIT_FAILED', 'OnConfigCommitFailed');
     self:RegisterEvent('ACTIVE_COMBAT_CONFIG_CHANGED', 'Refresh');
 
     self.specFrame:EnableMouse(true)
     self.specFrame:RegisterForClicks('AnyUp')
 
     if (xb.db.profile.modules.talent.loadoutSwitcherEnabled) then
-        self.loadoutFrame:EnableMouse(true)
-        self.loadoutFrame:RegisterForClicks('AnyUp')
-
-        -- LOADOUTS
-        self.loadoutFrame:SetScript('OnEnter', function()
-            if InCombatLockdown() then
-                return
-            end
-            self.loadoutText:SetTextColor(unpack(xb:HoverColors()))
-            if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
-                if (not self.loadoutPopup:IsVisible()) then
-                    self:ShowTooltip()
-                end
-            end
-        end)
-
-        self.loadoutFrame:SetScript('OnLeave', function()
-            if InCombatLockdown() then
-                return
-            end
-            self.loadoutText:SetTextColor(xb:GetColor('normal'))
-            if xb.db.profile.modules.talent.showTooltip then
-                GameTooltip:Hide()
-            end
-        end)
-
-        self.loadoutFrame:SetScript('OnClick', function(_, button)
-            GameTooltip:Hide()
-
-            if InCombatLockdown() then
-                return
-            end
-
-            if button == 'LeftButton' then
-                if not self.loadoutPopup:IsVisible() then
-                    self:CreateLoadoutPopup()
-                    xb:ShowPopup(self.loadoutPopup)
-                    xb:HidePopup(self.specPopup)
-                    xb:HidePopup(self.lootSpecPopup)
-                else
-                    xb:HidePopup(self.loadoutPopup)
-                    if xb.db.profile.modules.talent.showTooltip and xb:ShouldShowTooltip() then
-                        self:ShowTooltip()
-                    end
-                end
-            end
-        end)
+        self:RegisterLoadoutFrameScripts()
     end
 
     -- TALENTS
@@ -537,14 +563,22 @@ function TalentModule:CreateLoadoutPopup()
                         return;
                     end
                     if mouseButton == 'LeftButton' then
-                        local autoApply = true;
-                        local result = C_ClassTalents.LoadConfig(clickedButton:GetID(), autoApply)
-                        if result ~= 0 then
-                            local specID = select(1, GetSpecializationInfo(TalentModule.currentSpecID))
+                        local specID = select(1, GetSpecializationInfo(TalentModule.currentSpecID))
+                        local targetID = clickedButton:GetID()
+                        local previousID = specID and C_ClassTalents.GetLastSelectedSavedConfigID(specID)
+                        local result = C_ClassTalents.LoadConfig(targetID, true)
+                        if result == Enum.LoadConfigResult.NoChangesNecessary or result == Enum.LoadConfigResult.Ready then
                             if specID then
-                                C_ClassTalents.UpdateLastSelectedSavedConfigID(specID, clickedButton:GetID());
+                                C_ClassTalents.UpdateLastSelectedSavedConfigID(specID, targetID)
                             end
+                            TalentModule.pendingLoadout = nil
                             TalentModule:Refresh()
+                        elseif result == Enum.LoadConfigResult.LoadInProgress and specID then
+                            TalentModule.pendingLoadout = {
+                                specID = specID,
+                                targetID = targetID,
+                                previousID = previousID,
+                            }
                         end
                     end
                     TalentModule.loadoutPopup:Hide()
@@ -585,7 +619,7 @@ function TalentModule:CreateLoadoutPopup()
             button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
             button:SetPoint('RIGHT')
             popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
-        else
+        elseif button then
             button:Hide()
         end
     end
