@@ -1,22 +1,25 @@
 # XIV_Databar Continued
 
-## [5.8](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.8) (2026-09-28)
+## [5.9](https://github.com/ZelionGG/XIV_Databar-Continued/releases/tag/5.9) (2026-10-15)
 
-[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.7.2...5.8) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
+[Full Changelog](https://github.com/ZelionGG/XIV_Databar-Continued/compare/5.8...5.9) [Previous Releases](https://github.com/ZelionGG/XIV_Databar-Continued/releases)
 
-> **Version 5.8 - Mage Portals & Forever**
+> **Version 5.9 - Professions, Talents & 12.1.5**
 >
-> At long last, Mages get a **Travel** button for their teleports and portals.
-> This is also the first release for Forever. It is an early port, please share feedback and bug reports, it will help me a lot.
+> This update adds secondary professions to the **Tradeskill** module.
+> It also fixes the **Loadout switcher** in the **Talents** module (hopefully), LUA errors in **Travel**, the **Tradeskill** module on Forever, and updates the TOC for patch 12.1.5.
 
 ### _Global :_
 
-- 🆕 _**NEW** -_ Added a **Mage Portals** button to **Travel**. Left-click casts the favorite spell, right-click picks another. It only shows for Mages who know at least one teleport or portal.
+- 🆕 _**NEW** -_ Added secondary professions (cooking, fishing, archaeology and first aid) to the **Tradeskill** module, with the **Show Secondary Professions** option and the **Show Profession Names** option.
 
 ### _Retail :_
 
-- 🛠️ _**IMPROVEMENT** -_ The **M+ Teleports** icon in **Travel** now lines up with the other travel icons.
+- 🛠️ _**IMPROVEMENT** -_ TOC update for patch 12.1.5.
+- 🐞 _**BUGFIX** -_ Fixed the **Loadout switcher** in the **Talents** module not showing the active loadout, not returning to it when a talent change is cancelled, and not responding the first time it is enabled.
+- 🐞 _**BUGFIX** -_ Fixed a LUA error in the **Travel** module caused by a removed API.
+- 🐞 _**BUGFIX** -_ Fixed a LUA error in **Travel** tooltips during combat.
 
 ### _Forever :_
 
-- 🔥 _**IMPORTANT** -_ Early support for Forever. If something errors, looks wrong, or is missing, please report it, it will help me a lot.
+- 🐞 _**BUGFIX** -_ Fixed a LUA error in the **Tradeskill** module which hid the **Currency** module and its XP bar.
