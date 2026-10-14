@@ -1,3 +1,5 @@
+
+
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
 
@@ -57,9 +59,9 @@
 
 [![XIVScreenshot][xiv-screenshot]](https://www.curseforge.com/wow/addons/xiv_databar-continued)
 
-Pursuing the work of MilleXIV, [Vicious-wow](https://github.com/Vicious-wow/XIV_Databar) and [Kozoaku](https://github.com/Kozoaku/XIV_Databar).
+Pursuing the work of MilleXIV, [Vicious-wow](https://github.com/Vicious-wow/XIV_Databar) and [Kozoaku](https://github.com/Kozoaku/XIV_Databar).
 
-A reworking of [SX_Databar by saxitoxin](https://www.wowinterface.com/downloads/info23745-SX_DataBar.html).
+A reworking of [SX_Databar by saxitoxin](https://www.wowinterface.com/downloads/info23745-SX_DataBar.html).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -77,6 +79,7 @@ A reworking of [SX_Databar by saxitoxin](https://www.wowinterface.com/downloads
 - Clock
 - Tradeskills
 - Currency - With a mode for XP Bar when below level cap
+- DataBrokers - Displays third-party LibDataBroker plugins on the bar
 - System
 - Gold
 - Travel - Right click the left hearth to choose an alternate transport method
@@ -99,7 +102,7 @@ See the [open issues](https://github.com/ZelionGG/XIV_Databar-Continued/issues) 
 
 ## Credits
 
-- [https://www.wowinterface.com/downloads/info23745-SX_DataBar.html](saxitoxin) for the SX_Databar AddOn
+- [https://www.wowinterface.com/downloads/info23745-SX_DataBar.html](saxitoxin) for the SX_Databar AddOn
 - u/sammojo for the idea, textures and the description of the bar
 - u/keyboardturn for updated spec icons
 - MilleXIV for reviving the project and code refactoring
