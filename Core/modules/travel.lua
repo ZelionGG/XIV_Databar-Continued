@@ -24,8 +24,13 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 -- Safe IsUsableItem wrapper with compatibility check
 local function SafeIsUsableItem(id)
-    if compat.isMists and not IsUsableItem then return false end
-    return IsUsableItem(id)
+    if IsUsableItem then
+        return IsUsableItem(id)
+    end
+    if C_Item and C_Item.IsUsableItem then
+        return C_Item.IsUsableItem(id)
+    end
+    return false
 end
 
 local function GetOwnedItemCount(id)
