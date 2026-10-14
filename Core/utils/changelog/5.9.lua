@@ -48,7 +48,7 @@ XIVBar.Changelog[5900] = {
         ["zhCN"] = {},
         ["zhTW"] = {},
         ["enUS"] = {
-            "[Retail] Fixed the [Loadout switcher] in the [Talents] module not showing the active loadout, not returning to it when a talent change is cancelled, and not responding the first time it is enabled.",            
+            "[Retail] Fixed the [Loadout switcher] in the [Talents] module not showing the active loadout, not returning to it when a talent change is cancelled, and not responding the first time it is enabled.",
             "[Retail] Fixed a LUA error in the [Travel] module caused by a removed API.",
             "[Retail] Fixed a LUA error in [Travel] tooltips during combat.",
             "[Forever] Fixed a LUA error in the [Tradeskill] module which hid the [Currency] module and its XP bar.",

@@ -276,7 +276,7 @@ function DataBrokersModule:OnDataObjectCreated(_, name, dataobj)
     end
 end
 
-function DataBrokersModule:OnAttributeChanged(_, name, key, _value, dataobj)
+function DataBrokersModule:OnAttributeChanged(_, name, key, _, dataobj)
     local piece = self.pieces[name]
     if not piece or not piece:IsShown() then
         return
