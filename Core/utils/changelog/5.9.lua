@@ -20,6 +20,14 @@ XIVBar.Changelog[5900] = {
         ["koKR"] = {},
         ["ruRU"] = {}
     },
+    important = {
+        ["zhCN"] = {},
+        ["zhTW"] = {},
+        ["enUS"] = {},
+        ["frFR"] = {},
+        ["koKR"] = {},
+        ["ruRU"] = {}
+    },
     new = {
         ["zhCN"] = {},
         ["zhTW"] = {},
