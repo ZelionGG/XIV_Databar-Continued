@@ -249,6 +249,8 @@ L["USE_INTERACTIVE_TOOLTIP"] = "Usa descripción interactivo"
 L["COOLDOWNS"] = "Tiempos de reutilización"
 L["TOGGLE_PROFESSION_FRAME"] = "Mostrar/Ocultar marco de profesión"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Mostrar/Ocultar libro de hechizos de profesión"
+-- TODO: L["SHOW_SECONDARY_PROFESSIONS"] = "Show Secondary Professions"
+-- TODO: L["SHOW_PROFESSION_NAMES"] = "Show Profession Names"
 
 L["SET_SPECIALIZATION"] = "Establece especialización"
 L["SET_LOADOUT"] = "Establece configuración"
@@ -361,7 +363,6 @@ L["OPEN_CHANGELOG"] = "Abrir registro de cambias"
 L["CHANGELOG_AFTER_COMBAT"] = "Registro de cambias se abriré después el combate termina."
 
 -- Changelog
-L["DATE_FORMAT"] = "%month%-%day%-%year%" -- @no-translate
 L["IMPORTANT"] = "Importante"
 L["NEW"] = "Nuevo"
 L["IMPROVEMENT"] = "Mejora"
