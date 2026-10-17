@@ -247,6 +247,8 @@ L["USE_INTERACTIVE_TOOLTIP"] = "Utiliser l'infobulle interactive"
 L["COOLDOWNS"] = "Temps de recharge"
 L["TOGGLE_PROFESSION_FRAME"] = "Afficher l'interface de la profession"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Afficher le livre de sorts de la profession"
+L["SHOW_SECONDARY_PROFESSIONS"] = "Afficher les métiers secondaires"
+L["SHOW_PROFESSION_NAMES"] = "Afficher les noms des métiers"
 
 L["SET_SPECIALIZATION"] = "Choix de la spécialisation"
 L["SET_LOADOUT"] = "Choix de la configuration"

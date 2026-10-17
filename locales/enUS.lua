@@ -249,6 +249,8 @@ L["USE_INTERACTIVE_TOOLTIP"] = "Use Interactive Tooltip"
 L["COOLDOWNS"] = "Cooldowns"
 L["TOGGLE_PROFESSION_FRAME"] = "Toggle Profession Frame"
 L["TOGGLE_PROFESSION_SPELLBOOK"] = "Toggle Profession Spellbook"
+L["SHOW_SECONDARY_PROFESSIONS"] = "Show Secondary Professions"
+L["SHOW_PROFESSION_NAMES"] = "Show Profession Names"
 
 L["SET_SPECIALIZATION"] = "Set Specialization"
 L["SET_LOADOUT"] = "Set Loadout"

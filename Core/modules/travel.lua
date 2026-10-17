@@ -24,8 +24,13 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 -- Safe IsUsableItem wrapper with compatibility check
 local function SafeIsUsableItem(id)
-    if compat.isMists and not IsUsableItem then return false end
-    return IsUsableItem(id)
+    if IsUsableItem then
+        return IsUsableItem(id)
+    end
+    if C_Item and C_Item.IsUsableItem then
+        return C_Item.IsUsableItem(id)
+    end
+    return false
 end
 
 local function GetOwnedItemCount(id)
@@ -840,17 +845,26 @@ function TravelModule:UpdatePortOptions()
     end
 end
 
+local function IsPlainNumber(value)
+    return type(value) == "number" and not (issecretvalue and issecretvalue(value))
+end
+
 function TravelModule:GetRemainingCooldown(id, isSpell)
     local startTime, duration
     if isSpell then
         local spellCooldownInfo = GetSpellCooldown(id)
+        if not spellCooldownInfo then
+            return 0
+        end
         startTime = spellCooldownInfo.startTime
         duration = spellCooldownInfo.duration
     else
         startTime, duration = GetItemCooldown(id)
     end
-
-    if type(startTime) == "number" and type(duration) == "number" and duration > 0 then
+    if not IsPlainNumber(startTime) or not IsPlainNumber(duration) then
+        return nil
+    end
+    if duration > 0 then
         return math.max(0, startTime + duration - GetTime())
     end
     return 0
@@ -917,6 +931,9 @@ function TravelModule:SetButtonState(_, icon, text, isActive, isHover)
 end
 
 function TravelModule:FormatCooldown(cdTime)
+    if cdTime == nil then
+        return "-"
+    end
     if cdTime <= 0 then return L["READY"] end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
     local minutes = string.format("%02.f",
@@ -1039,8 +1056,11 @@ function TravelModule:GetHousingCooldown()
         return 0
     end
 
-    local startTime = info.startTime or 0
-    local duration = info.duration or 0
+    local startTime = info.startTime
+    local duration = info.duration
+    if not IsPlainNumber(startTime) or not IsPlainNumber(duration) then
+        return nil
+    end
     if duration <= 0 or startTime <= 0 then
         return 0
     end

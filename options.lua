@@ -245,10 +245,10 @@ function XIVBar:SetupOptions()
         end
 
         -- Checking localized "Important" category
-        local important_localized
-        if data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
+        local important_localized = {}
+        if data.important and data.important[GetLocale()] ~= nil and next(data.important[GetLocale()]) ~= nil then
             important_localized = data.important[GetLocale()]
-        else
+        elseif data.important then
             important_localized = data.important["enUS"]
         end
 
@@ -305,10 +305,10 @@ function XIVBar:SetupOptions()
         end
 
         -- Checking localized "New" category
-        local new_localized
-        if data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
+        local new_localized = {}
+        if data.new and data.new[GetLocale()] ~= nil and next(data.new[GetLocale()]) ~= nil then
             new_localized = data.new[GetLocale()]
-        else
+        elseif data.new then
             new_localized = data.new["enUS"]
         end
 
@@ -335,10 +335,10 @@ function XIVBar:SetupOptions()
         end
 
         -- Checking localized "Improvment" category
-        local improvment_localized
-        if data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
+        local improvment_localized = {}
+        if data.improvment and data.improvment[GetLocale()] ~= nil and next(data.improvment[GetLocale()]) ~= nil then
             improvment_localized = data.improvment[GetLocale()]
-        else
+        elseif data.improvment then
             improvment_localized = data.improvment["enUS"]
         end
 

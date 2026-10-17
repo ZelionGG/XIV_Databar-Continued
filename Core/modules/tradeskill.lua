@@ -7,6 +7,8 @@ local compat = XIVBar.compat or {}
 
 local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
 
+local PROF_PREFIXES = { 'firstProf', 'secondProf', 'cook', 'fish', 'arch', 'first_aid' }
+
 local LibStub = _G.LibStub
 local LibAddonCompat = nil
 local C_Timer = _G.C_Timer
@@ -62,7 +64,11 @@ function TradeskillModule:OnInitialize()
         [755] = 'jewelcrafting',
         [773] = 'inscription',
         [197] = 'tailoring',
-        [393] = 'skinning'
+        [393] = 'skinning',
+        [185] = 'cooking',
+        [356] = 'fishing',
+        [794] = 'archaeology',
+        [129] = 'firstaid'
     }
 end
 
@@ -147,16 +153,19 @@ local function IsCataClassic()
     return LE_EXPANSION_LEVEL_CURRENT == (LE_EXPANSION_CATACLYSM or 3)
 end
 
+-- Classic Era still has the legacy skill line globals. Forever 1.60.1 does not.
+-- Mists and Cataclysm also still expose those globals, but LibAddonCompat drops
+-- Archaeology, so those flavours use the native profession API.
+local function UseNativeProfessions()
+    return compat.isMainline or compat.isMists or IsCataClassic()
+end
+
 local function GetProfessionInfoCompat(index)
-    if compat.isMainline then
+    if UseNativeProfessions() then
         return GetProfessionInfo(index)
     end
 
-    if IsCataClassic() then
-        return GetProfessionInfo(index)
-    end
-
-    if LibAddonCompat then
+    if LibAddonCompat and GetNumSkillLines then
         return LibAddonCompat:GetProfessionInfo(index)
     end
 
@@ -164,70 +173,56 @@ local function GetProfessionInfoCompat(index)
 end
 
 local function GetProfessionsCompat()
-    if compat.isMainline then
+    if UseNativeProfessions() then
         return GetProfessions()
     end
 
-    if IsCataClassic() then
-        return GetProfessions()
-    end
-
-    if LibAddonCompat then
+    if LibAddonCompat and GetNumSkillLines then
         return LibAddonCompat:GetProfessions()
     end
 
     return GetProfessions()
 end
 
+function TradeskillModule:ReadProfession(prefix, index)
+    local prof = self[prefix]
+    prof.idx = index
+    if not index then
+        return
+    end
+
+    local name, defIcon, lvl, maxLvl, _, offset, id = GetProfessionInfoCompat(index)
+    prof.name, prof.defIcon, prof.lvl, prof.maxLvl, prof.offset, prof.id = name, defIcon, lvl, maxLvl, offset, id
+
+    local bar = self[prefix .. 'Bar']
+    if bar and prof.maxLvl then
+        bar:SetMinMaxValues(1, prof.maxLvl)
+        bar:SetValue(prof.lvl)
+    end
+end
+
 function TradeskillModule:UpdateProfValues()
-    self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx, self.first_aid.idx =
-        GetProfessionsCompat()
+    local firstIdx, secondIdx, archIdx, fishIdx, cookIdx, firstAidIdx = GetProfessionsCompat()
+    self:ReadProfession('firstProf', firstIdx)
+    self:ReadProfession('secondProf', secondIdx)
+    self:ReadProfession('arch', archIdx)
+    self:ReadProfession('fish', fishIdx)
+    self:ReadProfession('cook', cookIdx)
+    self:ReadProfession('first_aid', firstAidIdx)
+end
 
-    if not self.firstProf.idx then
-        self.tradeskillFrame:Hide()
-    else
-        self.tradeskillFrame:Show()
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.firstProf.idx)
-        self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, self.firstProf.offset,
-            self.firstProf.id = name, defIcon, lvl, maxLvl, offset, id
-        self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
-        self.firstProfBar:SetValue(self.firstProf.lvl)
+function TradeskillModule:GetBarPrefixes()
+    local prefixes = { 'firstProf', 'secondProf' }
+    local moduleDb = xb.db.profile.modules and xb.db.profile.modules.tradeskill
+    if moduleDb and moduleDb.showSecondary then
+        prefixes[#prefixes + 1] = 'cook'
+        prefixes[#prefixes + 1] = 'fish'
+        prefixes[#prefixes + 1] = 'arch'
+        if not compat.isMainline then
+            prefixes[#prefixes + 1] = 'first_aid'
+        end
     end
-
-    if not self.secondProf.idx then
-        self.secondProfFrame:Hide()
-    else
-        self.secondProfFrame:Show()
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.secondProf.idx)
-        self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl,
-            self.secondProf.offset, self.secondProf.id = name, defIcon, lvl, maxLvl, offset, id
-        self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
-        self.secondProfBar:SetValue(self.secondProf.lvl)
-    end
-
-    if self.first_aid.idx and not compat.isMainline then
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.first_aid.idx)
-        self.first_aid.name, self.first_aid.defIcon, self.first_aid.lvl, self.first_aid.maxLvl, self.first_aid.offset,
-            self.first_aid.id = name, defIcon, lvl, maxLvl, offset, id
-    end
-
-    if self.arch.idx then
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.arch.idx)
-        self.arch.name, self.arch.defIcon, self.arch.lvl, self.arch.maxLvl, self.arch.offset, self.arch.id = name,
-            defIcon, lvl, maxLvl, offset, id
-    end
-
-    if self.fish.idx then
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.fish.idx)
-        self.fish.name, self.fish.defIcon, self.fish.lvl, self.fish.maxLvl, self.fish.offset, self.fish.id = name,
-            defIcon, lvl, maxLvl, offset, id
-    end
-
-    if self.cook.idx then
-        local name, defIcon, lvl, maxLvl, _, offset, id, _ = GetProfessionInfoCompat(self.cook.idx)
-        self.cook.name, self.cook.defIcon, self.cook.lvl, self.cook.maxLvl, self.cook.offset, self.cook.id = name,
-            defIcon, lvl, maxLvl, offset, id
-    end
+    return prefixes
 end
 
 function TradeskillModule:Refresh()
@@ -257,26 +252,47 @@ function TradeskillModule:Refresh()
     end
 
     self:UpdateProfValues()
-    if not self.firstProf.idx then
+
+    local shown = {}
+    local shownSet = {}
+    for _, prefix in ipairs(self:GetBarPrefixes()) do
+        if self[prefix].idx then
+            shown[#shown + 1] = prefix
+            shownSet[prefix] = true
+        end
+    end
+
+    for _, prefix in ipairs(PROF_PREFIXES) do
+        local frame = self[prefix .. 'Frame']
+        if frame and not shownSet[prefix] then
+            frame:Hide()
+        end
+    end
+
+    if #shown == 0 then
         self:HideTooltip(true)
+        self.tradeskillFrame:Hide()
         return
     end
 
-    self:ConfigureSecureRightClick('firstProf')
-    self:ConfigureSecureRightClick('secondProf')
+    self.tradeskillFrame:Show()
 
     local totalWidth = 0
-
-    self:StyleTradeskillFrame('firstProf')
-    totalWidth = totalWidth + self.firstProfFrame:GetWidth()
-    self.firstProfFrame:ClearAllPoints()
-    self.firstProfFrame:SetPoint('LEFT')
-
-    if self.secondProf.idx then
-        self:StyleTradeskillFrame('secondProf')
-        totalWidth = totalWidth + self.secondProfFrame:GetWidth()
-        self.secondProfFrame:ClearAllPoints()
-        self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
+    local previous = nil
+    for _, prefix in ipairs(shown) do
+        self:ConfigureSecureRightClick(prefix)
+        self:StyleTradeskillFrame(prefix)
+        local frame = self[prefix .. 'Frame']
+        frame:Show()
+        frame:ClearAllPoints()
+        if previous then
+            frame:SetPoint('LEFT', previous, 'RIGHT', 5, 0)
+            totalWidth = totalWidth + 5
+        else
+            frame:SetPoint('LEFT')
+        end
+        totalWidth = totalWidth + frame:GetWidth()
+        previous = frame
     end
 
     self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
@@ -327,7 +343,15 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
     self[prefix .. 'Icon']:SetPoint('LEFT')
     self[prefix .. 'Icon']:SetVertexColor(xb:GetColor('normal'))
 
+    if db.modules.tradeskill.showLabel == false then
+        self[prefix .. 'Text']:Hide()
+        self[prefix .. 'Bar']:Hide()
+        self[prefix .. 'Frame']:SetSize(iconSize, xb:GetHeight())
+        return
+    end
+
     -- Text
+    self[prefix .. 'Text']:Show()
     self[prefix .. 'Text']:ClearAllPoints()
     self[prefix .. 'Text']:SetFont(xb:GetFont(textHeight))
     self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
@@ -365,17 +389,25 @@ function TradeskillModule:CreateFrames()
         buttonTemplate = 'SecureActionButtonTemplate,SecureHandlerStateTemplate'
     end
 
-    self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, buttonTemplate)
-    self.firstProfIcon = self.firstProfIcon or self.firstProfFrame:CreateTexture(nil, 'OVERLAY')
-    self.firstProfText = self.firstProfText or self.firstProfFrame:CreateFontString(nil, 'OVERLAY')
-    self.firstProfBar = self.firstProfBar or CreateFrame('STATUSBAR', nil, self.firstProfFrame)
-    self.firstProfBarBg = self.firstProfBarBg or self.firstProfBar:CreateTexture(nil, 'BACKGROUND')
-
-    self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, buttonTemplate)
-    self.secondProfIcon = self.secondProfIcon or self.secondProfFrame:CreateTexture(nil, 'OVERLAY')
-    self.secondProfText = self.secondProfText or self.secondProfFrame:CreateFontString(nil, 'OVERLAY')
-    self.secondProfBar = self.secondProfBar or CreateFrame('STATUSBAR', nil, self.secondProfFrame)
-    self.secondProfBarBg = self.secondProfBarBg or self.secondProfBar:CreateTexture(nil, 'BACKGROUND')
+    for _, prefix in ipairs(PROF_PREFIXES) do
+        local frame = self[prefix .. 'Frame']
+        if not frame then
+            frame = CreateFrame("BUTTON", nil, self.tradeskillFrame, buttonTemplate)
+            self[prefix .. 'Frame'] = frame
+        end
+        if not self[prefix .. 'Icon'] then
+            self[prefix .. 'Icon'] = frame:CreateTexture(nil, 'OVERLAY')
+        end
+        if not self[prefix .. 'Text'] then
+            self[prefix .. 'Text'] = frame:CreateFontString(nil, 'OVERLAY')
+        end
+        if not self[prefix .. 'Bar'] then
+            self[prefix .. 'Bar'] = CreateFrame('STATUSBAR', nil, frame)
+        end
+        if not self[prefix .. 'BarBg'] then
+            self[prefix .. 'BarBg'] = self[prefix .. 'Bar']:CreateTexture(nil, 'BACKGROUND')
+        end
+    end
 end
 
 function TradeskillModule:ConfigureSecureRightClick(prefix)
@@ -604,7 +636,11 @@ function TradeskillModule:SetProfScripts(prefix)
 
     self[prefix .. 'Frame']:SetScript('OnEnter', function()
         self.frameHover = true
-        self[prefix .. 'Text']:SetTextColor(unpack(xb:HoverColors()))
+        if xb.db.profile.modules.tradeskill.showLabel == false then
+            self[prefix .. 'Icon']:SetVertexColor(unpack(xb:HoverColors()))
+        else
+            self[prefix .. 'Text']:SetTextColor(unpack(xb:HoverColors()))
+        end
         if xb:ShouldShowTooltip() then
             self:ShowConfiguredTooltip()
         else
@@ -614,7 +650,11 @@ function TradeskillModule:SetProfScripts(prefix)
 
     self[prefix .. 'Frame']:SetScript('OnLeave', function()
         self.frameHover = false
-        self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
+        if xb.db.profile.modules.tradeskill.showLabel == false then
+            self[prefix .. 'Icon']:SetVertexColor(xb:GetColor('normal'))
+        else
+            self[prefix .. 'Text']:SetTextColor(xb:GetColor('normal'))
+        end
         local moduleDb = xb.db.profile.modules.tradeskill
         if moduleDb.showTooltip then
             self:QueueTooltipHide()
@@ -631,8 +671,9 @@ function TradeskillModule:RegisterFrameEvents()
     self.tradeskillFrame:RegisterEvent('SKILL_LINES_CHANGED')
     self.tradeskillFrame:RegisterUnitEvent('UNIT_SPELLCAST_STOP', 'player')
 
-    self:SetProfScripts('firstProf')
-    self:SetProfScripts('secondProf')
+    for _, prefix in ipairs(PROF_PREFIXES) do
+        self:SetProfScripts(prefix)
+    end
 
     self.tradeskillFrame:SetScript('OnEnter', function()
         self.frameHover = true
@@ -726,6 +767,8 @@ end
 function TradeskillModule:GetDefaultOptions()
     return 'tradeskill', {
         enabled = true,
+        showSecondary = false,
+        showLabel = true,
         barCC = false,
         showTooltip = true,
         useInteractiveTooltip = true
@@ -754,9 +797,35 @@ function TradeskillModule:GetConfig()
                 end,
                 width = "full"
             },
+            showSecondary = {
+                name = L["SHOW_SECONDARY_PROFESSIONS"],
+                order = 1,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.tradeskill.showSecondary
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.tradeskill.showSecondary = val
+                    self:Refresh()
+                end,
+                width = "full"
+            },
+            showLabel = {
+                name = L["SHOW_PROFESSION_NAMES"],
+                order = 2,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.modules.tradeskill.showLabel ~= false
+                end,
+                set = function(_, val)
+                    xb.db.profile.modules.tradeskill.showLabel = val
+                    self:Refresh()
+                end,
+                width = "full"
+            },
             barCC = {
                 name = L["USE_CLASS_COLORS"],
-                order = 2,
+                order = 3,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.tradeskill.barCC
@@ -764,11 +833,14 @@ function TradeskillModule:GetConfig()
                 set = function(_, val)
                     xb.db.profile.modules.tradeskill.barCC = val
                     self:Refresh()
+                end,
+                disabled = function()
+                    return xb.db.profile.modules.tradeskill.showLabel == false
                 end
             },
             showTooltip = {
                 name = L["SHOW_TOOLTIPS"],
-                order = 3,
+                order = 4,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.tradeskill.showTooltip
@@ -780,7 +852,7 @@ function TradeskillModule:GetConfig()
             },
             useInteractiveTooltip = {
                 name = L["USE_INTERACTIVE_TOOLTIP"],
-                order = 4,
+                order = 5,
                 type = "toggle",
                 get = function()
                     return xb.db.profile.modules.tradeskill.useInteractiveTooltip ~= false
