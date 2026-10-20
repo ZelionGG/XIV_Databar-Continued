@@ -89,11 +89,7 @@ local function RoundNearest(value)
         return 0
     end
 
-    if value >= 0 then
-        return floor(value + 0.5)
-    end
-
-    return floor(value - 0.5)
+    return floor(value + 0.5)
 end
 
 local function NormalizeAnchor(anchor)
