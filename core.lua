@@ -769,6 +769,24 @@ function XIVBar:GetHeight()
                self.db.profile.general.barPadding
 end
 
+function XIVBar:ApplySavedBarOffset()
+    if self.frames.bar == nil then return end
+    if self.db.profile.general.barFullscreen then return end
+    if InCombatLockdown() then return end
+
+    local point = self.db.profile.general.point
+    if not point then return end
+
+    self.frames.bar:ClearAllPoints()
+    self.frames.bar:SetPoint(
+        point,
+        UIParent,
+        self.db.profile.general.relativePoint,
+        self.db.profile.general.xOffset,
+        self.db.profile.general.yOffset
+    )
+end
+
 function XIVBar:Refresh()
     if self.frames.bar == nil then return; end
 
@@ -788,13 +806,7 @@ function XIVBar:Refresh()
     if not self.db.profile.general.barFullscreen then
         -- If we have a saved custom position, use it
         if self.db.profile.general.point then
-            self.frames.bar:SetPoint(
-                self.db.profile.general.point,
-                UIParent,
-                self.db.profile.general.relativePoint,
-                self.db.profile.general.xOffset,
-                self.db.profile.general.yOffset
-            )
+            self:ApplySavedBarOffset()
         else
             -- Initial position based on barHoriz and barPosition
             self.frames.bar:SetPoint(self.db.profile.general.barPosition, UIParent, self.db.profile.general.barPosition)

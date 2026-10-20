@@ -1071,7 +1071,7 @@ function XIVBar:GetPositioningOptions()
                 end,
                 set = function(_, val)
                     self.db.profile.general.xOffset = val
-                    self:Refresh()
+                    self:ApplySavedBarOffset()
                 end
             },
             yOffset = {
@@ -1090,7 +1090,7 @@ function XIVBar:GetPositioningOptions()
                 end,
                 set = function(_, val)
                     self.db.profile.general.yOffset = val
-                    self:Refresh()
+                    self:ApplySavedBarOffset()
                 end
             },
             locked = {
