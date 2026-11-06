@@ -1029,11 +1029,38 @@ local function ClassFileFromLocalizedName(className)
     end
 end
 
-local function ColorFriendName(name, classFile)
+local function ColorLevel(level)
+    if not level or level <= 0 then
+        return nil
+    end
+    local color
+    if NameplateLevelFrameMixin then
+        -- Forever loads this mixin with the nameplate cutoffs. Other classic flavors do not define it.
+        local diff = level - UnitEffectiveLevel("player")
+        color = NameplateLevelFrameMixin:GetDifficultyColor(diff)
+    else
+        -- Unit level color. Classic Era only has GetQuestDifficultyColor, which its unit frames use.
+        color = (GetCreatureDifficultyColor or GetQuestDifficultyColor)(level)
+    end
+    if not color then
+        return tostring(level)
+    end
+    local r = math.floor((color.r or 1) * 255 + 0.5)
+    local g = math.floor((color.g or 1) * 255 + 0.5)
+    local b = math.floor((color.b or 1) * 255 + 0.5)
+    return string.format("|cff%02x%02x%02x%s|r", r, g, b, level)
+end
+
+local function ColorFriendName(name, classFile, level)
     local shown = name or L["NO_INFO"]
     local classColor = classFile and RAID_CLASS_COLORS[classFile]
     local colorHex = classColor and classColor.colorStr or FRIEND_NAME_COLOR
-    return "|c" .. colorHex .. shown .. "|r"
+    local coloredName = "|c" .. colorHex .. shown .. "|r"
+    local coloredLevel = ColorLevel(level)
+    if coloredLevel then
+        return coloredLevel .. " " .. coloredName
+    end
+    return coloredName
 end
 
 function MenuModule:SocialHover(hoverFunc)
@@ -1176,7 +1203,7 @@ function MenuModule:SocialHover(hoverFunc)
                                 isClassic = true
                                 -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
                             elseif (not faction) or (faction == playerFaction) then
-                                charNameFormat = "(" .. ColorFriendName(charName, gameAccount.classFilename) ..
+                                charNameFormat = "(" .. ColorFriendName(charName, gameAccount.classFilename, gameAccount.characterLevel) ..
                                     " - |cffecd672" .. (displayRealm or L["NO_INFO"]) .. "|r)"
                                 -- friend is playing retail WoW but is playing on the player's opposite faction
                             else
@@ -1184,7 +1211,7 @@ function MenuModule:SocialHover(hoverFunc)
                                     ['Alliance'] = "ff008ee8",
                                     ['Horde'] = "ffc80000"
                                 }
-                                local opposingName = ColorFriendName(charName, gameAccount.classFilename)
+                                local opposingName = ColorFriendName(charName, gameAccount.classFilename, gameAccount.characterLevel)
                                 if playstyle then
                                     opposingName = opposingName .. " - |cffecd672" .. playstyle .. "|r"
                                 end
@@ -1275,9 +1302,8 @@ function MenuModule:SocialHover(hoverFunc)
                     end
 
                     -- lineLeft displays status icon, char name, char level, char class
-                    local coloredName = ColorFriendName(name, ClassFileFromLocalizedName(friendInfo.className))
-                    local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, coloredName, level,
-                        friendInfo.className)
+                    local coloredName = ColorFriendName(name, ClassFileFromLocalizedName(friendInfo.className), level)
+                    local lineLeft = string.format("|T%s:16|t %s, %s", statusIcon, coloredName, friendInfo.className)
                     -- lineRight displays the area the friend is currently in
                     local lineRight = string.format("%s", friendInfo.area)
 
