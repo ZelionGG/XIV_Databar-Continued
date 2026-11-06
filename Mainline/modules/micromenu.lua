@@ -789,6 +789,32 @@ function MenuModule:ShowButtonTooltip(name)
     GameTooltip:Show()
 end
 
+-- Same gold used for the realm. The character name uses the class color.
+local FRIEND_NAME_COLOR = "ffecd672"
+
+local function ClassFileFromLocalizedName(className)
+    if not className or className == "" then
+        return nil
+    end
+    local lists = {LOCALIZED_CLASS_NAMES_MALE, LOCALIZED_CLASS_NAMES_FEMALE}
+    for _, list in ipairs(lists) do
+        if list then
+            for classFile, localized in pairs(list) do
+                if localized == className then
+                    return classFile
+                end
+            end
+        end
+    end
+end
+
+local function ColorFriendName(name, classFile)
+    local shown = name or L["NO_INFO"]
+    local classColor = classFile and RAID_CLASS_COLORS[classFile]
+    local colorHex = classColor and classColor.colorStr or FRIEND_NAME_COLOR
+    return "|c" .. colorHex .. shown .. "|r"
+end
+
 function MenuModule:SocialHover(hoverFunc)
     return function()
         -- get out of here if showTooltips in the options is set to false
@@ -927,16 +953,16 @@ function MenuModule:SocialHover(hoverFunc)
                                 isClassic = true
                                 -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
                             elseif (not faction) or (faction == playerFaction) then
-                                charNameFormat = "(|cffecd672" .. (charName or L["NO_INFO"]) .. "-" ..
-                                                     (realmName or L["NO_INFO"]) .. "|r)"
+                                charNameFormat = "(" .. ColorFriendName(charName, gameAccount.classFilename) ..
+                                    " - |cffecd672" .. (realmName or L["NO_INFO"]) .. "|r)"
                                 -- friend is playing retail WoW but is playing on the player's opposite faction
                             else
                                 local factionColors = {
                                     ['Alliance'] = "ff008ee8",
                                     ['Horde'] = "ffc80000"
                                 }
-                                charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - |cffecd672" ..
-                                                     (charName or L["NO_INFO"]) .. "|r)"
+                                charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - " ..
+                                                     ColorFriendName(charName, gameAccount.classFilename) .. ")"
                             end
                         end
 
@@ -1022,7 +1048,8 @@ function MenuModule:SocialHover(hoverFunc)
                     end
 
                     -- lineLeft displays status icon, char name, char level, char class
-                    local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, name, level,
+                    local coloredName = ColorFriendName(name, ClassFileFromLocalizedName(friendInfo.className))
+                    local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, coloredName, level,
                         friendInfo.className)
                     -- lineRight displays the area the friend is currently in
                     local lineRight = string.format("%s", friendInfo.area)

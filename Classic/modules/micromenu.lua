@@ -983,6 +983,59 @@ function MenuModule:ShowButtonTooltip(name)
     GameTooltip:Show()
 end
 
+-- Forever has no player-facing realms. Battle.net reports the internal shard
+-- ("CAMWOW EU5 Realm 5 PvE" / "CAMWOWEU5Realm5PvE"); the tooltip shows the
+-- ruleset suffix instead. Other WoW versions keep their realm name.
+local function GetForeverPlaystyle(realmName, realmDisplayName)
+    local function isCamwowShard(name)
+        return name and name:find("CAMWOW", 1, true) and name:find("Realm", 1, true)
+    end
+
+    if isCamwowShard(realmDisplayName) then
+        local style = realmDisplayName:match("Realm%s+%d+%s+(.+)$")
+        if style and style ~= "" then
+            return style
+        end
+    end
+
+    if isCamwowShard(realmName) then
+        local style = realmName:match("Realm%d+(RPPvP)$")
+            or realmName:match("Realm%d+(PvE)$")
+            or realmName:match("Realm%d+(PvP)$")
+            or realmName:match("Realm%d+(RP)$")
+        if style == "RPPvP" then
+            return "RP PvP"
+        end
+        return style
+    end
+end
+
+-- Same gold used for the realm or playstyle. The character name uses the class color.
+local FRIEND_NAME_COLOR = "ffecd672"
+
+local function ClassFileFromLocalizedName(className)
+    if not className or className == "" then
+        return nil
+    end
+    local lists = {LOCALIZED_CLASS_NAMES_MALE, LOCALIZED_CLASS_NAMES_FEMALE}
+    for _, list in ipairs(lists) do
+        if list then
+            for classFile, localized in pairs(list) do
+                if localized == className then
+                    return classFile
+                end
+            end
+        end
+    end
+end
+
+local function ColorFriendName(name, classFile)
+    local shown = name or L["NO_INFO"]
+    local classColor = classFile and RAID_CLASS_COLORS[classFile]
+    local colorHex = classColor and classColor.colorStr or FRIEND_NAME_COLOR
+    return "|c" .. colorHex .. shown .. "|r"
+end
+
 function MenuModule:SocialHover(hoverFunc)
     return function()
         -- get out of here if showTooltips in the options is set to false
@@ -1089,6 +1142,8 @@ function MenuModule:SocialHover(hoverFunc)
                         local charName = gameAccount.characterName -- gets the friend's character name
                         local gameClient = gameAccount.clientProgram -- the application that the friend is online with - can be any game or 'App'/'Mobile'
                         local realmName = gameAccount.realmName or gameAccount.richPresence:match("^.-%-%s*(.+)$") -- gets the realm name the friend's char is on
+                        local playstyle = compat.isForever and GetForeverPlaystyle(realmName, gameAccount.realmDisplayName) or nil
+                        local displayRealm = playstyle or realmName
                         local faction = gameAccount.factionName -- gets the friend's currently logged in char's faction
                         local zone = gameAccount.areaName or gameAccount.richPresence:match("^(.*)%s%-%s.+$") -- zone name to be displayed when the friend is playing retail WoW
                         local richPresence = gameAccount.richPresence -- rich presence is used here to determine whether a friend logged into WoW is playing classic
@@ -1121,16 +1176,20 @@ function MenuModule:SocialHover(hoverFunc)
                                 isClassic = true
                                 -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
                             elseif (not faction) or (faction == playerFaction) then
-                                charNameFormat = "(|cffecd672" .. (charName or L["NO_INFO"]) .. "-" ..
-                                                     (realmName or L["NO_INFO"]) .. "|r)"
+                                charNameFormat = "(" .. ColorFriendName(charName, gameAccount.classFilename) ..
+                                    " - |cffecd672" .. (displayRealm or L["NO_INFO"]) .. "|r)"
                                 -- friend is playing retail WoW but is playing on the player's opposite faction
                             else
                                 local factionColors = {
                                     ['Alliance'] = "ff008ee8",
                                     ['Horde'] = "ffc80000"
                                 }
-                                charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - |cffecd672" ..
-                                                     (charName or L["NO_INFO"]) .. "|r)"
+                                local opposingName = ColorFriendName(charName, gameAccount.classFilename)
+                                if playstyle then
+                                    opposingName = opposingName .. " - |cffecd672" .. playstyle .. "|r"
+                                end
+                                charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - " ..
+                                                     opposingName .. ")"
                             end
                         end
 
@@ -1216,7 +1275,8 @@ function MenuModule:SocialHover(hoverFunc)
                     end
 
                     -- lineLeft displays status icon, char name, char level, char class
-                    local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, name, level,
+                    local coloredName = ColorFriendName(name, ClassFileFromLocalizedName(friendInfo.className))
+                    local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, coloredName, level,
                         friendInfo.className)
                     -- lineRight displays the area the friend is currently in
                     local lineRight = string.format("%s", friendInfo.area)

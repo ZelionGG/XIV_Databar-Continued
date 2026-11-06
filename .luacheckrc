@@ -244,6 +244,8 @@ read_globals = {
     'LEVEL',
     'LibStub',
     'LOCALE_TEXT_LABEL',
+    'LOCALIZED_CLASS_NAMES_FEMALE',
+    'LOCALIZED_CLASS_NAMES_MALE',
     'MAINHANDSLOT',
     'MAINMENU_BUTTON',
     'MASTER_VOLUME',
