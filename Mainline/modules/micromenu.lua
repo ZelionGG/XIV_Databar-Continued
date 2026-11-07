@@ -1237,7 +1237,7 @@ function MenuModule:GuildHover(hoverFunc)
                 end
 
                 local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r',
-                    level or '',
+                    ColorLevel(level) or '',
                     colorHex,
                     charName or name or L["NO_INFO"],
                     statusText or '',
