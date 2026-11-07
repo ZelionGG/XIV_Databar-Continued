@@ -163,6 +163,7 @@ read_globals = {
     'GetInventoryItemDurability',
     'GetInventoryItemLink',
     'GetInventoryItemTexture',
+    'GetItemCooldown',
     'GetItemCount',
     'GetItemInfo',
     'GetLFGDungeonInfo',

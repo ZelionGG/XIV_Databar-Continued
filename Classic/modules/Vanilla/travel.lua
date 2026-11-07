@@ -44,6 +44,11 @@ function TravelModule:OnInitialize()
     self.mageButtons = {}
     self.extraPadding = (xb.constants.popupPadding * 3)
     self.optionTextExtra = 4
+
+    local profile = xb.db and xb.db.profile
+    if profile and profile.hideAdditionalTooltipText == nil then
+        profile.hideAdditionalTooltipText = true
+    end
 end
 
 function TravelModule:OnEnable()
@@ -65,6 +70,10 @@ function TravelModule:OnDisable()
     if self.mageTooltipTimer then
         self.mageTooltipTimer:Cancel()
         self.mageTooltipTimer = nil
+    end
+    if self.hearthTooltipTimer then
+        self.hearthTooltipTimer:Cancel()
+        self.hearthTooltipTimer = nil
     end
 end
 
@@ -128,10 +137,18 @@ function TravelModule:RegisterFrameEvents()
 
     self.hearthButton:SetScript('OnEnter', function()
         TravelModule:SetHearthColor()
+        if not InCombatLockdown() then
+            self:ShowHearthTooltip()
+        end
     end)
 
     self.hearthButton:SetScript('OnLeave', function()
         TravelModule:SetHearthColor()
+        if self.hearthTooltipTimer then
+            self.hearthTooltipTimer:Cancel()
+            self.hearthTooltipTimer = nil
+        end
+        GameTooltip:Hide()
     end)
 
     self.mageButton:EnableMouse(true)
@@ -175,7 +192,7 @@ function TravelModule:RegisterFrameEvents()
 end
 
 function TravelModule:FormatCooldown(cdTime)
-    if cdTime <= 0 then return L["READY"] end
+    if type(cdTime) ~= "number" or cdTime <= 0 then return L["READY"] end
     local hours = string.format("%02.f", math.floor(cdTime / 3600))
     local minutes = string.format("%02.f", math.floor(cdTime / 60 - (hours * 60)))
     local seconds = string.format("%02.f", math.floor(cdTime - (hours * 3600) - (minutes * 60)))
@@ -441,6 +458,92 @@ function TravelModule:ShowMageTooltip()
 end
 
 local HEARTH_SPELL_ID = 8690
+local HEARTH_ITEM_ID = 6948
+
+local function IsPlainNumber(value)
+    return type(value) == "number" and not (issecretvalue and issecretvalue(value))
+end
+
+local function RemainingFromStart(startTime, duration, ignoreGcd)
+    if not IsPlainNumber(startTime) or not IsPlainNumber(duration) then
+        return 0
+    end
+    if ignoreGcd and duration <= 2 then
+        return 0
+    end
+    if duration > 0 then
+        return math.max(0, startTime + duration - GetTime())
+    end
+    return 0
+end
+
+local function ItemCooldownRemaining(itemID)
+    local startTime, duration
+    if C_Container and C_Container.GetItemCooldown then
+        startTime, duration = C_Container.GetItemCooldown(itemID)
+    elseif GetItemCooldown then
+        startTime, duration = GetItemCooldown(itemID)
+    end
+    return RemainingFromStart(startTime, duration, false)
+end
+
+local function SpellCooldownRemaining(spellID)
+    local startTime, duration
+    if C_Spell and C_Spell.GetSpellCooldown then
+        local info, extra = C_Spell.GetSpellCooldown(spellID)
+        if type(info) == "table" then
+            startTime = info.startTime
+            duration = info.duration
+        else
+            startTime, duration = info, extra
+        end
+    elseif GetSpellCooldown then
+        startTime, duration = GetSpellCooldown(spellID)
+    end
+    return RemainingFromStart(startTime, duration, true)
+end
+
+function TravelModule:GetHearthCooldownRemaining()
+    local itemRemaining = ItemCooldownRemaining(HEARTH_ITEM_ID)
+    local spellRemaining = SpellCooldownRemaining(HEARTH_SPELL_ID)
+    if itemRemaining > spellRemaining then
+        return itemRemaining
+    end
+    return spellRemaining
+end
+
+function TravelModule:ShowHearthTooltip()
+    if not self.hearthButton then return end
+
+    if not xb:ShouldShowTooltip() then
+        GameTooltip:Hide()
+        return
+    end
+
+    GameTooltip:SetOwner(self.hearthButton, 'ANCHOR_' .. xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r" .. L["TRAVEL_COOLDOWNS"] .. "|cFFFFFFFF]|r", r, g, b)
+    GameTooltip:AddLine(" ")
+
+    local label = L["HEARTHSTONE"]
+    if not xb.db.profile.hideAdditionalTooltipText then
+        label = label .. " |cffffffff(" .. GetBindLocation() .. ")|r"
+    end
+    GameTooltip:AddDoubleLine(label, self:FormatCooldown(self:GetHearthCooldownRemaining()), r, g, b, 1, 1, 1)
+    GameTooltip:Show()
+
+    if not self.hearthTooltipTimer then
+        self.hearthTooltipTimer = C_Timer.NewTicker(1, function()
+            if GameTooltip:IsOwned(self.hearthButton) then
+                self:ShowHearthTooltip()
+            elseif self.hearthTooltipTimer then
+                self.hearthTooltipTimer:Cancel()
+                self.hearthTooltipTimer = nil
+            end
+        end)
+    end
+end
 
 local function KnownHearthSpell()
     local spellBook = _G.C_SpellBook
@@ -521,8 +624,12 @@ function TravelModule:Refresh()
     local hasMageSpells = supportsMagePorts and xb.MagePortals:HasKnownSpells()
 
     if InCombatLockdown() then
-        self.hearthText:SetText(GetBindLocation())
-        self:SetHearthColor()
+        if not db.hideHearthstoneButton then
+            local hideHearthText = db.hideHearthstoneText
+            self.hearthText:SetText(hideHearthText and '' or GetBindLocation())
+            self.hearthText:SetShown(not hideHearthText)
+            self:SetHearthColor()
+        end
         if supportsMagePorts and self.mageText then
             local hideMageText = db.hideMagePortText
             local combatMageSpell = self:GetFavoriteMageSpell()
@@ -535,25 +642,43 @@ function TravelModule:Refresh()
     end
 
     local iconSize = db.text.fontSize + db.general.barPadding
+    local totalWidth = 0
+    local hearthShown = false
 
-    self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
-    self.hearthText:SetText(GetBindLocation())
+    if not db.hideHearthstoneButton then
+        local hideHearthText = db.hideHearthstoneText
 
-    self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
-    self.hearthButton:ClearAllPoints()
-    self.hearthButton:SetPoint("RIGHT")
+        self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
+        self.hearthText:SetText(hideHearthText and '' or GetBindLocation())
+        self.hearthText:SetShown(not hideHearthText)
 
-    self.hearthText:SetPoint("RIGHT")
+        local hearthTextWidth = hideHearthText and 0 or self.hearthText:GetWidth()
+        local hearthButtonWidth = hideHearthText and iconSize or (hearthTextWidth + iconSize + db.general.barPadding)
 
-    self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
-    self.hearthIcon:SetSize(iconSize, iconSize)
+        self.hearthButton:SetSize(hearthButtonWidth, xb:GetHeight())
+        self.hearthButton:ClearAllPoints()
+        self.hearthButton:SetPoint("RIGHT")
 
-    self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT", -(db.general.barPadding), 0)
+        self.hearthText:SetPoint("RIGHT")
 
-    self:SetHearthColor()
-    self.hearthButton:Show()
+        self.hearthIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\hearth')
+        self.hearthIcon:SetSize(iconSize, iconSize)
+        self.hearthIcon:ClearAllPoints()
 
-    local totalWidth = self.hearthButton:GetWidth()
+        if hideHearthText then
+            self.hearthIcon:SetPoint("RIGHT", self.hearthButton, "RIGHT", 0, 0)
+        else
+            self.hearthIcon:SetPoint("RIGHT", self.hearthText, "LEFT", -(db.general.barPadding), 0)
+        end
+
+        self:SetHearthColor()
+        self.hearthButton:Show()
+        totalWidth = self.hearthButton:GetWidth()
+        hearthShown = true
+    else
+        self.hearthButton:Hide()
+        self.hearthText:Hide()
+    end
 
     if hasMageSpells and not db.hideMagePortButton then
         local hideMageText = db.hideMagePortText
@@ -570,7 +695,11 @@ function TravelModule:Refresh()
 
         self.mageButton:SetSize(mageButtonWidth, xb:GetHeight())
         self.mageButton:ClearAllPoints()
-        self.mageButton:SetPoint("RIGHT", self.hearthButton, "LEFT", -(db.general.barPadding), 0)
+        if hearthShown then
+            self.mageButton:SetPoint("RIGHT", self.hearthButton, "LEFT", -(db.general.barPadding), 0)
+        else
+            self.mageButton:SetPoint("RIGHT", self.hearthFrame, "RIGHT", 0, 0)
+        end
 
         self.mageText:SetPoint("RIGHT")
         self.mageIcon:SetTexture(xb.constants.mediaPath .. 'datatexts\\mage_portal')
@@ -585,7 +714,10 @@ function TravelModule:Refresh()
 
         self:SetMageColor()
         self:CreateMagePopup()
-        totalWidth = totalWidth + db.general.barPadding + self.mageButton:GetWidth()
+        if hearthShown then
+            totalWidth = totalWidth + db.general.barPadding
+        end
+        totalWidth = totalWidth + self.mageButton:GetWidth()
     elseif self.mageButton then
         self.mageButton:Hide()
         if self.magePopup then self.magePopup:Hide() end
@@ -603,6 +735,11 @@ function TravelModule:Refresh()
         self.magePopup:Hide()
     end
 
+    if totalWidth <= 0 then
+        self.hearthFrame:Hide()
+        return
+    end
+
     self.hearthFrame:SetSize(totalWidth + db.general.barPadding, xb:GetHeight())
 
     if xb:ApplyModuleFreePlacement('travel', self.hearthFrame) then
@@ -618,6 +755,9 @@ end
 function TravelModule:GetDefaultOptions()
     return 'travel', {
         enabled = true,
+        hideHearthstoneButton = false,
+        hideHearthstoneText = false,
+        hideAdditionalTooltipText = true,
         hideMagePortButton = false,
         hideMagePortText = false
     }
@@ -644,6 +784,33 @@ function TravelModule:GetConfig()
                     end
                 end,
                 width = "full"
+            },
+            hideHearthstoneButton = {
+                name = L["HIDE_HEARTHSTONE_BUTTON"],
+                order = 10,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideHearthstoneButton;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideHearthstoneButton = val;
+                    self:Refresh();
+                end,
+                width = "2"
+            },
+            hideHearthstoneText = {
+                name = L["HIDE_HEARTHSTONE_TEXT"],
+                order = 10.5,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideHearthstoneText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideHearthstoneText = val;
+                    self:Refresh();
+                end,
+                disabled = function() return xb.db.profile.hideHearthstoneButton end,
+                width = "1"
             },
             hideMagePortButton = {
                 name = L["HIDE_MAGE_PORT_BUTTON"],
@@ -673,6 +840,20 @@ function TravelModule:GetConfig()
                 end,
                 disabled = function() return xb.db.profile.hideMagePortButton end,
                 width = "1"
+            },
+            hideAdditionalTooltipText = {
+                name = L["HIDE_ADDITIONAL_TOOLTIP_TEXT"],
+                desc = L["HIDE_ADDITIONAL_TOOLTIP_TEXT_DESC"],
+                order = 15,
+                type = "toggle",
+                get = function()
+                    return xb.db.profile.hideAdditionalTooltipText;
+                end,
+                set = function(_, val)
+                    xb.db.profile.hideAdditionalTooltipText = val;
+                    self:Refresh();
+                end,
+                width = "full"
             }
         }
     }
